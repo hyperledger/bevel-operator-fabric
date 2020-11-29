@@ -1,0 +1,109 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "hlf-ca.fullname" . }}
+  labels:
+{{ include "labels.standard" . | indent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ include "hlf-ca.name" . }}
+      release: {{ .Release.Name }}
+  # Ensure we allow our pod to be unavailable, so we can upgrade
+  strategy:
+    rollingUpdate:
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+{{ include "labels.standard" . | indent 8 }}
+    spec:
+      volumes:
+        - name: data
+        {{- if .Values.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ .Values.persistence.existingClaim | default (include "hlf-ca.fullname" .) }}
+        {{- else }}
+          emptyDir: {}
+        {{- end }}
+        - name: tls-secret
+          secret:
+            secretName: {{ include "hlf-ca.fullname" . }}--tls-cryptomaterial
+        - name: ca-config
+          configMap:
+            name: {{ include "hlf-ca.fullname" . }}--config
+        - name: ca-config-tls
+          configMap:
+            name: {{ include "hlf-ca.fullname" . }}--config-tls
+        - name: msp-cryptomaterial
+          secret:
+            secretName: {{ include "hlf-ca.fullname" . }}--msp-cryptomaterial
+        - name: msp-tls-cryptomaterial
+          secret:
+            secretName: {{ include "hlf-ca.fullname" . }}--msp-tls-cryptomaterial
+      containers:
+        - name: ca
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+            - sh
+            - -c
+            - |
+              mkdir -p $FABRIC_CA_HOME
+              cp /var/hyperledger/ca_config/ca.yaml $FABRIC_CA_HOME/fabric-ca-server-config.yaml
+              cp /var/hyperledger/ca_config_tls/fabric-ca-server-config.yaml $FABRIC_CA_HOME/fabric-ca-server-config-tls.yaml
+
+              echo ">\033[0;35m fabric-ca-server start \033[0m"
+              fabric-ca-server start
+          envFrom:
+            - secretRef:
+                name: {{ include "hlf-ca.fullname" . }}--ca
+            - configMapRef:
+                name: {{ include "hlf-ca.fullname" . }}--ca
+          ports:
+            - name: ca-port
+              containerPort: 7054
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /cainfo
+              port: 7054
+              scheme: HTTPS
+          readinessProbe:
+            httpGet:
+              path: /cainfo
+              port: 7054
+              scheme: HTTPS
+          volumeMounts:
+            - name: data
+              mountPath: /var/hyperledger
+            - name: ca-config
+              readOnly: true
+              mountPath: /var/hyperledger/ca_config
+            - name: ca-config-tls
+              readOnly: true
+              mountPath: /var/hyperledger/ca_config_tls
+            - name: tls-secret
+              readOnly: true
+              mountPath: /var/hyperledger/tls/secret
+            - name: msp-cryptomaterial
+              readOnly: true
+              mountPath: /var/hyperledger/fabric-ca/msp-secret
+            - name: msp-tls-cryptomaterial
+              readOnly: true
+              mountPath: /var/hyperledger/fabric-ca/msp-tls-secret
+          resources:
+{{ toYaml .Values.resources | indent 12 }}
+    {{- with .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+{{ toYaml . | indent 8 }}
+    {{- end }}

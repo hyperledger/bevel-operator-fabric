@@ -1,0 +1,86 @@
+apiVersion: hlf.kungfusoftware.es/v1alpha1
+kind: FabricOrderingService
+metadata:
+  name: orderingservice
+spec:
+  image: "hyperledger/fabric-orderer"
+  tag: "amd64-2.3.0"
+  mspID: "OrdererMSP"
+  enrollment:
+    component:
+      cahost: 172.24.0.2
+      caname: ca
+      caport: 32575
+      catls:
+        cacert: |-
+          LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUNaRENDQWdxZ0F3SUJBZ0lSQU1PSFJUT3Ro
+          QXJoV0NXdk1NcEpwVHd3Q2dZSUtvWkl6ajBFQXdJd1hURUwKTUFrR0ExVUVCaE1DUlZNeEVUQVBC
+          Z05WQkFjVENFRnNhV05oYm5SbE1SRXdEd1lEVlFRSkV3aEJiR2xqWVc1MApaVEVaTUJjR0ExVUVD
+          aE1RUzNWdVp5QkdkU0JUYjJaMGQyRnlaVEVOTUFzR0ExVUVDeE1FVkdWamFEQWVGdzB5Ck1ERXhN
+          amd4T0RReU16bGFGdzB6TURFeE1qa3hPRFF5TXpsYU1GMHhDekFKQmdOVkJBWVRBa1ZUTVJFd0R3
+          WUQKVlFRSEV3aEJiR2xqWVc1MFpURVJNQThHQTFVRUNSTUlRV3hwWTJGdWRHVXhHVEFYQmdOVkJB
+          b1RFRXQxYm1jZwpSblVnVTI5bWRIZGhjbVV4RFRBTEJnTlZCQXNUQkZSbFkyZ3dXVEFUQmdjcWhr
+          ak9QUUlCQmdncWhrak9QUU1CCkJ3TkNBQVRIYzlyOWlMRVk3T2srMGQyUFlVR094S3hDRzVvc3I0
+          QTFoOHBMbWFVanlZS0JKTEJPRkIzZnR4QzMKbVQ4Zm1EWnZoUHljZ2NvUUlsY2VtMXJqbEtIaW80
+          R3FNSUduTUE0R0ExVWREd0VCL3dRRUF3SUJwakFkQmdOVgpIU1VFRmpBVUJnZ3JCZ0VGQlFjREFn
+          WUlLd1lCQlFVSEF3RXdEd1lEVlIwVEFRSC9CQVV3QXdFQi96QXBCZ05WCkhRNEVJZ1Fndm9lNzE5
+          L0dTaUtTM21LSk9pazJtemE0SGEwNUhhdlk4dER5cVA4VmNKQXdPZ1lEVlIwUkJETXcKTVlJSmJH
+          OWpZV3hvYjNOMGdnZHZjbWN4TFdOaGdnOXZjbWN4TFdOaExtUmxabUYxYkhTSEJIOEFBQUdIQkt3
+          WQpBQUl3Q2dZSUtvWkl6ajBFQXdJRFNBQXdSUUlnRGhYSlpvdXYwSFRLZ0MzU3lnejQ3RlBYSGZq
+          UHVTTVRYTlI5CjhYaWxZVHNDSVFEOWZHZG5OdjlYYTZyM0hhQXQzL2JlclIwRCtpYlhpbXZveElE
+          cnY3WWVuQT09Ci0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0K
+      enrollid: "orderer"
+      enrollsecret: "ordererpw"
+    tls:
+      cahost: 172.24.0.2
+      caname: ca
+      caport: 32575
+      catls:
+        cacert: |-
+          LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUNaRENDQWdxZ0F3SUJBZ0lSQU1PSFJUT3Ro
+          QXJoV0NXdk1NcEpwVHd3Q2dZSUtvWkl6ajBFQXdJd1hURUwKTUFrR0ExVUVCaE1DUlZNeEVUQVBC
+          Z05WQkFjVENFRnNhV05oYm5SbE1SRXdEd1lEVlFRSkV3aEJiR2xqWVc1MApaVEVaTUJjR0ExVUVD
+          aE1RUzNWdVp5QkdkU0JUYjJaMGQyRnlaVEVOTUFzR0ExVUVDeE1FVkdWamFEQWVGdzB5Ck1ERXhN
+          amd4T0RReU16bGFGdzB6TURFeE1qa3hPRFF5TXpsYU1GMHhDekFKQmdOVkJBWVRBa1ZUTVJFd0R3
+          WUQKVlFRSEV3aEJiR2xqWVc1MFpURVJNQThHQTFVRUNSTUlRV3hwWTJGdWRHVXhHVEFYQmdOVkJB
+          b1RFRXQxYm1jZwpSblVnVTI5bWRIZGhjbVV4RFRBTEJnTlZCQXNUQkZSbFkyZ3dXVEFUQmdjcWhr
+          ak9QUUlCQmdncWhrak9QUU1CCkJ3TkNBQVRIYzlyOWlMRVk3T2srMGQyUFlVR094S3hDRzVvc3I0
+          QTFoOHBMbWFVanlZS0JKTEJPRkIzZnR4QzMKbVQ4Zm1EWnZoUHljZ2NvUUlsY2VtMXJqbEtIaW80
+          R3FNSUduTUE0R0ExVWREd0VCL3dRRUF3SUJwakFkQmdOVgpIU1VFRmpBVUJnZ3JCZ0VGQlFjREFn
+          WUlLd1lCQlFVSEF3RXdEd1lEVlIwVEFRSC9CQVV3QXdFQi96QXBCZ05WCkhRNEVJZ1Fndm9lNzE5
+          L0dTaUtTM21LSk9pazJtemE0SGEwNUhhdlk4dER5cVA4VmNKQXdPZ1lEVlIwUkJETXcKTVlJSmJH
+          OWpZV3hvYjNOMGdnZHZjbWN4TFdOaGdnOXZjbWN4TFdOaExtUmxabUYxYkhTSEJIOEFBQUdIQkt3
+          WQpBQUl3Q2dZSUtvWkl6ajBFQXdJRFNBQXdSUUlnRGhYSlpvdXYwSFRLZ0MzU3lnejQ3RlBYSGZq
+          UHVTTVRYTlI5CjhYaWxZVHNDSVFEOWZHZG5OdjlYYTZyM0hhQXQzL2JlclIwRCtpYlhpbXZveElE
+          cnY3WWVuQT09Ci0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0K
+      enrollid: "orderer"
+      enrollsecret: "ordererpw"
+      csr:
+        hosts: []
+  nodes:
+    - id: "orderer0"
+      enrollment:
+        tls:
+          csr:
+            hosts:
+              - "orderer.example.com"
+    - id: "orderer1"
+      enrollment:
+        tls:
+          csr:
+            hosts:
+              - "orderer1.example.com"
+    - id: "orderer2"
+      enrollment:
+        tls:
+          csr:
+            hosts:
+              - "orderer2.example.com"
+  service:
+    type: NodePort
+  storage:
+    size: 30Gi
+    storageClass: "standard"
+    accessMode: "ReadWriteOnce"
+  systemChannel:
+    name: "system-channel"

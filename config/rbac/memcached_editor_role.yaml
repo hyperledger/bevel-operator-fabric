@@ -1,0 +1,24 @@
+# permissions for end users to edit hlfs.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: hlf-editor-role
+rules:
+- apiGroups:
+  - hlf.kungfusoftware.es
+  resources:
+  - hlfs
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - hlf.kungfusoftware.es
+  resources:
+  - hlfs/status
+  verbs:
+  - get

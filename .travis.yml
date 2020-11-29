@@ -1,0 +1,50 @@
+
+language: go
+
+go:
+  - '1.15.x'
+
+services:
+  - docker
+
+go_import_path: github.com/kfsoftware/hlf-operator
+
+cache:
+  directories:
+    - $GOPATH/pkg/mod
+
+jobs:
+  include:
+    - stage: Integration Tests
+      before_script:
+        # Download and install kubectl
+        - curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl && chmod +x kubectl && sudo mv kubectl /usr/local/bin/
+
+        # Download and install KinD
+        - GO111MODULE=on go get sigs.k8s.io/kind
+        # It's possible to download and install KinD using curl, similar as for kubectl
+        # This is useful in cases when Go toolchain isn't available or you prefer running stable version
+        # Binaries for KinD are available on GitHub Releases: https://github.com/kubernetes-sigs/kind/releases
+        # - curl -Lo kind https://github.com/kubernetes-sigs/kind/releases/download/0.0.1/kind-linux-amd64 && chmod +x kind && sudo mv kind /usr/local/bin/
+        - export KIND_CLUSTER=hlf-operator-e2e
+        - export K8S_VERSION=1.18.8
+        - export K8S_VERSION_SHORT="1.18"
+        # Retrieve latest minor version related to k8s version defined above
+        - export K8S_VERSION_LONG=$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable-$K8S_VERSION_SHORT.txt)
+        - curl -Lo /tmp/kubectl https://storage.googleapis.com/kubernetes-release/release/"$K8S_VERSION_LONG"/bin/linux/amd64/kubectl
+        - chmod +x /tmp/kubectl
+        - KUBECTL_BIN="/usr/local/bin/kubectl"
+        - sudo mv /tmp/kubectl "$KUBECTL_BIN"
+        - kind create cluster --image="kindest/node:v${K8S_VERSION}" --name ${KIND_CLUSTER}
+        - mkdir -p ~/.kube
+        - kind get kubeconfig --name hlf-operator-e2e > ~/.kube/kind_operator_e2e
+        - export KUBECONFIG=~/.kube/kind_operator_e2e
+        - kubectl wait --timeout=180s --for=condition=Ready node --all
+      script:
+        - make generate manifests install
+        - echo "KUBECONFIG=$KUBECONFIG"
+        - mkdir -p ~/.kube
+        - kind get kubeconfig --name hlf-operator-e2e > ~/.kube/kind_operator_e2e
+        - export KUBECONFIG=~/.kube/kind_operator_e2e
+        - make test
+

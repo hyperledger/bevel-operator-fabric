@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+{{ include "hlf-operator.labels" . | indent 4}}
+  name: {{ include "hlf-operator.fullname" . }}-controller-manager-metrics-service
+spec:
+  ports:
+    - name: https
+      port: 8443
+      targetPort: https
+  selector:
+  {{- include "hlf-operator.selectorLabels" . | nindent 4 }}

@@ -1,0 +1,273 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "hlf-peer.fullname" . }}
+  labels:
+{{ include "labels.standard" . | indent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ include "hlf-peer.name" . }}
+      release: {{ .Release.Name }}
+  # Ensure we allow our pod to be unavailable, so we can upgrade
+  strategy:
+    rollingUpdate:
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+{{ include "labels.standard" . | indent 8 }}
+    spec:
+      serviceAccountName: {{ template "hlf-peer.fullname" . }}
+      hostAliases:
+{{ toYaml .Values.hostAliases | indent 10 }}
+      volumes:
+        - name: couchdb
+          {{- if eq .Values.peer.databaseType "couchdb" }}
+          {{- if .Values.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ include "hlf-peer.fullname" . }}--couchdb
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
+          {{- end }}
+        - name: data
+        {{- if .Values.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ .Values.persistence.existingClaim | default (include "hlf-peer.fullname" .) }}
+        {{- else }}
+          emptyDir: {}
+        {{- end }}
+        - name: peerconfig
+          configMap:
+            name: {{ include "hlf-peer.fullname" . }}--peer--core
+        {{- if .Values.dockerSocketPath }}
+        - name: dockersocket
+          hostPath:
+            path: {{ .Values.dockerSocketPath }}
+        {{- end }}
+        - name: id-cert
+          secret:
+            secretName: {{ include "hlf-peer.fullname" . }}-idcert
+        - name: id-key
+          secret:
+            secretName: {{ include "hlf-peer.fullname" . }}-idkey
+        - name: cacert
+          secret:
+            secretName: {{ include "hlf-peer.fullname" . }}-cacert
+        - name: tls-clientrootcert
+          secret:
+            secretName: {{ include "hlf-peer.fullname" . }}--tlsclientrootcerts
+        - name: nodeou
+          configMap:
+            name: '{{ include "hlf-peer.fullname" . }}-nodeou'
+            items:
+              - key: 'config.yaml'
+                path: 'config.yaml'
+        - name: tls
+          secret:
+            secretName: "{{ include "hlf-peer.fullname" . }}-tls"
+        - name: tls-ops
+          secret:
+            secretName: "{{ include "hlf-peer.fullname" . }}-tls-ops"
+        - name: tls-rootcert
+          secret:
+            secretName: "{{ include "hlf-peer.fullname" . }}-tlsrootcert"
+        - name: tls-client
+          secret:
+            secretName: "{{ include "hlf-peer.fullname" . }}-tls"
+      {{- if .Values.externalChaincodeBuilder }}
+        - name: chaincode
+          {{- if .Values.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ include "hlf-peer.fullname" . }}--chaincode
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
+      {{- end }}
+      containers:
+        - name: peer
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: request
+              containerPort: 7051
+              protocol: TCP
+            - name: event
+              containerPort: 7053
+              protocol: TCP
+            - name: operations
+              containerPort: 9443
+              protocol: TCP
+      {{- if and .Values.dockerSocketPath false }}
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 9443
+              scheme: HTTPS
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 9443
+              scheme: HTTPS
+            initialDelaySeconds: 15
+    {{- end }}
+          command:
+            - /bin/sh
+            - -c
+            - |
+              echo "\033[0;31m peer node initialization \033[0m"
+              # To avoid having separate secrets for CouchDB and HLF
+              export CORE_LEDGER_STATE_COUCHDBCONFIG_USERNAME=$COUCHDB_USER
+              export CORE_LEDGER_STATE_COUCHDBCONFIG_PASSWORD=$COUCHDB_PASSWORD
+              env
+
+              while [ ! -d ${CORE_PEER_MSPCONFIGPATH}/signcerts ];
+              do
+                echo "\033[0;31m ${CORE_PEER_MSPCONFIGPATH}/signcerts directory must exist \033[0m"
+                sleep 60
+              done
+              if [ ! -d ${FABRIC_CFG_PATH} ]
+              then
+                mkdir -p ${FABRIC_CFG_PATH}
+                cp -r /etc/hyperledger/fabric/core.yaml ${FABRIC_CFG_PATH}
+                ls ${FABRIC_CFG_PATH}
+              fi
+
+
+              echo ">\033[0;35m peer node start \033[0m"
+              peer node start
+          #              sleep 6000000
+
+{{- if $.Values.externalChaincodeBuilder }}
+          env:
+            - name: FILE_SERVER_BASE_IP
+              value: {{ include "hlf-peer.fullname" . }}-fs
+            - name: K8SCC_CFGFILE
+              value: "/builders/golang/bin/k8scc.yaml"
+            - name: FILE_SERVER_ENDPOINT
+              value: '127.0.0.1:8080'
+{{- end }}
+          envFrom:
+            {{- if eq .Values.peer.databaseType "couchdb" }}
+            - secretRef:
+                name: {{ include "hlf-peer.fullname" . }}--couchdb
+            {{- end }}
+            - configMapRef:
+                name: {{ include "hlf-peer.fullname" . }}--peer
+          volumeMounts:
+            - name: peerconfig
+              mountPath: /var/hyperledger/fabric_cfg
+            - mountPath: /var/hyperledger
+              name: data
+    {{- if .Values.dockerSocketPath }}
+            - mountPath: /host/var/run/docker.sock
+              name: dockersocket
+      {{- end }}
+            - mountPath: /var/hyperledger/msp/signcerts
+              name: id-cert
+            - mountPath: /var/hyperledger/msp/keystore
+              name: id-key
+            - mountPath: /var/hyperledger/msp/cacerts
+              name: cacert
+            - mountPath: /var/hyperledger/admin_msp/cacerts
+              name: cacert
+            - mountPath: /var/hyperledger/msp/tlscacerts
+              name: tls-rootcert
+            - mountPath: /var/hyperledger/msp/config.yaml
+              name: nodeou
+              subPath: config.yaml
+            - mountPath: /var/hyperledger/tls/client/pair
+              name: tls-client
+            - mountPath: /var/hyperledger/tls/client/cert
+              name: tls-clientrootcert
+            - mountPath: /var/hyperledger/tls/server/pair
+              name: tls
+            - mountPath: /var/hyperledger/tls/operations/pair
+              name: tls-ops
+            - mountPath: /var/hyperledger/tls/server/cert
+              name: tls-rootcert
+{{- if $.Values.externalChaincodeBuilder }}
+            - mountPath: /cclauncher
+              name: chaincode
+{{- end }}
+          resources:
+{{ toYaml .Values.resources | indent 12 }}
+{{- if .Values.externalChaincodeBuilder }}
+        - name: fs-server
+          image: "quay.io/kfsoftware/fs-peer:amd64-2.2.0"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: server
+              containerPort: 8080
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /cclauncher
+              name: chaincode
+          env:
+            - name: CHAINCODE_SHARED_DIR
+              value: "/cclauncher"
+            - name: "HTTP_ADDRESS"
+              value: ":8080"
+            - name: FILE_SERVER_BASE_IP
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: status.podIP
+{{- end }}
+      {{- if eq $.Values.peer.databaseType "couchdb" }}
+        - name: couchdb
+          image: "couchdb:3.1.1"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: couchdb
+              containerPort: 5984
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /opt/couchdb/data
+              name: couchdb
+          envFrom:
+            - secretRef:
+                name: {{ include "hlf-peer.fullname" . }}--couchdb
+          livenessProbe:
+            tcpSocket:
+              port: 5984
+            initialDelaySeconds: 60
+            timeoutSeconds: 5
+            failureThreshold: 6
+          readinessProbe:
+            tcpSocket:
+              port: 5984
+            initialDelaySeconds: 5
+            timeoutSeconds: 3
+            periodSeconds: 5
+
+      {{- end }}
+
+    {{- with .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+        ## This affinity is required to ensure reasonable ledger access speeds
+        {{- if eq $.Values.peer.databaseType "couchdb" }}
+        podAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: release
+                operator: In
+                values:
+                - {{ $.Values.peer.couchdbInstance }}
+            topologyKey: "kubernetes.io/hostname"
+        {{- end }}
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+{{ toYaml . | indent 8 }}
+    {{- end }}

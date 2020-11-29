@@ -1,0 +1,153 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "hlf-ordnode.fullname" . }}
+  labels:
+{{ include "labels.standard" . | indent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ include "hlf-ordnode.name" . }}
+      release: {{ .Release.Name }}
+  # Ensure we allow our pod to be unavailable, so we can upgrade
+  strategy:
+    rollingUpdate:
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+{{ include "labels.standard" . | indent 8 }}
+    spec:
+      hostAliases:
+{{ toYaml .Values.hostAliases | indent 10 }}
+      volumes:
+        - name: data
+        {{- if .Values.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ .Values.persistence.existingClaim | default (include "hlf-ordnode.fullname" .) }}
+        {{- else }}
+          emptyDir: {}
+        {{- end }}
+        - name: id-cert
+          secret:
+            secretName: {{ include "hlf-ordnode.fullname" . }}-idcert
+        - name: id-key
+          secret:
+            secretName: {{ include "hlf-ordnode.fullname" . }}-idkey
+        - name: cacert
+          secret:
+            secretName: {{ include "hlf-ordnode.fullname" . }}-cacert
+        - name: tls
+          secret:
+            secretName: {{ include "hlf-ordnode.fullname" . }}-tls
+        - name: tls-rootcert
+          secret:
+            secretName: {{ include "hlf-ordnode.fullname" . }}-tlsrootcert
+        - name: tls-clientrootcert
+          secret:
+            secretName: {{ include "hlf-ordnode.fullname" . }}-peer-tlsrootcert
+        - name: genesis
+          secret:
+            secretName: {{ include "hlf-ordnode.fullname" . }}--genesis
+        - name: nodeou
+          configMap:
+            name: '{{ include "hlf-ordnode.fullname" . }}-nodeou'
+            items:
+              - key: 'config.yaml'
+                path: 'config.yaml'
+      containers:
+        - name: orderer
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: ord-port
+              containerPort: 7050
+              protocol: TCP
+            - name: ord-operations
+              containerPort: 9444
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 9444
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 9444
+            initialDelaySeconds: 15
+          command:
+            - sh
+            - -c
+            - |
+
+              while [ ! -d /hl_config/genesis ] || [ -z "$(ls -A /hl_config/genesis)" ];
+              do
+                echo "\033[0;31m /hl_config/genesis must contain Genesis transaction \033[0m"
+                sleep 60
+              done
+
+              while [ ! -d ${ORDERER_GENERAL_LOCALMSPDIR}/signcerts ];
+              do
+                echo "\033[0;31m ${ORDERER_GENERAL_LOCALMSPDIR}/signcerts directory must exist \033[0m"
+                sleep 60
+              done
+              mkdir -p /var/hyperledger/msp/admincerts
+
+              echo "\033[0;32m Create ${ORDERER_FILELEDGER_LOCATION} directory to avoid restarts \033[0m"
+              mkdir -p ${ORDERER_FILELEDGER_LOCATION}
+              mkdir -p ${ORDERER_FILELEDGER_LOCATION}/index
+
+              if [ $ORDERER_GENERAL_TLS_CLIENTAUTHREQUIRED ]
+              then
+                export ORDERER_GENERAL_TLS_CLIENTROOTCAS=$(echo $(ls $ORDERER_GENERAL_TLS_CLIENTROOTCAS) | echo "[$(sed 's/ /,/g')]")
+              fi
+
+              echo ">\033[0;35m orderer \033[0m"
+              orderer
+              # disable in prod:
+              echo "orderer terminated with return value $?"
+              sleep 999999999
+          envFrom:
+            - configMapRef:
+                name: {{ include "hlf-ordnode.fullname" . }}--ord
+          volumeMounts:
+            - mountPath: /var/hyperledger
+              name: data
+            - mountPath: /var/hyperledger/msp/signcerts
+              name: id-cert
+            - mountPath: /var/hyperledger/msp/keystore
+              name: id-key
+            - mountPath: /var/hyperledger/msp/cacerts
+              name: cacert
+            - mountPath: /var/hyperledger/admin_msp/cacerts
+              name: cacert
+            - mountPath: /var/hyperledger/msp/config.yaml
+              name: nodeou
+              subPath: config.yaml
+
+            - mountPath: /var/hyperledger/tls/server/pair
+              name: tls
+            - mountPath: /var/hyperledger/tls/server/cert
+              name: tls-rootcert
+            - mountPath: /var/hyperledger/tls/client/cert
+              name: tls-clientrootcert
+            - mountPath: /hl_config/genesis
+              name: genesis
+
+          resources:
+{{ toYaml .Values.resources | indent 12 }}
+    {{- with .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+{{ toYaml . | indent 8 }}
+    {{- end }}

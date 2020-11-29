@@ -1,0 +1,25 @@
+{{- if .Values.hosts -}}
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: {{ include "hlf-ordnode.fullname" . }}-virtualservice
+spec:
+  hosts:
+    {{- range .Values.hosts }}
+    - {{ . }}
+    {{- end }}
+  gateways:
+    - {{ include "hlf-ordnode.fullname" . }}-gateway
+  tls:
+    - match:
+        - port: 443
+          sniHosts:
+          {{- range .Values.hosts }}
+              - {{ . }}
+          {{- end }}
+      route:
+        - destination:
+            host: {{ include "hlf-ordnode.fullname" . }}
+            port:
+              number: 7050
+{{- end -}}
