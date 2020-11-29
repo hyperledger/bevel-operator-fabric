@@ -1,0 +1,32 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ include "hlf-peer.fullname" . }}
+  labels:
+{{ include "labels.standard" . | indent 4 }}
+rules:
+  - apiGroups:
+      - ""
+      - extensions
+    resources:
+      - pods/status
+      - pods/log
+    verbs:
+      - create
+      - get
+      - list
+      - update
+      - watch
+      - patch
+  - apiGroups:
+      - ""
+      - extensions
+    resources:
+      - pods
+    verbs:
+      - get
+      - list
+      - watch
+      - create
+      - delete
+

@@ -1,0 +1,31 @@
+apiVersion: install.istio.io/v1alpha1
+kind: IstioOperator
+metadata:
+  namespace: istio-system
+  name: app-istiocontrolplane
+spec:
+  profile: default
+  components:
+    ingressGateways:
+      - name: istio-ingressgateway
+        enabled: true
+        k8s:
+          service:
+            type: NodePort
+            ports:
+              - port: 15021
+                targetPort: 15021
+                name: status-port
+                nodePort: 31002
+              - port: 80
+                targetPort: 8080
+                name: http2
+                nodePort: 31003
+              - port: 443
+                targetPort: 8443
+                name: https
+                nodePort: 31004
+              - port: 15443
+                targetPort: 15443
+                name: tls
+                nodePort: 31005

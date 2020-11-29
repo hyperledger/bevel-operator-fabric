@@ -1,0 +1,194 @@
+#fullnameOverride: org1-ca
+#image:
+#  repository: hyperledger/fabric-ca
+#  tag: 1.4.9
+#  pullPolicy: IfNotPresent
+#service:
+#  type: NodePort
+#  port: 7054
+#persistence:
+#  enabled: true
+#  annotations: {}
+#  storageClass: ''
+#  accessMode: ReadWriteOnce
+#  size: 3Gi
+#msp:
+#  keyfile: |
+#    -----BEGIN PRIVATE KEY-----
+#    MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQg8ROhbBNK3gGobVbt
+#    ncsRqMOEI0VJeKPV5CIn/ZiiPJChRANCAAS8Bj5e7kAbDKIY0FHYi35gdY7Bhdof
+#    3ZGmXqzEdFH+E6BhjV23opIKdtTEsjus1MYmG2S3iKgr76MO1JKSyrEh
+#    -----END PRIVATE KEY-----
+#  certfile: |
+#    -----BEGIN CERTIFICATE-----
+#    MIICPzCCAeWgAwIBAgIQQAmrqirMbG4SPORD1oeA5jAKBggqhkjOPQQDAjBqMQsw
+#    CQYDVQQGEwJFUzERMA8GA1UEBxMIQWxpY2FudGUxETAPBgNVBAkTCEFsaWNhbnRl
+#    MRkwFwYDVQQKExBLdW5nIEZ1IFNvZnR3YXJlMQ0wCwYDVQQLEwRUZWNoMQswCQYD
+#    VQQDEwJjYTAeFw0yMDExMjYyMzAwMzBaFw0zMDExMjcyMzAwMzBaMGoxCzAJBgNV
+#    BAYTAkVTMREwDwYDVQQHEwhBbGljYW50ZTERMA8GA1UECRMIQWxpY2FudGUxGTAX
+#    BgNVBAoTEEt1bmcgRnUgU29mdHdhcmUxDTALBgNVBAsTBFRlY2gxCzAJBgNVBAMT
+#    AmNhMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEvAY+Xu5AGwyiGNBR2It+YHWO
+#    wYXaH92Rpl6sxHRR/hOgYY1dt6KSCnbUxLI7rNTGJhtkt4ioK++jDtSSksqxIaNt
+#    MGswDgYDVR0PAQH/BAQDAgGmMB0GA1UdJQQWMBQGCCsGAQUFBwMCBggrBgEFBQcD
+#    ATAPBgNVHRMBAf8EBTADAQH/MCkGA1UdDgQiBCDyZTe4D0qFUcXmx+VpxSAJ/rid
+#    mUgFOqD+gjzpfSOIaTAKBggqhkjOPQQDAgNIADBFAiEA1NPRA3LqW/LQ25xhCdQp
+#    qvn+ArllT16aaMKTOqYPQAgCIDxEO/EdLBoW887vfgs9bS4mYCNrv6UtIf41vsKM
+#    B4T3
+#    -----END CERTIFICATE-----
+#  tlsCAKeyFile: |
+#    -----BEGIN PRIVATE KEY-----
+#    MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgFK1hjmRQ5Bvl2r2q
+#    19AeUsJ2AlqPOZ4DBaUR+o3bFdqhRANCAASp32zuDT9DO9sJ+PV+4+DsyBeko/Qh
+#    C4Dq3SjokxyNo+5+qiiO423cQoA3Tk5EaG0N/3C7OU+LjzsYmLmql4q3
+#    -----END PRIVATE KEY-----
+#  tlsCACertFile: |
+#    -----BEGIN CERTIFICATE-----
+#    MIICPzCCAeWgAwIBAgIQIJYxHWO4nFpPS9NO94KYvjAKBggqhkjOPQQDAjBqMQsw
+#    CQYDVQQGEwJFUzERMA8GA1UEBxMIQWxpY2FudGUxETAPBgNVBAkTCEFsaWNhbnRl
+#    MRkwFwYDVQQKExBLdW5nIEZ1IFNvZnR3YXJlMQ0wCwYDVQQLEwRUZWNoMQswCQYD
+#    VQQDEwJjYTAeFw0yMDExMjYyMzAwMzBaFw0zMDExMjcyMzAwMzBaMGoxCzAJBgNV
+#    BAYTAkVTMREwDwYDVQQHEwhBbGljYW50ZTERMA8GA1UECRMIQWxpY2FudGUxGTAX
+#    BgNVBAoTEEt1bmcgRnUgU29mdHdhcmUxDTALBgNVBAsTBFRlY2gxCzAJBgNVBAMT
+#    AmNhMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEqd9s7g0/QzvbCfj1fuPg7MgX
+#    pKP0IQuA6t0o6JMcjaPufqoojuNt3EKAN05ORGhtDf9wuzlPi487GJi5qpeKt6Nt
+#    MGswDgYDVR0PAQH/BAQDAgGmMB0GA1UdJQQWMBQGCCsGAQUFBwMCBggrBgEFBQcD
+#    ATAPBgNVHRMBAf8EBTADAQH/MCkGA1UdDgQiBCCMEdmYLiNdRjmsAOO6Ixee0iIy
+#    wQqEPr4nfN5DilyrlzAKBggqhkjOPQQDAgNIADBFAiB3B4gpwbfrY7s6mj9EyuKv
+#    TyvRCKqQX0WBA3zzs1blMQIhAIUT55YZ9uqXXybiCYWraGa7Yf5WINH/P5QEz5m9
+#    mTEm
+#    -----END CERTIFICATE-----
+#  tlsKeyFile: |
+#    -----BEGIN PRIVATE KEY-----
+#    MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgs9LbcXifUDh1l5Hk
+#    q7ERal3VQ7cBULcdsp4fs4w9V8GhRANCAATHu5MmK9CSFTmzvqf6ffchAuiktWoj
+#    W5ElkINz6ZqK0QCIAdSM3GllB3ctOIsfkurnk57zET9xWMmbAISmQ57s
+#    -----END PRIVATE KEY-----
+#  tlsCertFile: |
+#    -----BEGIN CERTIFICATE-----
+#    MIICgDCCAiWgAwIBAgIQfhcuSyYSK6ZL1+yEeuKwpzAKBggqhkjOPQQDAjBdMQsw
+#    CQYDVQQGEwJFUzERMA8GA1UEBxMIQWxpY2FudGUxETAPBgNVBAkTCEFsaWNhbnRl
+#    MRkwFwYDVQQKExBLdW5nIEZ1IFNvZnR3YXJlMQ0wCwYDVQQLEwRUZWNoMB4XDTIw
+#    MTEyNjIzMDAzMFoXDTMwMTEyNzIzMDAzMFowXTELMAkGA1UEBhMCRVMxETAPBgNV
+#    BAcTCEFsaWNhbnRlMREwDwYDVQQJEwhBbGljYW50ZTEZMBcGA1UEChMQS3VuZyBG
+#    dSBTb2Z0d2FyZTENMAsGA1UECxMEVGVjaDBZMBMGByqGSM49AgEGCCqGSM49AwEH
+#    A0IABMe7kyYr0JIVObO+p/p99yEC6KS1aiNbkSWQg3PpmorRAIgB1IzcaWUHdy04
+#    ix+S6ueTnvMRP3FYyZsAhKZDnuyjgcYwgcMwDgYDVR0PAQH/BAQDAgGmMB0GA1Ud
+#    JQQWMBQGCCsGAQUFBwMCBggrBgEFBQcDATAPBgNVHRMBAf8EBTADAQH/MCkGA1Ud
+#    DgQiBCBHyGTFOPoUiEbXRjONCs8HaS/yORwXADZXD/QG3hiypjBWBgNVHREETzBN
+#    gglsb2NhbGhvc3SCB29yZzEtY2GCK29yZzEtY2EuaGxmLW9wZXJhdG9yLWhzcGNo
+#    d3lubmhqd2lrdGJlYXBjdGqHBH8AAAGHBKwYAAIwCgYIKoZIzj0EAwIDSQAwRgIh
+#    AIyxdb8oIC+js7DAHLnrwm9Kd7mnGeTRdS/BGmPfgi5UAiEAnYmM9beQJl7LyrFC
+#    P6CBTRQFkx0a+ZHPAcvCwK43KvI=
+#    -----END CERTIFICATE-----
+#db:
+#  type: ''
+#  datasource: ''
+#resources:
+#  requests:
+#    cpu: ''
+#    memory: ''
+#  limits:
+#    cpu: ''
+#    memory: ''
+#nodeSelector: {}
+#tolerations:
+#affinity: {}
+#metrics:
+#  provider: prometheus
+#  statsd:
+#    network: udp
+#    address: ''
+#    writeInterval: ''
+#    prefix: ''
+#debug: true
+#clrSizeLimit: 0
+#cfg:
+#  identities:
+#    allowRemove: true
+#  affiliations:
+#    allowRemove: true
+#ca:
+#  name: ca
+#  csr:
+#    cn: ca
+#    hosts:
+#      - localhost
+#    names:
+#      - C: US
+#        ST: ''
+#        O: Hyperledger
+#        L: ''
+#        OU: North Carolina
+#    ca:
+#      expiry: ''
+#      pathLength: 0
+#  crl:
+#    expiry: ''
+#  registry:
+#    max_enrollments: -1
+#    identities:
+#      - name: enroll
+#        pass: enrollpw
+#        type: client
+#        affiliation: ''
+#        attrs:
+#          hf.Registrar.Roles: "*"
+#          hf.Registrar.DelegateRoles: "*"
+#          hf.Registrar.Attributes: "*"
+#          hf.Revoker: true
+#          hf.IntermediateCA: true
+#          hf.GenCRL: true
+#          hf.AffiliationMgr: true
+#  intermediate:
+#    parentServer:
+#      url: ''
+#      caName: ''
+#  bccsp:
+#    default: ''
+#    sw:
+#      hash: ''
+#      security: ''
+#tlsCA:
+#  name: tlsca
+#  csr:
+#    cn: tlsca
+#    hosts:
+#      - localhost
+#    names:
+#      - C: US
+#        ST: ''
+#        O: Hyperledger
+#        L: ''
+#        OU: North Carolina
+#    ca:
+#      expiry: ''
+#      pathLength: 0
+#  crl:
+#    expiry: ''
+#  registry:
+#    max_enrollments: -1
+#    identities:
+#      - name: enroll
+#        pass: enrollpw
+#        type: client
+#        affiliation: ''
+#        attrs:
+#          hf.Registrar.Roles: "*"
+#          hf.Registrar.DelegateRoles: "*"
+#          hf.Registrar.Attributes: "*"
+#          hf.Revoker: true
+#          hf.IntermediateCA: true
+#          hf.GenCRL: true
+#          hf.AffiliationMgr: true
+#  intermediate:
+#    parentServer:
+#      url: ''
+#      caName: ''
+#  bccsp:
+#    default: ''
+#    sw:
+#      hash: ''
+#      security: ''
+#cors:
+#  enabled: false
+#  origins: []

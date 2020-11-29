@@ -1,0 +1,71 @@
+apiVersion: hlf.kungfusoftware.es/v1alpha1
+kind: FabricPeer
+metadata:
+  name: fabricpeer5-sample
+spec:
+  dockerSocketPath: "/var/run/docker.sock"
+  image: "quay.io/kfsoftware/fabric-peer"
+  tag: "amd64-2.3.0"
+  hosts:
+    - "peer1.org1.example.com"
+  operationHosts: []
+  operationIPs: []
+  external_chaincode_builder: true
+  mspID: Org1MSP
+  secret:
+    enrollment:
+      component:
+        cahost: 172.24.0.2
+        caname: ca
+        caport: 30443
+        catls:
+          cacert: |-
+            LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUNaRENDQWdxZ0F3SUJBZ0lSQU5FSW54KzQv
+            TTNIRm1rRS9mL3djdDR3Q2dZSUtvWkl6ajBFQXdJd1hURUwKTUFrR0ExVUVCaE1DUlZNeEVUQVBC
+            Z05WQkFjVENFRnNhV05oYm5SbE1SRXdEd1lEVlFRSkV3aEJiR2xqWVc1MApaVEVaTUJjR0ExVUVD
+            aE1RUzNWdVp5QkdkU0JUYjJaMGQyRnlaVEVOTUFzR0ExVUVDeE1FVkdWamFEQWVGdzB5Ck1ERXhN
+            amd4T0RNNE1EWmFGdzB6TURFeE1qa3hPRE00TURaYU1GMHhDekFKQmdOVkJBWVRBa1ZUTVJFd0R3
+            WUQKVlFRSEV3aEJiR2xqWVc1MFpURVJNQThHQTFVRUNSTUlRV3hwWTJGdWRHVXhHVEFYQmdOVkJB
+            b1RFRXQxYm1jZwpSblVnVTI5bWRIZGhjbVV4RFRBTEJnTlZCQXNUQkZSbFkyZ3dXVEFUQmdjcWhr
+            ak9QUUlCQmdncWhrak9QUU1CCkJ3TkNBQVNxNWlEWUloQk9PVjg4VStjdG9md0xnQkQ3TnJqRW9W
+            VUJVZWplL0tpcDRBSlp6M1BtQXQxNzFDUDkKRHptU3ErWHlHQVpVWnA0VjBwVGdYWTltYmE3cG80
+            R3FNSUduTUE0R0ExVWREd0VCL3dRRUF3SUJwakFkQmdOVgpIU1VFRmpBVUJnZ3JCZ0VGQlFjREFn
+            WUlLd1lCQlFVSEF3RXdEd1lEVlIwVEFRSC9CQVV3QXdFQi96QXBCZ05WCkhRNEVJZ1FnSUp6WEZo
+            NVRuNzUxb1JXZCtZNlB1N2c3M1pCNVBUYzExRkVvb3NaTzF4SXdPZ1lEVlIwUkJETXcKTVlJSmJH
+            OWpZV3hvYjNOMGdnZHZjbWN4TFdOaGdnOXZjbWN4TFdOaExtUmxabUYxYkhTSEJIOEFBQUdIQkt3
+            WQpBQUl3Q2dZSUtvWkl6ajBFQXdJRFNBQXdSUUlnVVdsdmRrTEhsd1hRNEdNNGNySEt6cUszT3NE
+            Nk0wM0doTjdECmd4YURrN29DSVFETmxGRFRXMEc4RERVQmwrL1NVRHdiUVlXd2Ezd3REK2xWaDRy
+            emU1ZkdOdz09Ci0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0K
+        enrollid: peer
+        enrollsecret: peerpw
+      tls:
+        cahost: 172.24.0.2
+        caname: ca
+        caport: 30443
+        catls:
+          cacert: |-
+            LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUNaRENDQWdxZ0F3SUJBZ0lSQU5FSW54KzQv
+            TTNIRm1rRS9mL3djdDR3Q2dZSUtvWkl6ajBFQXdJd1hURUwKTUFrR0ExVUVCaE1DUlZNeEVUQVBC
+            Z05WQkFjVENFRnNhV05oYm5SbE1SRXdEd1lEVlFRSkV3aEJiR2xqWVc1MApaVEVaTUJjR0ExVUVD
+            aE1RUzNWdVp5QkdkU0JUYjJaMGQyRnlaVEVOTUFzR0ExVUVDeE1FVkdWamFEQWVGdzB5Ck1ERXhN
+            amd4T0RNNE1EWmFGdzB6TURFeE1qa3hPRE00TURaYU1GMHhDekFKQmdOVkJBWVRBa1ZUTVJFd0R3
+            WUQKVlFRSEV3aEJiR2xqWVc1MFpURVJNQThHQTFVRUNSTUlRV3hwWTJGdWRHVXhHVEFYQmdOVkJB
+            b1RFRXQxYm1jZwpSblVnVTI5bWRIZGhjbVV4RFRBTEJnTlZCQXNUQkZSbFkyZ3dXVEFUQmdjcWhr
+            ak9QUUlCQmdncWhrak9QUU1CCkJ3TkNBQVNxNWlEWUloQk9PVjg4VStjdG9md0xnQkQ3TnJqRW9W
+            VUJVZWplL0tpcDRBSlp6M1BtQXQxNzFDUDkKRHptU3ErWHlHQVpVWnA0VjBwVGdYWTltYmE3cG80
+            R3FNSUduTUE0R0ExVWREd0VCL3dRRUF3SUJwakFkQmdOVgpIU1VFRmpBVUJnZ3JCZ0VGQlFjREFn
+            WUlLd1lCQlFVSEF3RXdEd1lEVlIwVEFRSC9CQVV3QXdFQi96QXBCZ05WCkhRNEVJZ1FnSUp6WEZo
+            NVRuNzUxb1JXZCtZNlB1N2c3M1pCNVBUYzExRkVvb3NaTzF4SXdPZ1lEVlIwUkJETXcKTVlJSmJH
+            OWpZV3hvYjNOMGdnZHZjbWN4TFdOaGdnOXZjbWN4TFdOaExtUmxabUYxYkhTSEJIOEFBQUdIQkt3
+            WQpBQUl3Q2dZSUtvWkl6ajBFQXdJRFNBQXdSUUlnVVdsdmRrTEhsd1hRNEdNNGNySEt6cUszT3NE
+            Nk0wM0doTjdECmd4YURrN29DSVFETmxGRFRXMEc4RERVQmwrL1NVRHdiUVlXd2Ezd3REK2xWaDRy
+            emU1ZkdOdz09Ci0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0K
+        csr:
+          cn: "peer0-org1"
+          hosts: []
+        enrollid: peer
+        enrollsecret: peerpw
+  service:
+    type: NodePort
+    nodePortRequest: 30001
+  stateDb: leveldb

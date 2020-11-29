@@ -1,0 +1,22 @@
+{{- if .Values.hosts -}}
+
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: {{ include "hlf-peer.fullname" . }}-gateway
+spec:
+  selector:
+    istio: ingressgateway # use istio default ingress gateway
+  servers:
+    - port:
+        number: 443
+        name: tcp
+        protocol: TLS
+      tls:
+        mode: PASSTHROUGH
+      hosts:
+          {{- range .Values.hosts }}
+          - {{ . }}
+          {{- end }}
+
+{{- end -}}

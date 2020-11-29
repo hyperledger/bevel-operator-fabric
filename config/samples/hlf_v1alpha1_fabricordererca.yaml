@@ -1,0 +1,153 @@
+kind: FabricCA
+apiVersion: hlf.kungfusoftware.es/v1alpha1
+metadata:
+  name: orderer-ca
+spec:
+  ca:
+    bccsp:
+      default: SW
+      sw:
+        hash: SHA2
+        security: '256'
+    cfg:
+      affiliations:
+        allowRemove: true
+      identities:
+        allowRemove: true
+    crl:
+      expiry: 24h
+    csr:
+      ca:
+        expiry: 131400h
+        pathLength: 0
+      cn: ca
+      hosts:
+        - localhost
+      names:
+        - C: US
+          L: ''
+          O: Hyperledger
+          OU: North Carolina
+          ST: ''
+    intermediate:
+      parentServer:
+        caName: ''
+        url: ''
+    name: ca
+    registry:
+      identities:
+        - affiliation: ''
+          attrs:
+            hf.AffiliationMgr: true
+            hf.GenCRL: true
+            hf.IntermediateCA: true
+            hf.Registrar.Attributes: '*'
+            hf.Registrar.DelegateRoles: '*'
+            hf.Registrar.Roles: '*'
+            hf.Revoker: true
+          name: enroll
+          pass: enrollpw
+          type: client
+      max_enrollments: -1
+    subject:
+      C: ES
+      L: Alicante
+      O: Kung Fu Software
+      OU: Tech
+      ST: Alicante
+      cn: ca
+  clrSizeLimit: 512000
+  cors:
+    enabled: false
+    origins: []
+  db:
+    datasource: fabric-ca-server.db
+    type: sqlite3
+  debug: true
+  hosts:
+    - localhost
+    - org1-ca
+    - org1-ca.default
+  image: hyperledger/fabric-ca
+  metrics:
+    provider: prometheus
+    statsd:
+      address: '127.0.0.1:8125'
+      network: udp
+      prefix: server
+      writeInterval: 10s
+  resources:
+    limits:
+      cpu: '2'
+      memory: 4Gi
+    requests:
+      cpu: 10m
+      memory: 256Mi
+  rootCA:
+    subject:
+      C: ES
+      L: Alicante
+      O: Kung Fu Software
+      OU: Tech
+      ST: Alicante
+      cn: ca
+  service:
+    type: NodePort
+  storage:
+    accessMode: ReadWriteOnce
+    size: 3Gi
+    storageClass: ''
+  tlsCA:
+    bccsp:
+      default: SW
+      sw:
+        hash: SHA2
+        security: '256'
+    cfg:
+      affiliations:
+        allowRemove: true
+      identities:
+        allowRemove: true
+    crl:
+      expiry: 24h
+    csr:
+      ca:
+        expiry: 131400h
+        pathLength: 0
+      cn: tlsca
+      hosts:
+        - localhost
+      names:
+        - C: US
+          L: ''
+          O: Hyperledger
+          OU: North Carolina
+          ST: ''
+    intermediate:
+      parentServer:
+        caName: ''
+        url: ''
+    name: tlsca
+    registry:
+      identities:
+        - affiliation: ''
+          attrs:
+            hf.AffiliationMgr: true
+            hf.GenCRL: true
+            hf.IntermediateCA: true
+            hf.Registrar.Attributes: '*'
+            hf.Registrar.DelegateRoles: '*'
+            hf.Registrar.Roles: '*'
+            hf.Revoker: true
+          name: enroll
+          pass: enrollpw
+          type: client
+      max_enrollments: -1
+    subject:
+      C: ES
+      L: Alicante
+      O: Kung Fu Software
+      OU: Tech
+      ST: Alicante
+      cn: tlsca
+  version: 1.4.9

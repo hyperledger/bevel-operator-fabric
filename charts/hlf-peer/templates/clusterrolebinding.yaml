@@ -1,0 +1,15 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ include "hlf-peer.fullname" . }}-{{ .Values.rbac.ns }}
+  namespace: {{ .Values.rbac.ns }}
+  labels:
+{{ include "labels.standard" . | indent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ include "hlf-peer.fullname" . }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ include "hlf-peer.fullname" . }}
+    namespace: {{ .Values.rbac.ns }}

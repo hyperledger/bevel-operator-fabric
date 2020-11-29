@@ -1,0 +1,184 @@
+# Default values for  hlf-peer.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+image:
+  repository: hyperledger/fabric-peer
+  tag: amd64-2.2.0
+  pullPolicy: IfNotPresent
+
+
+dockerSocketPath: /var/run/docker.sock
+
+ingress:
+  enabled: false
+  annotations: {}
+  path: /
+  hosts:
+    - hlf-peer.local
+  tls: []
+  #  - secretName: hlf-peer-tls
+  #    hosts:
+  #      - hlf-peer.local
+
+rbac:
+  ns: default
+##################################
+## Peer configuration options    #
+##################################
+peer:
+  # Type of database ("goleveldb" or "CouchDB"):
+  databaseType: goleveldb
+  # If CouchDB is used, which chart holds it
+  couchdbInstance: cdb-peer1
+  ## MSP ID of the Peer
+  mspID: Org1MSP
+  gossip:
+    bootstrap: ""
+    endpoint: ""
+    externalEndpoint: ""
+    orgLeader: "false"
+    useLeaderElection: "true"
+
+  tls:
+    server:
+      enabled: "true"
+    client:
+      enabled: "false"
+
+
+# Certificate: as 'cert.pem'
+cert: |
+  -----BEGIN CERTIFICATE-----
+  MIICiDCCAi6gAwIBAgIUJyTfF3b/G/YYt3QAM4HVVVXIaCUwCgYIKoZIzj0EAwIw
+  bDELMAkGA1UEBhMCVVMxFzAVBgNVBAgTDk5vcnRoIENhcm9saW5hMRcwFQYDVQQK
+  Ew5vcmcxLmxvY2FsaG9zdDEPMA0GA1UECxMGRmFicmljMRowGAYDVQQDExFjYS5v
+  cmcxLmxvY2FsaG9zdDAeFw0yMDA4MzAxOTIwMDBaFw0yMTA4MzAxOTI1MDBaMDAx
+  DTALBgNVBAsTBHBlZXIxHzAdBgNVBAMTFmxsYXJhd3NnbXd5cWZha2hndnhhd2Ew
+  WTATBgcqhkjOPQIBBggqhkjOPQMBBwNCAASaM4fhUp35Jz0ib0Sbfktw36c31UuX
+  4S+qycOzWVQH+SotJB6CJnsXVeLrVCVVItcXQtAn84j6Zzg+sdHcxrBSo4HpMIHm
+  MA4GA1UdDwEB/wQEAwIHgDAMBgNVHRMBAf8EAjAAMB0GA1UdDgQWBBTkWHijUbO3
+  as32+CdatD2kaRpDjTArBgNVHSMEJDAigCDTOcVfuK2stRpyG/wDw1xWeL3DNuSF
+  k1Q48PqzxwnpqjARBgNVHREECjAIggZkdmllam8wZwYIKgMEBQYHCAEEW3siYXR0
+  cnMiOnsiaGYuQWZmaWxpYXRpb24iOiIiLCJoZi5FbnJvbGxtZW50SUQiOiJsbGFy
+  YXdzZ213eXFmYWtoZ3Z4YXdhIiwiaGYuVHlwZSI6InBlZXIifX0wCgYIKoZIzj0E
+  AwIDSAAwRQIhAJf2964pLsHwNxoZJb180tVSEZVpRlhSTTia6wCragCBAiAaEm/Q
+  bhoyopqU8UOgdN7DSU+IYif94bOa4jJlmWNXpQ==
+  -----END CERTIFICATE-----
+
+# Private key: as 'key.pem'
+key: |
+  -----BEGIN PRIVATE KEY-----
+  MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQg6F65FC/+rKWRa04a
+  7dzX2u6gtQk5CZg+o8iwBHhv9myhRANCAASaM4fhUp35Jz0ib0Sbfktw36c31UuX
+  4S+qycOzWVQH+SotJB6CJnsXVeLrVCVVItcXQtAn84j6Zzg+sdHcxrBS
+  -----END PRIVATE KEY-----
+hosts:
+  - 192.168.39.172
+  - peer0.org1.example.com
+
+# TLS secret: as 'tls.crt' and 'tls.key'
+tls:
+  cert: |
+    -----BEGIN CERTIFICATE-----
+    MIICtTCCAlugAwIBAgIUG1y/UfL3IKKwR0Uviq/2Qt5AwKMwCgYIKoZIzj0EAwIw
+    bDELMAkGA1UEBhMCVVMxFzAVBgNVBAgTDk5vcnRoIENhcm9saW5hMRcwFQYDVQQK
+    Ew5vcmcxLmxvY2FsaG9zdDEPMA0GA1UECxMGRmFicmljMRowGAYDVQQDExFjYS5v
+    cmcxLmxvY2FsaG9zdDAeFw0yMDA4MzAxOTIwMDBaFw0yMTA4MzAxOTI1MDBaMDAx
+    DTALBgNVBAsTBHBlZXIxHzAdBgNVBAMTFnFsdGNhdG1ldHdkYWxwbnBhYmFzYWcw
+    WTATBgcqhkjOPQIBBggqhkjOPQMBBwNCAAQwkLHwXb1YUetEtJYDYaqVicHeEmYD
+    CdYzrQEu1aEXcLNBPQUlc10OhCiZVyCYVlKb02wJpXyTBPAQpTKLNy3Fo4IBFTCC
+    AREwDgYDVR0PAQH/BAQDAgOoMB0GA1UdJQQWMBQGCCsGAQUFBwMBBggrBgEFBQcD
+    AjAMBgNVHRMBAf8EAjAAMB0GA1UdDgQWBBT8rr3D5twx+9bogS0KzlTXJgsQsTAr
+    BgNVHSMEJDAigCDTOcVfuK2stRpyG/wDw1xWeL3DNuSFk1Q48PqzxwnpqjAdBgNV
+    HREEFjAUghJwZWVyMC1ubi5sb2NhbGhvc3QwZwYIKgMEBQYHCAEEW3siYXR0cnMi
+    OnsiaGYuQWZmaWxpYXRpb24iOiIiLCJoZi5FbnJvbGxtZW50SUQiOiJxbHRjYXRt
+    ZXR3ZGFscG5wYWJhc2FnIiwiaGYuVHlwZSI6InBlZXIifX0wCgYIKoZIzj0EAwID
+    SAAwRQIhAL6rDsTeybyJ/aRHRRYi1SB/4x69onV0WDDJY2fg1PG8AiAVFA32tN9C
+    prbgd+aEF/TEYfqB2U3l8+Mn4x2gB3cvmw==
+    -----END CERTIFICATE-----
+
+  key: |
+    -----BEGIN PRIVATE KEY-----
+    MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgGA7JQ7M1NIh9rUeG
+    NvmizMpmB5M55epHFCWSieyTslyhRANCAAQwkLHwXb1YUetEtJYDYaqVicHeEmYD
+    CdYzrQEu1aEXcLNBPQUlc10OhCiZVyCYVlKb02wJpXyTBPAQpTKLNy3F
+    -----END PRIVATE KEY-----
+
+# CA Cert: as 'cacert.pem'
+cacert: |
+  -----BEGIN CERTIFICATE-----
+  MIICJTCCAcqgAwIBAgIQUuFqAtZPiddn6WGnSJkzDjAKBggqhkjOPQQDAjBsMQsw
+  CQYDVQQGEwJVUzEXMBUGA1UECBMOTm9ydGggQ2Fyb2xpbmExFzAVBgNVBAoTDm9y
+  ZzEubG9jYWxob3N0MQ8wDQYDVQQLEwZGYWJyaWMxGjAYBgNVBAMTEWNhLm9yZzEu
+  bG9jYWxob3N0MB4XDTIwMDgzMDE5MDYwOVoXDTMwMDgzMDE5MDYwOVowbDELMAkG
+  A1UEBhMCVVMxFzAVBgNVBAgTDk5vcnRoIENhcm9saW5hMRcwFQYDVQQKEw5vcmcx
+  LmxvY2FsaG9zdDEPMA0GA1UECxMGRmFicmljMRowGAYDVQQDExFjYS5vcmcxLmxv
+  Y2FsaG9zdDBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABEcGZyRpFnU078kCDa68
+  C6TxpZG980zxbVR/wpzfg4Urj3E0Qjr+xoUoXROy5WEhO/0AOUhsSWDOSmV6tzYK
+  r4ujTjBMMA4GA1UdDwEB/wQEAwIBpjAPBgNVHRMBAf8EBTADAQH/MCkGA1UdDgQi
+  BCDTOcVfuK2stRpyG/wDw1xWeL3DNuSFk1Q48PqzxwnpqjAKBggqhkjOPQQDAgNJ
+  ADBGAiEA9QJ4AlRTpXgfOoEhRVqc0Pu6y13uWfTHdyScr4eLlJwCIQD1h1C+PdYW
+  oRFWxr6uC0xDev2/rnwz01gHosiUzyg3eg==
+  -----END CERTIFICATE-----
+
+# TLS root CA certificate: as 'cert.pem'
+tlsrootcert: |
+  -----BEGIN CERTIFICATE-----
+  MIICJTCCAcqgAwIBAgIQUuFqAtZPiddn6WGnSJkzDjAKBggqhkjOPQQDAjBsMQsw
+  CQYDVQQGEwJVUzEXMBUGA1UECBMOTm9ydGggQ2Fyb2xpbmExFzAVBgNVBAoTDm9y
+  ZzEubG9jYWxob3N0MQ8wDQYDVQQLEwZGYWJyaWMxGjAYBgNVBAMTEWNhLm9yZzEu
+  bG9jYWxob3N0MB4XDTIwMDgzMDE5MDYwOVoXDTMwMDgzMDE5MDYwOVowbDELMAkG
+  A1UEBhMCVVMxFzAVBgNVBAgTDk5vcnRoIENhcm9saW5hMRcwFQYDVQQKEw5vcmcx
+  LmxvY2FsaG9zdDEPMA0GA1UECxMGRmFicmljMRowGAYDVQQDExFjYS5vcmcxLmxv
+  Y2FsaG9zdDBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABEcGZyRpFnU078kCDa68
+  C6TxpZG980zxbVR/wpzfg4Urj3E0Qjr+xoUoXROy5WEhO/0AOUhsSWDOSmV6tzYK
+  r4ujTjBMMA4GA1UdDwEB/wQEAwIBpjAPBgNVHRMBAf8EBTADAQH/MCkGA1UdDgQi
+  BCDTOcVfuK2stRpyG/wDw1xWeL3DNuSFk1Q48PqzxwnpqjAKBggqhkjOPQQDAgNJ
+  ADBGAiEA9QJ4AlRTpXgfOoEhRVqc0Pu6y13uWfTHdyScr4eLlJwCIQD1h1C+PdYW
+  oRFWxr6uC0xDev2/rnwz01gHosiUzyg3eg==
+  -----END CERTIFICATE-----
+
+
+
+resources:
+   limits:
+     cpu: 100m
+     memory: 128Mi
+   requests:
+     cpu: 100m
+     memory: 128Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+
+externalHost: peer0:443
+fullnameOverride: peer0
+hostAliases: []
+service:
+  type: NodePort
+  portRequest: 7051
+  portEvent: 7053
+  portOperations: 9443
+
+persistence:
+  enabled: true
+  annotations: {}
+  storageClass:
+  accessMode: ReadWriteOnce
+  size: 1Gi
+logging:
+  level: debug
+  peer: debug
+  cauthdsl: warning
+  gossip: debug
+  grpc: error
+  ledger: debug
+  msp: debug
+  policies: warning
+
+externalChaincodeBuilder: false
