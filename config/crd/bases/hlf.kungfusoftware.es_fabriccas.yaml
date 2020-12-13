@@ -669,8 +669,6 @@ spec:
             properties:
               ca_cert:
                 type: string
-              ca_name:
-                type: string
               conditions:
                 description: Conditions is a set of Condition instances.
                 items:
@@ -721,21 +719,17 @@ spec:
                 type: string
               tls_cert:
                 type: string
-              tlsCAName:
-                type: string
               tlsca_cert:
                 type: string
               url:
                 type: string
             required:
             - ca_cert
-            - ca_name
             - conditions
             - host
             - message
             - port
             - status
-            - tlsCAName
             - tls_cert
             - tlsca_cert
             - url

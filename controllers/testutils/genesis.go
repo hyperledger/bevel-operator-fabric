@@ -8,6 +8,7 @@ import (
 	cb "github.com/hyperledger/fabric-protos-go/common"
 	"github.com/hyperledger/fabric-protos-go/orderer/etcdraft"
 	"github.com/hyperledger/fabric-sdk-go/pkg/fab/resource/genesisconfig"
+	"github.com/kfsoftware/hlf-operator/internal/github.com/hyperledger/fabric/common/channelconfig"
 	"github.com/kfsoftware/hlf-operator/internal/github.com/hyperledger/fabric/sdkinternal/configtxgen/encoder"
 	genesisconfig2 "github.com/kfsoftware/hlf-operator/internal/github.com/hyperledger/fabric/sdkinternal/configtxgen/genesisconfig"
 	"io/ioutil"
@@ -31,10 +32,6 @@ func ordererCapabilities() map[string]bool {
 		"V2_0": true,
 	}
 }
-
-const (
-	consortiumDefault = "SampleConsortium"
-)
 
 type PeerNode struct {
 	Host string
@@ -114,7 +111,6 @@ NodeOUs:
 			},
 			"Readers": {
 				Type: "Signature",
-				//Rule: fmt.Sprintf("OR('%s.admin', '%s.peer', '%s.client')", mspID, mspID, mspID),
 				Rule: fmt.Sprintf("OR('%s.member')", mspID),
 			},
 			"Writers": {
@@ -222,7 +218,7 @@ NodeOUs:
 	}
 	return genesisOrg, nil
 }
-func GetUpdatedConfig(channelConfig *cb.Config, peerOrgs []PeerOrganization) (*cb.Config, error) {
+func GetUpdatedConfig(channelConfig *cb.Config, peerOrgs []PeerOrganization, consortiumName string) (*cb.Config, error) {
 	modifiedConfig := &cb.Config{}
 	modifiedConfigBytes, err := proto.Marshal(channelConfig)
 	if err != nil {
@@ -246,10 +242,67 @@ func GetUpdatedConfig(channelConfig *cb.Config, peerOrgs []PeerOrganization) (*c
 		}
 		consortiumGroups[mspID] = configGroup
 	}
-	modifiedConfig.ChannelGroup.Groups["Consortiums"].Groups[consortiumDefault].Groups = consortiumGroups
+	modifiedConfig.ChannelGroup.Groups["Consortiums"].Groups[consortiumName].Groups = consortiumGroups
 	return modifiedConfig, nil
 }
-func GetProfileConfig(ordOrgs []OrdererOrganization) (*genesisconfig.Profile, error) {
+
+type AddConsortiumRequest struct {
+	Name          string
+	Organizations []PeerOrganization
+}
+
+func AddConsortiumToConfig(channelConfig *cb.Config, request AddConsortiumRequest) (*cb.Config, error) {
+	modifiedConfig := &cb.Config{}
+	modifiedConfigBytes, err := proto.Marshal(channelConfig)
+	if err != nil {
+		return nil, err
+	}
+	err = proto.Unmarshal(modifiedConfigBytes, modifiedConfig)
+	if err != nil {
+		return nil, err
+	}
+
+	consortiumGroups := map[string]*cb.ConfigGroup{}
+	peerOrgs := []*genesisconfig2.Organization{}
+	for _, member := range request.Organizations {
+		mspID := member.MspID
+		peerOrg, err := memberToOrgUpdate(member)
+		if err != nil {
+			return nil, err
+		}
+		peerOrgs = append(peerOrgs, peerOrg)
+		configGroup, err := encoder.NewConsortiumOrgGroup(peerOrg)
+		if err != nil {
+			return nil, err
+		}
+		consortiumGroups[mspID] = configGroup
+	}
+	_, ok := modifiedConfig.ChannelGroup.Groups["Consortiums"]
+	if !ok {
+		modifiedConfig.ChannelGroup.Groups["Consortiums"] = &cb.ConfigGroup{}
+		modifiedConfig.ChannelGroup.Groups["Consortiums"].Groups[request.Name] = &cb.ConfigGroup{
+			Version:  0,
+			Groups:   nil,
+			Values:   nil,
+			Policies: nil,
+		}
+	}
+	conf := map[string]*genesisconfig2.Consortium{
+		request.Name: {
+			Organizations: peerOrgs,
+		},
+	}
+	consortiums, err := encoder.NewConsortiumsGroup(
+		conf,
+	)
+	if err != nil {
+		return nil, err
+	}
+	modifiedConfig.ChannelGroup.Groups[channelconfig.ConsortiumsGroupKey] = consortiums
+	return modifiedConfig, nil
+}
+
+func GetProfileConfig(ordOrgs []OrdererOrganization, consortiumName string) (*genesisconfig.Profile, error) {
 	organizations := []*genesisconfig.Organization{}
 	ordererOrganizations := []*genesisconfig.Organization{}
 	consenters := []*etcdraft.Consenter{}
@@ -356,7 +409,7 @@ NodeOUs:
 		})
 	}
 	profileConfig := &genesisconfig.Profile{
-		Consortium: consortiumDefault,
+		Consortium: consortiumName,
 		Application: &genesisconfig.Application{
 			Organizations: organizations,
 			Capabilities:  ordererCapabilities(),
@@ -425,7 +478,7 @@ NodeOUs:
 			Capabilities: ordererCapabilities(),
 		},
 		Consortiums: map[string]*genesisconfig.Consortium{
-			consortiumDefault: {
+			consortiumName: {
 				Organizations: organizations,
 			},
 		},
@@ -478,7 +531,12 @@ func GetConfigEnvelopeBytes(configUpdate *cb.ConfigUpdate) ([]byte, error) {
 	return proto.Marshal(configEnvelope)
 }
 
-func GetChannelProfileConfig(ordService OrdererOrganization, members []PeerOrganization) (*genesisconfig.Profile, error) {
+func GetChannelProfileConfig(
+	ordService OrdererOrganization,
+	members []PeerOrganization,
+	consortiumName string,
+	adminPolicy string,
+) (*genesisconfig.Profile, error) {
 	var organizations []*genesisconfig.Organization
 
 	var ordererOrganizations []*genesisconfig.Organization
@@ -530,9 +588,10 @@ func GetChannelProfileConfig(ordService OrdererOrganization, members []PeerOrgan
 	if err != nil {
 		return nil, err
 	}
-	orgAdmin := members[0]
-	serverRootTlsCertPem := []byte(orgAdmin.RootCert)
-	err = ioutil.WriteFile(path.Join(caCertsPath, "cacert.pem"), serverRootTlsCertPem, os.ModePerm)
+
+	serverRootCertPem := []byte(ordService.RootSignCert)
+	serverRootTlsCertPem := []byte(ordService.RootTLSCert)
+	err = ioutil.WriteFile(path.Join(caCertsPath, "cacert.pem"), serverRootCertPem, os.ModePerm)
 	if err != nil {
 		return nil, err
 	}
@@ -592,14 +651,14 @@ NodeOUs:
 		organizations = append(organizations, peerOrg)
 	}
 	profileConfig := &genesisconfig.Profile{
-		Consortium: consortiumDefault,
+		Consortium: consortiumName,
 		Application: &genesisconfig.Application{
 			Organizations: organizations,
 			Capabilities:  ordererCapabilities(),
 			Policies: map[string]*genesisconfig.Policy{
 				"Admins": {
 					Type: "Signature",
-					Rule: fmt.Sprintf("OR('%s.admin')", orgAdmin.MspID),
+					Rule: adminPolicy,
 				},
 				"Endorsement": {
 					Type: "ImplicitMeta",

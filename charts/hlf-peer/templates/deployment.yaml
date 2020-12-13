@@ -25,7 +25,7 @@ spec:
       volumes:
         - name: couchdb
           {{- if eq .Values.peer.databaseType "couchdb" }}
-          {{- if .Values.persistence.enabled }}
+          {{- if .Values.persistence.couchdb.enabled }}
           persistentVolumeClaim:
             claimName: {{ include "hlf-peer.fullname" . }}--couchdb
           {{- else }}
@@ -33,9 +33,9 @@ spec:
           {{- end }}
           {{- end }}
         - name: data
-        {{- if .Values.persistence.enabled }}
+        {{- if .Values.persistence.peer.enabled }}
           persistentVolumeClaim:
-            claimName: {{ .Values.persistence.existingClaim | default (include "hlf-peer.fullname" .) }}
+            claimName: {{ .Values.persistence.peer.existingClaim | default (include "hlf-peer.fullname" .) }}
         {{- else }}
           emptyDir: {}
         {{- end }}
@@ -79,7 +79,7 @@ spec:
             secretName: "{{ include "hlf-peer.fullname" . }}-tls"
       {{- if .Values.externalChaincodeBuilder }}
         - name: chaincode
-          {{- if .Values.persistence.enabled }}
+          {{- if .Values.persistence.chaincode.enabled }}
           persistentVolumeClaim:
             claimName: {{ include "hlf-peer.fullname" . }}--chaincode
           {{- else }}
@@ -146,6 +146,8 @@ spec:
           env:
             - name: FILE_SERVER_BASE_IP
               value: {{ include "hlf-peer.fullname" . }}-fs
+{{/*            - name: EXTERNAL_BUILDER_PEER_URL*/}}
+{{/*              value: {{ include "hlf-peer.fullname" . }}:7052*/}}
             - name: K8SCC_CFGFILE
               value: "/builders/golang/bin/k8scc.yaml"
             - name: FILE_SERVER_ENDPOINT

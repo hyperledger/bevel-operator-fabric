@@ -757,8 +757,6 @@ func createPeer(releaseName string, namespace string, params createPeerParams, c
 	secret, err := certs.RegisterUser(registerParams)
 	Expect(err).ToNot(HaveOccurred())
 	Expect(secret).To(Equal(registerParams.Secret))
-	nodeportRequest, err := getFreeNodeport(publicIP)
-	Expect(err).ToNot(HaveOccurred())
 	peerEnrollID := "peer"
 	peerEnrollSecret := "peerpw"
 	hosts := []string{
@@ -807,7 +805,6 @@ func createPeer(releaseName string, namespace string, params createPeerParams, c
 			},
 			Service: hlfv1alpha1.PeerService{
 				Type:            "NodePort",
-				NodePortRequest: nodeportRequest,
 			},
 			StateDb:        "leveldb",
 			Hosts:          []string{},
@@ -1333,6 +1330,8 @@ var _ = Describe("Fabric Controllers", func() {
 		Expect(err).ToNot(HaveOccurred())
 		port, err := strconv.Atoi(portStr)
 		Expect(err).ToNot(HaveOccurred())
+		consortiumName := "SampleConsortium"
+
 		modifiedConfig, err := testutils.GetUpdatedConfig(
 			systemChannelConfig,
 			[]testutils.PeerOrganization{
@@ -1348,6 +1347,7 @@ var _ = Describe("Fabric Controllers", func() {
 					},
 				},
 			},
+			consortiumName,
 		)
 		Expect(err).ToNot(HaveOccurred())
 		confUpdate, err := resmgmt.CalculateConfigUpdate(
@@ -1369,12 +1369,6 @@ var _ = Describe("Fabric Controllers", func() {
 		By("create a channel")
 
 		channelID := getRandomChannelID()
-		//ordUrl, err := url.Parse(orderer.Status.URL)
-		//Expect(err).ToNot(HaveOccurred())
-		//ordHost, ordPortStr, err := net.SplitHostPort(ordUrl.Host)
-		//Expect(err).ToNot(HaveOccurred())
-		//ordPort, err := strconv.Atoi(ordPortStr)
-		//Expect(err).ToNot(HaveOccurred())
 		ordNodes := getOrderers(
 			releaseNameOrd,
 			FabricNamespace,
@@ -1411,9 +1405,11 @@ var _ = Describe("Fabric Controllers", func() {
 				},
 			},
 		}
+		consortiumName := "SampleConsortium"
 		profileConfig, err := testutils.GetChannelProfileConfig(
 			orgOrganization,
 			peerOrgs,
+			consortiumName,
 		)
 		var baseProfile *genesisconfig.Profile
 		channelTx, err := resource.CreateChannelCreateTx(

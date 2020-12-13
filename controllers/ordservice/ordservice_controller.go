@@ -209,53 +209,6 @@ func GetConfig(conf *hlfv1alpha1.FabricOrderingService, client *kubernetes.Clien
 				Type:            spec.Service.Type,
 				NodePortRequest: requestNodePort,
 			},
-			//Ingress: Ingress{
-			//	Enabled: false,
-			//},
-			//Cacert:      string(signRootCRTEncoded),
-			//Tlsrootcert: string(tlsRootCRTEncoded),
-			//AdminCert:   "",
-			//Cert:        string(signCRTEncoded),
-			//Key:         string(signPEMEncodedPK),
-			//TLS: TLS{
-			//	Cert: string(tlsCRTEncoded),
-			//	Key:  string(tlsPEMEncodedPK),
-			//},
-			//FullnameOverride: conf.Name,
-			//HostAliases:      nil,
-			//Service: Service{
-			//	Type:               spec.Service.Type,
-			//	Port:               7050,
-			//	PortOperations:     9443,
-			//	NodePort:           requestNodePort,
-			//	NodePortOperations: operationsNodePort,
-			//},
-			//Image: Image{
-			//	Repository: spec.Image,
-			//	Tag:        spec.Tag,
-			//	PullPolicy: "IfNotPresent",
-			//},
-			//Persistence: Persistence{
-			//	Enabled:      true,
-			//	Annotations:  Annotations{},
-			//	StorageClass: "",
-			//	AccessMode:   "ReadWriteOnce",
-			//	Size:         "5Gi",
-			//},
-			//Ord: Ord{
-			//	Type:  "etcdraft",
-			//	MspID: spec.MspID,
-			//	TLS: TLSConfiguration{
-			//		Server: Server{
-			//			Enabled: true,
-			//		},
-			//		Client: Client{
-			//			Enabled: false,
-			//		},
-			//	},
-			//},
-			//Clientcerts: Clientcerts{},
-			//Hosts:       ingressHosts,
 		})
 	}
 
@@ -268,6 +221,7 @@ func GetConfig(conf *hlfv1alpha1.FabricOrderingService, client *kubernetes.Clien
 				MspID:        conf.Spec.MspID,
 			},
 		},
+		"SampleConsortium",
 	)
 	if err != nil {
 		return nil, err

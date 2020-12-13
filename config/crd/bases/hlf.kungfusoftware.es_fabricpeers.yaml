@@ -45,11 +45,52 @@ spec:
           spec:
             description: FabricPeerSpec defines the desired state of FabricPeer
             properties:
+              couchdb:
+                properties:
+                  password:
+                    type: string
+                  user:
+                    type: string
+                required:
+                - password
+                - user
+                type: object
+              discovery:
+                properties:
+                  period:
+                    type: string
+                  touchPeriod:
+                    type: string
+                required:
+                - period
+                - touchPeriod
+                type: object
               dockerSocketPath:
                 default: /var/run/docker.sock
                 type: string
               external_chaincode_builder:
                 type: boolean
+              externalEndpoint:
+                type: string
+              gossip:
+                properties:
+                  bootstrap:
+                    type: string
+                  endpoint:
+                    type: string
+                  externalEndpoint:
+                    type: string
+                  orgLeader:
+                    type: boolean
+                  useLeaderElection:
+                    type: boolean
+                required:
+                - bootstrap
+                - endpoint
+                - externalEndpoint
+                - orgLeader
+                - useLeaderElection
+                type: object
               hosts:
                 items:
                   type: string
@@ -57,6 +98,41 @@ spec:
               image:
                 minLength: 1
                 type: string
+              istio:
+                properties:
+                  port:
+                    type: integer
+                required:
+                - port
+                type: object
+              logging:
+                properties:
+                  cauthdsl:
+                    type: string
+                  gossip:
+                    type: string
+                  grpc:
+                    type: string
+                  ledger:
+                    type: string
+                  level:
+                    type: string
+                  msp:
+                    type: string
+                  peer:
+                    type: string
+                  policies:
+                    type: string
+                required:
+                - cauthdsl
+                - gossip
+                - grpc
+                - ledger
+                - level
+                - msp
+                - peer
+                - policies
+                type: object
               mspID:
                 minLength: 3
                 type: string
@@ -68,6 +144,103 @@ spec:
                 items:
                   type: string
                 type: array
+              resources:
+                properties:
+                  chaincode:
+                    properties:
+                      limits:
+                        properties:
+                          cpu:
+                            default: "2"
+                            type: string
+                          memory:
+                            default: 4Gi
+                            type: string
+                        required:
+                        - cpu
+                        - memory
+                        type: object
+                      requests:
+                        properties:
+                          cpu:
+                            default: 10m
+                            type: string
+                          memory:
+                            default: 256Mi
+                            type: string
+                        required:
+                        - cpu
+                        - memory
+                        type: object
+                    required:
+                    - limits
+                    - requests
+                    type: object
+                  couchdb:
+                    properties:
+                      limits:
+                        properties:
+                          cpu:
+                            default: "2"
+                            type: string
+                          memory:
+                            default: 4Gi
+                            type: string
+                        required:
+                        - cpu
+                        - memory
+                        type: object
+                      requests:
+                        properties:
+                          cpu:
+                            default: 10m
+                            type: string
+                          memory:
+                            default: 256Mi
+                            type: string
+                        required:
+                        - cpu
+                        - memory
+                        type: object
+                    required:
+                    - limits
+                    - requests
+                    type: object
+                  peer:
+                    properties:
+                      limits:
+                        properties:
+                          cpu:
+                            default: "2"
+                            type: string
+                          memory:
+                            default: 4Gi
+                            type: string
+                        required:
+                        - cpu
+                        - memory
+                        type: object
+                      requests:
+                        properties:
+                          cpu:
+                            default: 10m
+                            type: string
+                          memory:
+                            default: 256Mi
+                            type: string
+                        required:
+                        - cpu
+                        - memory
+                        type: object
+                    required:
+                    - limits
+                    - requests
+                    type: object
+                required:
+                - chaincode
+                - couchdb
+                - peer
+                type: object
               secret:
                 properties:
                   enrollment:
@@ -148,12 +321,6 @@ spec:
                 type: object
               service:
                 properties:
-                  nodePortEvent:
-                    type: integer
-                  nodePortOperations:
-                    type: integer
-                  nodePortRequest:
-                    type: integer
                   type:
                     type: string
                 required:
@@ -164,20 +331,92 @@ spec:
                 - couchdb
                 - leveldb
                 type: string
+              storage:
+                properties:
+                  chaincode:
+                    properties:
+                      accessMode:
+                        default: ReadWriteOnce
+                        enum:
+                        - ReadWriteOnce
+                        - ReadOnlyMany
+                        - ReadWriteMany
+                        type: string
+                      size:
+                        default: 5Gi
+                        type: string
+                      storageClass:
+                        default: ""
+                        type: string
+                    required:
+                    - accessMode
+                    - size
+                    type: object
+                  couchdb:
+                    properties:
+                      accessMode:
+                        default: ReadWriteOnce
+                        enum:
+                        - ReadWriteOnce
+                        - ReadOnlyMany
+                        - ReadWriteMany
+                        type: string
+                      size:
+                        default: 5Gi
+                        type: string
+                      storageClass:
+                        default: ""
+                        type: string
+                    required:
+                    - accessMode
+                    - size
+                    type: object
+                  peer:
+                    properties:
+                      accessMode:
+                        default: ReadWriteOnce
+                        enum:
+                        - ReadWriteOnce
+                        - ReadOnlyMany
+                        - ReadWriteMany
+                        type: string
+                      size:
+                        default: 5Gi
+                        type: string
+                      storageClass:
+                        default: ""
+                        type: string
+                    required:
+                    - accessMode
+                    - size
+                    type: object
+                required:
+                - chaincode
+                - couchdb
+                - peer
+                type: object
               tag:
                 minLength: 1
                 type: string
             required:
+            - couchdb
+            - discovery
             - dockerSocketPath
+            - externalEndpoint
             - external_chaincode_builder
+            - gossip
             - hosts
             - image
+            - istio
+            - logging
             - mspID
             - operationHosts
             - operationIPs
+            - resources
             - secret
             - service
             - stateDb
+            - storage
             - tag
             type: object
           status:
