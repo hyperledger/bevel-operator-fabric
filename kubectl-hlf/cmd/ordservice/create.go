@@ -11,6 +11,8 @@ import (
 	"github.com/spf13/cobra"
 	"io"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"strconv"
+	"strings"
 )
 
 type OrdererOptions struct {
@@ -26,6 +28,7 @@ type OrdererOptions struct {
 	CAName            string
 	SystemChannelName string
 	NumOrderers       int
+	Hosts             []string
 }
 
 func (o OrdererOptions) Validate() error {
@@ -59,17 +62,36 @@ func (c *createCmd) run(args []string) error {
 	if err != nil {
 		return err
 	}
-
+	includeHosts := len(c.ordererOpts.Hosts) > 0
+	if includeHosts && len(c.ordererOpts.Hosts) != c.ordererOpts.NumOrderers {
+		return errors.Errorf("there are %d orderers but %d hosts", c.ordererOpts.NumOrderers, len(c.ordererOpts.Hosts))
+	}
 	var nodes []v1alpha1.OrdererNode
 	for i := 0; i < c.ordererOpts.NumOrderers; i++ {
+		hosts := []string{}
+		host := ""
+		port := 0
+		if includeHosts {
+			ordHost := c.ordererOpts.Hosts[i]
+			chunks := strings.Split(ordHost, ":")
+			host = chunks[0]
+			if len(chunks) < 2 {
+				return errors.Errorf("Host %s doesn't have port", ordHost)
+			}
+			port, err = strconv.Atoi(chunks[1])
+			if err != nil {
+				return err
+			}
+			hosts = append(hosts, host)
+		}
 		nodes = append(nodes, v1alpha1.OrdererNode{
 			ID:   fmt.Sprintf("orderer%d", i),
-			Host: "",
-			Port: 0,
+			Host: host,
+			Port: port,
 			Enrollment: v1alpha1.OrdererNodeEnrollment{
 				TLS: v1alpha1.OrdererNodeEnrollmentTLS{
 					Csr: v1alpha1.Csr{
-						Hosts: []string{},
+						Hosts: hosts,
 					},
 				},
 			},
@@ -168,6 +190,7 @@ func newCreateOrderingServiceCmd(out io.Writer, errOut io.Writer) *cobra.Command
 	f.StringVarP(&c.ordererOpts.MspID, "mspid", "", "", "MSP ID of the organization")
 	f.StringVarP(&c.ordererOpts.SystemChannelName, "system-channel", "", "system-channel", "System channel name")
 	f.IntVarP(&c.ordererOpts.NumOrderers, "num-orderers", "", 3, "Orderers nodes to create")
+	f.StringArrayVarP(&c.ordererOpts.Hosts, "hosts", "", []string{}, "Hosts")
 
 	return cmd
 }

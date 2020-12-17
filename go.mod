@@ -28,6 +28,7 @@ require (
 	github.com/golang/protobuf v1.4.2
 	github.com/gorilla/handlers v1.4.2 // indirect
 	github.com/hyperledger/fabric v2.1.1+incompatible
+	github.com/hyperledger/fabric-amcl v0.0.0-20200424173818-327c9e2cf77a // indirect
 	github.com/hyperledger/fabric-config v0.0.5
 	github.com/hyperledger/fabric-lib-go v1.0.0
 	github.com/hyperledger/fabric-protos-go v0.0.0-20201028172056-a3136dde2354
@@ -49,6 +50,7 @@ require (
 	github.com/rogpeppe/go-internal v1.5.0 // indirect
 	github.com/sirupsen/logrus v1.5.0
 	github.com/spf13/cobra v1.0.0
+	github.com/sykesm/zap-logfmt v0.0.4 // indirect
 	github.com/yvasiyarov/go-metrics v0.0.0-20150112132944-c25f46c4b940 // indirect
 	github.com/yvasiyarov/gorelic v0.0.7 // indirect
 	github.com/yvasiyarov/newrelic_platform_go v0.0.0-20160601141957-9c099fbc30e9 // indirect

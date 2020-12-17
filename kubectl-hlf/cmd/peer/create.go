@@ -29,6 +29,7 @@ type PeerOptions struct {
 	CAName        string
 	EnrollID      string
 	BootstrapPeer string
+	Hosts         []string
 }
 
 func (o PeerOptions) Validate() error {
@@ -83,6 +84,10 @@ func (c *createCmd) run(args []string) error {
 	} else {
 		bootstrapPeerURL = ""
 	}
+	externalEndpoint := ""
+	if len(c.peerOpts.Hosts) > 0 {
+		externalEndpoint = fmt.Sprintf("%s:443", c.peerOpts.Hosts[0])
+	}
 	fabricPeer := &v1alpha1.FabricPeer{
 		ObjectMeta: v1.ObjectMeta{
 			Name:      c.peerOpts.Name,
@@ -95,13 +100,13 @@ func (c *createCmd) run(args []string) error {
 				Port: 443,
 			},
 			Gossip: v1alpha1.FabricPeerSpecGossip{
-				ExternalEndpoint:  "",
+				ExternalEndpoint:  externalEndpoint,
 				Bootstrap:         bootstrapPeerURL,
 				Endpoint:          "",
 				UseLeaderElection: true,
 				OrgLeader:         false,
 			},
-			ExternalEndpoint:         "",
+			ExternalEndpoint:         externalEndpoint,
 			Tag:                      c.peerOpts.Version,
 			ExternalChaincodeBuilder: true,
 			CouchDB: v1alpha1.FabricPeerCouchDB{
@@ -208,7 +213,7 @@ func (c *createCmd) run(args []string) error {
 					},
 				},
 			},
-			Hosts:          []string{},
+			Hosts:          c.peerOpts.Hosts,
 			OperationHosts: []string{},
 			OperationIPs:   []string{},
 		},
@@ -249,6 +254,6 @@ func newCreatePeerCmd(out io.Writer, errOut io.Writer) *cobra.Command {
 	f.StringVarP(&c.peerOpts.MspID, "mspid", "", "", "MSP ID of the organization")
 	f.StringVarP(&c.peerOpts.StateDB, "statedb", "", "leveldb", "State database")
 	f.StringVarP(&c.peerOpts.BootstrapPeer, "bootstrap-peer", "", "", "Bootstrap peer")
-
+	f.StringArrayVarP(&c.peerOpts.Hosts, "hosts", "", []string{}, "Bootstrap peer")
 	return cmd
 }

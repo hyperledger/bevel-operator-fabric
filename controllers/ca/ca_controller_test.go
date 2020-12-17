@@ -1410,6 +1410,7 @@ var _ = Describe("Fabric Controllers", func() {
 			orgOrganization,
 			peerOrgs,
 			consortiumName,
+			fmt.Sprintf("OR('%s.admin')", ),
 		)
 		var baseProfile *genesisconfig.Profile
 		channelTx, err := resource.CreateChannelCreateTx(

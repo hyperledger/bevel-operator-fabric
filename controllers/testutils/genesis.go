@@ -242,7 +242,7 @@ func GetUpdatedConfig(channelConfig *cb.Config, peerOrgs []PeerOrganization, con
 		}
 		consortiumGroups[mspID] = configGroup
 	}
-	modifiedConfig.ChannelGroup.Groups["Consortiums"].Groups[consortiumName].Groups = consortiumGroups
+	modifiedConfig.ChannelGroup.Groups[channelconfig.ConsortiumsGroupKey].Groups[consortiumName].Groups = consortiumGroups
 	return modifiedConfig, nil
 }
 

@@ -70,7 +70,7 @@ type PeerStatus struct {
 	TLSCert string
 }
 
-func GetPeerState(conf *action.Configuration, config *rest.Config, releaseName string, ns string, svc *corev1.Service) (*PeerStatus, error) {
+func GetPeerState(peer *hlfv1alpha1.FabricPeer, conf *action.Configuration, config *rest.Config, releaseName string, ns string, svc *corev1.Service) (*PeerStatus, error) {
 	ctx := context.Background()
 	cmd := action.NewGet(conf)
 	rel, err := cmd.Run(releaseName)
@@ -133,9 +133,13 @@ func GetPeerState(conf *action.Configuration, config *rest.Config, releaseName s
 			}
 		}
 	}
-	for _, port := range svc.Spec.Ports {
-		if port.Name == PeerPortName {
-			r.URL = fmt.Sprintf("grpcs://%s:%d", k8sIP, port.NodePort)
+	if peer.Spec.ExternalEndpoint != "" {
+		r.URL = fmt.Sprintf("grpcs://%s", peer.Spec.ExternalEndpoint)
+	} else {
+		for _, port := range svc.Spec.Ports {
+			if port.Name == PeerPortName {
+				r.URL = fmt.Sprintf("grpcs://%s:%d", k8sIP, port.NodePort)
+			}
 		}
 	}
 	tlsCrt, _, _, err := getExistingTLSCrypto(clientSet, releaseName, ns)
@@ -280,6 +284,7 @@ func (r *FabricPeerReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) 
 	if exists {
 		// update
 		s, err := GetPeerState(
+			fabricPeer,
 			cfg,
 			r.Config,
 			releaseName,

@@ -5,6 +5,7 @@ import (
 	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/chaincode"
 	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/channel"
 	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/consortium"
+	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/inspect"
 	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/ordservice"
 	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/peer"
 	"github.com/spf13/cobra"
@@ -24,7 +25,7 @@ func NewCmdHLF(streams genericclioptions.IOStreams) *cobra.Command {
 		Long:         hlfDesc,
 		SilenceUsage: true,
 	}
-	cmd.AddCommand(newInspectHLFConfig(cmd.OutOrStdout(), cmd.ErrOrStderr()))
+	cmd.AddCommand(inspect.NewInspectHLFConfig(cmd.OutOrStdout(), cmd.ErrOrStderr()))
 	cmd.AddCommand(consortium.NewConsortiumCmd(cmd.OutOrStdout(), cmd.ErrOrStderr()))
 	cmd.AddCommand(channel.NewChannelCmd(cmd.OutOrStdout(), cmd.ErrOrStderr()))
 	cmd.AddCommand(ca.NewCACmd(cmd.OutOrStdout(), cmd.ErrOrStderr()))

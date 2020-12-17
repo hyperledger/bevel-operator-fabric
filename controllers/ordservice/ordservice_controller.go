@@ -151,6 +151,9 @@ func GetConfig(conf *hlfv1alpha1.FabricOrderingService, client *kubernetes.Clien
 
 		requestNodePort := nodePorts[nodeIdx]
 		ingressHosts := []string{}
+		if node.Host != "" {
+			ingressHosts = append(ingressHosts, node.Host)
+		}
 		signCRTEncoded := pem.EncodeToMemory(&pem.Block{
 			Type:  "CERTIFICATE",
 			Bytes: signCert.Raw,
@@ -231,6 +234,7 @@ func GetConfig(conf *hlfv1alpha1.FabricOrderingService, client *kubernetes.Clien
 		return nil, err
 	}
 	genesisB64 := base64.StdEncoding.EncodeToString(genesisBytes)
+
 	fabricOrdChart = FabricOrdChart{
 		FullNameOverride: "",
 		Image: Image{
