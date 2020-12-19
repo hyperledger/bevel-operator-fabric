@@ -1,31 +1,20 @@
-# Build the manager binary
-FROM golang:1.13 as builder
+FROM registry.access.redhat.com/ubi8/ubi-minimal:8.3
 
-WORKDIR /workspace
-# Copy the Go Modules manifests
-COPY go.mod go.mod
-COPY go.sum go.sum
-# cache deps before building and copying source so that we don't need to re-download as much
-# and so that source changes don't invalidate our downloaded layer
-RUN go mod download
+LABEL name="HLF Operator" \
+      vendor="Kung Fu Software <dviejo@kungfusoftware.es>" \
+      maintainer="Kung Fu Software <dviejo@kungfusoftware.es>" \
+      version="v1.0.0" \
+      release="v1.0.0"
 
-# Copy the go source
-COPY main.go main.go
-COPY api/ api/
-COPY controllers/ controllers/
-COPY internal/ internal/
-COPY pkg/ pkg/
+COPY CREDITS /licenses/CREDITS
+COPY LICENSE /licenses/LICENSE
+COPY LICENSE /licenses/LICENSE
+COPY charts /charts
 
-# Build
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GO111MODULE=on go build -a -o manager main.go
+RUN \
+    microdnf update --nodocs && \
+    microdnf install curl ca-certificates shadow-utils --nodocs
 
-# Use distroless as minimal base image to package the manager binary
-# Refer to https://github.com/GoogleContainerTools/distroless for more details
-#FROM gcr.io/distroless/static:nonroot
-FROM alpine:20200917
-WORKDIR /
-COPY --from=builder /workspace/manager .
-COPY ./charts ./charts
-#USER nonroot:nonroot
+COPY hlf-operator /hlf-operator
 
-ENTRYPOINT ["/manager"]
+CMD ["/hlf-operator"]

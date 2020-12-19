@@ -1,0 +1,31 @@
+name: test-network-org1
+version: 1.0.0
+organizations:
+  {{- range $mspID, $org := .Organizations }}
+    {{$mspID}}:
+      mspid: {{$mspID}}
+      cryptoPath: /tmp/cryptopath
+      users:
+        admin:
+          key:
+            pem: |
+            {{ $org.AdminKey | indent 12 }}
+          cert:
+            pem: |
+            {{ $org.AdminCert | indent 12 }}
+    {{- end }}
+certificateAuthorities: []
+peers:
+  {{- range $peer := .Peers }}
+
+  "{{$peer.Name}}":
+    url: {{ $peer.Url }}
+    grpcOptions:
+      hostnameOverride: ""
+      ssl-target-name-override: ""
+      allow-insecure: true
+    tlsCACerts:
+      pem: |
+  {{ $peer.TlsCACrt | indent 8 }}
+
+channels: {}

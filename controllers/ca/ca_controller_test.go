@@ -34,7 +34,6 @@ import (
 	"github.com/lithammer/shortuuid/v3"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -757,8 +756,6 @@ func createPeer(releaseName string, namespace string, params createPeerParams, c
 	secret, err := certs.RegisterUser(registerParams)
 	Expect(err).ToNot(HaveOccurred())
 	Expect(secret).To(Equal(registerParams.Secret))
-	nodeportRequest, err := getFreeNodeport(publicIP)
-	Expect(err).ToNot(HaveOccurred())
 	peerEnrollID := "peer"
 	peerEnrollSecret := "peerpw"
 	hosts := []string{
@@ -772,11 +769,26 @@ func createPeer(releaseName string, namespace string, params createPeerParams, c
 			Namespace: namespace,
 		},
 		Spec: hlfv1alpha1.FabricPeerSpec{
-			DockerSocketPath:         "/var/run/docker.sock",
-			Image:                    "quay.io/kfsoftware/fabric-peer",
+			DockerSocketPath: "/var/run/docker.sock",
+			Image:            "quay.io/kfsoftware/fabric-peer",
+			Istio: hlfv1alpha1.FabricPeerIstio{
+				Port: 443,
+			},
+			Gossip: hlfv1alpha1.FabricPeerSpecGossip{
+				ExternalEndpoint:  "",
+				Bootstrap:         "",
+				Endpoint:          "",
+				UseLeaderElection: true,
+				OrgLeader:         false,
+			},
+			ExternalEndpoint:         "",
 			Tag:                      "amd64-2.3.0",
 			ExternalChaincodeBuilder: true,
-			MspID:                    mspID,
+			CouchDB: hlfv1alpha1.FabricPeerCouchDB{
+				User:     "couchdb",
+				Password: "couchdb",
+			},
+			MspID: mspID,
 			Secret: hlfv1alpha1.Secret{
 				Enrollment: hlfv1alpha1.Enrollment{
 					Component: hlfv1alpha1.Component{
@@ -806,10 +818,72 @@ func createPeer(releaseName string, namespace string, params createPeerParams, c
 				},
 			},
 			Service: hlfv1alpha1.PeerService{
-				Type:            "NodePort",
-				NodePortRequest: nodeportRequest,
+				Type: "NodePort",
 			},
-			StateDb:        "leveldb",
+			StateDb: "leveldb",
+			Storage: hlfv1alpha1.FabricPeerStorage{
+				CouchDB: hlfv1alpha1.Storage{
+					Size:         "1Gi",
+					StorageClass: "",
+					AccessMode:   "ReadWriteOnce",
+				},
+				Peer: hlfv1alpha1.Storage{
+					Size:         "1Gi",
+					StorageClass: "",
+					AccessMode:   "ReadWriteOnce",
+				},
+				Chaincode: hlfv1alpha1.Storage{
+					Size:         "1Gi",
+					StorageClass: "",
+					AccessMode:   "ReadWriteOnce",
+				},
+			},
+			Discovery: hlfv1alpha1.FabricPeerDiscovery{
+				Period:      "60s",
+				TouchPeriod: "60s",
+			},
+			Logging: hlfv1alpha1.FabricPeerLogging{
+				Level:    "info",
+				Peer:     "info",
+				Cauthdsl: "info",
+				Gossip:   "info",
+				Grpc:     "info",
+				Ledger:   "info",
+				Msp:      "info",
+				Policies: "info",
+			},
+			Resources: hlfv1alpha1.FabricPeerResources{
+				Peer: hlfv1alpha1.Resources{
+					Requests: hlfv1alpha1.Requests{
+						CPU:    "10m",
+						Memory: "10M",
+					},
+					Limits: hlfv1alpha1.RequestsLimit{
+						CPU:    "2",
+						Memory: "4096M",
+					},
+				},
+				CouchDB: hlfv1alpha1.Resources{
+					Requests: hlfv1alpha1.Requests{
+						CPU:    "10m",
+						Memory: "10M",
+					},
+					Limits: hlfv1alpha1.RequestsLimit{
+						CPU:    "2",
+						Memory: "4096M",
+					},
+				},
+				Chaincode: hlfv1alpha1.Resources{
+					Requests: hlfv1alpha1.Requests{
+						CPU:    "10m",
+						Memory: "10M",
+					},
+					Limits: hlfv1alpha1.RequestsLimit{
+						CPU:    "2",
+						Memory: "4096M",
+					},
+				},
+			},
 			Hosts:          []string{},
 			OperationHosts: []string{},
 			OperationIPs:   []string{},
@@ -850,7 +924,7 @@ func createOrderer(releaseName string, namespace string, params createOrdererPar
 	})
 
 	fabricOrderer := &hlfv1alpha1.FabricOrderingService{
-		TypeMeta: NewTypeMeta("FabricPeer"),
+		TypeMeta: NewTypeMeta("FabricOrderingService"),
 		ObjectMeta: v1.ObjectMeta{
 			Name:      releaseName,
 			Namespace: namespace,
@@ -862,7 +936,21 @@ func createOrderer(releaseName string, namespace string, params createOrdererPar
 				AccessMode:   "ReadWriteOnce",
 			},
 			SystemChannel: hlfv1alpha1.OrdererSystemChannel{
-				Name: "system-channel",
+				Name: systemChannelID,
+				Config: hlfv1alpha1.ChannelConfig{
+					BatchTimeout:            "2s",
+					MaxMessageCount:         500,
+					AbsoluteMaxBytes:        10 * 1024 * 1024,
+					PreferredMaxBytes:       2 * 1024 * 1024,
+					OrdererCapabilities:     hlfv1alpha1.OrdererCapabilities{V2_0: true},
+					ApplicationCapabilities: hlfv1alpha1.ApplicationCapabilities{V2_0: true},
+					ChannelCapabilities:     hlfv1alpha1.ChannelCapabilities{V2_0: true},
+					SnapshotIntervalSize:    19,
+					TickInterval:            "500ms",
+					ElectionTick:            10,
+					HeartbeatTick:           1,
+					MaxInflightBlocks:       5,
+				},
 			},
 			Nodes: []hlfv1alpha1.OrdererNode{
 				{
@@ -954,26 +1042,6 @@ func verifyCADeployment(fabricCA *hlfv1alpha1.FabricCA) {
 	Expect(secret).To(Equal(registerParams.Secret))
 }
 
-func getFreeNodeport(host string) (int, error) {
-	for port := 30000; port <= 32767; port++ {
-		timeout := time.Second
-		portStr := strconv.Itoa(port)
-		conn, err := net.DialTimeout("tcp", net.JoinHostPort(host, portStr), timeout)
-		if err != nil {
-			fmt.Println("Connecting error:", err)
-			if !strings.Contains(err.Error(), "i/o timeout") {
-				fmt.Printf("Found port: %d", port)
-				return port, nil
-			}
-		}
-		if conn != nil {
-			conn.Close()
-			fmt.Println("Opened", net.JoinHostPort(host, portStr))
-		}
-	}
-	return 0, errors.New("no ports are free")
-}
-
 var _ = Describe("Fabric Controllers", func() {
 	FabricNamespace := ""
 	BeforeEach(func() {
@@ -986,7 +1054,7 @@ var _ = Describe("Fabric Controllers", func() {
 		Expect(K8sClient.Create(context.Background(), testNamespace)).Should(Succeed())
 	})
 	AfterEach(func() {
-		//Expect(ClientSet.CoreV1().Namespaces().Delete(context.Background(), FabricNamespace, v1.DeleteOptions{})).Should(Succeed())
+		Expect(ClientSet.CoreV1().Namespaces().Delete(context.Background(), FabricNamespace, v1.DeleteOptions{})).Should(Succeed())
 	})
 	Specify("create a new Fabric CA instance", func() {
 		By("create the CA object")
@@ -1333,17 +1401,22 @@ var _ = Describe("Fabric Controllers", func() {
 		Expect(err).ToNot(HaveOccurred())
 		port, err := strconv.Atoi(portStr)
 		Expect(err).ToNot(HaveOccurred())
-		modifiedConfig, err := testutils.GetUpdatedConfig(
+		consortiumName := "SampleConsortium"
+
+		modifiedConfig, err := testutils.AddConsortiumToConfig(
 			systemChannelConfig,
-			[]testutils.PeerOrganization{
-				{
-					RootCert:    peerCA.Status.CACert,
-					TLSRootCert: peerCA.Status.CACert,
-					MspID:       peer.Spec.MspID,
-					Peers: []testutils.PeerNode{
-						{
-							Host: host,
-							Port: port,
+			testutils.AddConsortiumRequest{
+				Name: consortiumName,
+				Organizations: []testutils.PeerOrganization{
+					{
+						RootCert:    peerCA.Status.CACert,
+						TLSRootCert: peerCA.Status.CACert,
+						MspID:       peer.Spec.MspID,
+						Peers: []testutils.PeerNode{
+							{
+								Host: host,
+								Port: port,
+							},
 						},
 					},
 				},
@@ -1369,12 +1442,6 @@ var _ = Describe("Fabric Controllers", func() {
 		By("create a channel")
 
 		channelID := getRandomChannelID()
-		//ordUrl, err := url.Parse(orderer.Status.URL)
-		//Expect(err).ToNot(HaveOccurred())
-		//ordHost, ordPortStr, err := net.SplitHostPort(ordUrl.Host)
-		//Expect(err).ToNot(HaveOccurred())
-		//ordPort, err := strconv.Atoi(ordPortStr)
-		//Expect(err).ToNot(HaveOccurred())
 		ordNodes := getOrderers(
 			releaseNameOrd,
 			FabricNamespace,
@@ -1388,9 +1455,10 @@ var _ = Describe("Fabric Controllers", func() {
 			})
 		}
 		orgOrganization := testutils.OrdererOrganization{
-			Nodes:       nodes,
-			RootTLSCert: ordererCA.Status.CACert,
-			MspID:       orderer.Spec.MspID,
+			Nodes:        nodes,
+			RootTLSCert:  ordererCA.Status.TLSCACert,
+			MspID:        orderer.Spec.MspID,
+			RootSignCert: ordererCA.Status.CACert,
 		}
 		u, err = url.Parse(peer.Status.URL)
 		Expect(err).ToNot(HaveOccurred())
@@ -1414,7 +1482,10 @@ var _ = Describe("Fabric Controllers", func() {
 		profileConfig, err := testutils.GetChannelProfileConfig(
 			orgOrganization,
 			peerOrgs,
+			consortiumName,
+			fmt.Sprintf("OR('%s.admin')", peerOrgs[0].MspID),
 		)
+		Expect(err).ToNot(HaveOccurred())
 		var baseProfile *genesisconfig.Profile
 		channelTx, err := resource.CreateChannelCreateTx(
 			profileConfig,
@@ -1437,7 +1508,7 @@ var _ = Describe("Fabric Controllers", func() {
 		Expect(createChannelResponse).ToNot(BeNil())
 
 		By("join the peer to the channel")
-		time.Sleep(2 * time.Second) // wait for the transaction to be commited
+		time.Sleep(2 * time.Second) // wait for the transaction to be committed
 		err = resClient.JoinChannel(
 			channelID,
 			resmgmt.WithTargetEndpoints("peer"),

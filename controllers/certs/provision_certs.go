@@ -174,7 +174,7 @@ type RegisterUserRequest struct {
 }
 
 const (
-	keyStorePath = "./miscertificados"
+	keyStorePath = "/tmp/hlf-operator"
 )
 
 func RegisterUser(params RegisterUserRequest) (string, error) {
@@ -240,7 +240,6 @@ func EnrollUser(params EnrollUserRequest) (*x509.Certificate, *ecdsa.PrivateKey,
 	if err != nil {
 		return nil, nil, nil, err
 	}
-	caClient.GetCAInfo()
 	err = caClient.Enroll(&api.EnrollmentRequest{
 		Name:     params.User,
 		Secret:   params.Secret,
@@ -315,7 +314,7 @@ func GetUser(params GetUserRequest) (*api.IdentityResponse, error) {
 	if err != nil {
 		return nil, err
 	}
-	kk, err := caClient.GetIdentity("", "ca")
+	kk, err := caClient.GetIdentity(params.User, params.Name)
 	if err != nil {
 		return nil, err
 	}
@@ -399,7 +398,6 @@ func GetClient(ca FabricCAParams, keyStorePath string) (*msp.CAClientImpl, *msp.
 	if err != nil {
 		return nil, nil, nil, nil, err
 	}
-	//log.Printf("Config=%s", string(configYaml))
 	configBackend, err := config.FromRaw(configYaml, "yaml")()
 	if err != nil {
 		return nil, nil, nil, nil, err

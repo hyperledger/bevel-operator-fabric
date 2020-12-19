@@ -1,0 +1,37 @@
+run:
+  skip-dirs:
+    - internal
+
+linters-settings:
+  golint:
+    min-confidence: 0
+
+  misspell:
+    locale: US
+
+linters:
+  enable:
+    - typecheck
+    - goimports
+    - misspell
+    - govet
+    - golint
+    - ineffassign
+    - gosimple
+    - deadcode
+    - structcheck
+
+issues:
+  exclude-use-default: false
+  exclude:
+    - should have a package comment
+    - error strings should not be capitalized or end with punctuation or a newline
+  exclude-rules:
+    # Exclude linters from running on auto-generated files.
+    - path: pkg/client
+      linters:
+        - golint
+        - deadcode
+
+service:
+  golangci-lint-version: 1.27.0 # use the fixed version to not introduce new linters unexpectedly

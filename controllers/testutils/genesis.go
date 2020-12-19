@@ -8,7 +8,9 @@ import (
 	cb "github.com/hyperledger/fabric-protos-go/common"
 	"github.com/hyperledger/fabric-protos-go/orderer/etcdraft"
 	"github.com/hyperledger/fabric-sdk-go/pkg/fab/resource/genesisconfig"
+	"github.com/kfsoftware/hlf-operator/internal/github.com/hyperledger/fabric/common/channelconfig"
 	"github.com/kfsoftware/hlf-operator/internal/github.com/hyperledger/fabric/sdkinternal/configtxgen/encoder"
+
 	genesisconfig2 "github.com/kfsoftware/hlf-operator/internal/github.com/hyperledger/fabric/sdkinternal/configtxgen/genesisconfig"
 	"io/ioutil"
 	"log"
@@ -31,10 +33,6 @@ func ordererCapabilities() map[string]bool {
 		"V2_0": true,
 	}
 }
-
-const (
-	consortiumDefault = "SampleConsortium"
-)
 
 type PeerNode struct {
 	Host string
@@ -114,7 +112,6 @@ NodeOUs:
 			},
 			"Readers": {
 				Type: "Signature",
-				//Rule: fmt.Sprintf("OR('%s.admin', '%s.peer', '%s.client')", mspID, mspID, mspID),
 				Rule: fmt.Sprintf("OR('%s.member')", mspID),
 			},
 			"Writers": {
@@ -222,7 +219,13 @@ NodeOUs:
 	}
 	return genesisOrg, nil
 }
-func GetUpdatedConfig(channelConfig *cb.Config, peerOrgs []PeerOrganization) (*cb.Config, error) {
+
+type AddConsortiumRequest struct {
+	Name          string
+	Organizations []PeerOrganization
+}
+
+func AddConsortiumToConfig(channelConfig *cb.Config, request AddConsortiumRequest) (*cb.Config, error) {
 	modifiedConfig := &cb.Config{}
 	modifiedConfigBytes, err := proto.Marshal(channelConfig)
 	if err != nil {
@@ -234,22 +237,108 @@ func GetUpdatedConfig(channelConfig *cb.Config, peerOrgs []PeerOrganization) (*c
 	}
 
 	consortiumGroups := map[string]*cb.ConfigGroup{}
-	for _, member := range peerOrgs {
+	peerOrgs := []*genesisconfig2.Organization{}
+	for _, member := range request.Organizations {
 		mspID := member.MspID
 		peerOrg, err := memberToOrgUpdate(member)
 		if err != nil {
 			return nil, err
 		}
+		peerOrgs = append(peerOrgs, peerOrg)
 		configGroup, err := encoder.NewConsortiumOrgGroup(peerOrg)
 		if err != nil {
 			return nil, err
 		}
 		consortiumGroups[mspID] = configGroup
 	}
-	modifiedConfig.ChannelGroup.Groups["Consortiums"].Groups[consortiumDefault].Groups = consortiumGroups
+	_, ok := modifiedConfig.ChannelGroup.Groups["Consortiums"]
+	if !ok {
+		modifiedConfig.ChannelGroup.Groups["Consortiums"] = &cb.ConfigGroup{}
+		modifiedConfig.ChannelGroup.Groups["Consortiums"].Groups[request.Name] = &cb.ConfigGroup{
+			Version:  0,
+			Groups:   nil,
+			Values:   nil,
+			Policies: nil,
+		}
+	}
+	conf := map[string]*genesisconfig2.Consortium{
+		request.Name: {
+			Organizations: peerOrgs,
+		},
+	}
+	consortiums, err := encoder.NewConsortiumsGroup(
+		conf,
+	)
+	if err != nil {
+		return nil, err
+	}
+	modifiedConfig.ChannelGroup.Groups[channelconfig.ConsortiumsGroupKey] = consortiums
 	return modifiedConfig, nil
 }
-func GetProfileConfig(ordOrgs []OrdererOrganization) (*genesisconfig.Profile, error) {
+
+type OrdererCapabilities struct {
+	V2_0 bool
+}
+type ApplicationCapabilities struct {
+	V2_0 bool
+}
+type ChannelCapabilities struct {
+	V2_0 bool
+}
+type GenesisConfig struct {
+	BatchTimeout            time.Duration // 2 seconds
+	MaxMessageCount         int           // 500
+	AbsoluteMaxBytes        int           // 10 * 1024 * 1024 = 10MB
+	PreferredMaxBytes       int           // 2 * 1024 * 1024 = 2MB
+	OrdererCapabilities     OrdererCapabilities
+	ApplicationCapabilities ApplicationCapabilities
+	ChannelCapabilities     ChannelCapabilities
+	SnapshotIntervalSize    int    // 19
+	TickInterval            string // 500ms
+	ElectionTick            int    // 10
+	HeartbeatTick           int    // 1
+	MaxInflightBlocks       int    // 5
+}
+
+const MB = 1024 * 1024
+
+func fillWithDefaultOps(opts *GenesisConfig) {
+	if opts.BatchTimeout.Seconds() <= 1 {
+		opts.BatchTimeout = 2 * time.Second
+	}
+	if opts.MaxMessageCount == 0 {
+		opts.MaxMessageCount = 500
+	}
+	if opts.AbsoluteMaxBytes == 0 {
+		opts.AbsoluteMaxBytes = 10 * MB
+	}
+	if opts.PreferredMaxBytes == 0 {
+		opts.PreferredMaxBytes = 2 * MB
+	}
+	if opts.SnapshotIntervalSize == 0 {
+		opts.SnapshotIntervalSize = 19
+	}
+	if opts.MaxInflightBlocks == 0 {
+		opts.MaxInflightBlocks = 5
+	}
+	if opts.HeartbeatTick == 0 {
+		opts.HeartbeatTick = 1
+	}
+	if opts.ElectionTick == 0 {
+		opts.ElectionTick = 10
+	}
+	if opts.SnapshotIntervalSize == 0 {
+		opts.SnapshotIntervalSize = 19
+	}
+	if opts.TickInterval == "" {
+		opts.TickInterval = "500ms"
+	}
+}
+func GetProfileConfig(
+	ordOrgs []OrdererOrganization,
+	config GenesisConfig,
+) (*genesisconfig.Profile, error) {
+	fillWithDefaultOps(&config)
 	organizations := []*genesisconfig.Organization{}
 	ordererOrganizations := []*genesisconfig.Organization{}
 	consenters := []*etcdraft.Consenter{}
@@ -356,10 +445,11 @@ NodeOUs:
 		})
 	}
 	profileConfig := &genesisconfig.Profile{
-		Consortium: consortiumDefault,
 		Application: &genesisconfig.Application{
 			Organizations: organizations,
-			Capabilities:  ordererCapabilities(),
+			Capabilities: map[string]bool{
+				"V2_0": config.ApplicationCapabilities.V2_0,
+			},
 			Policies: map[string]*genesisconfig.Policy{
 				"Admins": {
 					Type: "ImplicitMeta",
@@ -389,19 +479,19 @@ NodeOUs:
 			EtcdRaft: &etcdraft.ConfigMetadata{
 				Consenters: consenters,
 				Options: &etcdraft.Options{
-					SnapshotIntervalSize: 19,
-					TickInterval:         "500ms",
-					ElectionTick:         10,
-					HeartbeatTick:        1,
-					MaxInflightBlocks:    5,
+					SnapshotIntervalSize: uint32(config.SnapshotIntervalSize),
+					TickInterval:         config.TickInterval,
+					ElectionTick:         uint32(config.ElectionTick),
+					HeartbeatTick:        uint32(config.HeartbeatTick),
+					MaxInflightBlocks:    uint32(config.MaxInflightBlocks),
 				},
 			},
 			Addresses:    ordererAddresses,
-			BatchTimeout: 2 * time.Second,
+			BatchTimeout: config.BatchTimeout,
 			BatchSize: genesisconfig.BatchSize{
-				MaxMessageCount:   500,
-				AbsoluteMaxBytes:  10 * 1024 * 1024,
-				PreferredMaxBytes: 2 * 1024 * 1024,
+				MaxMessageCount:   uint32(config.MaxMessageCount),
+				AbsoluteMaxBytes:  uint32(config.AbsoluteMaxBytes),
+				PreferredMaxBytes: uint32(config.PreferredMaxBytes),
 			},
 			Organizations: ordererOrganizations,
 			Policies: map[string]*genesisconfig.Policy{
@@ -422,14 +512,14 @@ NodeOUs:
 					Rule: "ANY Writers",
 				},
 			},
-			Capabilities: ordererCapabilities(),
-		},
-		Consortiums: map[string]*genesisconfig.Consortium{
-			consortiumDefault: {
-				Organizations: organizations,
+			Capabilities: map[string]bool{
+				"V2_0": config.OrdererCapabilities.V2_0,
 			},
 		},
-		Capabilities: ordererCapabilities(),
+		Consortiums: map[string]*genesisconfig.Consortium{},
+		Capabilities: map[string]bool{
+			"V2_0": config.ChannelCapabilities.V2_0,
+		},
 		Policies: map[string]*genesisconfig.Policy{
 			"Admins": {
 				Type: "ImplicitMeta",
@@ -478,7 +568,12 @@ func GetConfigEnvelopeBytes(configUpdate *cb.ConfigUpdate) ([]byte, error) {
 	return proto.Marshal(configEnvelope)
 }
 
-func GetChannelProfileConfig(ordService OrdererOrganization, members []PeerOrganization) (*genesisconfig.Profile, error) {
+func GetChannelProfileConfig(
+	ordService OrdererOrganization,
+	members []PeerOrganization,
+	consortiumName string,
+	adminPolicy string,
+) (*genesisconfig.Profile, error) {
 	var organizations []*genesisconfig.Organization
 
 	var ordererOrganizations []*genesisconfig.Organization
@@ -530,9 +625,10 @@ func GetChannelProfileConfig(ordService OrdererOrganization, members []PeerOrgan
 	if err != nil {
 		return nil, err
 	}
-	orgAdmin := members[0]
-	serverRootTlsCertPem := []byte(orgAdmin.RootCert)
-	err = ioutil.WriteFile(path.Join(caCertsPath, "cacert.pem"), serverRootTlsCertPem, os.ModePerm)
+
+	serverRootCertPem := []byte(ordService.RootSignCert)
+	serverRootTlsCertPem := []byte(ordService.RootTLSCert)
+	err = ioutil.WriteFile(path.Join(caCertsPath, "cacert.pem"), serverRootCertPem, os.ModePerm)
 	if err != nil {
 		return nil, err
 	}
@@ -592,14 +688,14 @@ NodeOUs:
 		organizations = append(organizations, peerOrg)
 	}
 	profileConfig := &genesisconfig.Profile{
-		Consortium: consortiumDefault,
+		Consortium: consortiumName,
 		Application: &genesisconfig.Application{
 			Organizations: organizations,
 			Capabilities:  ordererCapabilities(),
 			Policies: map[string]*genesisconfig.Policy{
 				"Admins": {
 					Type: "Signature",
-					Rule: fmt.Sprintf("OR('%s.admin')", orgAdmin.MspID),
+					Rule: adminPolicy,
 				},
 				"Endorsement": {
 					Type: "ImplicitMeta",

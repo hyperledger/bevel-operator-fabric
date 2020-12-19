@@ -9,7 +9,7 @@ spec:
     istio: ingressgateway # use istio default ingress gateway
   servers:
     - port:
-        number: 443
+        number: {{.Values.istio.port}}
         name: tcp
         protocol: TLS
       tls:
