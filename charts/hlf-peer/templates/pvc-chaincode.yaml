@@ -1,25 +1,25 @@
-{{- if and .Values.persistence.enabled (not .Values.persistence.existingClaim) .Values.externalChaincodeBuilder }}
+{{- if and .Values.persistence.chaincode.enabled (not .Values.persistence.chaincode.existingClaim) .Values.externalChaincodeBuilder }}
 kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
   name: {{ include "hlf-peer.fullname" . }}--chaincode
   labels:
 {{ include "labels.standard" . | indent 4 }}
-{{- if .Values.persistence.annotations }}
+{{- if .Values.persistence.chaincode.annotations }}
   annotations:
-{{ toYaml .Values.persistence.annotations | indent 4 }}
+{{ toYaml .Values.persistence.chaincode.annotations | indent 4 }}
 {{- end }}
 spec:
   accessModes:
-    - {{ .Values.persistence.accessMode | quote }}
+    - {{ .Values.persistence.chaincode.accessMode | quote }}
   resources:
     requests:
-      storage: {{ .Values.persistence.size | quote }}
-  {{- if .Values.persistence.storageClass }}
-  {{- if (eq "-" .Values.persistence.storageClass) }}
+      storage: {{ .Values.persistence.chaincode.size | quote }}
+  {{- if .Values.persistence.chaincode.storageClass }}
+  {{- if (eq "-" .Values.persistence.chaincode.storageClass) }}
   storageClassName: ""
   {{- else }}
-  storageClassName: "{{ .Values.persistence.storageClass }}"
+  storageClassName: "{{ .Values.persistence.chaincode.storageClass }}"
   {{- end }}
   {{- end }}
 {{- end }}

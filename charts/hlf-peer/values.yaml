@@ -7,6 +7,8 @@ image:
   tag: amd64-2.2.0
   pullPolicy: IfNotPresent
 
+istio:
+  port: 443
 
 dockerSocketPath: /var/run/docker.sock
 
@@ -166,11 +168,24 @@ service:
   portOperations: 9443
 
 persistence:
-  enabled: true
-  annotations: {}
-  storageClass:
-  accessMode: ReadWriteOnce
-  size: 1Gi
+  peer:
+    enabled: true
+    annotations: {}
+    storageClass:
+    accessMode: ReadWriteOnce
+    size: 1Gi
+  couchdb:
+    enabled: true
+    annotations: {}
+    storageClass:
+    accessMode: ReadWriteOnce
+    size: 1Gi
+  chaincode:
+    enabled: true
+    annotations: {}
+    storageClass:
+    accessMode: ReadWriteOnce
+    size: 1Gi
 logging:
   level: debug
   peer: debug
