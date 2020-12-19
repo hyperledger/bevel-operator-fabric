@@ -57,8 +57,12 @@ helm install hlf-operator ./chart/hlf-operator
 
 ### Installing the Kubectl HLF Plugin
 
+
 ```bash
-kubectl krew install hlf
+# when kubectl-hlf is in the krew-index
+kubectl krew install hlf 
+# now
+kubectl krew install --manifest=krew-plugin.yaml
 ```
 
 ## Deploy a Peer Organization
