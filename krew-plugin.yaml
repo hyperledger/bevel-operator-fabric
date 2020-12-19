@@ -3,7 +3,7 @@ kind: Plugin
 metadata:
   name: hlf
 spec:
-  version: "v0.0.1"
+  version: "v1.0.0"
   homepage: https://github.com/kfsoftware/hlf-operator
   shortDescription: "Deploy and manage Hyperledger Fabric Peers, Orderers and Certificate authorities"
   description: |
@@ -18,20 +18,20 @@ spec:
         matchLabels:
           os: darwin
           arch: amd64
-      uri: https://github.com/kfsoftware/hlf-operator/releases/download/v3.0.29/kubectl-hlf_darwin_amd64.zip
-      sha256: 490b6edbe4e32c3b18e7014d2f9416f4ffec296d5fb3b138db3320926fd0c98d
+      uri: https://github.com/kfsoftware/hlf-operator/releases/download/v1.0.0/kubectl-hlf_darwin_amd64.zip
+      sha256: 36408ad477cff232fcae827c655c826ff88786a83a17941c56d69de6407d1f38
       bin: kubectl-hlf
     - selector:
         matchLabels:
           os: linux
           arch: amd64
-      uri: https://github.com/kfsoftware/hlf-operator/releases/download/v3.0.29/kubectl-hlf_linux_amd64.zip
-      sha256: efa9d6d91f2f746758ca700c070bf0e6ae390337a843a1e39c578ff2ead51653
+      uri: https://github.com/kfsoftware/hlf-operator/releases/download/v1.0.0/kubectl-hlf_linux_amd64.zip
+      sha256: 07c017bbabf0d291caafb265376f2d8fb60ccbdcef96ee45dfb64c7a5d420d3c
       bin: kubectl-hlf
     - selector:
         matchLabels:
           os: windows
           arch: amd64
-      uri: https://github.com/kfsoftware/hlf-operator/releases/download/v3.0.29/kubectl-hlf_windows_amd64.zip
-      sha256: 0eec546d4c91e2dbe3cf6bd8b0def41a98dfebbe413bbbd8d0597cdc9844c106
+      uri: https://github.com/kfsoftware/hlf-operator/releases/download/v1.0.0/kubectl-hlf_windows_amd64.zip
+      sha256: 572e9a58c60faa31e67eb596980d61fe3566da49ab14bbbde35bf38f31a3aa45
       bin: kubectl-hlf.exe
