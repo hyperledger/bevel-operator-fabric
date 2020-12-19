@@ -4,32 +4,37 @@ type RBAC struct {
 	Ns string `json:"ns"`
 }
 type FabricPeerChart struct {
-	ExternalChaincodeBuilder bool          `json:"externalChaincodeBuilder"`
-	CouchdbUsername          string        `json:"couchdbUsername"`
-	CouchdbPassword          string        `json:"couchdbPassword"`
-	Image                    Image         `json:"image"`
-	Rbac                     RBAC          `json:"rbac"`
-	DockerSocketPath         string        `json:"dockerSocketPath"`
-	Ingress                  Ingress       `json:"ingress"`
-	Peer                     Peer          `json:"peer"`
-	Cert                     string        `json:"cert"`
-	Key                      string        `json:"key"`
-	Hosts                    []string      `json:"hosts"`
-	OperationHosts           []string      `json:"operationHosts"`
-	TLS                      TLS           `json:"tls"`
-	OPSTLS                   TLS           `json:"opsTLS"`
-	Cacert                   string        `json:"cacert"`
-	Tlsrootcert              string        `json:"tlsrootcert"`
-	Resources                Resources     `json:"resources,omitempty"`
-	NodeSelector             NodeSelector  `json:"nodeSelector,omitempty"`
-	Tolerations              []interface{} `json:"tolerations"`
-	Affinity                 Affinity      `json:"affinity,omitempty"`
-	ExternalHost             string        `json:"externalHost"`
-	FullnameOverride         string        `json:"fullnameOverride"`
-	HostAliases              []HostAliases `json:"hostAliases"`
-	Service                  Service       `json:"service"`
-	Persistence              Persistence   `json:"persistence"`
-	Logging                  Logging       `json:"logging"`
+	ExternalChaincodeBuilder bool            `json:"externalChaincodeBuilder"`
+	CouchdbUsername          string          `json:"couchdbUsername"`
+	CouchdbPassword          string          `json:"couchdbPassword"`
+	Image                    Image           `json:"image"`
+	Rbac                     RBAC            `json:"rbac"`
+	DockerSocketPath         string          `json:"dockerSocketPath"`
+	Ingress                  Ingress         `json:"ingress"`
+	Peer                     Peer            `json:"peer"`
+	Cert                     string          `json:"cert"`
+	Key                      string          `json:"key"`
+	Hosts                    []string        `json:"hosts"`
+	OperationHosts           []string        `json:"operationHosts"`
+	TLS                      TLS             `json:"tls"`
+	OPSTLS                   TLS             `json:"opsTLS"`
+	Cacert                   string          `json:"cacert"`
+	Tlsrootcert              string          `json:"tlsrootcert"`
+	Resources                Resources       `json:"resources,omitempty"`
+	NodeSelector             NodeSelector    `json:"nodeSelector,omitempty"`
+	Tolerations              []interface{}   `json:"tolerations"`
+	Affinity                 Affinity        `json:"affinity,omitempty"`
+	ExternalHost             string          `json:"externalHost"`
+	FullnameOverride         string          `json:"fullnameOverride"`
+	HostAliases              []HostAliases   `json:"hostAliases"`
+	Service                  Service         `json:"service"`
+	Persistence              PeerPersistence `json:"persistence"`
+	Logging                  Logging         `json:"logging"`
+}
+type PeerPersistence struct {
+	Peer      Persistence `json:"peer"`
+	CouchDB   Persistence `json:"couchdb"`
+	Chaincode Persistence `json:"chaincode"`
 }
 type Image struct {
 	Repository string `json:"repository"`
@@ -49,14 +54,14 @@ type Gossip struct {
 	Bootstrap         string `json:"bootstrap"`
 	Endpoint          string `json:"endpoint"`
 	ExternalEndpoint  string `json:"externalEndpoint"`
-	OrgLeader         string `json:"orgLeader"`
-	UseLeaderElection string `json:"useLeaderElection"`
+	OrgLeader         bool   `json:"orgLeader"`
+	UseLeaderElection bool   `json:"useLeaderElection"`
 }
 type Server struct {
-	Enabled string `json:"enabled"`
+	Enabled bool `json:"enabled"`
 }
 type Client struct {
-	Enabled string `json:"enabled"`
+	Enabled bool `json:"enabled"`
 }
 type TLSAuth struct {
 	Server Server `json:"server"`

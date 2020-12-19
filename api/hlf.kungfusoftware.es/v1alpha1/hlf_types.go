@@ -17,6 +17,7 @@ limitations under the License.
 package v1alpha1
 
 import (
+	"fmt"
 	"github.com/operator-framework/operator-lib/status"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -51,18 +52,66 @@ type FabricPeerSpec struct {
 	// +kubebuilder:default:="/var/run/docker.sock"
 	DockerSocketPath string `json:"dockerSocketPath"`
 	// +kubebuilder:validation:MinLength=1
-	Image string `json:"image"`
+	Image            string               `json:"image"`
+	Istio            FabricPeerIstio      `json:"istio"`
+	Gossip           FabricPeerSpecGossip `json:"gossip"`
+	ExternalEndpoint string               `json:"externalEndpoint"`
 	// +kubebuilder:validation:MinLength=1
-	Tag                      string `json:"tag"`
-	ExternalChaincodeBuilder bool   `json:"external_chaincode_builder"`
+	Tag                      string            `json:"tag"`
+	ExternalChaincodeBuilder bool              `json:"external_chaincode_builder"`
+	CouchDB                  FabricPeerCouchDB `json:"couchdb"`
 	// +kubebuilder:validation:MinLength=3
-	MspID          string      `json:"mspID"`
-	Secret         Secret      `json:"secret"`
-	Service        PeerService `json:"service"`
-	StateDb        StateDB     `json:"stateDb"`
-	Hosts          []string    `json:"hosts"`
-	OperationHosts []string    `json:"operationHosts"`
-	OperationIPs   []string    `json:"operationIPs"`
+	MspID          string              `json:"mspID"`
+	Secret         Secret              `json:"secret"`
+	Service        PeerService         `json:"service"`
+	StateDb        StateDB             `json:"stateDb"`
+	Storage        FabricPeerStorage   `json:"storage"`
+	Discovery      FabricPeerDiscovery `json:"discovery"`
+	Logging        FabricPeerLogging   `json:"logging"`
+	Resources      FabricPeerResources `json:"resources"`
+	Hosts          []string            `json:"hosts"`
+	OperationHosts []string            `json:"operationHosts"`
+	OperationIPs   []string            `json:"operationIPs"`
+}
+type FabricPeerResources struct {
+	Peer      Resources `json:"peer"`
+	CouchDB   Resources `json:"couchdb"`
+	Chaincode Resources `json:"chaincode"`
+}
+type FabricPeerDiscovery struct {
+	Period      string `json:"period"`
+	TouchPeriod string `json:"touchPeriod"`
+}
+type FabricPeerLogging struct {
+	Level    string `json:"level"`
+	Peer     string `json:"peer"`
+	Cauthdsl string `json:"cauthdsl"`
+	Gossip   string `json:"gossip"`
+	Grpc     string `json:"grpc"`
+	Ledger   string `json:"ledger"`
+	Msp      string `json:"msp"`
+	Policies string `json:"policies"`
+}
+type FabricPeerStorage struct {
+	CouchDB   Storage `json:"couchdb"`
+	Peer      Storage `json:"peer"`
+	Chaincode Storage `json:"chaincode"`
+}
+type FabricPeerCouchDB struct {
+	User     string `json:"user"`
+	Password string `json:"password"`
+}
+
+type FabricPeerIstio struct {
+	Port int `json:"port"`
+}
+
+type FabricPeerSpecGossip struct {
+	ExternalEndpoint  string `json:"externalEndpoint"`
+	Bootstrap         string `json:"bootstrap"`
+	Endpoint          string `json:"endpoint"`
+	UseLeaderElection bool   `json:"useLeaderElection"`
+	OrgLeader         bool   `json:"orgLeader"`
 }
 type Catls struct {
 	Cacert string `json:"cacert"`
@@ -79,6 +128,11 @@ type Component struct {
 	// +kubebuilder:validation:MinLength=1
 	Enrollsecret string `json:"enrollsecret"`
 }
+
+func (c *Component) CAUrl() string {
+	return fmt.Sprintf("https://%s:%d", c.Cahost, c.Caport)
+}
+
 type Csr struct {
 	// +optional
 	Hosts []string `json:"hosts"`
@@ -128,10 +182,7 @@ type Service struct {
 }
 
 type PeerService struct {
-	Type               string `json:"type"`
-	NodePortOperations int    `json:"nodePortOperations,omitempty"`
-	NodePortEvent      int    `json:"nodePortEvent,omitempty"`
-	NodePortRequest    int    `json:"nodePortRequest,omitempty"`
+	Type string `json:"type"`
 }
 
 // FabricPeerStatus defines the observed state of FabricPeer
@@ -194,7 +245,31 @@ type FabricOrdererNodeSpec struct {
 
 type OrdererSystemChannel struct {
 	// +kubebuilder:validation:MinLength=3
-	Name string `json:"name"`
+	Name   string        `json:"name"`
+	Config ChannelConfig `json:"config"`
+}
+type OrdererCapabilities struct {
+	V2_0 bool `json:"V2_0"`
+}
+type ApplicationCapabilities struct {
+	V2_0 bool `json:"V2_0"`
+}
+type ChannelCapabilities struct {
+	V2_0 bool `json:"V2_0"`
+}
+type ChannelConfig struct {
+	BatchTimeout            string                  `json:"batchTimeout"`
+	MaxMessageCount         int                     `json:"maxMessageCount"`
+	AbsoluteMaxBytes        int                     `json:"absoluteMaxBytes"`
+	PreferredMaxBytes       int                     `json:"preferredMaxBytes"`
+	OrdererCapabilities     OrdererCapabilities     `json:"ordererCapabilities"`
+	ApplicationCapabilities ApplicationCapabilities `json:"applicationCapabilities"`
+	ChannelCapabilities     ChannelCapabilities     `json:"channelCapabilities"`
+	SnapshotIntervalSize    int                     `json:"snapshotIntervalSize"`
+	TickInterval            string                  `json:"tickInterval"`
+	ElectionTick            int                     `json:"electionTick"`
+	HeartbeatTick           int                     `json:"heartbeatTick"`
+	MaxInflightBlocks       int                     `json:"maxInflightBlocks"`
 }
 
 // FabricOrderingServiceStatus defines the observed state of FabricOrderingService
@@ -209,9 +284,9 @@ type FabricOrdererNodeStatus struct {
 	Status     DeploymentStatus  `json:"status"`
 	URL        string            `json:"url"`
 	// +optional
-	Host       string            `json:"host"`
+	Host string `json:"host"`
 	// +optional
-	Port       int               `json:"port"`
+	Port int `json:"port"`
 }
 
 type Cors struct {
@@ -451,8 +526,6 @@ type FabricCAStatus struct {
 	TlsCert   string `json:"tls_cert"`
 	CACert    string `json:"ca_cert"`
 	TLSCACert string `json:"tlsca_cert"`
-	CAName    string `json:"ca_name"`
-	TLSCAName string `json:"tlsCAName"`
 }
 
 // +kubebuilder:object:root=true
@@ -473,6 +546,10 @@ type FabricPeer struct {
 
 	Spec   FabricPeerSpec   `json:"spec,omitempty"`
 	Status FabricPeerStatus `json:"status,omitempty"`
+}
+
+func (p *FabricPeer) FullName() string {
+	return fmt.Sprintf("%s.%s", p.Name, p.Namespace)
 }
 
 // +kubebuilder:object:root=true
@@ -503,6 +580,10 @@ type FabricOrderingService struct {
 	Status FabricOrderingServiceStatus `json:"status,omitempty"`
 }
 
+func (s *FabricOrderingService) FullName() string {
+	return fmt.Sprintf("%s.%s", s.Name, s.Namespace)
+}
+
 // +kubebuilder:object:root=true
 
 // FabricOrderingServiceList contains a list of FabricOrderingService
@@ -529,6 +610,10 @@ type FabricOrdererNode struct {
 
 	Spec   FabricOrdererNodeSpec   `json:"spec,omitempty"`
 	Status FabricOrdererNodeStatus `json:"status,omitempty"`
+}
+
+func (n *FabricOrdererNode) FullName() string {
+	return fmt.Sprintf("%s.%s", n.Name, n.Namespace)
 }
 
 // +kubebuilder:object:root=true

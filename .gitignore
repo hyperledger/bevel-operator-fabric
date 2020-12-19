@@ -25,4 +25,8 @@ bin
 
 crypto-config
 keystore
-miscertificados
+
+kubectl-hlf/kubectl-hlf
+*.minisig
+*.zip
+dist/

@@ -1,0 +1,72 @@
+# This is an example goreleaser.yaml file with some sane defaults.
+# Make sure to check the documentation at http://goreleaser.com
+project_name: hlf-operator
+
+release:
+  name_template: "Version {{.Version}}"
+  github:
+    owner: kfsoftware
+    name: hlf-operator
+  extra_files:
+    - glob: "*.minisig"
+    - glob: "*.zip"
+
+before:
+  hooks:
+    - go mod tidy
+    - go mod download
+
+builds:
+  -
+    goos:
+      - linux
+    goarch:
+      - amd64
+    env:
+      - CGO_ENABLED=0
+    ldflags:
+      - -s -w -X main.version={{.Tag}}
+    flags:
+      - -trimpath
+    hooks:
+      post: ./package.sh {{ .Path }}
+  -
+    id: kubectl-hlf
+    dir: kubectl-hlf
+    binary: kubectl-hlf
+    goos:
+      - linux
+      - darwin
+      - windows
+      - freebsd
+    goarch:
+      - amd64
+    env:
+      - CGO_ENABLED=0
+    ldflags:
+      - -s -w -X main.version={{.Tag}}
+    flags:
+      - -trimpath
+    hooks:
+      post: ./package.sh {{ .Path }}
+
+archives:
+  -
+    format: binary
+    allow_different_binary_count: true
+
+dockers:
+  -
+    # GOOS of the built binary that should be used.
+    goos: linux
+    # GOARCH of the built binary that should be used.
+    goarch: amd64
+    dockerfile: Dockerfile
+    image_templates:
+      - "quay.io/kfsoftware/hlf-operator:{{ .Tag }}"
+      - "quay.io/kfsoftware/hlf-operator:latest"
+    extra_files:
+      - charts
+      - LICENSE
+      - README.md
+      - CREDITS

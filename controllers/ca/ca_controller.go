@@ -459,14 +459,14 @@ func GetConfig(conf *hlfv1alpha1.FabricCA, client *kubernetes.Clientset, chartNa
 	return &c, nil
 }
 
-type CAStatus struct {
-	URL     string
-	Port    int
-	Host    string
-	Status  hlfv1alpha1.DeploymentStatus
-	TlsCert string
-	CAName  string
-	CACert  string
+type Status struct {
+	URL       string
+	Port      int
+	Host      string
+	Status    hlfv1alpha1.DeploymentStatus
+	TlsCert   string
+	CACert    string
+	TLSCACert string
 }
 
 func GetServiceName(releaseName string) string {
@@ -475,13 +475,13 @@ func GetServiceName(releaseName string) string {
 func GetDeploymentName(releaseName string) string {
 	return releaseName
 }
-func GetCAState(clientSet *kubernetes.Clientset, releaseName string, ns string) (*CAStatus, error) {
+func GetCAState(clientSet *kubernetes.Clientset, releaseName string, ns string) (*Status, error) {
 	ctx := context.Background()
 	k8sIP, err := utils.GetPublicIPKubernetes(clientSet)
 	if err != nil {
 		return nil, err
 	}
-	r := &CAStatus{
+	r := &Status{
 		Status: hlfv1alpha1.PendingStatus,
 	}
 	depName := GetDeploymentName(releaseName)
@@ -538,7 +538,11 @@ func GetCAState(clientSet *kubernetes.Clientset, releaseName string, ns string) 
 		return nil, err
 	}
 	r.CACert = string(utils.EncodeX509Certificate(signCrt))
-	r.CAName = "ca"
+	tlsCACrt, _, err := getExistingSignTLSCrypto(clientSet, releaseName, ns)
+	if err != nil {
+		return nil, err
+	}
+	r.TLSCACert = string(utils.EncodeX509Certificate(tlsCACrt))
 	return r, nil
 }
 
@@ -655,8 +659,8 @@ func Reconcile(
 		fca.Status.Status = s.Status
 		fca.Status.URL = s.URL
 		fca.Status.TlsCert = s.TlsCert
+		fca.Status.TLSCACert = s.TLSCACert
 		fca.Status.CACert = s.CACert
-		fca.Status.CAName = s.CAName
 		fca.Status.Host = s.Host
 		fca.Status.Port = s.Port
 		fca.Status.Conditions.SetCondition(status.Condition{
