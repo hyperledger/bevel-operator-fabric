@@ -6,21 +6,13 @@ metadata:
 {{ include "labels.standard" . | indent 4 }}
 data:
   CORE_PEER_ID: {{ .Release.Name }}
-  CORE_PEER_NETWORKID: nid1
+  CORE_PEER_NETWORKID: {{ .Release.Name }}-nid
   CORE_PEER_ADDRESSAUTODETECT: "true"
   # If we have an ingress, we set hostname to it
-  {{- if and .Values.ingress.enabled .Values.externalHost }}
-  CORE_PEER_ADDRESS: {{ index .Values.externalHost 0 }}:443
+  CORE_PEER_ADDRESS: {{ .Values.externalHost }}
   CORE_PEER_GOSSIP_EXTERNALENDPOINT: {{ .Values.peer.gossip.externalEndpoint | quote }}
   CORE_PEER_GOSSIP_BOOTSTRAP: {{ .Values.peer.gossip.bootstrap | quote }}
   CORE_PEER_GOSSIP_ENDPOINT: {{ .Values.peer.gossip.endpoint | quote }}
-  {{- else }}
-  # TODO: change to parameter in values.yaml
-  # Otherwise we use CORE_PEER_ADDRESSAUTODETECT to auto-detect its address
-  CORE_PEER_ADDRESS: {{.Values.externalHost}}
-  CORE_PEER_GOSSIP_EXTERNALENDPOINT: {{.Values.externalHost}}
-  CORE_PEER_GOSSIP_BOOTSTRAP: {{.Values.externalHost}}
-  {{- end }}
   CORE_PEER_LISTENADDRESS: 0.0.0.0:7051
   CORE_PEER_CHAINCODELISTENADDRESS: 0.0.0.0:7052
   CORE_PEER_EVENTS_ADDRESS: 0.0.0.0:7053
@@ -86,6 +78,5 @@ data:
   {{- end }}
   PEER_CFG_PATH: /var/hyperledger/config
   FABRIC_CFG_PATH: /var/hyperledger/fabric_cfg
-  GODEBUG: "netdns=go"
   ADMIN_MSP_PATH: /var/hyperledger/admin_msp
   ORD_TLS_PATH: /var/hyperledger/tls/ord/cert

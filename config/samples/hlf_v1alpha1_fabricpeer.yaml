@@ -1,71 +1,130 @@
 apiVersion: hlf.kungfusoftware.es/v1alpha1
 kind: FabricPeer
 metadata:
-  name: fabricpeer5-sample
+  name: peer2-org1
 spec:
   dockerSocketPath: "/var/run/docker.sock"
   image: "quay.io/kfsoftware/fabric-peer"
   tag: "amd64-2.3.0"
-  hosts:
-    - "peer1.org1.example.com"
-  operationHosts: []
-  operationIPs: []
+  hosts: [ ]
+  operationHosts: [ ]
+  operationIPs: [ ]
   external_chaincode_builder: true
   mspID: Org1MSP
+  externalEndpoint: "" # if empty, k8s ip + nodeport will be used
+  istio:
+    port: 443
+  resources:
+    couchdb:
+      limits:
+        cpu: '2'
+        memory: 4096M
+      requests:
+        cpu: 10m
+        memory: 10M
+    peer:
+      limits:
+        cpu: "2"
+        memory: 4096M
+      requests:
+        cpu: 10m
+        memory: 10M
+    chaincode:
+      limits:
+        cpu: "2"
+        memory: 2Gi
+      requests:
+        cpu: 100m
+        memory: 100Mi
+  couchdb:
+    user: "couchdb"
+    password: "couchdb"
+  gossip:
+    externalEndpoint: "" # if empty, k8s ip + nodeport will be used
+    endpoint: "" # if empty, k8s ip + nodeport will be used
+    bootstrap: ""
+    orgLeader: false
+    useLeaderElection: true
+  discovery:
+    period: "60s"
+    touchPeriod: "60s"
+  logging:
+    level: info
+    peer: info
+    cauthdsl: warning
+    gossip: info
+    grpc: error
+    ledger: info
+    msp: info
+    policies: warning
+  storage:
+    couchdb:
+      accessMode: ReadWriteOnce
+      storageClass: ""
+      size: "10Gi"
+    peer:
+      accessMode: ReadWriteOnce
+      size: "30Gi"
+      storageClass: ""
+    chaincode:
+      accessMode: ReadWriteOnce
+      size: 2Gi
+      storageClass: ""
   secret:
     enrollment:
       component:
         cahost: 172.24.0.2
         caname: ca
-        caport: 30443
+        caport: 32330
         catls:
           cacert: |-
-            LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUNaRENDQWdxZ0F3SUJBZ0lSQU5FSW54KzQv
-            TTNIRm1rRS9mL3djdDR3Q2dZSUtvWkl6ajBFQXdJd1hURUwKTUFrR0ExVUVCaE1DUlZNeEVUQVBC
+            LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUNZekNDQWdxZ0F3SUJBZ0lSQVBORVgvNm5H
+            R2c4S0ViL1h1dEF6bzR3Q2dZSUtvWkl6ajBFQXdJd1hURUwKTUFrR0ExVUVCaE1DUlZNeEVUQVBC
             Z05WQkFjVENFRnNhV05oYm5SbE1SRXdEd1lEVlFRSkV3aEJiR2xqWVc1MApaVEVaTUJjR0ExVUVD
-            aE1RUzNWdVp5QkdkU0JUYjJaMGQyRnlaVEVOTUFzR0ExVUVDeE1FVkdWamFEQWVGdzB5Ck1ERXhN
-            amd4T0RNNE1EWmFGdzB6TURFeE1qa3hPRE00TURaYU1GMHhDekFKQmdOVkJBWVRBa1ZUTVJFd0R3
+            aE1RUzNWdVp5QkdkU0JUYjJaMGQyRnlaVEVOTUFzR0ExVUVDeE1FVkdWamFEQWVGdzB5Ck1ERXlN
+            REV5TWpJeU1UUmFGdzB6TURFeU1ESXlNakl5TVRSYU1GMHhDekFKQmdOVkJBWVRBa1ZUTVJFd0R3
             WUQKVlFRSEV3aEJiR2xqWVc1MFpURVJNQThHQTFVRUNSTUlRV3hwWTJGdWRHVXhHVEFYQmdOVkJB
             b1RFRXQxYm1jZwpSblVnVTI5bWRIZGhjbVV4RFRBTEJnTlZCQXNUQkZSbFkyZ3dXVEFUQmdjcWhr
-            ak9QUUlCQmdncWhrak9QUU1CCkJ3TkNBQVNxNWlEWUloQk9PVjg4VStjdG9md0xnQkQ3TnJqRW9W
-            VUJVZWplL0tpcDRBSlp6M1BtQXQxNzFDUDkKRHptU3ErWHlHQVpVWnA0VjBwVGdYWTltYmE3cG80
+            ak9QUUlCQmdncWhrak9QUU1CCkJ3TkNBQVRkTWl6UENsRURBZlZCR1ZjQjRkMHMvZ3U2NEtFVDly
+            OE9DWDFMZ2lCNVpQMjZXbDREeTkwTHpkR1kKUDU5T3YvT0xDekJxSmJ0RVE2d2swSWJ3SDF0VW80
             R3FNSUduTUE0R0ExVWREd0VCL3dRRUF3SUJwakFkQmdOVgpIU1VFRmpBVUJnZ3JCZ0VGQlFjREFn
-            WUlLd1lCQlFVSEF3RXdEd1lEVlIwVEFRSC9CQVV3QXdFQi96QXBCZ05WCkhRNEVJZ1FnSUp6WEZo
-            NVRuNzUxb1JXZCtZNlB1N2c3M1pCNVBUYzExRkVvb3NaTzF4SXdPZ1lEVlIwUkJETXcKTVlJSmJH
+            WUlLd1lCQlFVSEF3RXdEd1lEVlIwVEFRSC9CQVV3QXdFQi96QXBCZ05WCkhRNEVJZ1FnalFwSDJM
+            UW1SbTZnWVlRZUpORXlNQUp4bFlwOHJFU1VVQTRYMFdjbDNjOHdPZ1lEVlIwUkJETXcKTVlJSmJH
             OWpZV3hvYjNOMGdnZHZjbWN4TFdOaGdnOXZjbWN4TFdOaExtUmxabUYxYkhTSEJIOEFBQUdIQkt3
-            WQpBQUl3Q2dZSUtvWkl6ajBFQXdJRFNBQXdSUUlnVVdsdmRrTEhsd1hRNEdNNGNySEt6cUszT3NE
-            Nk0wM0doTjdECmd4YURrN29DSVFETmxGRFRXMEc4RERVQmwrL1NVRHdiUVlXd2Ezd3REK2xWaDRy
-            emU1ZkdOdz09Ci0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0K
+            WQpBQUl3Q2dZSUtvWkl6ajBFQXdJRFJ3QXdSQUlnQ2M1NERFR3dPakZ0K09GRjI1RkxNQ1NCQ213
+            QlUrYnJrcm43ClF3ZjNxUUVDSUVacDV4K3lNaFZmY3dkTnR6K3pQQis4SGtuVnRtbENLNTNKS1NM
+            b05hUWUKLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQo=
         enrollid: peer
         enrollsecret: peerpw
       tls:
         cahost: 172.24.0.2
         caname: ca
-        caport: 30443
+        caport: 32330
         catls:
           cacert: |-
-            LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUNaRENDQWdxZ0F3SUJBZ0lSQU5FSW54KzQv
-            TTNIRm1rRS9mL3djdDR3Q2dZSUtvWkl6ajBFQXdJd1hURUwKTUFrR0ExVUVCaE1DUlZNeEVUQVBC
+            LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUNZekNDQWdxZ0F3SUJBZ0lSQVBORVgvNm5H
+            R2c4S0ViL1h1dEF6bzR3Q2dZSUtvWkl6ajBFQXdJd1hURUwKTUFrR0ExVUVCaE1DUlZNeEVUQVBC
             Z05WQkFjVENFRnNhV05oYm5SbE1SRXdEd1lEVlFRSkV3aEJiR2xqWVc1MApaVEVaTUJjR0ExVUVD
-            aE1RUzNWdVp5QkdkU0JUYjJaMGQyRnlaVEVOTUFzR0ExVUVDeE1FVkdWamFEQWVGdzB5Ck1ERXhN
-            amd4T0RNNE1EWmFGdzB6TURFeE1qa3hPRE00TURaYU1GMHhDekFKQmdOVkJBWVRBa1ZUTVJFd0R3
+            aE1RUzNWdVp5QkdkU0JUYjJaMGQyRnlaVEVOTUFzR0ExVUVDeE1FVkdWamFEQWVGdzB5Ck1ERXlN
+            REV5TWpJeU1UUmFGdzB6TURFeU1ESXlNakl5TVRSYU1GMHhDekFKQmdOVkJBWVRBa1ZUTVJFd0R3
             WUQKVlFRSEV3aEJiR2xqWVc1MFpURVJNQThHQTFVRUNSTUlRV3hwWTJGdWRHVXhHVEFYQmdOVkJB
             b1RFRXQxYm1jZwpSblVnVTI5bWRIZGhjbVV4RFRBTEJnTlZCQXNUQkZSbFkyZ3dXVEFUQmdjcWhr
-            ak9QUUlCQmdncWhrak9QUU1CCkJ3TkNBQVNxNWlEWUloQk9PVjg4VStjdG9md0xnQkQ3TnJqRW9W
-            VUJVZWplL0tpcDRBSlp6M1BtQXQxNzFDUDkKRHptU3ErWHlHQVpVWnA0VjBwVGdYWTltYmE3cG80
+            ak9QUUlCQmdncWhrak9QUU1CCkJ3TkNBQVRkTWl6UENsRURBZlZCR1ZjQjRkMHMvZ3U2NEtFVDly
+            OE9DWDFMZ2lCNVpQMjZXbDREeTkwTHpkR1kKUDU5T3YvT0xDekJxSmJ0RVE2d2swSWJ3SDF0VW80
             R3FNSUduTUE0R0ExVWREd0VCL3dRRUF3SUJwakFkQmdOVgpIU1VFRmpBVUJnZ3JCZ0VGQlFjREFn
-            WUlLd1lCQlFVSEF3RXdEd1lEVlIwVEFRSC9CQVV3QXdFQi96QXBCZ05WCkhRNEVJZ1FnSUp6WEZo
-            NVRuNzUxb1JXZCtZNlB1N2c3M1pCNVBUYzExRkVvb3NaTzF4SXdPZ1lEVlIwUkJETXcKTVlJSmJH
+            WUlLd1lCQlFVSEF3RXdEd1lEVlIwVEFRSC9CQVV3QXdFQi96QXBCZ05WCkhRNEVJZ1FnalFwSDJM
+            UW1SbTZnWVlRZUpORXlNQUp4bFlwOHJFU1VVQTRYMFdjbDNjOHdPZ1lEVlIwUkJETXcKTVlJSmJH
             OWpZV3hvYjNOMGdnZHZjbWN4TFdOaGdnOXZjbWN4TFdOaExtUmxabUYxYkhTSEJIOEFBQUdIQkt3
-            WQpBQUl3Q2dZSUtvWkl6ajBFQXdJRFNBQXdSUUlnVVdsdmRrTEhsd1hRNEdNNGNySEt6cUszT3NE
-            Nk0wM0doTjdECmd4YURrN29DSVFETmxGRFRXMEc4RERVQmwrL1NVRHdiUVlXd2Ezd3REK2xWaDRy
-            emU1ZkdOdz09Ci0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0K
+            WQpBQUl3Q2dZSUtvWkl6ajBFQXdJRFJ3QXdSQUlnQ2M1NERFR3dPakZ0K09GRjI1RkxNQ1NCQ213
+            QlUrYnJrcm43ClF3ZjNxUUVDSUVacDV4K3lNaFZmY3dkTnR6K3pQQis4SGtuVnRtbENLNTNKS1NM
+            b05hUWUKLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQo=
         csr:
-          cn: "peer0-org1"
-          hosts: []
+          cn: "peer2-org1"
+          hosts:
+            - "172.24.0.2"
         enrollid: peer
         enrollsecret: peerpw
   service:
     type: NodePort
-    nodePortRequest: 30001
   stateDb: leveldb
+

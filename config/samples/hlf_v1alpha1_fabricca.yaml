@@ -69,6 +69,7 @@ spec:
     - org1-ca
     - org1-ca.default
   image: hyperledger/fabric-ca
+  version: 1.4.9
   metrics:
     provider: prometheus
     statsd:
@@ -150,4 +151,3 @@ spec:
       OU: Tech
       ST: Alicante
       cn: tlsca
-  version: 1.4.9

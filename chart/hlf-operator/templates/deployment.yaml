@@ -38,7 +38,7 @@ spec:
             - --metrics-addr=127.0.0.1:8080
             - --enable-leader-election
           command:
-            - /manager
+            - /hlf-operator
           image: {{.Values.image.repository}}:{{.Values.image.tag}}
           imagePullPolicy: {{.Values.image.pullPolicy | default "IfNotPresent"}}
           name: manager

@@ -568,6 +568,7 @@ data:
             - EXTERNAL_BUILDER_HTTP_PROXY
             - EXTERNAL_BUILDER_HTTPS_PROXY
             - EXTERNAL_BUILDER_NO_PROXY
+            - EXTERNAL_BUILDER_PEER_URL
 {{- end }}
       # The maximum duration to wait for the chaincode build and install process
       # to complete.

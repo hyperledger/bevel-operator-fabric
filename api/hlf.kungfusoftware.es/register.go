@@ -1,6 +1,6 @@
 package operator
 
-// MinIO Operator group name.
+// HLF Operator group name.
 const (
 	GroupName = "hlf.kungfusoftware.es"
 )
