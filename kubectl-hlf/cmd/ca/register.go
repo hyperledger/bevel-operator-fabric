@@ -15,7 +15,6 @@ type RegisterOptions struct {
 	Type         string
 	MspID        string
 	EnrollID     string
-	c            string
 	EnrollSecret string
 }
 

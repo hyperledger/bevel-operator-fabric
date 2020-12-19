@@ -10,6 +10,7 @@ import (
 	"github.com/hyperledger/fabric-sdk-go/pkg/fab/resource/genesisconfig"
 	"github.com/kfsoftware/hlf-operator/internal/github.com/hyperledger/fabric/common/channelconfig"
 	"github.com/kfsoftware/hlf-operator/internal/github.com/hyperledger/fabric/sdkinternal/configtxgen/encoder"
+
 	genesisconfig2 "github.com/kfsoftware/hlf-operator/internal/github.com/hyperledger/fabric/sdkinternal/configtxgen/genesisconfig"
 	"io/ioutil"
 	"log"
@@ -217,33 +218,6 @@ NodeOUs:
 		SkipAsForeign: false,
 	}
 	return genesisOrg, nil
-}
-func GetUpdatedConfig(channelConfig *cb.Config, peerOrgs []PeerOrganization, consortiumName string) (*cb.Config, error) {
-	modifiedConfig := &cb.Config{}
-	modifiedConfigBytes, err := proto.Marshal(channelConfig)
-	if err != nil {
-		return nil, err
-	}
-	err = proto.Unmarshal(modifiedConfigBytes, modifiedConfig)
-	if err != nil {
-		return nil, err
-	}
-
-	consortiumGroups := map[string]*cb.ConfigGroup{}
-	for _, member := range peerOrgs {
-		mspID := member.MspID
-		peerOrg, err := memberToOrgUpdate(member)
-		if err != nil {
-			return nil, err
-		}
-		configGroup, err := encoder.NewConsortiumOrgGroup(peerOrg)
-		if err != nil {
-			return nil, err
-		}
-		consortiumGroups[mspID] = configGroup
-	}
-	modifiedConfig.ChannelGroup.Groups[channelconfig.ConsortiumsGroupKey].Groups[consortiumName].Groups = consortiumGroups
-	return modifiedConfig, nil
 }
 
 type AddConsortiumRequest struct {

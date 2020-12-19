@@ -1,9 +1,9 @@
 #!/bin/bash
 
 binary=$(basename "$(dirname "${1}")")
-minisign -s "/media/${USER}/kfsoftware/minisign.key" \
+minisign -s "/home/${USER}/.minisign/minisign.key" \
          -x "${binary}.minisig" \
-         -Sm "${1}" < "/media/${USER}/kfsoftware/minisign-passphrase"
+         -Sm "${1}" < "/home/${USER}/.minisign/minisign-passphrase"
 
 cp -f "${binary}.minisig" "${1}.minisig"
 cp -f LICENSE "$(dirname "${1}")"

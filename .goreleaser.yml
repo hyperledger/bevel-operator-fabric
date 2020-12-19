@@ -53,6 +53,7 @@ builds:
 archives:
   -
     format: binary
+    allow_different_binary_count: true
 
 dockers:
   -
@@ -62,9 +63,10 @@ dockers:
     goarch: amd64
     dockerfile: Dockerfile
     image_templates:
-      - "kfsoftware/hlf-operator:{{ .Tag }}"
-      - "kfsoftware/hlf-operator:latest"
+      - "quay.io/kfsoftware/hlf-operator:{{ .Tag }}"
+      - "quay.io/kfsoftware/hlf-operator:latest"
     extra_files:
+      - charts
       - LICENSE
       - README.md
       - CREDITS

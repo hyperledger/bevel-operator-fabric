@@ -5,6 +5,7 @@ import (
 	"io"
 )
 
+// NewOrdServiceCmd creates a new root command to manage Ordering Services
 func NewOrdServiceCmd(out io.Writer, errOut io.Writer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use: "ordservice",

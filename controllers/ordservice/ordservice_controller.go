@@ -46,7 +46,7 @@ type FabricOrderingServiceReconciler struct {
 	Config    *rest.Config
 }
 
-func GetConfig(conf *hlfv1alpha1.FabricOrderingService, client *kubernetes.Clientset, chartName string, namespace string) (*FabricOrdChart, error) {
+func getConfig(conf *hlfv1alpha1.FabricOrderingService, client *kubernetes.Clientset) (*FabricOrdChart, error) {
 	spec := conf.Spec
 	signCertStr, err := base64.StdEncoding.DecodeString(conf.Spec.Enrollment.Component.Catls.Cacert)
 	if err != nil {
@@ -346,7 +346,7 @@ func (r *FabricOrderingServiceReconciler) Reconcile(req ctrl.Request) (ctrl.Resu
 	}
 	isMemcachedMarkedToBeDeleted := fabricOrderer.GetDeletionTimestamp() != nil
 	if isMemcachedMarkedToBeDeleted {
-		if contains(fabricOrderer.GetFinalizers(), ordererFinalizer) {
+		if utils.Contains(fabricOrderer.GetFinalizers(), ordererFinalizer) {
 			if err := r.finalizeOrderer(reqLogger, fabricOrderer); err != nil {
 				return ctrl.Result{}, err
 			}
@@ -358,7 +358,7 @@ func (r *FabricOrderingServiceReconciler) Reconcile(req ctrl.Request) (ctrl.Resu
 		}
 		return ctrl.Result{}, nil
 	}
-	if !contains(fabricOrderer.GetFinalizers(), ordererFinalizer) {
+	if !utils.Contains(fabricOrderer.GetFinalizers(), ordererFinalizer) {
 		if err := r.addFinalizer(reqLogger, fabricOrderer); err != nil {
 			return ctrl.Result{}, err
 		}
@@ -382,7 +382,7 @@ func (r *FabricOrderingServiceReconciler) Reconcile(req ctrl.Request) (ctrl.Resu
 	}
 	if exists {
 		// update
-		s, err := GetOrdererState(cfg, r.Config, releaseName, ns)
+		s, err := getOrdererState(r.Config, releaseName, ns)
 		if err != nil {
 			return ctrl.Result{}, err
 		}
@@ -407,7 +407,7 @@ func (r *FabricOrderingServiceReconciler) Reconcile(req ctrl.Request) (ctrl.Resu
 			//	return ctrl.Result{}, err
 			//}
 			//ns := req.Namespace
-			//c, err := GetConfig(fabricOrderer, clientSet, releaseName, ns)
+			//c, err := getConfig(fabricOrderer, clientSet, releaseName, ns)
 			//if err != nil {
 			//	return ctrl.Result{}, err
 			//}
@@ -453,7 +453,7 @@ func (r *FabricOrderingServiceReconciler) Reconcile(req ctrl.Request) (ctrl.Resu
 		if err != nil {
 			return ctrl.Result{}, err
 		}
-		c, err := GetConfig(fabricOrderer, clientSet, name, req.Namespace)
+		c, err := getConfig(fabricOrderer, clientSet)
 		if err != nil {
 			reqLogger.Error(err, "Failed to get config for orderer %s/%s", req.Namespace, req.Name)
 			return ctrl.Result{}, err
@@ -495,14 +495,6 @@ func (r *FabricOrderingServiceReconciler) SetupWithManager(mgr ctrl.Manager) err
 		Owns(&appsv1.Deployment{}).
 		Complete(r)
 }
-func contains(list []string, s string) bool {
-	for _, v := range list {
-		if v == s {
-			return true
-		}
-	}
-	return false
-}
 
 func newActionCfg(log logr.Logger, clusterCfg *rest.Config, namespace string) (*action.Configuration, error) {
 	err := os.Setenv("HELM_NAMESPACE", namespace)
@@ -530,7 +522,7 @@ type OrdererStatus struct {
 	Status hlfv1alpha1.DeploymentStatus
 }
 
-func GetOrdererState(conf *action.Configuration, config *rest.Config, releaseName string, ns string) (*OrdererStatus, error) {
+func getOrdererState(config *rest.Config, releaseName string, ns string) (*OrdererStatus, error) {
 	ctx := context.Background()
 	r := &OrdererStatus{
 		Status: hlfv1alpha1.RunningStatus,

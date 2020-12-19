@@ -92,7 +92,6 @@ func (c *topChannelCmd) run() error {
 		fmt.Printf("\r%s", tableString.String())
 		time.Sleep(2 * time.Second)
 	}
-	return nil
 }
 func newTopChannelCMD(io.Writer, io.Writer) *cobra.Command {
 	c := &topChannelCmd{}

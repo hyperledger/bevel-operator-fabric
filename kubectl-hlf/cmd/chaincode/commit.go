@@ -1,6 +1,5 @@
 package chaincode
 
-
 import (
 	pb "github.com/hyperledger/fabric-protos-go/peer"
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/resmgmt"
@@ -94,7 +93,7 @@ func (c *commitChaincodeCmd) run() error {
 	log.Infof("Chaincode commited=%s", txID)
 	return nil
 }
-func newChaincodeCommitCMD(out io.Writer,errOut io.Writer) *cobra.Command {
+func newChaincodeCommitCMD(out io.Writer, errOut io.Writer) *cobra.Command {
 	c := &commitChaincodeCmd{}
 	cmd := &cobra.Command{
 		Use: "commit",

@@ -143,7 +143,7 @@ func GetCertAuthByURL(oclient *operatorv1.Clientset, host string, port int) (*Cl
 		}
 
 	}
-	return nil, errors.Errorf("CA with host=%s port=%s not found", host, port)
+	return nil, errors.Errorf("CA with host=%s port=%d not found", host, port)
 }
 
 func GetCertAuthByName(oclient *operatorv1.Clientset, name string, ns string) (*ClusterCA, error) {

@@ -7,14 +7,14 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"encoding/pem"
-	"github.com/pkg/errors"
 	"fmt"
 	"github.com/operator-framework/operator-lib/status"
+	"github.com/pkg/errors"
+	log "github.com/sirupsen/logrus"
 	"helm.sh/helm/v3/pkg/cli"
 	apiv1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/kubernetes/pkg/api/v1/pod"
-	"log"
 	"os"
 	"reflect"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
@@ -64,13 +64,13 @@ func (r *FabricPeerReconciler) addFinalizer(reqLogger logr.Logger, m *hlfv1alpha
 	return nil
 }
 
-type PeerStatus struct {
+type Status struct {
 	URL     string
 	Status  hlfv1alpha1.DeploymentStatus
 	TLSCert string
 }
 
-func GetPeerState(peer *hlfv1alpha1.FabricPeer, conf *action.Configuration, config *rest.Config, releaseName string, ns string, svc *corev1.Service) (*PeerStatus, error) {
+func GetPeerState(peer *hlfv1alpha1.FabricPeer, conf *action.Configuration, config *rest.Config, releaseName string, ns string, svc *corev1.Service) (*Status, error) {
 	ctx := context.Background()
 	cmd := action.NewGet(conf)
 	rel, err := cmd.Run(releaseName)
@@ -88,7 +88,7 @@ func GetPeerState(peer *hlfv1alpha1.FabricPeer, conf *action.Configuration, conf
 	if ns == "" {
 		ns = "default"
 	}
-	r := &PeerStatus{
+	r := &Status{
 		Status: hlfv1alpha1.PendingStatus,
 	}
 	objects := utils.ParseK8sYaml([]byte(rel.Manifest))
@@ -314,6 +314,9 @@ func (r *FabricPeerReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) 
 			}
 			var inInterface map[string]interface{}
 			err = json.Unmarshal(inrec, &inInterface)
+			if err != nil {
+				return ctrl.Result{}, err
+			}
 			cmd := action.NewUpgrade(cfg)
 			err = os.Setenv("HELM_NAMESPACE", ns)
 			if err != nil {
@@ -329,18 +332,16 @@ func (r *FabricPeerReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) 
 			if err != nil {
 				return ctrl.Result{}, err
 			}
-			log.Printf("Chart upgraded %s", release.Name)
+			log.Infof("Chart upgraded %s", release.Name)
 		} else {
-
 			if err := r.Status().Update(ctx, fPeer); err != nil {
 				log.Printf("Error updating the status: %v", err)
 				return ctrl.Result{}, err
 			}
 		}
+		log.Infof("Peer %s in %s status", fPeer.Name, string(s.Status))
 		if s.Status == hlfv1alpha1.RunningStatus {
-			return ctrl.Result{
-				//RequeueAfter: 120 * time.Second,
-			}, nil
+			return ctrl.Result{}, nil
 		} else {
 			return ctrl.Result{
 				RequeueAfter: 2 * time.Second,
@@ -555,14 +556,10 @@ func GetConfig(conf *hlfv1alpha1.FabricPeer, client *kubernetes.Clientset, chart
 	tlsParams := conf.Spec.Secret.Enrollment.TLS
 	tlsCAUrl := fmt.Sprintf("https://%s:%d", tlsParams.Cahost, tlsParams.Caport)
 	ingressHosts := spec.Hosts
-	var hosts []string
 	operationHosts := spec.OperationHosts
-	for _, host := range tlsParams.Csr.Hosts {
-		hosts = append(hosts, host)
-	}
-	for _, host := range ingressHosts {
-		hosts = append(hosts, host)
-	}
+	var hosts []string
+	hosts = append(hosts, tlsParams.Csr.Hosts...)
+	hosts = append(hosts, ingressHosts...)
 	tlsCert, tlsKey, tlsRootCert, err := getExistingTLSCrypto(client, chartName, namespace)
 	if err != nil {
 		cacert, err := base64.StdEncoding.DecodeString(tlsParams.Catls.Cacert)

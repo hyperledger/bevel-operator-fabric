@@ -181,7 +181,7 @@ func (r *FabricOrdererNodeReconciler) Reconcile(req ctrl.Request) (ctrl.Result, 
 		if err != nil {
 			return ctrl.Result{}, err
 		}
-		c, err := GetConfig(fabricOrdererNode, clientSet)
+		c, err := getConfig(fabricOrdererNode, clientSet)
 		if err != nil {
 			reqLogger.Error(err, "Failed to get config for orderer %s/%s", req.Namespace, req.Name)
 			return ctrl.Result{}, err
@@ -224,25 +224,22 @@ func (r *FabricOrdererNodeReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Complete(r)
 }
 
-func GetConfig(conf *hlfv1alpha1.FabricOrdererNode, client *kubernetes.Clientset) (*FabricOrdChart, error) {
+func getConfig(conf *hlfv1alpha1.FabricOrdererNode, client *kubernetes.Clientset) (*fabricOrdChart, error) {
 	spec := conf.Spec
-
 	publicIP, err := utils.GetPublicIPKubernetes(client)
 	if err != nil {
 		return nil, err
 	}
 	tlsHosts := []string{}
 	ingressHosts := []string{}
-	for _, host := range spec.Hosts {
-		tlsHosts = append(tlsHosts, host)
-		ingressHosts = append(ingressHosts, host)
-	}
+	tlsHosts = append(tlsHosts, spec.Hosts...)
+	ingressHosts = append(ingressHosts, spec.Hosts...)
 	if !utils.Contains(tlsHosts, publicIP) {
 		tlsHosts = append(tlsHosts, publicIP)
 	}
 
-	fabricOrdChart := FabricOrdChart{
-		Ingress: Ingress{
+	fabricOrdChart := fabricOrdChart{
+		Ingress: ingress{
 			Enabled: false,
 		},
 		Genesis:     spec.Genesis,
@@ -251,44 +248,44 @@ func GetConfig(conf *hlfv1alpha1.FabricOrdererNode, client *kubernetes.Clientset
 		AdminCert:   "",
 		Cert:        spec.SignCert,
 		Key:         spec.SignKey,
-		TLS: TLS{
+		TLS: tls{
 			Cert: spec.TLSCert,
 			Key:  spec.TLSKey,
 		},
 		FullnameOverride: "",
 		HostAliases:      nil,
-		Service: Service{
+		Service: service{
 			Type:               spec.Service.Type,
 			Port:               7050,
 			PortOperations:     9443,
 			NodePort:           spec.Service.NodePortRequest,
 			NodePortOperations: spec.Service.NodePortOperations,
 		},
-		Image: Image{
+		Image: image{
 			Repository: spec.Image,
 			Tag:        spec.Tag,
 			PullPolicy: spec.PullPolicy,
 		},
-		Persistence: Persistence{
+		Persistence: persistence{
 			Enabled:      true,
-			Annotations:  Annotations{},
+			Annotations:  annotations{},
 			StorageClass: spec.Storage.StorageClass,
 			AccessMode:   string(spec.Storage.AccessMode),
 			Size:         spec.Storage.Size,
 		},
-		Ord: Ord{
+		Ord: ord{
 			Type:  "etcdraft",
 			MspID: spec.MspID,
-			TLS: TLSConfiguration{
-				Server: Server{
+			TLS: tlsConfiguration{
+				Server: ordServer{
 					Enabled: true,
 				},
-				Client: Client{
+				Client: ordClient{
 					Enabled: false,
 				},
 			},
 		},
-		Clientcerts: Clientcerts{},
+		Clientcerts: clientcerts{},
 		Hosts:       ingressHosts,
 	}
 

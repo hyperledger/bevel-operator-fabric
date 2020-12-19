@@ -13,6 +13,6 @@ const (
 	DefaultPeerImage   = "quay.io/kfsoftware/fabric-peer"
 	DefaultPeerVersion = "amd64-2.2.0"
 
-	DefaultOrdererImage = "hyperledger/fabric-orderer"
+	DefaultOrdererImage   = "hyperledger/fabric-orderer"
 	DefaultOrdererVersion = "amd64-2.2.0"
 )

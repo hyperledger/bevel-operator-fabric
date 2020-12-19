@@ -95,7 +95,7 @@ func (c *approveChaincodeCmd) run() error {
 	log.Infof("Chaincode approved=%s", txID)
 	return nil
 }
-func newChaincodeApproveCMD(out io.Writer,errOut io.Writer) *cobra.Command {
+func newChaincodeApproveCMD(out io.Writer, errOut io.Writer) *cobra.Command {
 	c := &approveChaincodeCmd{}
 	cmd := &cobra.Command{
 		Use: "approveformyorg",

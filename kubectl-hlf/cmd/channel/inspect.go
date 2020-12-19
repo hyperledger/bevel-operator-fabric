@@ -56,7 +56,7 @@ func (c *inspectChannelCmd) run(out io.Writer) error {
 	if err != nil {
 		return err
 	}
-	cmnConfig,err := resource.ExtractConfigFromBlock(block)
+	cmnConfig, err := resource.ExtractConfigFromBlock(block)
 	if err != nil {
 		return err
 	}

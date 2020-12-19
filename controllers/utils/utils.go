@@ -6,15 +6,12 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"errors"
-	"fmt"
-	"log"
+	log "github.com/sirupsen/logrus"
 	"net"
-	"net/url"
 	"strconv"
 	"strings"
 	"time"
 
-	"github.com/lithammer/shortuuid/v3"
 	v12 "k8s.io/api/core/v1"
 	apiextv1beta1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -26,15 +23,6 @@ import (
 )
 
 func GetClientKubeWithConf(config *rest.Config) (*kubernetes.Clientset, error) {
-	u, err := url.Parse(config.Host)
-	if err != nil {
-		return nil, err
-	}
-	chunks := strings.Split(u.Host, ":")
-	ip := chunks[0]
-	port := chunks[1]
-	log.Printf("Host=%s Port=%s", ip, port)
-
 	clientSet, err := kubernetes.NewForConfig(config)
 	if err != nil {
 		return nil, err
@@ -110,16 +98,6 @@ func EncodePrivateKey(key interface{}) ([]byte, error) {
 	return pemPk, nil
 }
 
-func GetRandomUserName() string {
-	alphabet := "23456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
-	channelID := shortuuid.NewWithAlphabet(alphabet)
-
-	for i := 1; i <= 9; i++ {
-		channelID = strings.Replace(channelID, strconv.Itoa(i), "a", -1)
-	}
-	return strings.ToLower(channelID)
-}
-
 func GetPublicIPKubernetes(clientSet *kubernetes.Clientset) (string, error) {
 	ctx := context.Background()
 	resp, err := clientSet.CoreV1().Nodes().List(ctx, v1.ListOptions{})
@@ -162,26 +140,6 @@ func Contains(slice []string, item string) bool {
 	return ok
 }
 
-func GetFreeNodeport(host string) (int, error) {
-	for port := 30000; port <= 32767; port++ {
-		timeout := time.Second
-		portStr := strconv.Itoa(port)
-		conn, err := net.DialTimeout("tcp", net.JoinHostPort(host, portStr), timeout)
-		if err != nil {
-			fmt.Println("Connecting error:", err)
-			if !strings.Contains(err.Error(), "i/o timeout") {
-				fmt.Printf("Found port: %d", port)
-				return port, nil
-			}
-		}
-		if conn != nil {
-			conn.Close()
-			fmt.Println("Opened", net.JoinHostPort(host, portStr))
-		}
-	}
-	return 0, errors.New("no ports are free")
-}
-
 func GetFreeNodeports(host string, n int) ([]int, error) {
 	c := 0
 	ports := []int{}
@@ -190,9 +148,7 @@ func GetFreeNodeports(host string, n int) ([]int, error) {
 		portStr := strconv.Itoa(port)
 		conn, err := net.DialTimeout("tcp", net.JoinHostPort(host, portStr), timeout)
 		if err != nil {
-			fmt.Println("Connecting error:", err)
 			if !strings.Contains(err.Error(), "i/o timeout") {
-				fmt.Println("Connecting error:", err)
 				c++
 				ports = append(ports, port)
 				if c == n {
@@ -202,8 +158,10 @@ func GetFreeNodeports(host string, n int) ([]int, error) {
 
 		}
 		if conn != nil {
-			conn.Close()
-			fmt.Println("Opened", net.JoinHostPort(host, portStr))
+			err = conn.Close()
+			if err != nil {
+				log.Warnf("Failed to close connection: %v", err)
+			}
 		}
 	}
 	return []int{}, errors.New("no ports are free")
