@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/Masterminds/sprig/v3"
-	"github.com/hyperledger/fabric-sdk-go/pkg/common/logging"
 	"github.com/kfsoftware/hlf-operator/controllers/utils"
 	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/helpers"
 	"github.com/spf13/cobra"
@@ -42,14 +41,10 @@ type Peer struct {
 }
 
 const tmplGoConfig = `
-name: k8s-network
+name: hlf-network
 version: 1.0.0
 client:
   organization: ""
-  connection:
-    timeout:
-      peer:
-        endorser: "300"
 organizations:
   {{ range $mspID, $org := .Organizations }}
   {{$mspID}}:
@@ -99,8 +94,6 @@ channels: {}
 `
 
 func (c *inspectCmd) run(out io.Writer) error {
-	logging.SetLevel("fabsdk/fab", logging.CRITICAL)
-
 	oclient, err := helpers.GetKubeOperatorClient()
 	if err != nil {
 		return err
@@ -159,7 +152,7 @@ func (c *inspectCmd) run(out io.Writer) error {
 	return nil
 }
 
-func NewInspectHLFConfig(out io.Writer, errOut io.Writer) *cobra.Command {
+func NewInspectHLFConfig(out io.Writer) *cobra.Command {
 	c := &inspectCmd{}
 	cmd := &cobra.Command{
 		Use:     "inspect",

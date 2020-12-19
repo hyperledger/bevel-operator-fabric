@@ -16,7 +16,7 @@ import (
 	"strings"
 )
 
-type PeerOptions struct {
+type Options struct {
 	Name           string
 	StorageClass   string
 	Capacity       string
@@ -33,14 +33,14 @@ type PeerOptions struct {
 	Leader         bool
 }
 
-func (o PeerOptions) Validate() error {
+func (o Options) Validate() error {
 	return nil
 }
 
 type createCmd struct {
 	out      io.Writer
 	errOut   io.Writer
-	peerOpts PeerOptions
+	peerOpts Options
 }
 
 func (c *createCmd) validate() error {

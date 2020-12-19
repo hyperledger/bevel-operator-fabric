@@ -314,7 +314,7 @@ func GetUser(params GetUserRequest) (*api.IdentityResponse, error) {
 	if err != nil {
 		return nil, err
 	}
-	kk, err := caClient.GetIdentity("", params.Name)
+	kk, err := caClient.GetIdentity(params.User, params.Name)
 	if err != nil {
 		return nil, err
 	}

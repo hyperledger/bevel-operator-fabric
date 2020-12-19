@@ -79,7 +79,7 @@ func (c *topChannelCmd) run() error {
 		table.SetCenterSeparator("")
 		table.SetColumnSeparator("")
 		table.SetRowSeparator("")
-		table.SetTablePadding("\t") // pad with tabs
+		table.SetTablePadding("\t")
 		table.SetNoWhiteSpace(true)
 		table.AppendBulk(data) // Add Bulk Data
 		table.Render()

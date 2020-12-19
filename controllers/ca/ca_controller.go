@@ -459,7 +459,7 @@ func GetConfig(conf *hlfv1alpha1.FabricCA, client *kubernetes.Clientset, chartNa
 	return &c, nil
 }
 
-type CAStatus struct {
+type Status struct {
 	URL       string
 	Port      int
 	Host      string
@@ -475,13 +475,13 @@ func GetServiceName(releaseName string) string {
 func GetDeploymentName(releaseName string) string {
 	return releaseName
 }
-func GetCAState(clientSet *kubernetes.Clientset, releaseName string, ns string) (*CAStatus, error) {
+func GetCAState(clientSet *kubernetes.Clientset, releaseName string, ns string) (*Status, error) {
 	ctx := context.Background()
 	k8sIP, err := utils.GetPublicIPKubernetes(clientSet)
 	if err != nil {
 		return nil, err
 	}
-	r := &CAStatus{
+	r := &Status{
 		Status: hlfv1alpha1.PendingStatus,
 	}
 	depName := GetDeploymentName(releaseName)

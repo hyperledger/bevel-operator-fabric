@@ -1,13 +1,11 @@
 package chaincode
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/channel"
 	"github.com/hyperledger/fabric-sdk-go/pkg/core/config"
 	"github.com/hyperledger/fabric-sdk-go/pkg/fabsdk"
 	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/helpers"
-	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"io"
 )
@@ -19,7 +17,7 @@ type queryChaincodeCmd struct {
 	channel    string
 	chaincode  string
 	fcn        string
-	args       string
+	args       []string
 }
 
 func (c *queryChaincodeCmd) validate() error {
@@ -51,13 +49,8 @@ func (c *queryChaincodeCmd) run(out io.Writer) error {
 		return err
 	}
 	var args [][]byte
-	var strAgs []string
-	err = json.Unmarshal([]byte(c.args), &strAgs)
-	if err != nil {
-		return errors.Wrapf(err, "error parsing the arguments: %v", c.args)
-	}
-	for _, strArg := range strAgs {
-		args = append(args, []byte(strArg))
+	for _, arg := range c.args {
+		args = append(args, []byte(arg))
 	}
 	response, err := ch.Query(
 		channel.Request{
@@ -97,7 +90,7 @@ func newQueryChaincodeCMD(out io.Writer, errOut io.Writer) *cobra.Command {
 	persistentFlags.StringVarP(&c.channel, "channel", "", "", "Channel")
 	persistentFlags.StringVarP(&c.chaincode, "chaincode", "", "", "Chaincode")
 	persistentFlags.StringVarP(&c.fcn, "fcn", "", "", "Function")
-	persistentFlags.StringVarP(&c.args, "args", "", "", "Arguments")
+	persistentFlags.StringArrayVarP(&c.args, "args", "a", []string{}, "Arguments")
 	cmd.MarkPersistentFlagRequired("user")
 	cmd.MarkPersistentFlagRequired("peer")
 	cmd.MarkPersistentFlagRequired("config")

@@ -1,11 +1,5 @@
 name: test-network-org1
 version: 1.0.0
-client:
-  organization: ""
-  connection:
-    timeout:
-      peer:
-        endorser: "300"
 organizations:
   {{- range $mspID, $org := .Organizations }}
     {{$mspID}}:

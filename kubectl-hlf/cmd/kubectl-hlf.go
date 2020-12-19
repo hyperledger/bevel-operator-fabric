@@ -25,7 +25,7 @@ func NewCmdHLF(streams genericclioptions.IOStreams) *cobra.Command {
 		Long:         hlfDesc,
 		SilenceUsage: true,
 	}
-	cmd.AddCommand(inspect.NewInspectHLFConfig(cmd.OutOrStdout(), cmd.ErrOrStderr()))
+	cmd.AddCommand(inspect.NewInspectHLFConfig(cmd.OutOrStdout()))
 	cmd.AddCommand(consortium.NewConsortiumCmd(cmd.OutOrStdout(), cmd.ErrOrStderr()))
 	cmd.AddCommand(channel.NewChannelCmd(cmd.OutOrStdout(), cmd.ErrOrStderr()))
 	cmd.AddCommand(ca.NewCACmd(cmd.OutOrStdout(), cmd.ErrOrStderr()))

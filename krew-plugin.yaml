@@ -18,20 +18,20 @@ spec:
         matchLabels:
           os: darwin
           arch: amd64
-      uri: https://github.com/minio/operator/releases/download/v3.0.29/kubectl-minio_darwin_amd64.zip
+      uri: https://github.com/kfsoftware/hlf-operator/releases/download/v3.0.29/kubectl-hlf_darwin_amd64.zip
       sha256: 490b6edbe4e32c3b18e7014d2f9416f4ffec296d5fb3b138db3320926fd0c98d
-      bin: kubectl-minio
+      bin: kubectl-hlf
     - selector:
         matchLabels:
           os: linux
           arch: amd64
-      uri: https://github.com/minio/operator/releases/download/v3.0.29/kubectl-minio_linux_amd64.zip
+      uri: https://github.com/kfsoftware/hlf-operator/releases/download/v3.0.29/kubectl-hlf_linux_amd64.zip
       sha256: efa9d6d91f2f746758ca700c070bf0e6ae390337a843a1e39c578ff2ead51653
-      bin: kubectl-minio
+      bin: kubectl-hlf
     - selector:
         matchLabels:
           os: windows
           arch: amd64
-      uri: https://github.com/minio/operator/releases/download/v3.0.29/kubectl-minio_windows_amd64.zip
+      uri: https://github.com/kfsoftware/hlf-operator/releases/download/v3.0.29/kubectl-hlf_windows_amd64.zip
       sha256: 0eec546d4c91e2dbe3cf6bd8b0def41a98dfebbe413bbbd8d0597cdc9844c106
-      bin: kubectl-minio.exe
+      bin: kubectl-hlf.exe

@@ -6,6 +6,7 @@ import (
 	"github.com/hyperledger/fabric-sdk-go/pkg/core/config"
 	"github.com/hyperledger/fabric-sdk-go/pkg/fabsdk"
 	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/helpers"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"io"
 )
@@ -71,6 +72,7 @@ func (c *invokeChaincodeCmd) run(out io.Writer) error {
 	if err != nil {
 		return err
 	}
+	log.Infof("txid=%s", response.TransactionID)
 	return nil
 }
 func newInvokeChaincodeCMD(out io.Writer, errOut io.Writer) *cobra.Command {
