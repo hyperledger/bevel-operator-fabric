@@ -19,19 +19,19 @@ spec:
           os: darwin
           arch: amd64
       uri: https://github.com/kfsoftware/hlf-operator/releases/download/v1.0.0/kubectl-hlf_darwin_amd64.zip
-      sha256: 36408ad477cff232fcae827c655c826ff88786a83a17941c56d69de6407d1f38
+      sha256: 0d0bcfcb28406c17eb7ac6d6697fee3df6a0aa19f0b5140339e398b02f8f3f3c
       bin: kubectl-hlf
     - selector:
         matchLabels:
           os: linux
           arch: amd64
       uri: https://github.com/kfsoftware/hlf-operator/releases/download/v1.0.0/kubectl-hlf_linux_amd64.zip
-      sha256: 07c017bbabf0d291caafb265376f2d8fb60ccbdcef96ee45dfb64c7a5d420d3c
+      sha256: 9d2095d3ea83b5a88a73e34a3b651fa652a39e51e3c5e2648c24a3f2ae746647
       bin: kubectl-hlf
     - selector:
         matchLabels:
           os: windows
           arch: amd64
       uri: https://github.com/kfsoftware/hlf-operator/releases/download/v1.0.0/kubectl-hlf_windows_amd64.zip
-      sha256: 572e9a58c60faa31e67eb596980d61fe3566da49ab14bbbde35bf38f31a3aa45
+      sha256: 966be5f702ba93fab6b11992ea180e695e361e14ed450ce6a73fd73d9a9cebed
       bin: kubectl-hlf.exe
