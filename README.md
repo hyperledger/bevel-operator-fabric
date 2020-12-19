@@ -135,3 +135,12 @@ kubectl delete -f ./config/samples/hlf_v1alpha1_fabricpeer.yaml
 kubectl delete -f ./config/samples/hlf_v1alpha1_fabricorderer.yaml
 kubectl delete -f ./config/samples/hlf_v1alpha1_fabricordererca.yaml
 ```
+
+
+## New release
+
+```bash
+
+make docker-build IMG=quay.io/kfsoftware/hlf-operator:1.0.1
+make docker-push IMG=quay.io/kfsoftware/hlf-operator:1.0.0
+```

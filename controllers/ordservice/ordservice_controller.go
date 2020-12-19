@@ -214,7 +214,35 @@ func GetConfig(conf *hlfv1alpha1.FabricOrderingService, client *kubernetes.Clien
 			},
 		})
 	}
-
+	channelConfig := spec.SystemChannel.Config
+	batchTimeout, err := time.ParseDuration(channelConfig.BatchTimeout)
+	if err != nil {
+		return nil, err
+	}
+	_, err = time.ParseDuration(channelConfig.TickInterval)
+	if err != nil {
+		return nil, err
+	}
+	genesisConfig := testutils.GenesisConfig{
+		BatchTimeout:      batchTimeout,
+		MaxMessageCount:   channelConfig.MaxMessageCount,
+		AbsoluteMaxBytes:  channelConfig.AbsoluteMaxBytes,
+		PreferredMaxBytes: channelConfig.PreferredMaxBytes,
+		OrdererCapabilities: testutils.OrdererCapabilities{
+			V2_0: channelConfig.OrdererCapabilities.V2_0,
+		},
+		ApplicationCapabilities: testutils.ApplicationCapabilities{
+			V2_0: channelConfig.ApplicationCapabilities.V2_0,
+		},
+		ChannelCapabilities: testutils.ChannelCapabilities{
+			V2_0: channelConfig.ChannelCapabilities.V2_0,
+		},
+		SnapshotIntervalSize: channelConfig.SnapshotIntervalSize,
+		TickInterval:         channelConfig.TickInterval,
+		ElectionTick:         channelConfig.ElectionTick,
+		HeartbeatTick:        channelConfig.HeartbeatTick,
+		MaxInflightBlocks:    channelConfig.MaxInflightBlocks,
+	}
 	profileConfig, err := testutils.GetProfileConfig(
 		[]testutils.OrdererOrganization{
 			{
@@ -224,7 +252,7 @@ func GetConfig(conf *hlfv1alpha1.FabricOrderingService, client *kubernetes.Clien
 				MspID:        conf.Spec.MspID,
 			},
 		},
-		"SampleConsortium",
+		genesisConfig,
 	)
 	if err != nil {
 		return nil, err

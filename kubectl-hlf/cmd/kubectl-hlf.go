@@ -17,7 +17,7 @@ const (
 kubectl plugin to manage HLF operator CRDs.`
 )
 
-// NewCmdHLF creates a new root command for kubectl-minio
+// NewCmdHLF creates a new root command for kubectl-hlf
 func NewCmdHLF(streams genericclioptions.IOStreams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:          "hlf",

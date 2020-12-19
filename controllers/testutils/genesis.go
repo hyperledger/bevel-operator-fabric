@@ -302,7 +302,69 @@ func AddConsortiumToConfig(channelConfig *cb.Config, request AddConsortiumReques
 	return modifiedConfig, nil
 }
 
-func GetProfileConfig(ordOrgs []OrdererOrganization, consortiumName string) (*genesisconfig.Profile, error) {
+type OrdererCapabilities struct {
+	V2_0 bool
+}
+type ApplicationCapabilities struct {
+	V2_0 bool
+}
+type ChannelCapabilities struct {
+	V2_0 bool
+}
+type GenesisConfig struct {
+	BatchTimeout            time.Duration // 2 seconds
+	MaxMessageCount         int           // 500
+	AbsoluteMaxBytes        int           // 10 * 1024 * 1024 = 10MB
+	PreferredMaxBytes       int           // 2 * 1024 * 1024 = 2MB
+	OrdererCapabilities     OrdererCapabilities
+	ApplicationCapabilities ApplicationCapabilities
+	ChannelCapabilities     ChannelCapabilities
+	SnapshotIntervalSize    int    // 19
+	TickInterval            string // 500ms
+	ElectionTick            int    // 10
+	HeartbeatTick           int    // 1
+	MaxInflightBlocks       int    // 5
+}
+
+const MB = 1024 * 1024
+
+func fillWithDefaultOps(opts *GenesisConfig) {
+	if opts.BatchTimeout.Seconds() <= 1 {
+		opts.BatchTimeout = 2 * time.Second
+	}
+	if opts.MaxMessageCount == 0 {
+		opts.MaxMessageCount = 500
+	}
+	if opts.AbsoluteMaxBytes == 0 {
+		opts.AbsoluteMaxBytes = 10 * MB
+	}
+	if opts.PreferredMaxBytes == 0 {
+		opts.PreferredMaxBytes = 2 * MB
+	}
+	if opts.SnapshotIntervalSize == 0 {
+		opts.SnapshotIntervalSize = 19
+	}
+	if opts.MaxInflightBlocks == 0 {
+		opts.MaxInflightBlocks = 5
+	}
+	if opts.HeartbeatTick == 0 {
+		opts.HeartbeatTick = 1
+	}
+	if opts.ElectionTick == 0 {
+		opts.ElectionTick = 10
+	}
+	if opts.SnapshotIntervalSize == 0 {
+		opts.SnapshotIntervalSize = 19
+	}
+	if opts.TickInterval == "" {
+		opts.TickInterval = "500ms"
+	}
+}
+func GetProfileConfig(
+	ordOrgs []OrdererOrganization,
+	config GenesisConfig,
+) (*genesisconfig.Profile, error) {
+	fillWithDefaultOps(&config)
 	organizations := []*genesisconfig.Organization{}
 	ordererOrganizations := []*genesisconfig.Organization{}
 	consenters := []*etcdraft.Consenter{}
@@ -409,10 +471,11 @@ NodeOUs:
 		})
 	}
 	profileConfig := &genesisconfig.Profile{
-		Consortium: consortiumName,
 		Application: &genesisconfig.Application{
 			Organizations: organizations,
-			Capabilities:  ordererCapabilities(),
+			Capabilities: map[string]bool{
+				"V2_0": config.ApplicationCapabilities.V2_0,
+			},
 			Policies: map[string]*genesisconfig.Policy{
 				"Admins": {
 					Type: "ImplicitMeta",
@@ -442,19 +505,19 @@ NodeOUs:
 			EtcdRaft: &etcdraft.ConfigMetadata{
 				Consenters: consenters,
 				Options: &etcdraft.Options{
-					SnapshotIntervalSize: 19,
-					TickInterval:         "500ms",
-					ElectionTick:         10,
-					HeartbeatTick:        1,
-					MaxInflightBlocks:    5,
+					SnapshotIntervalSize: uint32(config.SnapshotIntervalSize),
+					TickInterval:         config.TickInterval,
+					ElectionTick:         uint32(config.ElectionTick),
+					HeartbeatTick:        uint32(config.HeartbeatTick),
+					MaxInflightBlocks:    uint32(config.MaxInflightBlocks),
 				},
 			},
 			Addresses:    ordererAddresses,
-			BatchTimeout: 2 * time.Second,
+			BatchTimeout: config.BatchTimeout,
 			BatchSize: genesisconfig.BatchSize{
-				MaxMessageCount:   500,
-				AbsoluteMaxBytes:  10 * 1024 * 1024,
-				PreferredMaxBytes: 2 * 1024 * 1024,
+				MaxMessageCount:   uint32(config.MaxMessageCount),
+				AbsoluteMaxBytes:  uint32(config.AbsoluteMaxBytes),
+				PreferredMaxBytes: uint32(config.PreferredMaxBytes),
 			},
 			Organizations: ordererOrganizations,
 			Policies: map[string]*genesisconfig.Policy{
@@ -475,14 +538,14 @@ NodeOUs:
 					Rule: "ANY Writers",
 				},
 			},
-			Capabilities: ordererCapabilities(),
-		},
-		Consortiums: map[string]*genesisconfig.Consortium{
-			consortiumName: {
-				Organizations: organizations,
+			Capabilities: map[string]bool{
+				"V2_0": config.OrdererCapabilities.V2_0,
 			},
 		},
-		Capabilities: ordererCapabilities(),
+		Consortiums: map[string]*genesisconfig.Consortium{},
+		Capabilities: map[string]bool{
+			"V2_0": config.ChannelCapabilities.V2_0,
+		},
 		Policies: map[string]*genesisconfig.Policy{
 			"Admins": {
 				Type: "ImplicitMeta",

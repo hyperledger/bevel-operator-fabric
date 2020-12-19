@@ -56,7 +56,7 @@ spec:
       enrollid: "orderer"
       enrollsecret: "ordererpw"
       csr:
-        hosts: []
+        hosts: [ ]
   nodes:
     - id: "orderer0"
       enrollment:
@@ -84,3 +84,20 @@ spec:
     accessMode: "ReadWriteOnce"
   systemChannel:
     name: "system-channel"
+    config:
+      absoluteMaxBytes: 10485760
+      applicationCapabilities:
+        V2_0: true
+      batchTimeout: 2s
+      channelCapabilities:
+        V2_0: true
+      electionTick: 10
+      heartbeatTick: 1
+      maxInflightBlocks: 5
+      maxMessageCount: 500
+      ordererCapabilities:
+        V2_0: true
+      preferredMaxBytes: 2097152
+      snapshotIntervalSize: 19
+      tickInterval: 500ms
+

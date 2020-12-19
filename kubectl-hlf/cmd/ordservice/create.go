@@ -8,6 +8,7 @@ import (
 	"github.com/kfsoftware/hlf-operator/controllers/utils"
 	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/helpers"
 	"github.com/pkg/errors"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"io"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -113,6 +114,20 @@ func (c *createCmd) run(args []string) error {
 			},
 			SystemChannel: v1alpha1.OrdererSystemChannel{
 				Name: c.ordererOpts.SystemChannelName,
+				Config: v1alpha1.ChannelConfig{
+					BatchTimeout:            "2s",
+					MaxMessageCount:         500,
+					AbsoluteMaxBytes:        10 * 1024 * 1024,
+					PreferredMaxBytes:       2 * 1024 * 1024,
+					OrdererCapabilities:     v1alpha1.OrdererCapabilities{V2_0: true},
+					ApplicationCapabilities: v1alpha1.ApplicationCapabilities{V2_0: true},
+					ChannelCapabilities:     v1alpha1.ChannelCapabilities{V2_0: true},
+					SnapshotIntervalSize:    19,
+					TickInterval:            "500ms",
+					ElectionTick:            10,
+					HeartbeatTick:           1,
+					MaxInflightBlocks:       5,
+				},
 			},
 			Nodes: nodes,
 			Image: c.ordererOpts.Image,
@@ -155,7 +170,7 @@ func (c *createCmd) run(args []string) error {
 	}
 
 	ctx := context.Background()
-	_, err = oclient.HlfV1alpha1().FabricOrderingServices(c.ordererOpts.NS).Create(
+	ordService, err := oclient.HlfV1alpha1().FabricOrderingServices(c.ordererOpts.NS).Create(
 		ctx,
 		fabricOrderer,
 		v1.CreateOptions{},
@@ -163,13 +178,14 @@ func (c *createCmd) run(args []string) error {
 	if err != nil {
 		return err
 	}
+	log.Infof("Ordering service %s created on namespace %s", ordService.Name, ordService.Namespace)
 	return nil
 }
 func newCreateOrderingServiceCmd(out io.Writer, errOut io.Writer) *cobra.Command {
 	c := createCmd{out: out, errOut: errOut}
 	cmd := &cobra.Command{
 		Use:   "create",
-		Short: "Create a Fabric Orderer",
+		Short: "Create a Fabric Ordering Service",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := c.validate(); err != nil {
 				return err

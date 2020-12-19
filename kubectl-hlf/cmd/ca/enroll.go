@@ -92,7 +92,7 @@ func newCAEnrollCmd(out io.Writer, errOut io.Writer) *cobra.Command {
 		},
 	}
 	f := cmd.Flags()
-	f.StringVar(&c.enrollOpts.Name, "name", "", "name of the MinIO tenant to create")
+	f.StringVar(&c.enrollOpts.Name, "name", "", "name of the Certificate Authority in the cluster, e.g ca.default")
 	f.StringVarP(&c.enrollOpts.NS, "namespace", "n", helpers.DefaultNamespace, "namespace scope for this request")
 	f.StringVarP(&c.enrollOpts.CAName, "ca-name", "", "", "ca name to enroll this user")
 	f.StringVarP(&c.enrollOpts.User, "user", "", "", "namespace scope for this request")

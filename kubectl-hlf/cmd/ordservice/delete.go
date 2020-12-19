@@ -41,7 +41,7 @@ func newOrderingServiceDeleteCmd(out io.Writer, errOut io.Writer) *cobra.Command
 	}
 
 	f := cmd.Flags()
-	f.StringVar(&c.name, "name", "", "name of the MinIO tenant to delete")
+	f.StringVar(&c.name, "name", "", "name of the Ordering Service to delete")
 	f.StringVarP(&c.ns, "namespace", "n", helpers.DefaultNamespace, "namespace scope for this request")
 	return cmd
 }
@@ -53,7 +53,6 @@ func (d *ordererDeleteCmd) validate() error {
 	return nil
 }
 
-// run initializes local config and installs MinIO Operator to Kubernetes cluster.
 func (d *ordererDeleteCmd) run(args []string) error {
 	oclient, err := helpers.GetKubeOperatorClient()
 	if err != nil {

@@ -245,7 +245,31 @@ type FabricOrdererNodeSpec struct {
 
 type OrdererSystemChannel struct {
 	// +kubebuilder:validation:MinLength=3
-	Name string `json:"name"`
+	Name   string        `json:"name"`
+	Config ChannelConfig `json:"config"`
+}
+type OrdererCapabilities struct {
+	V2_0 bool `json:"V2_0"`
+}
+type ApplicationCapabilities struct {
+	V2_0 bool `json:"V2_0"`
+}
+type ChannelCapabilities struct {
+	V2_0 bool `json:"V2_0"`
+}
+type ChannelConfig struct {
+	BatchTimeout            string                  `json:"batchTimeout"`
+	MaxMessageCount         int                     `json:"maxMessageCount"`
+	AbsoluteMaxBytes        int                     `json:"absoluteMaxBytes"`
+	PreferredMaxBytes       int                     `json:"preferredMaxBytes"`
+	OrdererCapabilities     OrdererCapabilities     `json:"ordererCapabilities"`
+	ApplicationCapabilities ApplicationCapabilities `json:"applicationCapabilities"`
+	ChannelCapabilities     ChannelCapabilities     `json:"channelCapabilities"`
+	SnapshotIntervalSize    int                     `json:"snapshotIntervalSize"`
+	TickInterval            string                  `json:"tickInterval"`
+	ElectionTick            int                     `json:"electionTick"`
+	HeartbeatTick           int                     `json:"heartbeatTick"`
+	MaxInflightBlocks       int                     `json:"maxInflightBlocks"`
 }
 
 // FabricOrderingServiceStatus defines the observed state of FabricOrderingService

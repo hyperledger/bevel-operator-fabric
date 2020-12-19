@@ -241,10 +241,10 @@ func newCreateCACmd(out io.Writer, errOut io.Writer) *cobra.Command {
 		},
 	}
 	f := cmd.Flags()
-	f.StringVar(&c.caOpts.Name, "name", "", "name of the MinIO tenant to create")
-	f.StringVar(&c.caOpts.Capacity, "capacity", "", "total raw capacity of MinIO tenant in this zone, e.g. 16Ti")
+	f.StringVar(&c.caOpts.Name, "name", "", "name of the Certificate Authority tenant to create")
+	f.StringVar(&c.caOpts.Capacity, "capacity", "", "total raw capacity of Certificate Authority, e.g. 2Gi")
 	f.StringVarP(&c.caOpts.NS, "namespace", "n", helpers.DefaultNamespace, "namespace scope for this request")
-	f.StringVarP(&c.caOpts.StorageClass, "storage-class", "s", helpers.DefaultStorageclass, "storage class for this MinIO tenant")
+	f.StringVarP(&c.caOpts.StorageClass, "storage-class", "s", helpers.DefaultStorageclass, "storage class for this Certificate Authority tenant")
 	f.StringVarP(&c.caOpts.Version, "version", "v", helpers.DefaultCAVersion, "version of the Fabric CA")
 
 	return cmd

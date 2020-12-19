@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
 	"github.com/kfsoftware/hlf-operator/controllers/utils"
-	log "github.com/kfsoftware/hlf-operator/internal/github.com/hyperledger/fabric-ca/sdkpatch/logbridge"
 	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/helpers"
 	"github.com/pkg/errors"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"io"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -17,19 +17,20 @@ import (
 )
 
 type PeerOptions struct {
-	Name          string
-	StorageClass  string
-	Capacity      string
-	NS            string
-	Image         string
-	Version       string
-	MspID         string
-	StateDB       string
-	EnrollPW      string
-	CAName        string
-	EnrollID      string
-	BootstrapPeer string
-	Hosts         []string
+	Name           string
+	StorageClass   string
+	Capacity       string
+	NS             string
+	Image          string
+	Version        string
+	MspID          string
+	StateDB        string
+	EnrollPW       string
+	CAName         string
+	EnrollID       string
+	Hosts          []string
+	BootstrapPeers []string
+	Leader         bool
 }
 
 func (o PeerOptions) Validate() error {
@@ -46,7 +47,7 @@ func (c *createCmd) validate() error {
 	c.peerOpts.Image = helpers.DefaultPeerImage
 	return c.peerOpts.Validate()
 }
-func (c *createCmd) run(args []string) error {
+func (c *createCmd) run() error {
 	oclient, err := helpers.GetKubeOperatorClient()
 	if err != nil {
 		return err
@@ -64,26 +65,32 @@ func (c *createCmd) run(args []string) error {
 		return err
 	}
 	var bootstrapPeerURL string
-	if c.peerOpts.BootstrapPeer != "" {
-		boostrapPeer, err := helpers.GetPeerByFullName(oclient, c.peerOpts.BootstrapPeer)
-		if err != nil {
-			return err
+	if len(c.peerOpts.BootstrapPeers) > 0 {
+		var bootstrapPeerUrls []string
+		for _, bp := range c.peerOpts.BootstrapPeers {
+			boostrapPeer, err := helpers.GetPeerByFullName(oclient, bp)
+			if err != nil {
+				return err
+			}
+			if boostrapPeer.Status.Status != v1alpha1.RunningStatus {
+				return errors.Errorf("Peer %s is not running", boostrapPeer.Name)
+			}
+			u, err := url.Parse(boostrapPeer.Status.URL)
+			if err != nil {
+				return err
+			}
+			chunks := strings.Split(u.Host, ":")
+			ip := chunks[0]
+			port := chunks[1]
+			bootstrapPeerURL := fmt.Sprintf("%s:%s", ip, port)
+			bootstrapPeerUrls = append(bootstrapPeerUrls, bootstrapPeerURL)
+			log.Infof("Bootstrap peer url %s ip=%s port=%s", bootstrapPeerURL, ip, port)
 		}
-		if boostrapPeer.Status.Status != v1alpha1.RunningStatus {
-			return errors.Errorf("Peer %s is not running", boostrapPeer.Name)
-		}
-		u, err := url.Parse(boostrapPeer.Status.URL)
-		if err != nil {
-			return err
-		}
-		chunks := strings.Split(u.Host, ":")
-		ip := chunks[0]
-		port := chunks[1]
-		bootstrapPeerURL = fmt.Sprintf("%s:%s", ip, port)
-		log.Infof("Bootstrap peer url %s ip=%s port=%s", bootstrapPeerURL, ip, port)
+		bootstrapPeerURL = strings.Join(bootstrapPeerUrls, " ")
 	} else {
 		bootstrapPeerURL = ""
 	}
+
 	externalEndpoint := ""
 	if len(c.peerOpts.Hosts) > 0 {
 		externalEndpoint = fmt.Sprintf("%s:443", c.peerOpts.Hosts[0])
@@ -103,8 +110,8 @@ func (c *createCmd) run(args []string) error {
 				ExternalEndpoint:  externalEndpoint,
 				Bootstrap:         bootstrapPeerURL,
 				Endpoint:          "",
-				UseLeaderElection: true,
-				OrgLeader:         false,
+				UseLeaderElection: !c.peerOpts.Leader,
+				OrgLeader:         c.peerOpts.Leader,
 			},
 			ExternalEndpoint:         externalEndpoint,
 			Tag:                      c.peerOpts.Version,
@@ -238,7 +245,7 @@ func newCreatePeerCmd(out io.Writer, errOut io.Writer) *cobra.Command {
 			if err := c.validate(); err != nil {
 				return err
 			}
-			return c.run(args)
+			return c.run()
 		},
 	}
 	f := cmd.Flags()
@@ -253,7 +260,8 @@ func newCreatePeerCmd(out io.Writer, errOut io.Writer) *cobra.Command {
 	f.StringVarP(&c.peerOpts.Version, "version", "", helpers.DefaultPeerVersion, "version of the Fabric Peer")
 	f.StringVarP(&c.peerOpts.MspID, "mspid", "", "", "MSP ID of the organization")
 	f.StringVarP(&c.peerOpts.StateDB, "statedb", "", "leveldb", "State database")
-	f.StringVarP(&c.peerOpts.BootstrapPeer, "bootstrap-peer", "", "", "Bootstrap peer")
-	f.StringArrayVarP(&c.peerOpts.Hosts, "hosts", "", []string{}, "Bootstrap peer")
+	f.BoolVarP(&c.peerOpts.Leader, "leader", "", false, "Force peer to be leader")
+	f.StringArrayVarP(&c.peerOpts.BootstrapPeers, "bootstrap-peer", "", []string{}, "Bootstrap peers")
+	f.StringArrayVarP(&c.peerOpts.Hosts, "hosts", "", []string{}, "External hosts")
 	return cmd
 }
