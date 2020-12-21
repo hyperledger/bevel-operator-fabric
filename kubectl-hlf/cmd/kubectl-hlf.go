@@ -10,6 +10,10 @@ import (
 	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/peer"
 	"github.com/spf13/cobra"
 	"k8s.io/cli-runtime/pkg/genericclioptions"
+
+	// Workaround for authentication plugins https://krew.sigs.k8s.io/docs/developer-guide/develop/best-practices/#auth-plugins
+	_ "k8s.io/client-go/plugin/pkg/client/auth"
+
 )
 
 const (
