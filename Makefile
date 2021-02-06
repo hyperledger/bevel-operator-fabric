@@ -25,6 +25,13 @@ endif
 
 all: manager
 
+api-reference:
+	refdocs \
+		-api-dir ./api/hlf.kungfusoftware.es/v1alpha1 \
+		-template-dir ./docs/api/autogen/templates \
+		-config ./docs/api/autogen/config.json \
+		-out-file ./docs/api/hlf.kungfusoftware.io.ref.md
+	mv ./docs/api/hlf.kungfusoftware.io.ref.md ./website-docs/docs/api-reference.md
 # Run tests
 test: generate fmt vet manifests
 	go test ./controllers/... -coverprofile cover.out

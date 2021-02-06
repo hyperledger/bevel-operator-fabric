@@ -100,9 +100,14 @@ spec:
                 type: string
               istio:
                 properties:
+                  hosts:
+                    items:
+                      type: string
+                    type: array
                   port:
                     type: integer
                 required:
+                - hosts
                 - port
                 type: object
               logging:

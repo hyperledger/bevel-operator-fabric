@@ -12,6 +12,7 @@ import (
 	"encoding/pem"
 	"fmt"
 	"github.com/operator-framework/operator-lib/status"
+	"helm.sh/helm/v3/pkg/cli"
 	"k8s.io/kubernetes/pkg/api/v1/pod"
 	"log"
 	"math/big"
@@ -394,8 +395,20 @@ func GetConfig(conf *hlfv1alpha1.FabricCA, client *kubernetes.Clientset, chartNa
 		Type:  "PRIVATE KEY",
 		Bytes: caTLSSignEncodedPK,
 	})
+	istioPort := 443
+	if spec.Istio != nil && spec.Istio.Port != 0 {
+		istioPort = spec.Istio.Port
+	}
+	istioHosts := []string{}
+	if spec.Istio != nil && len(spec.Istio.Hosts) > 0 {
+		istioHosts = spec.Istio.Hosts
+	}
 	var c = FabricCAChart{
 		FullNameOverride: conf.Name,
+		Istio: Istio{
+			Port:  istioPort,
+			Hosts: istioHosts,
+		},
 		Image: Image{
 			Repository: spec.Image,
 			Tag:        spec.Version,
@@ -475,7 +488,7 @@ func GetServiceName(releaseName string) string {
 func GetDeploymentName(releaseName string) string {
 	return releaseName
 }
-func GetCAState(clientSet *kubernetes.Clientset, releaseName string, ns string) (*Status, error) {
+func GetCAState(clientSet *kubernetes.Clientset, ca *hlfv1alpha1.FabricCA, releaseName string, ns string) (*Status, error) {
 	ctx := context.Background()
 	k8sIP, err := utils.GetPublicIPKubernetes(clientSet)
 	if err != nil {
@@ -519,15 +532,21 @@ func GetCAState(clientSet *kubernetes.Clientset, releaseName string, ns string) 
 			r.Status = hlfv1alpha1.PendingStatus
 		}
 	}
-	svcName := GetServiceName(releaseName)
-	svc, err := clientSet.CoreV1().Services(ns).Get(ctx, svcName, v1.GetOptions{})
-	if err != nil {
-		return nil, err
+	if len(ca.Spec.Istio.Hosts) > 0 {
+		r.URL = fmt.Sprintf("https://%s:%d", ca.Spec.Istio.Hosts[0], ca.Spec.Istio.Port)
+		r.Host = ca.Spec.Istio.Hosts[0]
+		r.Port = ca.Spec.Istio.Port
+	} else {
+		svcName := GetServiceName(releaseName)
+		svc, err := clientSet.CoreV1().Services(ns).Get(ctx, svcName, v1.GetOptions{})
+		if err != nil {
+			return nil, err
+		}
+		nodePort := svc.Spec.Ports[0].NodePort
+		r.URL = fmt.Sprintf("https://%s:%d", k8sIP, nodePort)
+		r.Port = int(nodePort)
+		r.Host = k8sIP
 	}
-	nodePort := svc.Spec.Ports[0].NodePort
-	r.URL = fmt.Sprintf("https://%s:%d", k8sIP, nodePort)
-	r.Port = int(nodePort)
-	r.Host = k8sIP
 	tlsCrt, _, err := getExistingTLSCrypto(clientSet, releaseName, ns)
 	if err != nil {
 		return nil, err
@@ -608,15 +627,9 @@ func Reconcile(
 	isMemcachedMarkedToBeDeleted := hlf.GetDeletionTimestamp() != nil
 	if isMemcachedMarkedToBeDeleted {
 		if utils.Contains(hlf.GetFinalizers(), caFinalizer) {
-			// Run finalization logic for caFinalizer. If the
-			// finalization logic fails, don't remove the finalizer so
-			// that we can retry during the next reconciliation.
 			if err := r.finalizeCA(reqLogger, hlf); err != nil {
 				return ctrl.Result{}, err
 			}
-
-			// Remove caFinalizer. Once all finalizers have been
-			// removed, the object will be deleted.
 			controllerutil.RemoveFinalizer(hlf, caFinalizer)
 			err := r.Update(ctx, hlf)
 			if err != nil {
@@ -651,8 +664,18 @@ func Reconcile(
 
 	if exists {
 		// update
-		s, err := GetCAState(r.ClientSet, releaseName, ns)
+		s, err := GetCAState(r.ClientSet, hlf, releaseName, ns)
 		if err != nil {
+			return ctrl.Result{}, err
+		}
+		err = r.Get(ctx, req.NamespacedName, hlf)
+		if err != nil {
+			log.Printf("Error getting the object %s error=%v", req.NamespacedName, err)
+			if apierrors.IsNotFound(err) {
+				reqLogger.Info("CA resource not found. Ignoring since object must be deleted.")
+				return ctrl.Result{}, nil
+			}
+			reqLogger.Error(err, "Failed to get CA.")
 			return ctrl.Result{}, err
 		}
 		fca := hlf.DeepCopy()
@@ -670,57 +693,42 @@ func Reconcile(
 		})
 		if reflect.DeepEqual(fca.Status, hlf.Status) {
 			log.Printf("Status hasn't changed, skipping CA update")
+			c, err := GetConfig(hlf, clientSet, releaseName, req.Namespace)
+			if err != nil {
+				return ctrl.Result{}, err
+			}
+			inrec, err := json.Marshal(c)
+			if err != nil {
+				return ctrl.Result{}, err
+			}
+			var inInterface map[string]interface{}
+			err = json.Unmarshal(inrec, &inInterface)
+			if err != nil {
+				return ctrl.Result{}, err
+			}
+			cmd := action.NewUpgrade(cfg)
+			settings := cli.New()
+			chartPath, err := cmd.LocateChart(r.ChartPath, settings)
+			ch, err := loader.Load(chartPath)
+			if err != nil {
+				return ctrl.Result{}, err
+			}
+			release, err := cmd.Run(releaseName, ch, inInterface)
+			if err != nil {
+				return ctrl.Result{}, err
+			}
+			log.Printf("Chart upgraded %s", release.Name)
+
 		} else {
-			// TODO: DON'T UPGRADE IF NOT NEEDED TO
-			//cmdGet := action.NewGet(cfg)
-			//rel, err := cmdGet.Run(releaseName)
-			//if err != nil {
-			//	return ctrl.Result{}, err
-			//}
-			//ns := rel.Namespace
-			//if ns == "" {
-			//	ns = "default"
-			//}
-			//c, err := GetConfig(hlf, clientSet, releaseName, ns)
-			//if err != nil {
-			//	return ctrl.Result{}, err
-			//}
-			//inrec, err := json.Marshal(c)
-			//if err != nil {
-			//	return ctrl.Result{}, err
-			//}
-			//var inInterface map[string]interface{}
-			//err = json.Unmarshal(inrec, &inInterface)
-			//if err != nil {
-			//	return ctrl.Result{}, err
-			//}
-			//cmd := action.NewUpgrade(cfg)
-			//settings := cli.New()
-			//chartPath, err := cmd.LocateChart(chartPath, settings)
-			//ch, err := loader.Load(chartPath)
-			//if err != nil {
-			//	return ctrl.Result{}, err
-			//}
-			//release, err := cmd.Run(releaseName, ch, inInterface)
-			//if err != nil {
-			//	return ctrl.Result{}, err
-			//}
-			//log.Printf("Chart upgraded %s", release.Name)
 
 			if err := r.Status().Update(ctx, fca); err != nil {
 				log.Printf("Error updating the status: %v", err)
 				return ctrl.Result{}, err
 			}
-			if err := r.Status().Update(ctx, hlf); err != nil {
-				return ctrl.Result{}, err
-			}
 		}
 
 		if s.Status == hlfv1alpha1.RunningStatus {
-			return ctrl.Result{
-				Requeue:      false,
-				RequeueAfter: 0,
-			}, nil
+			return ctrl.Result{}, nil
 		} else {
 			return ctrl.Result{
 				Requeue:      false,

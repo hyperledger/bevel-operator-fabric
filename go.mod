@@ -70,7 +70,7 @@ require (
 	k8s.io/apiextensions-apiserver v0.18.4
 	k8s.io/apimachinery v0.18.4
 	k8s.io/cli-runtime v0.18.2
-	k8s.io/client-go v12.0.0+incompatible
+	k8s.io/client-go v0.18.4
 	k8s.io/kubectl v0.18.2 // indirect
 	k8s.io/kubernetes v1.13.0
 	rsc.io/letsencrypt v0.0.3 // indirect

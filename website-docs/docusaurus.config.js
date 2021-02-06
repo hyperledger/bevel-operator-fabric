@@ -1,6 +1,7 @@
 module.exports = {
-  title: "My Site",
-  tagline: "The tagline of my site",
+  title: "Hyperledger Fabric Operator",
+  tagline:
+    "Make easier and more secure deployments of Hyperledger Fabric on Kubernetes",
   url: "https://your-docusaurus-test-site.com",
   baseUrl: "/",
   onBrokenLinks: "throw",
@@ -55,9 +56,8 @@ module.exports = {
           label: "Docs",
           position: "left",
         },
-        // { to: "blog", label: "Blog", position: "left" },
         {
-          href: "https://github.com/facebook/docusaurus",
+          href: "https://github.com/kfsoftware/hlf-operator",
           label: "GitHub",
           position: "right",
         },
@@ -70,12 +70,24 @@ module.exports = {
           title: "Docs",
           items: [
             {
-              label: "Style Guide",
+              label: "Introduction",
               to: "docs/",
             },
             {
-              label: "Second Doc",
-              to: "docs/doc2/",
+              label: "Certificate Authority",
+              to: "docs/ca/",
+            },
+            {
+              label: "Peer",
+              to: "docs/peer/",
+            },
+            {
+              label: "Ordering Service",
+              to: "docs/orderer/",
+            },
+            {
+              label: "Kubectl Plugin",
+              to: "docs/kubectl-plugin/",
             },
           ],
         },
@@ -84,15 +96,11 @@ module.exports = {
           items: [
             {
               label: "Stack Overflow",
-              href: "https://stackoverflow.com/questions/tagged/docusaurus",
+              href: "https://stackoverflow.com/questions/tagged/hlf-operator",
             },
             {
-              label: "Discord",
-              href: "https://discordapp.com/invite/docusaurus",
-            },
-            {
-              label: "Twitter",
-              href: "https://twitter.com/docusaurus",
+              label: "Github Issues",
+              href: "https://github.com/kfsoftware/hlf-operator/issues",
             },
           ],
         },
@@ -100,17 +108,13 @@ module.exports = {
           title: "More",
           items: [
             {
-              label: "Blog",
-              to: "blog",
-            },
-            {
               label: "GitHub",
-              href: "https://github.com/facebook/docusaurus",
+              href: "https://github.com/kfsoftware/hlf-operator",
             },
           ],
         },
       ],
-      copyright: `Copyright © ${new Date().getFullYear()} My Project, Inc. Built with Docusaurus.`,
+      copyright: `Copyright © ${new Date().getFullYear()} HLF Operator, Inc. Built with Docusaurus.`,
     },
   },
   presets: [
@@ -122,13 +126,13 @@ module.exports = {
           sidebarPath: require.resolve("./sidebars.js"),
           // Please change this to your repo.
           editUrl:
-            "https://github.com/facebook/docusaurus/edit/master/website/",
+            "https://github.com/kfsoftware/hlf-operator/edit/master/website/",
         },
         blog: {
           showReadingTime: true,
           // Please change this to your repo.
           editUrl:
-            "https://github.com/facebook/docusaurus/edit/master/website/blog/",
+            "https://github.com/kfsoftware/hlf-operator/edit/master/website/blog/",
         },
         theme: {
           customCss: require.resolve("./src/css/custom.css"),

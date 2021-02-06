@@ -2,8 +2,17 @@ domain: kungfusoftware.es
 layout: go.kubebuilder.io/v2
 repo: github.com/kfsoftware/hlf-operator
 resources:
-- group: cache
+- group: hlf
   kind: FabricPeer
+  version: v1alpha1
+- group: hlf
+  kind: FabricOrderingService
+  version: v1alpha1
+- group: hlf
+  kind: FabricOrdererNode
+  version: v1alpha1
+- group: hlf
+  kind: FabricCA
   version: v1alpha1
 version: 3-alpha
 plugins:

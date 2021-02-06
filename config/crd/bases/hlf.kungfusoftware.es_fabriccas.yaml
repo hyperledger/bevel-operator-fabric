@@ -305,6 +305,17 @@ spec:
               image:
                 minLength: 1
                 type: string
+              istio:
+                properties:
+                  hosts:
+                    items:
+                      type: string
+                    type: array
+                  port:
+                    type: integer
+                required:
+                - port
+                type: object
               metrics:
                 properties:
                   provider:

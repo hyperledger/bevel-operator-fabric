@@ -1,6 +1,6 @@
 module.exports = {
   someSidebar: {
-    "Operator": ["intro", "ca", "peer", "orderer"],
+    "Operator": ["intro", "getting-started", "ca", "peer", "orderer", "api-reference"],
     "Kubectl Plugin": ["kubectl-plugin"],
   },
 };

@@ -20,8 +20,11 @@ import (
 	"flag"
 	"github.com/kfsoftware/hlf-operator/controllers/ordnode"
 	"github.com/kfsoftware/hlf-operator/controllers/utils"
+	log "github.com/sirupsen/logrus"
+	"k8s.io/client-go/rest"
 	"os"
 	"path/filepath"
+	"sigs.k8s.io/controller-runtime/pkg/client/config"
 
 	"github.com/kfsoftware/hlf-operator/controllers/ca"
 	"github.com/kfsoftware/hlf-operator/controllers/ordservice"
@@ -60,8 +63,18 @@ func main() {
 	flag.Parse()
 
 	ctrl.SetLogger(zap.New(zap.UseDevMode(true)))
-
-	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
+	kubeContext, exists := os.LookupEnv("KUBECONTEXT")
+	var restConfig *rest.Config
+	var err error
+	if exists {
+		restConfig, err = config.GetConfigWithContext(kubeContext)
+		if err != nil {
+			log.Fatalf("Failed to get context %s", kubeContext)
+		}
+	} else {
+		restConfig = ctrl.GetConfigOrDie()
+	}
+	mgr, err := ctrl.NewManager(restConfig, ctrl.Options{
 		Scheme:             scheme,
 		MetricsBindAddress: metricsAddr,
 		Port:               9443,
