@@ -2,13 +2,13 @@ module.exports = {
   title: "Hyperledger Fabric Operator",
   tagline:
     "Make easier and more secure deployments of Hyperledger Fabric on Kubernetes",
-  url: "https://your-docusaurus-test-site.com",
-  baseUrl: "/",
+  url: "https://kfsoftware.github.io",
+  baseUrl: "/hlf-operator/",
   onBrokenLinks: "throw",
   onBrokenMarkdownLinks: "warn",
   favicon: "img/favicon.ico",
-  organizationName: "facebook", // Usually your GitHub org/user name.
-  projectName: "docusaurus", // Usually your repo name.
+  organizationName: "kfsoftware", // Usually your GitHub org/user name.
+  projectName: "hlf-operator", // Usually your repo name.
   themeConfig: {
     colorMode: {
       // "light" | "dark"

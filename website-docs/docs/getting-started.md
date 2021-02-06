@@ -37,7 +37,7 @@ helm install hlf-operator ./chart/hlf-operator
 
 
 ```bash
-kubectl krew install --manifest=krew-plugin.yaml
+kubectl krew install hlf 
 ```
 
 ## Deploy a Peer Organization
