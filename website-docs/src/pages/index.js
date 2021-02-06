@@ -18,12 +18,11 @@ const features = [
     ),
   },
   {
-    title: 'Focus on What Matters',
+    title: 'Secure',
     imageUrl: 'img/undraw_docusaurus_tree.svg',
     description: (
       <>
-        Docusaurus lets you focus on your docs, and we&apos;ll do the chores. Go
-        ahead and move your docs into the <code>docs</code> directory.
+        Cryptographic operations needed to generate the cryptomaterial are executed within the Operator. Eliminating the need to store crypto material on the client side.
       </>
     ),
   },
@@ -32,7 +31,7 @@ const features = [
     imageUrl: 'img/undraw_docusaurus_react.svg',
     description: (
       <>
-        Perform all the operations through the command line
+        Perform all the operations through the command line using a Kubectl Plugin already indexed in <b>Krew</b>.
       </>
     ),
   },
