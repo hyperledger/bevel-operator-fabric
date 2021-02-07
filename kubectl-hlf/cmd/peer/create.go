@@ -103,7 +103,7 @@ func (c *createCmd) run() error {
 		Spec: v1alpha1.FabricPeerSpec{
 			DockerSocketPath: "/var/run/docker.sock",
 			Image:            c.peerOpts.Image,
-			Istio: v1alpha1.FabricPeerIstio{
+			Istio: &v1alpha1.FabricPeerIstio{
 				Port: 443,
 			},
 			Gossip: v1alpha1.FabricPeerSpecGossip{
