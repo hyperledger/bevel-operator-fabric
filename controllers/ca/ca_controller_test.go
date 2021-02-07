@@ -5,9 +5,6 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
-	"github.com/kfsoftware/hlf-operator/controllers/ordnode"
-	operatorv1alpha1 "github.com/kfsoftware/hlf-operator/pkg/client/clientset/versioned"
-	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"log"
 	"net"
 	"net/url"
@@ -15,6 +12,10 @@ import (
 	"strings"
 	"text/template"
 	"time"
+
+	"github.com/kfsoftware/hlf-operator/controllers/ordnode"
+	operatorv1alpha1 "github.com/kfsoftware/hlf-operator/pkg/client/clientset/versioned"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 
 	"github.com/Masterminds/sprig"
 	pb "github.com/hyperledger/fabric-protos-go/peer"
@@ -41,6 +42,8 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	k8sconfig "sigs.k8s.io/controller-runtime/pkg/client/config"
 
+	"path/filepath"
+
 	hlfv1alpha1 "github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
 	"github.com/kfsoftware/hlf-operator/controllers/ordservice"
 	"github.com/kfsoftware/hlf-operator/controllers/peer"
@@ -48,7 +51,6 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
-	"path/filepath"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
@@ -1515,7 +1517,7 @@ var _ = Describe("Fabric Controllers", func() {
 		Expect(createChannelResponse).ToNot(BeNil())
 
 		By("join the peer to the channel")
-		time.Sleep(2 * time.Second) // wait for the transaction to be committed
+		time.Sleep(4 * time.Second) // wait for the transaction to be committed
 		err = resClient.JoinChannel(
 			channelID,
 			resmgmt.WithTargetEndpoints("peer"),
