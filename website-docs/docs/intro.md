@@ -11,8 +11,6 @@ HLF Operator is a Kubernetes Operator built with the [operator sdk](https://sdk.
 - Ordering service nodes(OSN)
 - Certificate authorities
 
-You can see more info in https://google.es
-
 
 ## Why another tool to manage Hyperledger Fabric networks?
 There are some alternatives such as:
