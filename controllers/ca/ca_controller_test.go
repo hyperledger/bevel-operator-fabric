@@ -1327,7 +1327,7 @@ var _ = Describe("Fabric Controllers", func() {
 		Expect(err).ToNot(HaveOccurred())
 		Expect(installedRes).To(HaveLen(1))
 	})
-	FSpecify("create a new Fabric Orderer instance", func() {
+	Specify("create a new Fabric Orderer instance", func() {
 		releaseNameOrdCA := "org1-ca"
 		releaseNameOrd := "org1-orderer"
 		By("create a fabric ca")
