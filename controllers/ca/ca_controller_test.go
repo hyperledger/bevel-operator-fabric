@@ -362,6 +362,9 @@ func randomFabricCA(releaseName string, namespace string) *hlfv1alpha1.FabricCA 
 			Namespace: namespace,
 		},
 		Spec: hlfv1alpha1.FabricCASpec{
+			Istio: &hlfv1alpha1.FabricCAIstio{
+				Hosts: []string{},
+			},
 			Database: hlfv1alpha1.FabricCADatabase{
 				Type:       "sqlite3",
 				Datasource: "fabric-ca-server.db",
@@ -771,8 +774,9 @@ func createPeer(releaseName string, namespace string, params createPeerParams, c
 		Spec: hlfv1alpha1.FabricPeerSpec{
 			DockerSocketPath: "/var/run/docker.sock",
 			Image:            "quay.io/kfsoftware/fabric-peer",
-			Istio: hlfv1alpha1.FabricPeerIstio{
-				Port: 443,
+			Istio: &hlfv1alpha1.FabricPeerIstio{
+				Port:  443,
+				Hosts: []string{},
 			},
 			Gossip: hlfv1alpha1.FabricPeerSpecGossip{
 				ExternalEndpoint:  "",
@@ -818,7 +822,7 @@ func createPeer(releaseName string, namespace string, params createPeerParams, c
 				},
 			},
 			Service: hlfv1alpha1.PeerService{
-				Type: "NodePort",
+				Type: hlfv1alpha1.ServiceTypeNodePort,
 			},
 			StateDb: "leveldb",
 			Storage: hlfv1alpha1.FabricPeerStorage{
@@ -1113,6 +1117,9 @@ var _ = Describe("Fabric Controllers", func() {
 				Namespace: FabricNamespace,
 			},
 			Spec: hlfv1alpha1.FabricCASpec{
+				Istio: &hlfv1alpha1.FabricCAIstio{
+					Hosts: []string{},
+				},
 				Database: hlfv1alpha1.FabricCADatabase{
 					Type:       "sqlite3",
 					Datasource: "fabric-ca-server.db",
@@ -1318,7 +1325,7 @@ var _ = Describe("Fabric Controllers", func() {
 		Expect(err).ToNot(HaveOccurred())
 		Expect(installedRes).To(HaveLen(1))
 	})
-	Specify("create a new Fabric Orderer instance", func() {
+	FSpecify("create a new Fabric Orderer instance", func() {
 		releaseNameOrdCA := "org1-ca"
 		releaseNameOrd := "org1-orderer"
 		By("create a fabric ca")

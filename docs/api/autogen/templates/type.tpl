@@ -6,7 +6,7 @@
     </h3>
     {{ with (typeReferences .) }}
         <p>
-            (<em>Appears on:</em>
+            (<em>Appears on: </em>
             {{- $prev := "" -}}
             {{- range . -}}
                 {{- if $prev -}}, {{ end -}}

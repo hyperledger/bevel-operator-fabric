@@ -209,7 +209,7 @@ func getConfig(conf *hlfv1alpha1.FabricOrderingService, client *kubernetes.Clien
 			TLSRootCert:  string(tlsRootCRTEncoded),
 			Hosts:        ingressHosts,
 			Service: Service{
-				Type:            spec.Service.Type,
+				Type:            string(spec.Service.Type),
 				NodePortRequest: requestNodePort,
 			},
 		})

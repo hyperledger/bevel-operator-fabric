@@ -84,6 +84,7 @@ FabricCAIstio
 </em>
 </td>
 <td>
+<em>(Optional)</em>
 </td>
 </tr>
 <tr>
@@ -725,6 +726,7 @@ FabricPeerIstio
 </em>
 </td>
 <td>
+<em>(Optional)</em>
 </td>
 </tr>
 <tr>
@@ -925,14 +927,14 @@ FabricPeerStatus
 <h3 id="hlf.kungfusoftware.es/v1alpha1.AccessMode">AccessMode
 (<code>string</code> alias)</h3>
 <p>
-(<em>Appears on:</em><a href="#hlf.kungfusoftware.es/v1alpha1.Storage">Storage</a>)
+(<em>Appears on: </em><a href="#hlf.kungfusoftware.es/v1alpha1.Storage">Storage</a>)
 </p>
 <p>
 </p>
 <h3 id="hlf.kungfusoftware.es/v1alpha1.ApplicationCapabilities">ApplicationCapabilities
 </h3>
 <p>
-(<em>Appears on:</em><a href="#hlf.kungfusoftware.es/v1alpha1.ChannelConfig">ChannelConfig</a>)
+(<em>Appears on: </em><a href="#hlf.kungfusoftware.es/v1alpha1.ChannelConfig">ChannelConfig</a>)
 </p>
 <p>
 </p>
@@ -1013,7 +1015,7 @@ string
 <h3 id="hlf.kungfusoftware.es/v1alpha1.Catls">Catls
 </h3>
 <p>
-(<em>Appears on:</em><a href="#hlf.kungfusoftware.es/v1alpha1.Component">Component</a>, <a href="#hlf.kungfusoftware.es/v1alpha1.TLS">TLS</a>)
+(<em>Appears on: </em><a href="#hlf.kungfusoftware.es/v1alpha1.Component">Component</a>, <a href="#hlf.kungfusoftware.es/v1alpha1.TLS">TLS</a>)
 </p>
 <p>
 </p>
@@ -1040,7 +1042,7 @@ string
 <h3 id="hlf.kungfusoftware.es/v1alpha1.ChannelCapabilities">ChannelCapabilities
 </h3>
 <p>
-(<em>Appears on:</em><a href="#hlf.kungfusoftware.es/v1alpha1.ChannelConfig">ChannelConfig</a>)
+(<em>Appears on: </em><a href="#hlf.kungfusoftware.es/v1alpha1.ChannelConfig">ChannelConfig</a>)
 </p>
 <p>
 </p>
@@ -1067,7 +1069,7 @@ bool
 <h3 id="hlf.kungfusoftware.es/v1alpha1.ChannelConfig">ChannelConfig
 </h3>
 <p>
-(<em>Appears on:</em><a href="#hlf.kungfusoftware.es/v1alpha1.OrdererSystemChannel">OrdererSystemChannel</a>)
+(<em>Appears on: </em><a href="#hlf.kungfusoftware.es/v1alpha1.OrdererSystemChannel">OrdererSystemChannel</a>)
 </p>
 <p>
 </p>
@@ -1210,7 +1212,7 @@ int
 <h3 id="hlf.kungfusoftware.es/v1alpha1.Component">Component
 </h3>
 <p>
-(<em>Appears on:</em><a href="#hlf.kungfusoftware.es/v1alpha1.Enrollment">Enrollment</a>, <a href="#hlf.kungfusoftware.es/v1alpha1.OrdererEnrollment">OrdererEnrollment</a>)
+(<em>Appears on: </em><a href="#hlf.kungfusoftware.es/v1alpha1.Enrollment">Enrollment</a>, <a href="#hlf.kungfusoftware.es/v1alpha1.OrdererEnrollment">OrdererEnrollment</a>)
 </p>
 <p>
 </p>
@@ -1289,7 +1291,7 @@ string
 <h3 id="hlf.kungfusoftware.es/v1alpha1.Cors">Cors
 </h3>
 <p>
-(<em>Appears on:</em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricCASpec">FabricCASpec</a>)
+(<em>Appears on: </em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricCASpec">FabricCASpec</a>)
 </p>
 <p>
 </p>
@@ -1326,7 +1328,7 @@ bool
 <h3 id="hlf.kungfusoftware.es/v1alpha1.Csr">Csr
 </h3>
 <p>
-(<em>Appears on:</em><a href="#hlf.kungfusoftware.es/v1alpha1.OrdererNodeEnrollmentTLS">OrdererNodeEnrollmentTLS</a>, <a href="#hlf.kungfusoftware.es/v1alpha1.TLS">TLS</a>)
+(<em>Appears on: </em><a href="#hlf.kungfusoftware.es/v1alpha1.OrdererNodeEnrollmentTLS">OrdererNodeEnrollmentTLS</a>, <a href="#hlf.kungfusoftware.es/v1alpha1.TLS">TLS</a>)
 </p>
 <p>
 </p>
@@ -1365,7 +1367,7 @@ string
 <h3 id="hlf.kungfusoftware.es/v1alpha1.DeploymentStatus">DeploymentStatus
 (<code>string</code> alias)</h3>
 <p>
-(<em>Appears on:</em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricCAStatus">FabricCAStatus</a>, <a href="#hlf.kungfusoftware.es/v1alpha1.FabricOrdererNodeStatus">FabricOrdererNodeStatus</a>, <a href="#hlf.kungfusoftware.es/v1alpha1.FabricOrderingServiceStatus">FabricOrderingServiceStatus</a>, <a href="#hlf.kungfusoftware.es/v1alpha1.FabricPeerStatus">FabricPeerStatus</a>)
+(<em>Appears on: </em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricCAStatus">FabricCAStatus</a>, <a href="#hlf.kungfusoftware.es/v1alpha1.FabricOrdererNodeStatus">FabricOrdererNodeStatus</a>, <a href="#hlf.kungfusoftware.es/v1alpha1.FabricOrderingServiceStatus">FabricOrderingServiceStatus</a>, <a href="#hlf.kungfusoftware.es/v1alpha1.FabricPeerStatus">FabricPeerStatus</a>)
 </p>
 <p>
 </p>
@@ -1389,7 +1391,7 @@ string
 <h3 id="hlf.kungfusoftware.es/v1alpha1.Enrollment">Enrollment
 </h3>
 <p>
-(<em>Appears on:</em><a href="#hlf.kungfusoftware.es/v1alpha1.Secret">Secret</a>)
+(<em>Appears on: </em><a href="#hlf.kungfusoftware.es/v1alpha1.Secret">Secret</a>)
 </p>
 <p>
 </p>
@@ -1430,7 +1432,7 @@ TLS
 <h3 id="hlf.kungfusoftware.es/v1alpha1.FabricCABCCSP">FabricCABCCSP
 </h3>
 <p>
-(<em>Appears on:</em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricCAItemConf">FabricCAItemConf</a>)
+(<em>Appears on: </em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricCAItemConf">FabricCAItemConf</a>)
 </p>
 <p>
 </p>
@@ -1469,7 +1471,7 @@ FabricCABCCSPSW
 <h3 id="hlf.kungfusoftware.es/v1alpha1.FabricCABCCSPSW">FabricCABCCSPSW
 </h3>
 <p>
-(<em>Appears on:</em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricCABCCSP">FabricCABCCSP</a>)
+(<em>Appears on: </em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricCABCCSP">FabricCABCCSP</a>)
 </p>
 <p>
 </p>
@@ -1506,7 +1508,7 @@ string
 <h3 id="hlf.kungfusoftware.es/v1alpha1.FabricCACFG">FabricCACFG
 </h3>
 <p>
-(<em>Appears on:</em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricCAItemConf">FabricCAItemConf</a>)
+(<em>Appears on: </em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricCAItemConf">FabricCAItemConf</a>)
 </p>
 <p>
 </p>
@@ -1547,7 +1549,7 @@ FabricCACFGAffilitions
 <h3 id="hlf.kungfusoftware.es/v1alpha1.FabricCACFGAffilitions">FabricCACFGAffilitions
 </h3>
 <p>
-(<em>Appears on:</em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricCACFG">FabricCACFG</a>)
+(<em>Appears on: </em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricCACFG">FabricCACFG</a>)
 </p>
 <p>
 </p>
@@ -1574,7 +1576,7 @@ bool
 <h3 id="hlf.kungfusoftware.es/v1alpha1.FabricCACFGIdentities">FabricCACFGIdentities
 </h3>
 <p>
-(<em>Appears on:</em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricCACFG">FabricCACFG</a>)
+(<em>Appears on: </em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricCACFG">FabricCACFG</a>)
 </p>
 <p>
 </p>
@@ -1601,7 +1603,7 @@ bool
 <h3 id="hlf.kungfusoftware.es/v1alpha1.FabricCACRL">FabricCACRL
 </h3>
 <p>
-(<em>Appears on:</em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricCAItemConf">FabricCAItemConf</a>)
+(<em>Appears on: </em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricCAItemConf">FabricCAItemConf</a>)
 </p>
 <p>
 </p>
@@ -1628,7 +1630,7 @@ string
 <h3 id="hlf.kungfusoftware.es/v1alpha1.FabricCACSR">FabricCACSR
 </h3>
 <p>
-(<em>Appears on:</em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricCAItemConf">FabricCAItemConf</a>)
+(<em>Appears on: </em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricCAItemConf">FabricCAItemConf</a>)
 </p>
 <p>
 </p>
@@ -1689,7 +1691,7 @@ FabricCACSRCA
 <h3 id="hlf.kungfusoftware.es/v1alpha1.FabricCACSRCA">FabricCACSRCA
 </h3>
 <p>
-(<em>Appears on:</em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricCACSR">FabricCACSR</a>)
+(<em>Appears on: </em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricCACSR">FabricCACSR</a>)
 </p>
 <p>
 </p>
@@ -1726,7 +1728,7 @@ int
 <h3 id="hlf.kungfusoftware.es/v1alpha1.FabricCADatabase">FabricCADatabase
 </h3>
 <p>
-(<em>Appears on:</em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricCASpec">FabricCASpec</a>)
+(<em>Appears on: </em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricCASpec">FabricCASpec</a>)
 </p>
 <p>
 </p>
@@ -1763,7 +1765,7 @@ string
 <h3 id="hlf.kungfusoftware.es/v1alpha1.FabricCAIdentity">FabricCAIdentity
 </h3>
 <p>
-(<em>Appears on:</em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricCARegistry">FabricCARegistry</a>)
+(<em>Appears on: </em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricCARegistry">FabricCARegistry</a>)
 </p>
 <p>
 </p>
@@ -1832,7 +1834,7 @@ FabricCAIdentityAttrs
 <h3 id="hlf.kungfusoftware.es/v1alpha1.FabricCAIdentityAttrs">FabricCAIdentityAttrs
 </h3>
 <p>
-(<em>Appears on:</em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricCAIdentity">FabricCAIdentity</a>)
+(<em>Appears on: </em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricCAIdentity">FabricCAIdentity</a>)
 </p>
 <p>
 </p>
@@ -1919,7 +1921,7 @@ bool
 <h3 id="hlf.kungfusoftware.es/v1alpha1.FabricCAIntermediate">FabricCAIntermediate
 </h3>
 <p>
-(<em>Appears on:</em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricCAItemConf">FabricCAItemConf</a>)
+(<em>Appears on: </em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricCAItemConf">FabricCAItemConf</a>)
 </p>
 <p>
 </p>
@@ -1992,7 +1994,7 @@ string
 <h3 id="hlf.kungfusoftware.es/v1alpha1.FabricCAIntermediateParentServer">FabricCAIntermediateParentServer
 </h3>
 <p>
-(<em>Appears on:</em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricCAIntermediate">FabricCAIntermediate</a>)
+(<em>Appears on: </em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricCAIntermediate">FabricCAIntermediate</a>)
 </p>
 <p>
 </p>
@@ -2065,7 +2067,7 @@ FabricCAIntermediateTLSClient
 <h3 id="hlf.kungfusoftware.es/v1alpha1.FabricCAIntermediateTLSClient">FabricCAIntermediateTLSClient
 </h3>
 <p>
-(<em>Appears on:</em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricCAIntermediateTLS">FabricCAIntermediateTLS</a>)
+(<em>Appears on: </em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricCAIntermediateTLS">FabricCAIntermediateTLS</a>)
 </p>
 <p>
 </p>
@@ -2102,7 +2104,7 @@ string
 <h3 id="hlf.kungfusoftware.es/v1alpha1.FabricCAIstio">FabricCAIstio
 </h3>
 <p>
-(<em>Appears on:</em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricCASpec">FabricCASpec</a>)
+(<em>Appears on: </em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricCASpec">FabricCASpec</a>)
 </p>
 <p>
 </p>
@@ -2139,7 +2141,7 @@ int
 <h3 id="hlf.kungfusoftware.es/v1alpha1.FabricCAItemConf">FabricCAItemConf
 </h3>
 <p>
-(<em>Appears on:</em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricCASpec">FabricCASpec</a>)
+(<em>Appears on: </em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricCASpec">FabricCASpec</a>)
 </p>
 <p>
 </p>
@@ -2250,7 +2252,7 @@ FabricCABCCSP
 <h3 id="hlf.kungfusoftware.es/v1alpha1.FabricCAMetrics">FabricCAMetrics
 </h3>
 <p>
-(<em>Appears on:</em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricCASpec">FabricCASpec</a>)
+(<em>Appears on: </em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricCASpec">FabricCASpec</a>)
 </p>
 <p>
 </p>
@@ -2290,7 +2292,7 @@ FabricCAMetricsStatsd
 <h3 id="hlf.kungfusoftware.es/v1alpha1.FabricCAMetricsStatsd">FabricCAMetricsStatsd
 </h3>
 <p>
-(<em>Appears on:</em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricCAMetrics">FabricCAMetrics</a>)
+(<em>Appears on: </em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricCAMetrics">FabricCAMetrics</a>)
 </p>
 <p>
 </p>
@@ -2350,7 +2352,7 @@ string
 <h3 id="hlf.kungfusoftware.es/v1alpha1.FabricCANames">FabricCANames
 </h3>
 <p>
-(<em>Appears on:</em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricCACSR">FabricCACSR</a>)
+(<em>Appears on: </em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricCACSR">FabricCACSR</a>)
 </p>
 <p>
 </p>
@@ -2417,7 +2419,7 @@ string
 <h3 id="hlf.kungfusoftware.es/v1alpha1.FabricCARegistry">FabricCARegistry
 </h3>
 <p>
-(<em>Appears on:</em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricCAItemConf">FabricCAItemConf</a>)
+(<em>Appears on: </em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricCAItemConf">FabricCAItemConf</a>)
 </p>
 <p>
 </p>
@@ -2456,7 +2458,7 @@ int
 <h3 id="hlf.kungfusoftware.es/v1alpha1.FabricCASpec">FabricCASpec
 </h3>
 <p>
-(<em>Appears on:</em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricCA">FabricCA</a>)
+(<em>Appears on: </em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricCA">FabricCA</a>)
 </p>
 <p>
 <p>FabricCASpec defines the desired state of FabricCA</p>
@@ -2479,6 +2481,7 @@ FabricCAIstio
 </em>
 </td>
 <td>
+<em>(Optional)</em>
 </td>
 </tr>
 <tr>
@@ -2645,7 +2648,7 @@ FabricCAMetrics
 <h3 id="hlf.kungfusoftware.es/v1alpha1.FabricCASpecService">FabricCASpecService
 </h3>
 <p>
-(<em>Appears on:</em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricCASpec">FabricCASpec</a>)
+(<em>Appears on: </em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricCASpec">FabricCASpec</a>)
 </p>
 <p>
 </p>
@@ -2661,7 +2664,9 @@ FabricCAMetrics
 <td>
 <code>type</code><br/>
 <em>
-string
+<a href="#hlf.kungfusoftware.es/v1alpha1.ServiceType">
+ServiceType
+</a>
 </em>
 </td>
 <td>
@@ -2672,7 +2677,7 @@ string
 <h3 id="hlf.kungfusoftware.es/v1alpha1.FabricCAStatus">FabricCAStatus
 </h3>
 <p>
-(<em>Appears on:</em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricCA">FabricCA</a>)
+(<em>Appears on: </em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricCA">FabricCA</a>)
 </p>
 <p>
 <p>FabricCAStatus defines the observed state of FabricCA</p>
@@ -2789,7 +2794,7 @@ string
 <h3 id="hlf.kungfusoftware.es/v1alpha1.FabricCASubject">FabricCASubject
 </h3>
 <p>
-(<em>Appears on:</em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricCAItemConf">FabricCAItemConf</a>, <a href="#hlf.kungfusoftware.es/v1alpha1.FabricCATLSConf">FabricCATLSConf</a>)
+(<em>Appears on: </em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricCAItemConf">FabricCAItemConf</a>, <a href="#hlf.kungfusoftware.es/v1alpha1.FabricCATLSConf">FabricCATLSConf</a>)
 </p>
 <p>
 </p>
@@ -2866,7 +2871,7 @@ string
 <h3 id="hlf.kungfusoftware.es/v1alpha1.FabricCATLSConf">FabricCATLSConf
 </h3>
 <p>
-(<em>Appears on:</em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricCASpec">FabricCASpec</a>)
+(<em>Appears on: </em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricCASpec">FabricCASpec</a>)
 </p>
 <p>
 </p>
@@ -2895,7 +2900,7 @@ FabricCASubject
 <h3 id="hlf.kungfusoftware.es/v1alpha1.FabricOrdererNodeSpec">FabricOrdererNodeSpec
 </h3>
 <p>
-(<em>Appears on:</em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricOrdererNode">FabricOrdererNode</a>)
+(<em>Appears on: </em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricOrdererNode">FabricOrdererNode</a>)
 </p>
 <p>
 <p>FabricOrderingServiceSpec defines the desired state of FabricOrderingService</p>
@@ -3057,7 +3062,7 @@ string
 <h3 id="hlf.kungfusoftware.es/v1alpha1.FabricOrdererNodeStatus">FabricOrdererNodeStatus
 </h3>
 <p>
-(<em>Appears on:</em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricOrdererNode">FabricOrdererNode</a>)
+(<em>Appears on: </em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricOrdererNode">FabricOrdererNode</a>)
 </p>
 <p>
 <p>FabricOrdererNodeStatus defines the observed state of FabricOrdererNode</p>
@@ -3129,7 +3134,7 @@ int
 <h3 id="hlf.kungfusoftware.es/v1alpha1.FabricOrderingServiceSpec">FabricOrderingServiceSpec
 </h3>
 <p>
-(<em>Appears on:</em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricOrderingService">FabricOrderingService</a>)
+(<em>Appears on: </em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricOrderingService">FabricOrderingService</a>)
 </p>
 <p>
 <p>FabricOrderingServiceSpec defines the desired state of FabricOrderingService</p>
@@ -3237,7 +3242,7 @@ OrdererSystemChannel
 <h3 id="hlf.kungfusoftware.es/v1alpha1.FabricOrderingServiceStatus">FabricOrderingServiceStatus
 </h3>
 <p>
-(<em>Appears on:</em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricOrderingService">FabricOrderingService</a>)
+(<em>Appears on: </em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricOrderingService">FabricOrderingService</a>)
 </p>
 <p>
 <p>FabricOrderingServiceStatus defines the observed state of FabricOrderingService</p>
@@ -3277,7 +3282,7 @@ DeploymentStatus
 <h3 id="hlf.kungfusoftware.es/v1alpha1.FabricPeerCouchDB">FabricPeerCouchDB
 </h3>
 <p>
-(<em>Appears on:</em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricPeerSpec">FabricPeerSpec</a>)
+(<em>Appears on: </em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricPeerSpec">FabricPeerSpec</a>)
 </p>
 <p>
 </p>
@@ -3314,7 +3319,7 @@ string
 <h3 id="hlf.kungfusoftware.es/v1alpha1.FabricPeerDiscovery">FabricPeerDiscovery
 </h3>
 <p>
-(<em>Appears on:</em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricPeerSpec">FabricPeerSpec</a>)
+(<em>Appears on: </em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricPeerSpec">FabricPeerSpec</a>)
 </p>
 <p>
 </p>
@@ -3351,7 +3356,7 @@ string
 <h3 id="hlf.kungfusoftware.es/v1alpha1.FabricPeerIstio">FabricPeerIstio
 </h3>
 <p>
-(<em>Appears on:</em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricPeerSpec">FabricPeerSpec</a>)
+(<em>Appears on: </em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricPeerSpec">FabricPeerSpec</a>)
 </p>
 <p>
 </p>
@@ -3375,12 +3380,13 @@ int
 </tr>
 <tr>
 <td>
-<code>hosts</code><br/>
+<code>hosts:omitempty</code><br/>
 <em>
 []string
 </em>
 </td>
 <td>
+<em>(Optional)</em>
 </td>
 </tr>
 </tbody>
@@ -3388,7 +3394,7 @@ int
 <h3 id="hlf.kungfusoftware.es/v1alpha1.FabricPeerLogging">FabricPeerLogging
 </h3>
 <p>
-(<em>Appears on:</em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricPeerSpec">FabricPeerSpec</a>)
+(<em>Appears on: </em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricPeerSpec">FabricPeerSpec</a>)
 </p>
 <p>
 </p>
@@ -3485,7 +3491,7 @@ string
 <h3 id="hlf.kungfusoftware.es/v1alpha1.FabricPeerResources">FabricPeerResources
 </h3>
 <p>
-(<em>Appears on:</em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricPeerSpec">FabricPeerSpec</a>)
+(<em>Appears on: </em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricPeerSpec">FabricPeerSpec</a>)
 </p>
 <p>
 </p>
@@ -3538,7 +3544,7 @@ Resources
 <h3 id="hlf.kungfusoftware.es/v1alpha1.FabricPeerSpec">FabricPeerSpec
 </h3>
 <p>
-(<em>Appears on:</em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricPeer">FabricPeer</a>)
+(<em>Appears on: </em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricPeer">FabricPeer</a>)
 </p>
 <p>
 <p>FabricPeerSpec defines the desired state of FabricPeer</p>
@@ -3581,6 +3587,7 @@ FabricPeerIstio
 </em>
 </td>
 <td>
+<em>(Optional)</em>
 </td>
 </tr>
 <tr>
@@ -3766,7 +3773,7 @@ FabricPeerResources
 <h3 id="hlf.kungfusoftware.es/v1alpha1.FabricPeerSpecGossip">FabricPeerSpecGossip
 </h3>
 <p>
-(<em>Appears on:</em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricPeerSpec">FabricPeerSpec</a>)
+(<em>Appears on: </em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricPeerSpec">FabricPeerSpec</a>)
 </p>
 <p>
 </p>
@@ -3833,7 +3840,7 @@ bool
 <h3 id="hlf.kungfusoftware.es/v1alpha1.FabricPeerStatus">FabricPeerStatus
 </h3>
 <p>
-(<em>Appears on:</em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricPeer">FabricPeer</a>)
+(<em>Appears on: </em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricPeer">FabricPeer</a>)
 </p>
 <p>
 <p>FabricPeerStatus defines the observed state of FabricPeer</p>
@@ -3903,7 +3910,7 @@ string
 <h3 id="hlf.kungfusoftware.es/v1alpha1.FabricPeerStorage">FabricPeerStorage
 </h3>
 <p>
-(<em>Appears on:</em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricPeerSpec">FabricPeerSpec</a>)
+(<em>Appears on: </em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricPeerSpec">FabricPeerSpec</a>)
 </p>
 <p>
 </p>
@@ -3964,7 +3971,7 @@ Storage
 <h3 id="hlf.kungfusoftware.es/v1alpha1.OrdererCapabilities">OrdererCapabilities
 </h3>
 <p>
-(<em>Appears on:</em><a href="#hlf.kungfusoftware.es/v1alpha1.ChannelConfig">ChannelConfig</a>)
+(<em>Appears on: </em><a href="#hlf.kungfusoftware.es/v1alpha1.ChannelConfig">ChannelConfig</a>)
 </p>
 <p>
 </p>
@@ -3991,7 +3998,7 @@ bool
 <h3 id="hlf.kungfusoftware.es/v1alpha1.OrdererEnrollment">OrdererEnrollment
 </h3>
 <p>
-(<em>Appears on:</em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricOrderingServiceSpec">FabricOrderingServiceSpec</a>)
+(<em>Appears on: </em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricOrderingServiceSpec">FabricOrderingServiceSpec</a>)
 </p>
 <p>
 </p>
@@ -4032,7 +4039,7 @@ TLS
 <h3 id="hlf.kungfusoftware.es/v1alpha1.OrdererNode">OrdererNode
 </h3>
 <p>
-(<em>Appears on:</em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricOrderingServiceSpec">FabricOrderingServiceSpec</a>)
+(<em>Appears on: </em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricOrderingServiceSpec">FabricOrderingServiceSpec</a>)
 </p>
 <p>
 </p>
@@ -4093,7 +4100,7 @@ OrdererNodeEnrollment
 <h3 id="hlf.kungfusoftware.es/v1alpha1.OrdererNodeEnrollment">OrdererNodeEnrollment
 </h3>
 <p>
-(<em>Appears on:</em><a href="#hlf.kungfusoftware.es/v1alpha1.OrdererNode">OrdererNode</a>)
+(<em>Appears on: </em><a href="#hlf.kungfusoftware.es/v1alpha1.OrdererNode">OrdererNode</a>)
 </p>
 <p>
 </p>
@@ -4122,7 +4129,7 @@ OrdererNodeEnrollmentTLS
 <h3 id="hlf.kungfusoftware.es/v1alpha1.OrdererNodeEnrollmentTLS">OrdererNodeEnrollmentTLS
 </h3>
 <p>
-(<em>Appears on:</em><a href="#hlf.kungfusoftware.es/v1alpha1.OrdererNodeEnrollment">OrdererNodeEnrollment</a>)
+(<em>Appears on: </em><a href="#hlf.kungfusoftware.es/v1alpha1.OrdererNodeEnrollment">OrdererNodeEnrollment</a>)
 </p>
 <p>
 </p>
@@ -4152,7 +4159,7 @@ Csr
 <h3 id="hlf.kungfusoftware.es/v1alpha1.OrdererNodeService">OrdererNodeService
 </h3>
 <p>
-(<em>Appears on:</em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricOrdererNodeSpec">FabricOrdererNodeSpec</a>)
+(<em>Appears on: </em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricOrdererNodeSpec">FabricOrdererNodeSpec</a>)
 </p>
 <p>
 </p>
@@ -4199,7 +4206,7 @@ int
 <h3 id="hlf.kungfusoftware.es/v1alpha1.OrdererService">OrdererService
 </h3>
 <p>
-(<em>Appears on:</em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricOrderingServiceSpec">FabricOrderingServiceSpec</a>)
+(<em>Appears on: </em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricOrderingServiceSpec">FabricOrderingServiceSpec</a>)
 </p>
 <p>
 </p>
@@ -4215,7 +4222,9 @@ int
 <td>
 <code>type</code><br/>
 <em>
-string
+<a href="#hlf.kungfusoftware.es/v1alpha1.ServiceType">
+ServiceType
+</a>
 </em>
 </td>
 <td>
@@ -4226,7 +4235,7 @@ string
 <h3 id="hlf.kungfusoftware.es/v1alpha1.OrdererSystemChannel">OrdererSystemChannel
 </h3>
 <p>
-(<em>Appears on:</em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricOrderingServiceSpec">FabricOrderingServiceSpec</a>)
+(<em>Appears on: </em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricOrderingServiceSpec">FabricOrderingServiceSpec</a>)
 </p>
 <p>
 </p>
@@ -4265,7 +4274,7 @@ ChannelConfig
 <h3 id="hlf.kungfusoftware.es/v1alpha1.PeerService">PeerService
 </h3>
 <p>
-(<em>Appears on:</em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricPeerSpec">FabricPeerSpec</a>)
+(<em>Appears on: </em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricPeerSpec">FabricPeerSpec</a>)
 </p>
 <p>
 </p>
@@ -4281,7 +4290,9 @@ ChannelConfig
 <td>
 <code>type</code><br/>
 <em>
-string
+<a href="#hlf.kungfusoftware.es/v1alpha1.ServiceType">
+ServiceType
+</a>
 </em>
 </td>
 <td>
@@ -4292,7 +4303,7 @@ string
 <h3 id="hlf.kungfusoftware.es/v1alpha1.Requests">Requests
 </h3>
 <p>
-(<em>Appears on:</em><a href="#hlf.kungfusoftware.es/v1alpha1.Resources">Resources</a>)
+(<em>Appears on: </em><a href="#hlf.kungfusoftware.es/v1alpha1.Resources">Resources</a>)
 </p>
 <p>
 </p>
@@ -4329,7 +4340,7 @@ string
 <h3 id="hlf.kungfusoftware.es/v1alpha1.RequestsLimit">RequestsLimit
 </h3>
 <p>
-(<em>Appears on:</em><a href="#hlf.kungfusoftware.es/v1alpha1.Resources">Resources</a>)
+(<em>Appears on: </em><a href="#hlf.kungfusoftware.es/v1alpha1.Resources">Resources</a>)
 </p>
 <p>
 </p>
@@ -4366,7 +4377,7 @@ string
 <h3 id="hlf.kungfusoftware.es/v1alpha1.Resources">Resources
 </h3>
 <p>
-(<em>Appears on:</em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricCASpec">FabricCASpec</a>, <a href="#hlf.kungfusoftware.es/v1alpha1.FabricPeerResources">FabricPeerResources</a>)
+(<em>Appears on: </em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricCASpec">FabricCASpec</a>, <a href="#hlf.kungfusoftware.es/v1alpha1.FabricPeerResources">FabricPeerResources</a>)
 </p>
 <p>
 </p>
@@ -4407,7 +4418,7 @@ RequestsLimit
 <h3 id="hlf.kungfusoftware.es/v1alpha1.Secret">Secret
 </h3>
 <p>
-(<em>Appears on:</em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricPeerSpec">FabricPeerSpec</a>)
+(<em>Appears on: </em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricPeerSpec">FabricPeerSpec</a>)
 </p>
 <p>
 </p>
@@ -4449,7 +4460,9 @@ Enrollment
 <td>
 <code>type</code><br/>
 <em>
-string
+<a href="#hlf.kungfusoftware.es/v1alpha1.ServiceType">
+ServiceType
+</a>
 </em>
 </td>
 <td>
@@ -4457,17 +4470,39 @@ string
 </tr>
 </tbody>
 </table>
+<h3 id="hlf.kungfusoftware.es/v1alpha1.ServiceType">ServiceType
+(<code>string</code> alias)</h3>
+<p>
+(<em>Appears on: </em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricCASpecService">FabricCASpecService</a>, <a href="#hlf.kungfusoftware.es/v1alpha1.OrdererService">OrdererService</a>, <a href="#hlf.kungfusoftware.es/v1alpha1.PeerService">PeerService</a>, <a href="#hlf.kungfusoftware.es/v1alpha1.Service">Service</a>)
+</p>
+<p>
+</p>
 <h3 id="hlf.kungfusoftware.es/v1alpha1.StateDB">StateDB
 (<code>string</code> alias)</h3>
 <p>
-(<em>Appears on:</em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricPeerSpec">FabricPeerSpec</a>)
+(<em>Appears on: </em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricPeerSpec">FabricPeerSpec</a>)
 </p>
 <p>
 </p>
+<table>
+<thead>
+<tr>
+<th>Value</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr><td><p>&#34;couchdb&#34;</p></td>
+<td><p>Use CouchDB database</p>
+</td>
+</tr><tr><td><p>&#34;leveldb&#34;</p></td>
+<td><p>Use LevelDB database</p>
+</td>
+</tr></tbody>
+</table>
 <h3 id="hlf.kungfusoftware.es/v1alpha1.Storage">Storage
 </h3>
 <p>
-(<em>Appears on:</em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricCASpec">FabricCASpec</a>, <a href="#hlf.kungfusoftware.es/v1alpha1.FabricOrdererNodeSpec">FabricOrdererNodeSpec</a>, <a href="#hlf.kungfusoftware.es/v1alpha1.FabricOrderingServiceSpec">FabricOrderingServiceSpec</a>, <a href="#hlf.kungfusoftware.es/v1alpha1.FabricPeerStorage">FabricPeerStorage</a>)
+(<em>Appears on: </em><a href="#hlf.kungfusoftware.es/v1alpha1.FabricCASpec">FabricCASpec</a>, <a href="#hlf.kungfusoftware.es/v1alpha1.FabricOrdererNodeSpec">FabricOrdererNodeSpec</a>, <a href="#hlf.kungfusoftware.es/v1alpha1.FabricOrderingServiceSpec">FabricOrderingServiceSpec</a>, <a href="#hlf.kungfusoftware.es/v1alpha1.FabricPeerStorage">FabricPeerStorage</a>)
 </p>
 <p>
 </p>
@@ -4517,7 +4552,7 @@ AccessMode
 <h3 id="hlf.kungfusoftware.es/v1alpha1.TLS">TLS
 </h3>
 <p>
-(<em>Appears on:</em><a href="#hlf.kungfusoftware.es/v1alpha1.Enrollment">Enrollment</a>, <a href="#hlf.kungfusoftware.es/v1alpha1.OrdererEnrollment">OrdererEnrollment</a>)
+(<em>Appears on: </em><a href="#hlf.kungfusoftware.es/v1alpha1.Enrollment">Enrollment</a>, <a href="#hlf.kungfusoftware.es/v1alpha1.OrdererEnrollment">OrdererEnrollment</a>)
 </p>
 <p>
 </p>
@@ -4609,5 +4644,5 @@ string
 <hr/>
 <p><em>
 Generated with <code>gen-crd-api-reference-docs</code>
-on git commit <code>d820cb8</code>.
+on git commit <code>a1bf589</code>.
 </em></p>

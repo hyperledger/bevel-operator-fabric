@@ -743,7 +743,7 @@ func GetConfig(conf *hlfv1alpha1.FabricPeer, client *kubernetes.Clientset, chart
 		FullnameOverride: conf.Name,
 		HostAliases:      nil,
 		Service: Service{
-			Type: spec.Service.Type,
+			Type: string(spec.Service.Type),
 		},
 		Persistence: PeerPersistence{
 			Peer: Persistence{

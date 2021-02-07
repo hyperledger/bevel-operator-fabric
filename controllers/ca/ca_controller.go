@@ -415,7 +415,7 @@ func GetConfig(conf *hlfv1alpha1.FabricCA, client *kubernetes.Clientset, chartNa
 			PullPolicy: "IfNotPresent",
 		},
 		Service: Service{
-			Type: spec.Service.ServiceType,
+			Type: string(spec.Service.ServiceType),
 			Port: 7054,
 		},
 		Persistence: Persistence{
