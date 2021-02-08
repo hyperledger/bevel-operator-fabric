@@ -10,10 +10,10 @@ import (
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"gopkg.in/yaml.v2"
 	"io"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"net/url"
+	"sigs.k8s.io/yaml"
 	"strings"
 )
 
@@ -98,6 +98,10 @@ func (c *createCmd) run() error {
 		externalEndpoint = fmt.Sprintf("%s:443", c.peerOpts.Hosts[0])
 	}
 	fabricPeer := &v1alpha1.FabricPeer{
+		TypeMeta: v1.TypeMeta{
+			Kind:       "FabricPeer",
+			APIVersion: v1alpha1.GroupVersion.String(),
+		},
 		ObjectMeta: v1.ObjectMeta{
 			Name:      c.peerOpts.Name,
 			Namespace: c.peerOpts.NS,
@@ -227,6 +231,7 @@ func (c *createCmd) run() error {
 			OperationHosts: []string{},
 			OperationIPs:   []string{},
 		},
+		Status: v1alpha1.FabricPeerStatus{},
 	}
 	if c.peerOpts.Output {
 		ot, err := yaml.Marshal(&fabricPeer)

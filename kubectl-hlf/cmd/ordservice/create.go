@@ -10,7 +10,7 @@ import (
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"gopkg.in/yaml.v2"
+	"sigs.k8s.io/yaml"
 	"io"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"strconv"
@@ -104,6 +104,10 @@ func (c *createCmd) run(args []string) error {
 		return errors.Errorf("Orderers are empty")
 	}
 	fabricOrderer := &v1alpha1.FabricOrderingService{
+		TypeMeta: v1.TypeMeta{
+			Kind:       "FabricOrderingService",
+			APIVersion: v1alpha1.GroupVersion.String(),
+		},
 		ObjectMeta: v1.ObjectMeta{
 			Name:      c.ordererOpts.Name,
 			Namespace: c.ordererOpts.NS,

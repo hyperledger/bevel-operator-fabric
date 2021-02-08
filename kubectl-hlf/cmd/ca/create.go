@@ -7,7 +7,7 @@ import (
 	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/helpers"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"gopkg.in/yaml.v2"
+	"sigs.k8s.io/yaml"
 	"io"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -61,6 +61,10 @@ func (c *createCmd) run(args []string) error {
 		},
 	}
 	fabricCA := &v1alpha1.FabricCA{
+		TypeMeta: v1.TypeMeta{
+			Kind:       "FabricCA",
+			APIVersion: v1alpha1.GroupVersion.String(),
+		},
 		ObjectMeta: v1.ObjectMeta{
 			Name:      c.caOpts.Name,
 			Namespace: c.caOpts.NS,
