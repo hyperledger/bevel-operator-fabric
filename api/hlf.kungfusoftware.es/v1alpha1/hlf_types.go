@@ -38,8 +38,10 @@ type CA struct {
 
 // +kubebuilder:validation:Enum=couchdb;leveldb
 type StateDB string
+
 // Use LevelDB database
 const StateDBLevelDB StateDB = "leveldb"
+
 // Use CouchDB database
 const StateDBCouchDB StateDB = "couchdb"
 
@@ -328,7 +330,7 @@ type FabricCADatabase struct {
 type FabricCASpec struct {
 	// +kubebuilder:validation:Optional
 	// +optional
-	Istio    *FabricCAIstio    `json:"istio"`
+	Istio    *FabricCAIstio   `json:"istio"`
 	Database FabricCADatabase `json:"db"`
 	// +kubebuilder:validation:MinItems=1
 	// Hosts for the Fabric CA

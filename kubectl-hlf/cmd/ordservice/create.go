@@ -10,6 +10,7 @@ import (
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"gopkg.in/yaml.v2"
 	"io"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"strconv"
@@ -30,6 +31,7 @@ type OrdererOptions struct {
 	SystemChannelName string
 	NumOrderers       int
 	Hosts             []string
+	Output            bool
 }
 
 func (o OrdererOptions) Validate() error {
@@ -168,17 +170,24 @@ func (c *createCmd) run(args []string) error {
 			},
 		},
 	}
-
-	ctx := context.Background()
-	ordService, err := oclient.HlfV1alpha1().FabricOrderingServices(c.ordererOpts.NS).Create(
-		ctx,
-		fabricOrderer,
-		v1.CreateOptions{},
-	)
-	if err != nil {
-		return err
+	if c.ordererOpts.Output {
+		ot, err := yaml.Marshal(&fabricOrderer)
+		if err != nil {
+			return err
+		}
+		fmt.Println(string(ot))
+	} else {
+		ctx := context.Background()
+		ordService, err := oclient.HlfV1alpha1().FabricOrderingServices(c.ordererOpts.NS).Create(
+			ctx,
+			fabricOrderer,
+			v1.CreateOptions{},
+		)
+		if err != nil {
+			return err
+		}
+		log.Infof("Ordering service %s created on namespace %s", ordService.Name, ordService.Namespace)
 	}
-	log.Infof("Ordering service %s created on namespace %s", ordService.Name, ordService.Namespace)
 	return nil
 }
 func newCreateOrderingServiceCmd(out io.Writer, errOut io.Writer) *cobra.Command {
@@ -207,6 +216,6 @@ func newCreateOrderingServiceCmd(out io.Writer, errOut io.Writer) *cobra.Command
 	f.StringVarP(&c.ordererOpts.SystemChannelName, "system-channel", "", "system-channel", "System channel name")
 	f.IntVarP(&c.ordererOpts.NumOrderers, "num-orderers", "", 3, "Orderers nodes to create")
 	f.StringArrayVarP(&c.ordererOpts.Hosts, "hosts", "", []string{}, "Hosts")
-
+	f.BoolVarP(&c.ordererOpts.Output, "output", "o", false, "output in yaml")
 	return cmd
 }

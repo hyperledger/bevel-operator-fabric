@@ -73,6 +73,12 @@ vet:
 generate: controller-gen
 	$(CONTROLLER_GEN) object:headerFile="hack/boilerplate.go.txt" paths="./..."
 
+kubectl-plugin:
+	cd kubectl-hlf
+	go build -o kubectl-hlf main.go
+	sudo mv kubectl-hlf /usr/local/bin/kubectl-hlf
+
+
 # Build the docker image
 docker-build:
 	docker build . -t ${IMG}

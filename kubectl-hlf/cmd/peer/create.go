@@ -10,6 +10,7 @@ import (
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"gopkg.in/yaml.v2"
 	"io"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"net/url"
@@ -31,6 +32,7 @@ type Options struct {
 	Hosts          []string
 	BootstrapPeers []string
 	Leader         bool
+	Output         bool
 }
 
 func (o Options) Validate() error {
@@ -104,7 +106,8 @@ func (c *createCmd) run() error {
 			DockerSocketPath: "/var/run/docker.sock",
 			Image:            c.peerOpts.Image,
 			Istio: &v1alpha1.FabricPeerIstio{
-				Port: 443,
+				Port:  443,
+				Hosts: []string{},
 			},
 			Gossip: v1alpha1.FabricPeerSpecGossip{
 				ExternalEndpoint:  externalEndpoint,
@@ -225,14 +228,23 @@ func (c *createCmd) run() error {
 			OperationIPs:   []string{},
 		},
 	}
-	ctx := context.Background()
-	_, err = oclient.HlfV1alpha1().FabricPeers(c.peerOpts.NS).Create(
-		ctx,
-		fabricPeer,
-		v1.CreateOptions{},
-	)
-	if err != nil {
-		return err
+	if c.peerOpts.Output {
+		ot, err := yaml.Marshal(&fabricPeer)
+		if err != nil {
+			return err
+		}
+		fmt.Println(string(ot))
+	} else {
+		ctx := context.Background()
+		_, err = oclient.HlfV1alpha1().FabricPeers(c.peerOpts.NS).Create(
+			ctx,
+			fabricPeer,
+			v1.CreateOptions{},
+		)
+		if err != nil {
+			return err
+		}
+		log.Infof("Peer %s created on namespace %s", fabricPeer.Name, fabricPeer.Namespace)
 	}
 	return nil
 }
@@ -263,5 +275,6 @@ func newCreatePeerCmd(out io.Writer, errOut io.Writer) *cobra.Command {
 	f.BoolVarP(&c.peerOpts.Leader, "leader", "", false, "Force peer to be leader")
 	f.StringArrayVarP(&c.peerOpts.BootstrapPeers, "bootstrap-peer", "", []string{}, "Bootstrap peers")
 	f.StringArrayVarP(&c.peerOpts.Hosts, "hosts", "", []string{}, "External hosts")
+	f.BoolVarP(&c.peerOpts.Output, "output", "o", false, "output in yaml")
 	return cmd
 }

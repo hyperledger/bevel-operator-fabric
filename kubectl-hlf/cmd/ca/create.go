@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
 	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/helpers"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"gopkg.in/yaml.v2"
 	"io"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -19,6 +21,7 @@ type Options struct {
 	Version      string
 	EnrollID     string
 	EnrollSecret string
+	Output       bool
 }
 
 func (o Options) Validate() error {
@@ -75,9 +78,12 @@ func (c *createCmd) run(args []string) error {
 			Service: v1alpha1.FabricCASpecService{
 				ServiceType: "NodePort",
 			},
-			Image:        c.caOpts.Image,
-			Version:      c.caOpts.Version,
-			Debug:        false,
+			Image:   c.caOpts.Image,
+			Version: c.caOpts.Version,
+			Debug:   false,
+			Istio: &v1alpha1.FabricCAIstio{
+				Hosts: []string{},
+			},
 			CLRSizeLimit: 512000,
 			TLS: v1alpha1.FabricCATLSConf{
 				Subject: v1alpha1.FabricCASubject{
@@ -219,15 +225,25 @@ func (c *createCmd) run(args []string) error {
 			},
 		},
 	}
-	ctx := context.Background()
-	_, err = oclient.HlfV1alpha1().FabricCAs(c.caOpts.NS).Create(
-		ctx,
-		fabricCA,
-		v1.CreateOptions{},
-	)
-	if err != nil {
-		return err
+	if c.caOpts.Output {
+		ot, err := yaml.Marshal(&fabricCA)
+		if err != nil {
+			return err
+		}
+		fmt.Println(string(ot))
+	} else {
+		ctx := context.Background()
+		_, err = oclient.HlfV1alpha1().FabricCAs(c.caOpts.NS).Create(
+			ctx,
+			fabricCA,
+			v1.CreateOptions{},
+		)
+		if err != nil {
+			return err
+		}
+		log.Infof("Peer %s created on namespace %s", fabricCA.Name, fabricCA.Namespace)
 	}
+
 	return nil
 }
 func newCreateCACmd(out io.Writer, errOut io.Writer) *cobra.Command {
@@ -250,6 +266,7 @@ func newCreateCACmd(out io.Writer, errOut io.Writer) *cobra.Command {
 	f.StringVarP(&c.caOpts.Version, "version", "v", helpers.DefaultCAVersion, "version of the Fabric CA")
 	f.StringVarP(&c.caOpts.EnrollID, "enroll-id", "", "enroll", "username to register new users")
 	f.StringVarP(&c.caOpts.EnrollSecret, "enroll-pw", "", "enrollpw", "password to register new users")
+	f.BoolVarP(&c.caOpts.Output, "output", "o", false, "output in yaml")
 
 	return cmd
 }
