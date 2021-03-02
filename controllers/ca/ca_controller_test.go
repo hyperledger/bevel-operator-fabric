@@ -192,7 +192,7 @@ var _ = AfterSuite(func() {
 })
 
 const (
-	defTimeoutSecs  = "120s"
+	defTimeoutSecs  = "240s"
 	peerTimeoutSecs = "240s"
 	defInterval     = "1s"
 	systemChannelID = "system-channel"
