@@ -1060,7 +1060,7 @@ var _ = Describe("Fabric Controllers", func() {
 		Expect(K8sClient.Create(context.Background(), testNamespace)).Should(Succeed())
 	})
 	AfterEach(func() {
-		Expect(ClientSet.CoreV1().Namespaces().Delete(context.Background(), FabricNamespace, v1.DeleteOptions{})).Should(Succeed())
+		//Expect(ClientSet.CoreV1().Namespaces().Delete(context.Background(), FabricNamespace, v1.DeleteOptions{})).Should(Succeed())
 	})
 	Specify("create a new Fabric CA instance", func() {
 		By("create the CA object")
