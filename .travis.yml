@@ -54,3 +54,6 @@ jobs:
         - kubectl get pods --all-namespaces
         - kubectl get services --all-namespaces
         - kubectl get ingress --all-namespaces
+        - kubectl get fabriccas.hlf.kungfusoftware.es --all-namespaces -o wide
+        - kubectl get fabricpeers.hlf.kungfusoftware.es --all-namespaces -o wide
+        - kubectl get fabricorderingservices.hlf.kungfusoftware.es --all-namespaces -o wide

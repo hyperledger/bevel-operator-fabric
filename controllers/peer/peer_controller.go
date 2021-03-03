@@ -222,7 +222,7 @@ func (r *FabricPeerReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) 
 	}
 	err = r.Get(ctx, req.NamespacedName, fabricPeer)
 	if err != nil {
-		log.Printf("Error getting the object %s error=%v", req.NamespacedName, err)
+		log.Debugf("Error getting the object %s error=%v", req.NamespacedName, err)
 		if apierrors.IsNotFound(err) {
 			// Request object not found, could have been deleted after reconcile request.
 			// Owned objects are automatically garbage collected. For additional cleanup logic use finalizers.
@@ -266,7 +266,7 @@ func (r *FabricPeerReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) 
 			return ctrl.Result{}, err
 		}
 	}
-	log.Printf("Release %s exists=%v", releaseName, exists)
+	log.Debugf("Release %s exists=%v", releaseName, exists)
 	clientSet, err := utils.GetClientKubeWithConf(r.Config)
 	if err != nil {
 		return ctrl.Result{}, err
@@ -303,7 +303,7 @@ func (r *FabricPeerReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) 
 			Status: "True",
 		})
 		if reflect.DeepEqual(fPeer.Status, fabricPeer.Status) {
-			log.Printf("Status hasn't changed, skipping update")
+			log.Info("Status hasn't changed, skipping update")
 			c, err := GetConfig(fabricPeer, clientSet, releaseName, req.Namespace, svc)
 			if err != nil {
 				return ctrl.Result{}, err
@@ -335,7 +335,7 @@ func (r *FabricPeerReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) 
 			log.Infof("Chart upgraded %s", release.Name)
 		} else {
 			if err := r.Status().Update(ctx, fPeer); err != nil {
-				log.Printf("Error updating the status: %v", err)
+				log.Errorf("Error updating the status: %v", err)
 				return ctrl.Result{}, err
 			}
 		}
@@ -374,7 +374,6 @@ func (r *FabricPeerReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) 
 		if err != nil {
 			return ctrl.Result{}, err
 		}
-		log.Println(string(inrec))
 		err = json.Unmarshal(inrec, &inInterface)
 		if err != nil {
 			return ctrl.Result{}, err
@@ -384,7 +383,7 @@ func (r *FabricPeerReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) 
 			reqLogger.Error(err, "Failed to install chart")
 			return ctrl.Result{}, err
 		}
-		log.Printf("Chart installed %s", release.Name)
+		log.Infof("Chart installed %s", release.Name)
 		fabricPeer.Status.Status = hlfv1alpha1.PendingStatus
 		fabricPeer.Status.Conditions.SetCondition(status.Condition{
 			Type:               "DEPLOYED",
@@ -592,7 +591,7 @@ func GetConfig(conf *hlfv1alpha1.FabricPeer, client *kubernetes.Clientset, chart
 			tlsParams.Enrollid,
 			tlsParams.Enrollsecret,
 			string(cacert),
-			spec.OperationIPs,
+			hosts,
 		)
 		if err != nil {
 			return nil, err
@@ -822,10 +821,10 @@ func (r *FabricPeerReconciler) finalizePeer(reqLogger logr.Logger, peer *hlfv1al
 		if strings.Compare("Release not loaded", err.Error()) != 0 {
 			return nil
 		}
-		log.Printf("Failed to uninstall release %s %v", releaseName, err)
+		log.Errorf("Failed to uninstall release %s %v", releaseName, err)
 		return err
 	}
-	log.Printf("Release %s deleted=%s", releaseName, resp.Info)
+	log.Infof("Release %s deleted=%s", releaseName, resp.Info)
 	return nil
 }
 

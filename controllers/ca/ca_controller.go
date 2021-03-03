@@ -14,7 +14,7 @@ import (
 	"github.com/operator-framework/operator-lib/status"
 	"helm.sh/helm/v3/pkg/cli"
 	"k8s.io/kubernetes/pkg/api/v1/pod"
-	"log"
+
 	"math/big"
 	"net"
 	"os"
@@ -26,6 +26,7 @@ import (
 	hlfv1alpha1 "github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
 	"github.com/kfsoftware/hlf-operator/controllers/utils"
 	"github.com/pkg/errors"
+	log "github.com/sirupsen/logrus"
 	"helm.sh/helm/v3/pkg/action"
 	"helm.sh/helm/v3/pkg/chart/loader"
 	"helm.sh/helm/v3/pkg/storage/driver"
@@ -584,10 +585,10 @@ func (r *FabricCAReconciler) finalizeCA(reqLogger logr.Logger, m *hlfv1alpha1.Fa
 		if strings.Compare("Release not loaded", err.Error()) != 0 {
 			return nil
 		}
-		log.Printf("Failed to uninstall release %s %v", releaseName, err)
+		log.Debugf("Failed to uninstall release %s %v", releaseName, err)
 		return err
 	}
-	log.Printf("Release %s deleted=%s", releaseName, resp.Info)
+	log.Debugf("Release %s deleted=%s", releaseName, resp.Info)
 	return nil
 }
 
@@ -616,7 +617,7 @@ func Reconcile(
 	releaseName := req.Name
 	err := r.Get(ctx, req.NamespacedName, hlf)
 	if err != nil {
-		log.Printf("Error getting the object %s error=%v", req.NamespacedName, err)
+		log.Debugf("Error getting the object %s error=%v", req.NamespacedName, err)
 		if apierrors.IsNotFound(err) {
 			reqLogger.Info("CA resource not found. Ignoring since object must be deleted.")
 			return ctrl.Result{}, nil
@@ -656,7 +657,7 @@ func Reconcile(
 			return ctrl.Result{}, err
 		}
 	}
-	log.Printf("Release %s exists=%v", releaseName, exists)
+	log.Debugf("Release %s exists=%v", releaseName, exists)
 	clientSet, err := utils.GetClientKubeWithConf(r.Config)
 	if err != nil {
 		return ctrl.Result{}, err
@@ -670,7 +671,7 @@ func Reconcile(
 		}
 		err = r.Get(ctx, req.NamespacedName, hlf)
 		if err != nil {
-			log.Printf("Error getting the object %s error=%v", req.NamespacedName, err)
+			log.Debugf("Error getting the object %s error=%v", req.NamespacedName, err)
 			if apierrors.IsNotFound(err) {
 				reqLogger.Info("CA resource not found. Ignoring since object must be deleted.")
 				return ctrl.Result{}, nil
@@ -692,7 +693,7 @@ func Reconcile(
 			LastTransitionTime: v1.Time{},
 		})
 		if reflect.DeepEqual(fca.Status, hlf.Status) {
-			log.Printf("Status hasn't changed, skipping CA update")
+			log.Debug("Status hasn't changed, skipping CA update")
 			c, err := GetConfig(hlf, clientSet, releaseName, req.Namespace)
 			if err != nil {
 				return ctrl.Result{}, err
@@ -717,12 +718,12 @@ func Reconcile(
 			if err != nil {
 				return ctrl.Result{}, err
 			}
-			log.Printf("Chart upgraded %s", release.Name)
+			log.Debugf("Chart upgraded %s", release.Name)
 
 		} else {
 
 			if err := r.Status().Update(ctx, fca); err != nil {
-				log.Printf("Error updating the status: %v", err)
+				log.Debugf("Error updating the status: %v", err)
 				return ctrl.Result{}, err
 			}
 		}
@@ -758,7 +759,7 @@ func Reconcile(
 			reqLogger.Error(err, "Failed to marshall helm values")
 			return ctrl.Result{}, err
 		}
-		log.Println(string(inrec))
+		log.Debugf("Values.yaml for FabricCA: %s", string(inrec))
 		err = json.Unmarshal(inrec, &inInterface)
 		if err != nil {
 			return ctrl.Result{}, err
@@ -768,7 +769,7 @@ func Reconcile(
 			reqLogger.Error(err, "Failed to install helm chart")
 			return ctrl.Result{}, err
 		}
-		log.Printf("Chart installed %s", release.Name)
+		log.Debugf("Chart installed %s", release.Name)
 		hlf.Status.Status = hlfv1alpha1.PendingStatus
 		hlf.Status.Conditions.SetCondition(status.Condition{
 			Type:               "DEPLOYED",

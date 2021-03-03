@@ -5,7 +5,6 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
-	"log"
 	"net"
 	"net/url"
 	"strconv"
@@ -16,6 +15,7 @@ import (
 	"github.com/kfsoftware/hlf-operator/controllers/ordnode"
 	operatorv1alpha1 "github.com/kfsoftware/hlf-operator/pkg/client/clientset/versioned"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	log "github.com/sirupsen/logrus"
 
 	"github.com/Masterminds/sprig"
 	pb "github.com/hyperledger/fabric-protos-go/peer"
@@ -916,7 +916,8 @@ func createOrderer(releaseName string, namespace string, params createOrdererPar
 	ordEnrollID := "orderer"
 	ordEnrollSecret := "ordererpw"
 	ordType := "orderer"
-	certs.RegisterUser(certs.RegisterUserRequest{
+	log.Infof("Registering user with credentials %s:%s and user %s:%s", enrollID, enrollSecret, ordEnrollID, ordEnrollSecret)
+	_, err := certs.RegisterUser(certs.RegisterUserRequest{
 		TLSCert:      caTLSCert,
 		URL:          caURL,
 		Name:         caName,
@@ -928,6 +929,9 @@ func createOrderer(releaseName string, namespace string, params createOrdererPar
 		Type:         ordType,
 		Attributes:   nil,
 	})
+	if err != nil {
+		log.Errorf("Failed to register user %s %v", ordEnrollID, err)
+	}
 
 	fabricOrderer := &hlfv1alpha1.FabricOrderingService{
 		TypeMeta: NewTypeMeta("FabricOrderingService"),
@@ -1057,9 +1061,11 @@ var _ = Describe("Fabric Controllers", func() {
 				Name: FabricNamespace,
 			},
 		}
+		log.Infof("Creating namespace %s", FabricNamespace)
 		Expect(K8sClient.Create(context.Background(), testNamespace)).Should(Succeed())
 	})
 	AfterEach(func() {
+		log.Infof("Deleting namespace %s", FabricNamespace)
 		//Expect(ClientSet.CoreV1().Namespaces().Delete(context.Background(), FabricNamespace, v1.DeleteOptions{})).Should(Succeed())
 	})
 	Specify("create a new Fabric CA instance", func() {
@@ -1221,6 +1227,7 @@ var _ = Describe("Fabric Controllers", func() {
 				},
 			},
 		}
+		log.Infof("Creating the fabric ca %s", fabricCa.Name)
 		Expect(K8sClient.Create(context.Background(), fabricCa)).Should(Succeed())
 		updatedCA := &hlfv1alpha1.FabricCA{}
 		caKey := types.NamespacedName{Namespace: FabricNamespace, Name: objName}
@@ -1327,7 +1334,7 @@ var _ = Describe("Fabric Controllers", func() {
 		Expect(err).ToNot(HaveOccurred())
 		Expect(installedRes).To(HaveLen(1))
 	})
-	Specify("create a new Fabric Orderer instance", func() {
+	FSpecify("create a new Fabric Orderer instance", func() {
 		releaseNameOrdCA := "org1-ca"
 		releaseNameOrd := "org1-orderer"
 		By("create a fabric ca")
@@ -1361,7 +1368,6 @@ var _ = Describe("Fabric Controllers", func() {
 			peerTimeoutSecs,
 			defInterval,
 		).Should(BeTrue(), "peer status should have been updated")
-
 		By("create a fabric peer")
 		releaseNamePeer := "org1-peer0"
 		releaseNamePeerCA := "org1-peer0-ca"
@@ -1403,7 +1409,7 @@ var _ = Describe("Fabric Controllers", func() {
 		Expect(err).ToNot(HaveOccurred())
 		systemChannelConfig, err := resource.ExtractConfigFromBlock(block)
 		Expect(err).ToNot(HaveOccurred())
-		log.Print(systemChannelConfig)
+		log.Info(systemChannelConfig)
 		u, err := url.Parse(peer.Status.URL)
 		Expect(err).ToNot(HaveOccurred())
 		host, portStr, err := net.SplitHostPort(u.Host)
@@ -1509,6 +1515,7 @@ var _ = Describe("Fabric Controllers", func() {
 			orderer,
 			ordererCA,
 		)
+		log.Infof("Orderer host=%s port=%d", nodes[0].Host, nodes[0].Port)
 		createChannelResponse, err := resClient.SaveChannel(resmgmt.SaveChannelRequest{
 			ChannelID:     channelID,
 			ChannelConfig: channelConfig,
@@ -1517,13 +1524,23 @@ var _ = Describe("Fabric Controllers", func() {
 		Expect(createChannelResponse).ToNot(BeNil())
 
 		By("join the peer to the channel")
-		time.Sleep(4 * time.Second) // wait for the transaction to be committed
-		err = resClient.JoinChannel(
-			channelID,
-			resmgmt.WithTargetEndpoints("peer"),
-			resmgmt.WithOrdererEndpoint("orderer"),
-		)
-		Expect(err).ToNot(HaveOccurred())
+		Eventually(
+			func() bool {
+				log.Infof("Peer Url=%s Orderer Host=%s Port=%d", peer.Status.URL, nodes[0].Host, nodes[0].Port)
+				err = resClient.JoinChannel(
+					channelID,
+					resmgmt.WithTargetEndpoints("peer"),
+					resmgmt.WithOrdererEndpoint("orderer"),
+				)
+				if err != nil {
+					log.Errorf("error joining channel %v", err)
+				}
+				return err == nil
+			},
+			"140s",
+			defInterval,
+		).Should(BeTrue(), "peer should join the channel")
+
 		By("install a chaincode for the org")
 		pkgLabel := "fabcar"
 		packageBytes, err := lifecycle.NewCCPackage(&lifecycle.Descriptor{
