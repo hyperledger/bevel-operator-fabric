@@ -1,6 +1,7 @@
 package ca
 
 type FabricCAChart struct {
+	Istio            Istio                 `json:"istio"`
 	FullNameOverride string                `json:"fullnameOverride"`
 	Image            Image                 `json:"image"`
 	Service          Service               `json:"service"`
@@ -17,6 +18,10 @@ type FabricCAChart struct {
 	Ca               FabricCAChartItemConf `json:"ca"`
 	TLSCA            FabricCAChartItemConf `json:"tlsCA"`
 	Cors             Cors                  `json:"cors"`
+}
+type Istio struct {
+	Port  int      `json:"port"`
+	Hosts []string `json:"hosts"`
 }
 type Cors struct {
 	Enabled bool     `json:"enabled"`

@@ -13,6 +13,7 @@ import (
 	"io"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"net/url"
+	"sigs.k8s.io/yaml"
 	"strings"
 )
 
@@ -31,6 +32,7 @@ type Options struct {
 	Hosts          []string
 	BootstrapPeers []string
 	Leader         bool
+	Output         bool
 }
 
 func (o Options) Validate() error {
@@ -96,6 +98,10 @@ func (c *createCmd) run() error {
 		externalEndpoint = fmt.Sprintf("%s:443", c.peerOpts.Hosts[0])
 	}
 	fabricPeer := &v1alpha1.FabricPeer{
+		TypeMeta: v1.TypeMeta{
+			Kind:       "FabricPeer",
+			APIVersion: v1alpha1.GroupVersion.String(),
+		},
 		ObjectMeta: v1.ObjectMeta{
 			Name:      c.peerOpts.Name,
 			Namespace: c.peerOpts.NS,
@@ -103,8 +109,9 @@ func (c *createCmd) run() error {
 		Spec: v1alpha1.FabricPeerSpec{
 			DockerSocketPath: "/var/run/docker.sock",
 			Image:            c.peerOpts.Image,
-			Istio: v1alpha1.FabricPeerIstio{
-				Port: 443,
+			Istio: &v1alpha1.FabricPeerIstio{
+				Port:  443,
+				Hosts: []string{},
 			},
 			Gossip: v1alpha1.FabricPeerSpecGossip{
 				ExternalEndpoint:  externalEndpoint,
@@ -224,15 +231,25 @@ func (c *createCmd) run() error {
 			OperationHosts: []string{},
 			OperationIPs:   []string{},
 		},
+		Status: v1alpha1.FabricPeerStatus{},
 	}
-	ctx := context.Background()
-	_, err = oclient.HlfV1alpha1().FabricPeers(c.peerOpts.NS).Create(
-		ctx,
-		fabricPeer,
-		v1.CreateOptions{},
-	)
-	if err != nil {
-		return err
+	if c.peerOpts.Output {
+		ot, err := yaml.Marshal(&fabricPeer)
+		if err != nil {
+			return err
+		}
+		fmt.Println(string(ot))
+	} else {
+		ctx := context.Background()
+		_, err = oclient.HlfV1alpha1().FabricPeers(c.peerOpts.NS).Create(
+			ctx,
+			fabricPeer,
+			v1.CreateOptions{},
+		)
+		if err != nil {
+			return err
+		}
+		log.Infof("Peer %s created on namespace %s", fabricPeer.Name, fabricPeer.Namespace)
 	}
 	return nil
 }
@@ -263,5 +280,6 @@ func newCreatePeerCmd(out io.Writer, errOut io.Writer) *cobra.Command {
 	f.BoolVarP(&c.peerOpts.Leader, "leader", "", false, "Force peer to be leader")
 	f.StringArrayVarP(&c.peerOpts.BootstrapPeers, "bootstrap-peer", "", []string{}, "Bootstrap peers")
 	f.StringArrayVarP(&c.peerOpts.Hosts, "hosts", "", []string{}, "External hosts")
+	f.BoolVarP(&c.peerOpts.Output, "output", "o", false, "output in yaml")
 	return cmd
 }

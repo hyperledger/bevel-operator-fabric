@@ -31,6 +31,12 @@ type FabricPeerChart struct {
 	Persistence              PeerPersistence `json:"persistence"`
 	Logging                  Logging         `json:"logging"`
 }
+
+type Istio struct {
+	Port  int      `json:"port"`
+	Hosts []string `json:"hosts"`
+}
+
 type PeerPersistence struct {
 	Peer      Persistence `json:"peer"`
 	CouchDB   Persistence `json:"couchdb"`

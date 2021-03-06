@@ -159,6 +159,15 @@ spec:
               service:
                 properties:
                   type:
+                    allOf:
+                    - enum:
+                      - NodePort
+                      - ClusterIP
+                      - LoadBalancer
+                    - enum:
+                      - NodePort
+                      - ClusterIP
+                      - LoadBalancer
                     type: string
                 required:
                 - type
