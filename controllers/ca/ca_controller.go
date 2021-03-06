@@ -11,6 +11,7 @@ import (
 	"encoding/json"
 	"encoding/pem"
 	"fmt"
+
 	"github.com/operator-framework/operator-lib/status"
 	"helm.sh/helm/v3/pkg/cli"
 	"k8s.io/kubernetes/pkg/api/v1/pod"
@@ -693,7 +694,6 @@ func Reconcile(
 			LastTransitionTime: v1.Time{},
 		})
 		if reflect.DeepEqual(fca.Status, hlf.Status) {
-			log.Debug("Status hasn't changed, skipping CA update")
 			c, err := GetConfig(hlf, clientSet, releaseName, req.Namespace)
 			if err != nil {
 				return ctrl.Result{}, err
@@ -719,9 +719,7 @@ func Reconcile(
 				return ctrl.Result{}, err
 			}
 			log.Debugf("Chart upgraded %s", release.Name)
-
 		} else {
-
 			if err := r.Status().Update(ctx, fca); err != nil {
 				log.Debugf("Error updating the status: %v", err)
 				return ctrl.Result{}, err
