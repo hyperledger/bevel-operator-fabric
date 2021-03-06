@@ -1,3 +1,7 @@
+---
+id: getting-started
+title: Getting started
+---
 [![Build Status](https://img.shields.io/travis/kfsoftware/hlf-operator/main.svg?label=E2E%20testing)](https://travis-ci.org/kfsoftware/hlf-operator)
 
 # Hyperledger Fabric Operator
@@ -59,10 +63,7 @@ helm install hlf-operator ./chart/hlf-operator
 
 
 ```bash
-# when kubectl-hlf is in the krew-index
 kubectl krew install hlf 
-# now
-kubectl krew install --manifest=krew-plugin.yaml
 ```
 
 ## Deploy a Peer Organization

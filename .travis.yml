@@ -48,3 +48,12 @@ jobs:
         - export KUBECONFIG=~/.kube/kind_operator_e2e
         - make test
 
+      after_script:
+        - echo "KUBECONFIG=$KUBECONFIG"
+        - kubectl get nodes --all-namespaces
+        - kubectl get pods --all-namespaces
+        - kubectl get services --all-namespaces
+        - kubectl get ingress --all-namespaces
+        - kubectl get fabriccas.hlf.kungfusoftware.es --all-namespaces -o wide
+        - kubectl get fabricpeers.hlf.kungfusoftware.es --all-namespaces -o wide
+        - kubectl get fabricorderingservices.hlf.kungfusoftware.es --all-namespaces -o wide

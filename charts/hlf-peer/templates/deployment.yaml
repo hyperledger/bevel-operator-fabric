@@ -100,19 +100,15 @@ spec:
             - name: operations
               containerPort: 9443
               protocol: TCP
-      {{- if and .Values.dockerSocketPath false }}
+      {{- if and .Values.dockerSocketPath }}
           livenessProbe:
-            httpGet:
-              path: /healthz
-              port: 9443
-              scheme: HTTPS
+            tcpSocket:
+              port: 7051
             initialDelaySeconds: 5
             periodSeconds: 5
           readinessProbe:
-            httpGet:
-              path: /healthz
-              port: 9443
-              scheme: HTTPS
+            tcpSocket:
+              port: 7051
             initialDelaySeconds: 15
     {{- end }}
           command:

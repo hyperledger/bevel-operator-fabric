@@ -5,16 +5,17 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
-	"github.com/kfsoftware/hlf-operator/controllers/ordnode"
-	operatorv1alpha1 "github.com/kfsoftware/hlf-operator/pkg/client/clientset/versioned"
-	apierrors "k8s.io/apimachinery/pkg/api/errors"
-	"log"
 	"net"
 	"net/url"
 	"strconv"
 	"strings"
 	"text/template"
 	"time"
+
+	"github.com/kfsoftware/hlf-operator/controllers/ordnode"
+	operatorv1alpha1 "github.com/kfsoftware/hlf-operator/pkg/client/clientset/versioned"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	log "github.com/sirupsen/logrus"
 
 	"github.com/Masterminds/sprig"
 	pb "github.com/hyperledger/fabric-protos-go/peer"
@@ -41,6 +42,8 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	k8sconfig "sigs.k8s.io/controller-runtime/pkg/client/config"
 
+	"path/filepath"
+
 	hlfv1alpha1 "github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
 	"github.com/kfsoftware/hlf-operator/controllers/ordservice"
 	"github.com/kfsoftware/hlf-operator/controllers/peer"
@@ -48,7 +51,6 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
-	"path/filepath"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
@@ -190,7 +192,7 @@ var _ = AfterSuite(func() {
 })
 
 const (
-	defTimeoutSecs  = "120s"
+	defTimeoutSecs  = "240s"
 	peerTimeoutSecs = "240s"
 	defInterval     = "1s"
 	systemChannelID = "system-channel"
@@ -362,6 +364,9 @@ func randomFabricCA(releaseName string, namespace string) *hlfv1alpha1.FabricCA 
 			Namespace: namespace,
 		},
 		Spec: hlfv1alpha1.FabricCASpec{
+			Istio: &hlfv1alpha1.FabricCAIstio{
+				Hosts: []string{},
+			},
 			Database: hlfv1alpha1.FabricCADatabase{
 				Type:       "sqlite3",
 				Datasource: "fabric-ca-server.db",
@@ -771,8 +776,9 @@ func createPeer(releaseName string, namespace string, params createPeerParams, c
 		Spec: hlfv1alpha1.FabricPeerSpec{
 			DockerSocketPath: "/var/run/docker.sock",
 			Image:            "quay.io/kfsoftware/fabric-peer",
-			Istio: hlfv1alpha1.FabricPeerIstio{
-				Port: 443,
+			Istio: &hlfv1alpha1.FabricPeerIstio{
+				Port:  443,
+				Hosts: []string{},
 			},
 			Gossip: hlfv1alpha1.FabricPeerSpecGossip{
 				ExternalEndpoint:  "",
@@ -818,7 +824,7 @@ func createPeer(releaseName string, namespace string, params createPeerParams, c
 				},
 			},
 			Service: hlfv1alpha1.PeerService{
-				Type: "NodePort",
+				Type: hlfv1alpha1.ServiceTypeNodePort,
 			},
 			StateDb: "leveldb",
 			Storage: hlfv1alpha1.FabricPeerStorage{
@@ -910,7 +916,8 @@ func createOrderer(releaseName string, namespace string, params createOrdererPar
 	ordEnrollID := "orderer"
 	ordEnrollSecret := "ordererpw"
 	ordType := "orderer"
-	certs.RegisterUser(certs.RegisterUserRequest{
+	log.Infof("Registering user with credentials %s:%s and user %s:%s", enrollID, enrollSecret, ordEnrollID, ordEnrollSecret)
+	_, err := certs.RegisterUser(certs.RegisterUserRequest{
 		TLSCert:      caTLSCert,
 		URL:          caURL,
 		Name:         caName,
@@ -922,6 +929,9 @@ func createOrderer(releaseName string, namespace string, params createOrdererPar
 		Type:         ordType,
 		Attributes:   nil,
 	})
+	if err != nil {
+		log.Errorf("Failed to register user %s %v", ordEnrollID, err)
+	}
 
 	fabricOrderer := &hlfv1alpha1.FabricOrderingService{
 		TypeMeta: NewTypeMeta("FabricOrderingService"),
@@ -1051,10 +1061,12 @@ var _ = Describe("Fabric Controllers", func() {
 				Name: FabricNamespace,
 			},
 		}
+		log.Infof("Creating namespace %s", FabricNamespace)
 		Expect(K8sClient.Create(context.Background(), testNamespace)).Should(Succeed())
 	})
 	AfterEach(func() {
-		Expect(ClientSet.CoreV1().Namespaces().Delete(context.Background(), FabricNamespace, v1.DeleteOptions{})).Should(Succeed())
+		log.Infof("Deleting namespace %s", FabricNamespace)
+		//Expect(ClientSet.CoreV1().Namespaces().Delete(context.Background(), FabricNamespace, v1.DeleteOptions{})).Should(Succeed())
 	})
 	Specify("create a new Fabric CA instance", func() {
 		By("create the CA object")
@@ -1113,6 +1125,9 @@ var _ = Describe("Fabric Controllers", func() {
 				Namespace: FabricNamespace,
 			},
 			Spec: hlfv1alpha1.FabricCASpec{
+				Istio: &hlfv1alpha1.FabricCAIstio{
+					Hosts: []string{},
+				},
 				Database: hlfv1alpha1.FabricCADatabase{
 					Type:       "sqlite3",
 					Datasource: "fabric-ca-server.db",
@@ -1212,6 +1227,7 @@ var _ = Describe("Fabric Controllers", func() {
 				},
 			},
 		}
+		log.Infof("Creating the fabric ca %s", fabricCa.Name)
 		Expect(K8sClient.Create(context.Background(), fabricCa)).Should(Succeed())
 		updatedCA := &hlfv1alpha1.FabricCA{}
 		caKey := types.NamespacedName{Namespace: FabricNamespace, Name: objName}
@@ -1352,7 +1368,6 @@ var _ = Describe("Fabric Controllers", func() {
 			peerTimeoutSecs,
 			defInterval,
 		).Should(BeTrue(), "peer status should have been updated")
-
 		By("create a fabric peer")
 		releaseNamePeer := "org1-peer0"
 		releaseNamePeerCA := "org1-peer0-ca"
@@ -1394,7 +1409,7 @@ var _ = Describe("Fabric Controllers", func() {
 		Expect(err).ToNot(HaveOccurred())
 		systemChannelConfig, err := resource.ExtractConfigFromBlock(block)
 		Expect(err).ToNot(HaveOccurred())
-		log.Print(systemChannelConfig)
+		log.Info(systemChannelConfig)
 		u, err := url.Parse(peer.Status.URL)
 		Expect(err).ToNot(HaveOccurred())
 		host, portStr, err := net.SplitHostPort(u.Host)
@@ -1500,6 +1515,7 @@ var _ = Describe("Fabric Controllers", func() {
 			orderer,
 			ordererCA,
 		)
+		log.Infof("Orderer host=%s port=%d", nodes[0].Host, nodes[0].Port)
 		createChannelResponse, err := resClient.SaveChannel(resmgmt.SaveChannelRequest{
 			ChannelID:     channelID,
 			ChannelConfig: channelConfig,
@@ -1508,13 +1524,23 @@ var _ = Describe("Fabric Controllers", func() {
 		Expect(createChannelResponse).ToNot(BeNil())
 
 		By("join the peer to the channel")
-		time.Sleep(2 * time.Second) // wait for the transaction to be committed
-		err = resClient.JoinChannel(
-			channelID,
-			resmgmt.WithTargetEndpoints("peer"),
-			resmgmt.WithOrdererEndpoint("orderer"),
-		)
-		Expect(err).ToNot(HaveOccurred())
+		Eventually(
+			func() bool {
+				log.Infof("Peer Url=%s Orderer Host=%s Port=%d", peer.Status.URL, nodes[0].Host, nodes[0].Port)
+				err = resClient.JoinChannel(
+					channelID,
+					resmgmt.WithTargetEndpoints("peer"),
+					resmgmt.WithOrdererEndpoint("orderer"),
+				)
+				if err != nil {
+					log.Errorf("error joining channel %v", err)
+				}
+				return err == nil
+			},
+			"140s",
+			defInterval,
+		).Should(BeTrue(), "peer should join the channel")
+
 		By("install a chaincode for the org")
 		pkgLabel := "fabcar"
 		packageBytes, err := lifecycle.NewCCPackage(&lifecycle.Descriptor{

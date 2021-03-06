@@ -1,0 +1,9 @@
+{
+  "hideMemberFields": [
+    "TypeMeta"
+  ],
+  "hideTypePatterns": [
+    "ParseError$",
+    "List$"
+  ]
+}

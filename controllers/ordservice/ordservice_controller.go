@@ -8,21 +8,23 @@ import (
 	"encoding/pem"
 	"errors"
 	"fmt"
-	"github.com/hyperledger/fabric-sdk-go/pkg/fab/resource"
-	"github.com/kfsoftware/hlf-operator/controllers/testutils"
-	operatorv1 "github.com/kfsoftware/hlf-operator/pkg/client/clientset/versioned"
-	"github.com/operator-framework/operator-lib/status"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"log"
 	"os"
 	"reflect"
 	"strings"
 	"time"
 
+	"github.com/hyperledger/fabric-sdk-go/pkg/fab/resource"
+	"github.com/kfsoftware/hlf-operator/controllers/testutils"
+	operatorv1 "github.com/kfsoftware/hlf-operator/pkg/client/clientset/versioned"
+	"github.com/operator-framework/operator-lib/status"
+	"helm.sh/helm/v3/pkg/cli"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	"github.com/go-logr/logr"
 	hlfv1alpha1 "github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
 	"github.com/kfsoftware/hlf-operator/controllers/certs"
 	"github.com/kfsoftware/hlf-operator/controllers/utils"
+	log "github.com/sirupsen/logrus"
 	"helm.sh/helm/v3/pkg/action"
 	"helm.sh/helm/v3/pkg/chart/loader"
 	"helm.sh/helm/v3/pkg/storage/driver"
@@ -209,7 +211,7 @@ func getConfig(conf *hlfv1alpha1.FabricOrderingService, client *kubernetes.Clien
 			TLSRootCert:  string(tlsRootCRTEncoded),
 			Hosts:        ingressHosts,
 			Service: Service{
-				Type:            spec.Service.Type,
+				Type:            string(spec.Service.Type),
 				NodePortRequest: requestNodePort,
 			},
 		})
@@ -304,7 +306,7 @@ func (r *FabricOrderingServiceReconciler) finalizeOrderer(reqLogger logr.Logger,
 		}
 		return err
 	}
-	log.Printf("Release %s deleted=%s", releaseName, resp.Info)
+	log.Debugf("Release %s deleted=%s", releaseName, resp.Info)
 	return nil
 }
 
@@ -336,7 +338,7 @@ func (r *FabricOrderingServiceReconciler) Reconcile(req ctrl.Request) (ctrl.Resu
 	}
 	err = r.Get(ctx, req.NamespacedName, fabricOrderer)
 	if err != nil {
-		log.Printf("Error getting the object %s error=%v", req.NamespacedName, err)
+		log.Debugf("Error getting the object %s error=%v", req.NamespacedName, err)
 		if apierrors.IsNotFound(err) {
 			reqLogger.Info("Orderer resource not found. Ignoring since object must be deleted.")
 			return ctrl.Result{}, nil
@@ -375,7 +377,7 @@ func (r *FabricOrderingServiceReconciler) Reconcile(req ctrl.Request) (ctrl.Resu
 			return ctrl.Result{}, err
 		}
 	}
-	log.Printf("Release %s exists=%v", releaseName, exists)
+	log.Debugf("Release %s exists=%v", releaseName, exists)
 	clientSet, err := utils.GetClientKubeWithConf(r.Config)
 	if err != nil {
 		return ctrl.Result{}, err
@@ -393,41 +395,40 @@ func (r *FabricOrderingServiceReconciler) Reconcile(req ctrl.Request) (ctrl.Resu
 			Status: "True",
 		})
 		if reflect.DeepEqual(fOrderer.Status, fabricOrderer.Status) {
-			log.Printf("Status hasn't changed, skipping update")
+			log.Infof("Status hasn't changed, skipping update")
 		} else {
-			//cmd := action.NewUpgrade(cfg)
-			//err = os.Setenv("HELM_NAMESPACE", req.Namespace)
-			//if err != nil {
-			//	return ctrl.Result{}, err
-			//}
-			//settings := cli.New()
-			//chartPath, err := cmd.LocateChart(r.ChartPath, settings)
-			//ch, err := loader.Load(chartPath)
-			//if err != nil {
-			//	return ctrl.Result{}, err
-			//}
-			//ns := req.Namespace
-			//c, err := getConfig(fabricOrderer, clientSet, releaseName, ns)
-			//if err != nil {
-			//	return ctrl.Result{}, err
-			//}
-			//inrec, err := json.Marshal(c)
-			//if err != nil {
-			//	return ctrl.Result{}, err
-			//}
-			//var inInterface map[string]interface{}
-			//err = json.Unmarshal(inrec, &inInterface)
-			//
-			//if err != nil {
-			//	return ctrl.Result{}, err
-			//}
-			//release, err := cmd.Run(releaseName, ch, inInterface)
-			//if err != nil {
-			//	return ctrl.Result{}, err
-			//}
-			//log.Printf("Chart upgraded %s", release.Name)
+			cmd := action.NewUpgrade(cfg)
+			err = os.Setenv("HELM_NAMESPACE", req.Namespace)
+			if err != nil {
+				return ctrl.Result{}, err
+			}
+			settings := cli.New()
+			chartPath, err := cmd.LocateChart(r.ChartPath, settings)
+			ch, err := loader.Load(chartPath)
+			if err != nil {
+				return ctrl.Result{}, err
+			}
+			c, err := getConfig(fabricOrderer, clientSet)
+			if err != nil {
+				return ctrl.Result{}, err
+			}
+			inrec, err := json.Marshal(c)
+			if err != nil {
+				return ctrl.Result{}, err
+			}
+			var inInterface map[string]interface{}
+			err = json.Unmarshal(inrec, &inInterface)
+
+			if err != nil {
+				return ctrl.Result{}, err
+			}
+			release, err := cmd.Run(releaseName, ch, inInterface)
+			if err != nil {
+				return ctrl.Result{}, err
+			}
+			log.Debugf("Chart upgraded %s", release.Name)
 			if err := r.Status().Update(ctx, fOrderer); err != nil {
-				log.Printf("Error updating the status: %v", err)
+				log.Debugf("Error updating the status: %v", err)
 				return ctrl.Result{}, err
 			}
 		}
@@ -463,7 +464,7 @@ func (r *FabricOrderingServiceReconciler) Reconcile(req ctrl.Request) (ctrl.Resu
 		if err != nil {
 			return ctrl.Result{}, err
 		}
-		log.Println(string(inrec))
+		log.Debugf(string(inrec))
 		err = json.Unmarshal(inrec, &inInterface)
 		if err != nil {
 			return ctrl.Result{}, err
