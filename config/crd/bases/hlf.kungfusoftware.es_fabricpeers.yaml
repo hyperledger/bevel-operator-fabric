@@ -99,8 +99,15 @@ spec:
                 minLength: 1
                 type: string
               istio:
+                nullable: true
                 properties:
+                  hosts:omitempty:
+                    items:
+                      type: string
+                    nullable: true
+                    type: array
                   port:
+                    nullable: true
                     type: integer
                 required:
                 - port
@@ -322,6 +329,15 @@ spec:
               service:
                 properties:
                   type:
+                    allOf:
+                    - enum:
+                      - NodePort
+                      - ClusterIP
+                      - LoadBalancer
+                    - enum:
+                      - NodePort
+                      - ClusterIP
+                      - LoadBalancer
                     type: string
                 required:
                 - type
@@ -407,7 +423,6 @@ spec:
             - gossip
             - hosts
             - image
-            - istio
             - logging
             - mspID
             - operationHosts
