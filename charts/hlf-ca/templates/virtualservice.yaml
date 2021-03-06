@@ -1,0 +1,25 @@
+{{- if .Values.istio.hosts -}}
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: {{ include "hlf-ca.fullname" . }}-virtualservice
+spec:
+  hosts:
+    {{- range .Values.istio.hosts }}
+    - {{ . }}
+    {{- end }}
+  gateways:
+    - {{ include "hlf-ca.fullname" . }}-gateway
+  tls:
+    - match:
+        - port: 443
+          sniHosts:
+          {{- range .Values.istio.hosts }}
+              - {{ . }}
+          {{- end }}
+      route:
+        - destination:
+            host: {{ include "hlf-ca.fullname" . }}
+            port:
+              number: 7054
+{{- end -}}
