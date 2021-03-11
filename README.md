@@ -139,7 +139,7 @@ kubectl hlf ca enroll --name=org1-ca --user=admin --secret=adminpw --mspid Org1M
 
 kubectl hlf inspect --output org1.yaml -o Org1MSP -o OrdererMSP
 
-## add user key and cert to org1.yaml from admin-ordservice.yaml
+## add user key and cert to org1.yaml from peer-org1.yaml
 ```
 
 ## Create a channel
