@@ -119,9 +119,9 @@ kubectl hlf ca register --name=ord-ca --user=admin --secret=adminpw \
 
 kubectl hlf ca enroll --name=ord-ca --user=admin --secret=adminpw --mspid Ord2MSP \
         --ca-name ca  --output admin-ordservice.yaml 
-## add user from admin-ordservice.yaml to ordservice.yaml
 
 ```
+> IMPORTANT!!: **Add user from admin-ordservice.yaml to ordservice.yaml** if not, following commands will not work
 
 ## Create a consortium
 ```bash
@@ -139,9 +139,9 @@ kubectl hlf ca enroll --name=org1-ca --user=admin --secret=adminpw --mspid Org1M
 
 kubectl hlf inspect --output org1.yaml -o Org1MSP -o OrdererMSP
 
-## add user key and cert to org1.yaml from admin-ordservice.yaml
 ```
 
+> IMPORTANT!!: **Add user from peer-org1.yaml to org1.yaml** if not, following commands will not work
 ## Create a channel
 ```bash
 
