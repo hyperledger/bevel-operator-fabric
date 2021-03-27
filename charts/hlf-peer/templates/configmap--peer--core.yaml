@@ -552,6 +552,9 @@ data:
       # chaincode. The external builder detection processing will iterate over the
       # builders in the order specified below.
       externalBuilders:
+{{- if $.Values.externalBuilders }}
+{{ $.Values.externalBuilders | toYaml | indent 8  }}
+{{- else }}
 {{- if $.Values.externalChaincodeBuilder }}
         - name: my-golang-builder
           path: /builders/golang
@@ -569,6 +572,7 @@ data:
             - EXTERNAL_BUILDER_HTTPS_PROXY
             - EXTERNAL_BUILDER_NO_PROXY
             - EXTERNAL_BUILDER_PEER_URL
+{{- end }}
 {{- end }}
       # The maximum duration to wait for the chaincode build and install process
       # to complete.

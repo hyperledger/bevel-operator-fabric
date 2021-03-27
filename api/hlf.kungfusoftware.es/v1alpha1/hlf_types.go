@@ -19,6 +19,7 @@ package v1alpha1
 import (
 	"fmt"
 	"github.com/operator-framework/operator-lib/status"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -53,12 +54,20 @@ const (
 	LevelDBState = "leveldb"
 )
 
+type ExternalBuilder struct {
+	Name string `json:"name"`
+	Path string `json:"path"`
+}
+
+const DefaultImagePullPolicy = corev1.PullAlways
+
 // FabricPeerSpec defines the desired state of FabricPeer
 type FabricPeerSpec struct {
 	// +kubebuilder:default:="/var/run/docker.sock"
 	DockerSocketPath string `json:"dockerSocketPath"`
 	// +kubebuilder:validation:MinLength=1
-	Image string `json:"image"`
+	Image            string            `json:"image"`
+	ExternalBuilders []ExternalBuilder `json:"externalBuilders"`
 	// +optional
 	// +kubebuilder:validation:Optional
 	// +nullable
@@ -67,6 +76,7 @@ type FabricPeerSpec struct {
 	ExternalEndpoint string               `json:"externalEndpoint"`
 	// +kubebuilder:validation:MinLength=1
 	Tag                      string            `json:"tag"`
+	ImagePullPolicy          corev1.PullPolicy `json:"imagePullPolicy,omitempty"`
 	ExternalChaincodeBuilder bool              `json:"external_chaincode_builder"`
 	CouchDB                  FabricPeerCouchDB `json:"couchdb"`
 	// +kubebuilder:validation:MinLength=3
@@ -112,6 +122,7 @@ type FabricPeerCouchDB struct {
 }
 
 type FabricPeerIstio struct {
+	// +optional
 	// +nullable
 	Port int `json:"port"`
 	// +nullable
@@ -328,8 +339,9 @@ type FabricCADatabase struct {
 
 // FabricCASpec defines the desired state of FabricCA
 type FabricCASpec struct {
-	// +kubebuilder:validation:Optional
 	// +optional
+	// +kubebuilder:validation:Optional
+	// +nullable
 	Istio    *FabricCAIstio   `json:"istio"`
 	Database FabricCADatabase `json:"db"`
 	// +kubebuilder:validation:MinItems=1
@@ -354,8 +366,13 @@ type FabricCASpec struct {
 }
 type FabricCAIstio struct {
 	// +kubebuilder:validation:Optional
+	// +optional
+	// +nullable
 	Port int `json:"port"`
+	// +nullable
 	// +kubebuilder:validation:Optional
+	// +optional
+	// +kubebuilder:validation:Default={}
 	Hosts []string `json:"hosts"`
 }
 type FabricCATLSConf struct {
