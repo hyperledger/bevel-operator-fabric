@@ -1,3 +1,5 @@
 .idea
 bin
 website-docs
+dist
+kubectl-hlf

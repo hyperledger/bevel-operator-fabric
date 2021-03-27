@@ -12,8 +12,7 @@ spec:
       release: {{ .Release.Name }}
   # Ensure we allow our pod to be unavailable, so we can upgrade
   strategy:
-    rollingUpdate:
-      maxUnavailable: 1
+    type: Recreate
   template:
     metadata:
       labels:
@@ -142,8 +141,8 @@ spec:
           env:
             - name: FILE_SERVER_BASE_IP
               value: {{ include "hlf-peer.fullname" . }}-fs
-{{/*            - name: EXTERNAL_BUILDER_PEER_URL*/}}
-{{/*              value: {{ include "hlf-peer.fullname" . }}:7052*/}}
+            - name: EXTERNAL_BUILDER_PEER_URL
+              value: {{ include "hlf-peer.fullname" . }}:7052
             - name: K8SCC_CFGFILE
               value: "/builders/golang/bin/k8scc.yaml"
             - name: FILE_SERVER_ENDPOINT
