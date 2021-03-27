@@ -685,12 +685,24 @@ func GetConfig(conf *hlfv1alpha1.FabricPeer, client *kubernetes.Clientset, chart
 	if gossipEndpoint == "" {
 		gossipEndpoint = externalEndpoint
 	}
+	externalBuilders := []ExternalBuilder{}
+	for _, builder := range spec.ExternalBuilders {
+		externalBuilders = append(externalBuilders, ExternalBuilder{
+			Name: builder.Name,
+			Path: builder.Path,
+		})
+	}
+	imagePullPolicy := spec.ImagePullPolicy
+	if imagePullPolicy == "" {
+		imagePullPolicy = hlfv1alpha1.DefaultImagePullPolicy
+	}
 	var c = FabricPeerChart{
 		Image: Image{
 			Repository: spec.Image,
 			Tag:        spec.Tag,
-			PullPolicy: "Always",
+			PullPolicy: string(imagePullPolicy),
 		},
+		ExternalBuilders: externalBuilders,
 		DockerSocketPath: spec.DockerSocketPath,
 		Peer: Peer{
 			DatabaseType: string(spec.StateDb),

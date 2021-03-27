@@ -245,7 +245,7 @@ func (c *createCmd) run(args []string) error {
 		if err != nil {
 			return err
 		}
-		log.Infof("Peer %s created on namespace %s", fabricCA.Name, fabricCA.Namespace)
+		log.Infof("Certificate authority %s created on namespace %s", fabricCA.Name, fabricCA.Namespace)
 	}
 
 	return nil
