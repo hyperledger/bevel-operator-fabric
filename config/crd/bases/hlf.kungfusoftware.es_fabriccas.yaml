@@ -307,12 +307,15 @@ spec:
                 minLength: 1
                 type: string
               istio:
+                nullable: true
                 properties:
                   hosts:
                     items:
                       type: string
+                    nullable: true
                     type: array
                   port:
+                    nullable: true
                     type: integer
                 type: object
               metrics:

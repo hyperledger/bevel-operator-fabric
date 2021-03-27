@@ -70,6 +70,18 @@ spec:
                 type: string
               external_chaincode_builder:
                 type: boolean
+              externalBuilders:
+                items:
+                  properties:
+                    name:
+                      type: string
+                    path:
+                      type: string
+                  required:
+                  - name
+                  - path
+                  type: object
+                type: array
               externalEndpoint:
                 type: string
               gossip:
@@ -98,6 +110,10 @@ spec:
               image:
                 minLength: 1
                 type: string
+              imagePullPolicy:
+                description: PullPolicy describes a policy for if/when to pull a container
+                  image
+                type: string
               istio:
                 nullable: true
                 properties:
@@ -109,8 +125,6 @@ spec:
                   port:
                     nullable: true
                     type: integer
-                required:
-                - port
                 type: object
               logging:
                 properties:
@@ -418,6 +432,7 @@ spec:
             - couchdb
             - discovery
             - dockerSocketPath
+            - externalBuilders
             - externalEndpoint
             - external_chaincode_builder
             - gossip

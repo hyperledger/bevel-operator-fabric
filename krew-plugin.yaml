@@ -3,7 +3,7 @@ kind: Plugin
 metadata:
   name: hlf
 spec:
-  version: "v1.0.0"
+  version: "v1.1.0"
   homepage: https://github.com/kfsoftware/hlf-operator
   shortDescription: "Deploy and manage Hyperledger Fabric Peers, Orderers and Certificate authorities"
   description: |
