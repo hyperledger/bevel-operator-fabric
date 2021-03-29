@@ -80,12 +80,13 @@ spec:
                     propagateEnvironment:
                       items:
                         type: string
+                      nullable: true
                       type: array
                   required:
                   - name
                   - path
-                  - propagateEnvironment
                   type: object
+                nullable: true
                 type: array
               externalEndpoint:
                 type: string
@@ -437,7 +438,6 @@ spec:
             - couchdb
             - discovery
             - dockerSocketPath
-            - externalBuilders
             - externalEndpoint
             - external_chaincode_builder
             - gossip

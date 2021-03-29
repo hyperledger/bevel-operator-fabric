@@ -57,6 +57,10 @@ const (
 type ExternalBuilder struct {
 	Name                 string   `json:"name"`
 	Path                 string   `json:"path"`
+	// +nullable
+	// +kubebuilder:validation:Optional
+	// +optional
+	// +kubebuilder:validation:Default={}
 	PropagateEnvironment []string `json:"propagateEnvironment"`
 }
 
@@ -67,7 +71,11 @@ type FabricPeerSpec struct {
 	// +kubebuilder:default:="/var/run/docker.sock"
 	DockerSocketPath string `json:"dockerSocketPath"`
 	// +kubebuilder:validation:MinLength=1
-	Image            string            `json:"image"`
+	Image string `json:"image"`
+	// +nullable
+	// +kubebuilder:validation:Optional
+	// +optional
+	// +kubebuilder:validation:Default={}
 	ExternalBuilders []ExternalBuilder `json:"externalBuilders"`
 	// +optional
 	// +kubebuilder:validation:Optional
