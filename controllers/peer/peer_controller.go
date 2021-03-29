@@ -688,8 +688,9 @@ func GetConfig(conf *hlfv1alpha1.FabricPeer, client *kubernetes.Clientset, chart
 	externalBuilders := []ExternalBuilder{}
 	for _, builder := range spec.ExternalBuilders {
 		externalBuilders = append(externalBuilders, ExternalBuilder{
-			Name: builder.Name,
-			Path: builder.Path,
+			Name:                 builder.Name,
+			Path:                 builder.Path,
+			PropagateEnvironment: builder.PropagateEnvironment,
 		})
 	}
 	imagePullPolicy := spec.ImagePullPolicy

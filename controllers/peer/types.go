@@ -34,8 +34,9 @@ type FabricPeerChart struct {
 }
 
 type ExternalBuilder struct {
-	Name string `json:"name"`
-	Path string `json:"path"`
+	Name                 string   `json:"name"`
+	Path                 string   `json:"path"`
+	PropagateEnvironment []string `json:"propagateEnvironment"`
 }
 
 type Istio struct {
