@@ -776,6 +776,7 @@ func createPeer(releaseName string, namespace string, params createPeerParams, c
 		Spec: hlfv1alpha1.FabricPeerSpec{
 			DockerSocketPath: "/var/run/docker.sock",
 			Image:            "quay.io/kfsoftware/fabric-peer",
+			ExternalBuilders: []hlfv1alpha1.ExternalBuilder{},
 			Istio: &hlfv1alpha1.FabricPeerIstio{
 				Port:  443,
 				Hosts: []string{},
@@ -789,6 +790,7 @@ func createPeer(releaseName string, namespace string, params createPeerParams, c
 			},
 			ExternalEndpoint:         "",
 			Tag:                      "amd64-2.3.0",
+			ImagePullPolicy:          "Always",
 			ExternalChaincodeBuilder: true,
 			CouchDB: hlfv1alpha1.FabricPeerCouchDB{
 				User:     "couchdb",
@@ -1313,8 +1315,8 @@ var _ = Describe("Fabric Controllers", func() {
 		By("Installing a new chaincode")
 		pkgLabel := "fabcar"
 		packageBytes, err := lifecycle.NewCCPackage(&lifecycle.Descriptor{
-			Path:  "../../fixtures/chaincodes/fabcar/javascript",
-			Type:  pb.ChaincodeSpec_NODE,
+			Path:  "../../fixtures/chaincodes/fabcar/go",
+			Type:  pb.ChaincodeSpec_GOLANG,
 			Label: pkgLabel,
 		})
 		Expect(err).ToNot(HaveOccurred())
@@ -1544,8 +1546,8 @@ var _ = Describe("Fabric Controllers", func() {
 		By("install a chaincode for the org")
 		pkgLabel := "fabcar"
 		packageBytes, err := lifecycle.NewCCPackage(&lifecycle.Descriptor{
-			Path:  "../../fixtures/chaincodes/fabcar/javascript",
-			Type:  pb.ChaincodeSpec_NODE,
+			Path:  "../../fixtures/chaincodes/fabcar/go",
+			Type:  pb.ChaincodeSpec_GOLANG,
 			Label: pkgLabel,
 		})
 		Expect(err).ToNot(HaveOccurred())
@@ -1557,11 +1559,11 @@ var _ = Describe("Fabric Controllers", func() {
 			resmgmt.WithTimeout(fab.ResMgmt, 20*time.Minute),
 			resmgmt.WithTimeout(fab.PeerResponse, 20*time.Minute),
 		)
+		Expect(err).ToNot(HaveOccurred())
 		By("approve a chaincode in the peer")
 		ccName := "fabcar"
 		version := "1.0"
 		sequence := 1
-		Expect(err).ToNot(HaveOccurred())
 		packageID := lifecycle.ComputePackageID(pkgLabel, packageBytes)
 		sp, err := policydsl.FromString("OR('Org1MSP.peer')")
 		Expect(err).ToNot(HaveOccurred())
