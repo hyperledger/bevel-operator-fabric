@@ -11,13 +11,16 @@ import (
 )
 
 type EnrollOptions struct {
-	Name   string
-	NS     string
-	User   string
-	Secret string
-	Type   string
-	MspID  string
-	CAName string
+	Name    string
+	NS      string
+	User    string
+	Secret  string
+	Type    string
+	MspID   string
+	CAName  string
+	Profile string
+	Hosts   []string
+	CN      string
 }
 
 func (o EnrollOptions) Validate() error {
@@ -51,6 +54,9 @@ func (c *enrollCmd) run(args []string) error {
 		MSPID:      c.enrollOpts.MspID,
 		User:       c.enrollOpts.User,
 		Secret:     c.enrollOpts.Secret,
+		Hosts:      c.enrollOpts.Hosts,
+		CN:         c.enrollOpts.CN,
+		Profile:    c.enrollOpts.Profile,
 		Attributes: nil,
 	})
 	if err != nil {
@@ -99,6 +105,10 @@ func newCAEnrollCmd(out io.Writer, errOut io.Writer) *cobra.Command {
 	f.StringVarP(&c.enrollOpts.Secret, "secret", "", "", "namespace scope for this request")
 	f.StringVarP(&c.enrollOpts.Type, "type", "", "", "namespace scope for this request")
 	f.StringVarP(&c.enrollOpts.MspID, "mspid", "", "", "namespace scope for this request")
+	f.StringVarP(&c.enrollOpts.Profile, "profile", "", "", "profile")
+	f.StringVarP(&c.enrollOpts.CN, "cn", "", "", "cn")
+	f.StringSliceVarP(&c.enrollOpts.Hosts, "hosts", "", []string{}, "hosts")
+
 	f.StringVar(&c.fileOutput, "output", "", "output file")
 
 	return cmd

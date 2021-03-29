@@ -55,8 +55,9 @@ const (
 )
 
 type ExternalBuilder struct {
-	Name string `json:"name"`
-	Path string `json:"path"`
+	Name                 string   `json:"name"`
+	Path                 string   `json:"path"`
+	PropagateEnvironment []string `json:"propagateEnvironment"`
 }
 
 const DefaultImagePullPolicy = corev1.PullAlways
@@ -129,7 +130,7 @@ type FabricPeerIstio struct {
 	// +kubebuilder:validation:Optional
 	// +optional
 	// +kubebuilder:validation:Default={}
-	Hosts []string `json:"hosts:omitempty"`
+	Hosts []string `json:"hosts,omitempty"`
 }
 
 type FabricPeerSpecGossip struct {
