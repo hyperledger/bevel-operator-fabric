@@ -955,7 +955,7 @@ func createOrderer(releaseName string, namespace string, params createOrdererPar
 					OrdererCapabilities:     hlfv1alpha1.OrdererCapabilities{V2_0: true},
 					ApplicationCapabilities: hlfv1alpha1.ApplicationCapabilities{V2_0: true},
 					ChannelCapabilities:     hlfv1alpha1.ChannelCapabilities{V2_0: true},
-					SnapshotIntervalSize:    19,
+					SnapshotIntervalSize:    16777216,
 					TickInterval:            "500ms",
 					ElectionTick:            10,
 					HeartbeatTick:           1,
