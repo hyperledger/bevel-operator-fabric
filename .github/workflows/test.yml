@@ -17,7 +17,8 @@ jobs:
           go-version: ${{ matrix.go-version }}
       - name: Checkout code
         uses: actions/checkout@v2
-      - uses: engineerd/setup-kind@v0.5.0
+      - name: Create k8s Kind Cluster
+        uses: helm/kind-action@v1.1.0
       - name: Install operator
         run: make generate manifests install
       - name: Test
