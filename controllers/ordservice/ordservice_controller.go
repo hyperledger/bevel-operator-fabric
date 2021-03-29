@@ -2,6 +2,7 @@ package ordservice
 
 import (
 	"context"
+	"crypto/ecdsa"
 	"crypto/x509"
 	"encoding/base64"
 	"encoding/json"
@@ -46,6 +47,76 @@ type FabricOrderingServiceReconciler struct {
 	Log       logr.Logger
 	Scheme    *runtime.Scheme
 	Config    *rest.Config
+}
+
+func getOrdererName(chartName string, idx int) string {
+	return fmt.Sprintf("%s--ord-%d-hlf-ordnode", chartName, idx)
+}
+func getExistingTLSCrypto(client *kubernetes.Clientset, chartName string, namespace string, idx int) (*x509.Certificate, *ecdsa.PrivateKey, *x509.Certificate, error) {
+	baseName := getOrdererName(chartName, idx)
+	secretName := fmt.Sprintf("%s-tls", baseName)
+	tlsRootSecretName := fmt.Sprintf("%s-tlsrootcert", baseName)
+	secret, err := client.CoreV1().Secrets(namespace).Get(context.Background(), secretName, v1.GetOptions{})
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	rootCertSecret, err := client.CoreV1().Secrets(namespace).Get(context.Background(), tlsRootSecretName, v1.GetOptions{})
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	// cacert.pem
+	tlsKeyData := secret.Data["tls.key"]
+	tlsCrtData := secret.Data["tls.crt"]
+	rootTLSCrtData := rootCertSecret.Data["cacert.pem"]
+	key, err := utils.ParseECDSAPrivateKey(tlsKeyData)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	crt, err := utils.ParseX509Certificate(tlsCrtData)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	rootCrt, err := utils.ParseX509Certificate(rootTLSCrtData)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	return crt, key, rootCrt, nil
+}
+
+func getExistingSignCrypto(client *kubernetes.Clientset, chartName string, namespace string, idx int) (*x509.Certificate, *ecdsa.PrivateKey, *x509.Certificate, error) {
+	baseName := getOrdererName(chartName, idx)
+	secretCrtName := fmt.Sprintf("%s-idcert", baseName)
+	secretKeyName := fmt.Sprintf("%s-idkey", baseName)
+	secretRootCrtName := fmt.Sprintf("%s-cacert", baseName)
+
+	secretCrt, err := client.CoreV1().Secrets(namespace).Get(context.Background(), secretCrtName, v1.GetOptions{})
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	secretKey, err := client.CoreV1().Secrets(namespace).Get(context.Background(), secretKeyName, v1.GetOptions{})
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	secretRootCrt, err := client.CoreV1().Secrets(namespace).Get(context.Background(), secretRootCrtName, v1.GetOptions{})
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	signCrtData := secretCrt.Data["cert.pem"]
+	signKeyData := secretKey.Data["key.pem"]
+	signRootCrtData := secretRootCrt.Data["cacert.pem"]
+	crt, err := utils.ParseX509Certificate(signCrtData)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	rootCrt, err := utils.ParseX509Certificate(signRootCrtData)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	key, err := utils.ParseECDSAPrivateKey(signKeyData)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	return crt, key, rootCrt, nil
 }
 
 func getConfig(conf *hlfv1alpha1.FabricOrderingService, client *kubernetes.Clientset) (*FabricOrdChart, error) {
@@ -110,6 +181,7 @@ func getConfig(conf *hlfv1alpha1.FabricOrderingService, client *kubernetes.Clien
 		if err != nil {
 			return nil, err
 		}
+
 		tlsCert, tlsKey, tlsRootCert, err := certs.EnrollUser(certs.EnrollUserRequest{
 			TLSCert: string(tlsCertPEM),
 			URL: fmt.Sprintf(
