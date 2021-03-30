@@ -12,6 +12,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"io"
+	"io/ioutil"
 	"strings"
 	"time"
 )
@@ -56,13 +57,21 @@ func (c *installChaincodeCmd) run() error {
 	if !ok {
 		return errors.Errorf("Language %s not valid", c.chaincodeLanguage)
 	}
-	pkg, err := lifecycle.NewCCPackage(&lifecycle.Descriptor{
-		Path:  c.chaincodePath,
-		Type:  pb.ChaincodeSpec_Type(chLng),
-		Label: c.chaincodeLabel,
-	})
-	if err != nil {
-		return err
+	var pkg []byte
+	if strings.HasSuffix(c.chaincodePath, ".tar.gz") || strings.HasSuffix(c.chaincodePath, ".tgz") {
+		pkg, err = ioutil.ReadFile(c.chaincodePath)
+		if err != nil {
+			return err
+		}
+	} else {
+		pkg, err = lifecycle.NewCCPackage(&lifecycle.Descriptor{
+			Path:  c.chaincodePath,
+			Type:  pb.ChaincodeSpec_Type(chLng),
+			Label: c.chaincodeLabel,
+		})
+		if err != nil {
+			return err
+		}
 	}
 	responses, err := resClient.LifecycleInstallCC(
 		resmgmt.LifecycleInstallCCRequest{
