@@ -28,8 +28,6 @@ builds:
       - -s -w -X main.version={{.Tag}}
     flags:
       - -trimpath
-    hooks:
-      post: ./package.sh {{ .Path }}
   -
     id: kubectl-hlf
     dir: kubectl-hlf
@@ -47,8 +45,6 @@ builds:
       - -s -w -X main.version={{.Tag}}
     flags:
       - -trimpath
-    hooks:
-      post: ./package.sh {{ .Path }}
 
 archives:
   -
