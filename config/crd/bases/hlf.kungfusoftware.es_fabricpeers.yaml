@@ -70,6 +70,24 @@ spec:
                 type: string
               external_chaincode_builder:
                 type: boolean
+              externalBuilders:
+                items:
+                  properties:
+                    name:
+                      type: string
+                    path:
+                      type: string
+                    propagateEnvironment:
+                      items:
+                        type: string
+                      nullable: true
+                      type: array
+                  required:
+                  - name
+                  - path
+                  type: object
+                nullable: true
+                type: array
               externalEndpoint:
                 type: string
               gossip:
@@ -98,10 +116,14 @@ spec:
               image:
                 minLength: 1
                 type: string
+              imagePullPolicy:
+                description: PullPolicy describes a policy for if/when to pull a container
+                  image
+                type: string
               istio:
                 nullable: true
                 properties:
-                  hosts:omitempty:
+                  hosts:
                     items:
                       type: string
                     nullable: true
@@ -109,8 +131,6 @@ spec:
                   port:
                     nullable: true
                     type: integer
-                required:
-                - port
                 type: object
               logging:
                 properties:

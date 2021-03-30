@@ -1,3 +1,8 @@
 .idea
 bin
 website-docs
+dist
+kubectl-hlf
+.git
+fixtures
+hlf-operator
