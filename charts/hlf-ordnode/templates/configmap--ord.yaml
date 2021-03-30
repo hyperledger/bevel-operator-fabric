@@ -22,7 +22,7 @@ data:
   ORDERER_GENERAL_LOCALMSPID: {{ .Values.ord.mspID | quote }}
   ORDERER_GENERAL_GENESISMETHOD: file
   ORDERER_GENERAL_GENESISFILE: /hl_config/genesis/genesis.block
-#  ORDERER_GENERAL_GENESISPROFILE: initial
+  ORDERER_GENERAL_GENESISPROFILE: initial
   ORDERER_GENERAL_TLS_ENABLED: {{ .Values.ord.tls.server.enabled | quote }}
   ORDERER_GENERAL_TLS_CERTIFICATE: "/var/hyperledger/tls/server/pair/tls.crt"
   ORDERER_GENERAL_TLS_PRIVATEKEY: "/var/hyperledger/tls/server/pair/tls.key"
@@ -33,7 +33,7 @@ data:
   ORDERER_GENERAL_CLUSTER_CLIENTPRIVATEKEY: "/var/hyperledger/tls/server/pair/tls.key"
   ORDERER_GENERAL_CLUSTER_ROOTCAS: "/var/hyperledger/tls/server/cert/cacert.pem"
   # This is fixed prior to starting the orderer
-#  ORDERER_GENERAL_TLS_CLIENTROOTCAS: "/var/hyperledger/tls/client/cert/*"
+  ORDERER_GENERAL_TLS_CLIENTROOTCAS: "/var/hyperledger/tls/client/cert/*"
   GODEBUG: "netdns=go"
   ADMIN_MSP_PATH: /var/hyperledger/admin_msp
   FABRIC_LOGGING_SPEC: debug

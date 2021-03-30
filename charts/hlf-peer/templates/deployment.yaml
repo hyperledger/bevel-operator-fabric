@@ -12,8 +12,7 @@ spec:
       release: {{ .Release.Name }}
   # Ensure we allow our pod to be unavailable, so we can upgrade
   strategy:
-    rollingUpdate:
-      maxUnavailable: 1
+    type: Recreate
   template:
     metadata:
       labels:

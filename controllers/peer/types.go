@@ -4,32 +4,39 @@ type RBAC struct {
 	Ns string `json:"ns"`
 }
 type FabricPeerChart struct {
-	ExternalChaincodeBuilder bool            `json:"externalChaincodeBuilder"`
-	CouchdbUsername          string          `json:"couchdbUsername"`
-	CouchdbPassword          string          `json:"couchdbPassword"`
-	Image                    Image           `json:"image"`
-	Rbac                     RBAC            `json:"rbac"`
-	DockerSocketPath         string          `json:"dockerSocketPath"`
-	Ingress                  Ingress         `json:"ingress"`
-	Peer                     Peer            `json:"peer"`
-	Cert                     string          `json:"cert"`
-	Key                      string          `json:"key"`
-	Hosts                    []string        `json:"hosts"`
-	OperationHosts           []string        `json:"operationHosts"`
-	TLS                      TLS             `json:"tls"`
-	OPSTLS                   TLS             `json:"opsTLS"`
-	Cacert                   string          `json:"cacert"`
-	Tlsrootcert              string          `json:"tlsrootcert"`
-	Resources                Resources       `json:"resources,omitempty"`
-	NodeSelector             NodeSelector    `json:"nodeSelector,omitempty"`
-	Tolerations              []interface{}   `json:"tolerations"`
-	Affinity                 Affinity        `json:"affinity,omitempty"`
-	ExternalHost             string          `json:"externalHost"`
-	FullnameOverride         string          `json:"fullnameOverride"`
-	HostAliases              []HostAliases   `json:"hostAliases"`
-	Service                  Service         `json:"service"`
-	Persistence              PeerPersistence `json:"persistence"`
-	Logging                  Logging         `json:"logging"`
+	ExternalChaincodeBuilder bool              `json:"externalChaincodeBuilder"`
+	CouchdbUsername          string            `json:"couchdbUsername"`
+	CouchdbPassword          string            `json:"couchdbPassword"`
+	Image                    Image             `json:"image"`
+	Rbac                     RBAC              `json:"rbac"`
+	DockerSocketPath         string            `json:"dockerSocketPath"`
+	Ingress                  Ingress           `json:"ingress"`
+	Peer                     Peer              `json:"peer"`
+	Cert                     string            `json:"cert"`
+	Key                      string            `json:"key"`
+	Hosts                    []string          `json:"hosts"`
+	OperationHosts           []string          `json:"operationHosts"`
+	TLS                      TLS               `json:"tls"`
+	OPSTLS                   TLS               `json:"opsTLS"`
+	Cacert                   string            `json:"cacert"`
+	Tlsrootcert              string            `json:"tlsrootcert"`
+	Resources                Resources         `json:"resources,omitempty"`
+	NodeSelector             NodeSelector      `json:"nodeSelector,omitempty"`
+	Tolerations              []interface{}     `json:"tolerations"`
+	Affinity                 Affinity          `json:"affinity,omitempty"`
+	ExternalHost             string            `json:"externalHost"`
+	FullnameOverride         string            `json:"fullnameOverride"`
+	HostAliases              []HostAliases     `json:"hostAliases"`
+	Service                  Service           `json:"service"`
+	Persistence              PeerPersistence   `json:"persistence"`
+	Logging                  Logging           `json:"logging"`
+	ExternalBuilders         []ExternalBuilder `json:"externalBuilders"`
+}
+
+type ExternalBuilder struct {
+	Name                 string   `json:"name"`
+	Path                 string   `json:"path"`
+	PropagateEnvironment []string `json:"propagateEnvironment"`
 }
 
 type Istio struct {
