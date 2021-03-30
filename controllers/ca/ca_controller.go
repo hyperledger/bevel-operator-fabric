@@ -534,7 +534,7 @@ func GetCAState(clientSet *kubernetes.Clientset, ca *hlfv1alpha1.FabricCA, relea
 			r.Status = hlfv1alpha1.PendingStatus
 		}
 	}
-	if len(ca.Spec.Istio.Hosts) > 0 {
+	if ca.Spec.Istio != nil && len(ca.Spec.Istio.Hosts) > 0 {
 		r.URL = fmt.Sprintf("https://%s:%d", ca.Spec.Istio.Hosts[0], ca.Spec.Istio.Port)
 		r.Host = ca.Spec.Istio.Hosts[0]
 		r.Port = ca.Spec.Istio.Port

@@ -14,11 +14,11 @@ dockerSocketPath: /var/run/docker.sock
 
 ingress:
   enabled: false
-  annotations: {}
+  annotations: { }
   path: /
   hosts:
     - hlf-peer.local
-  tls: []
+  tls: [ ]
   #  - secretName: hlf-peer-tls
   #    hosts:
   #      - hlf-peer.local
@@ -144,23 +144,23 @@ tlsrootcert: |
 
 
 resources:
-   limits:
-     cpu: 100m
-     memory: 128Mi
-   requests:
-     cpu: 100m
-     memory: 128Mi
+  limits:
+    cpu: 100m
+    memory: 128Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
 
-nodeSelector: {}
+nodeSelector: { }
 
-tolerations: []
+tolerations: [ ]
 
-affinity: {}
+affinity: { }
 
 
 externalHost: peer0:443
 fullnameOverride: peer0
-hostAliases: []
+hostAliases: [ ]
 service:
   type: NodePort
   portRequest: 7051
@@ -170,19 +170,19 @@ service:
 persistence:
   peer:
     enabled: true
-    annotations: {}
+    annotations: { }
     storageClass:
     accessMode: ReadWriteOnce
     size: 1Gi
   couchdb:
     enabled: true
-    annotations: {}
+    annotations: { }
     storageClass:
     accessMode: ReadWriteOnce
     size: 1Gi
   chaincode:
     enabled: true
-    annotations: {}
+    annotations: { }
     storageClass:
     accessMode: ReadWriteOnce
     size: 1Gi
@@ -197,3 +197,11 @@ logging:
   policies: warning
 
 externalChaincodeBuilder: false
+
+externalBuilders:
+  - path: "12"
+    name: external-sample-builder
+
+opsTLS:
+  key: ""
+  cert: ""
