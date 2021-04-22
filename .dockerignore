@@ -5,4 +5,3 @@ dist
 kubectl-hlf
 .git
 fixtures
-hlf-operator
