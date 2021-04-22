@@ -73,7 +73,7 @@ data:
   {{- end }}
   CORE_LEDGER_STATE_STATEDATABASE: {{ .Values.peer.databaseType | quote }}
   # Containers in the same pod share the host
-  {{- if eq .Values.peer.databaseType "couchdb" }}
+  {{- if eq .Values.peer.databaseType "CouchDB" }}
   CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS: localhost:5984
   {{- end }}
   PEER_CFG_PATH: /var/hyperledger/config
