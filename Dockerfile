@@ -8,7 +8,6 @@ LABEL name="HLF Operator" \
 
 COPY CREDITS /licenses/CREDITS
 COPY LICENSE /licenses/LICENSE
-COPY LICENSE /licenses/LICENSE
 COPY charts /charts
 
 RUN \

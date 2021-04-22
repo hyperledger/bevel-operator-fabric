@@ -73,7 +73,7 @@ orderers:
       allow-insecure: false
     tlsCACerts:
       pem: |
-{{ $orderer.Spec.TLSRootCert | indent 8 }}
+{{ $orderer.Status.TlsCert | indent 8 }}
 {{- end }}
 {{- end }}
 

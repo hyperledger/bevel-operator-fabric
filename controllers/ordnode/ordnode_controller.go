@@ -2,11 +2,16 @@ package ordnode
 
 import (
 	"context"
+	"crypto/ecdsa"
+	"crypto/x509"
+	"encoding/base64"
 	"encoding/json"
+	"encoding/pem"
 	"errors"
 	"fmt"
 	"github.com/go-logr/logr"
 	hlfv1alpha1 "github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
+	"github.com/kfsoftware/hlf-operator/controllers/certs"
 	"github.com/kfsoftware/hlf-operator/controllers/utils"
 	"github.com/operator-framework/operator-lib/status"
 	"helm.sh/helm/v3/pkg/action"
@@ -141,6 +146,7 @@ func (r *FabricOrdererNodeReconciler) Reconcile(req ctrl.Request) (ctrl.Result, 
 		// update
 		s, err := GetOrdererState(cfg, r.Config, releaseName, ns)
 		if err != nil {
+			log.Printf("Failed to get orderer state=%v", err)
 			return ctrl.Result{}, err
 		}
 		fOrderer := fabricOrdererNode.DeepCopy()
@@ -148,6 +154,10 @@ func (r *FabricOrdererNodeReconciler) Reconcile(req ctrl.Request) (ctrl.Result, 
 		fOrderer.Status.URL = s.URL
 		fOrderer.Status.Host = s.Host
 		fOrderer.Status.Port = s.Port
+		fOrderer.Status.TlsCert = s.TlsCert
+		fOrderer.Status.TlsAdminCert = s.TlsAdminCert
+		fOrderer.Status.AdminPort = s.AdminPort
+		fOrderer.Status.OperationsPort = s.OperationsPort
 		fOrderer.Status.Conditions.SetCondition(status.Condition{
 			Type:   status.ConditionType(s.Status),
 			Status: "True",
@@ -181,7 +191,7 @@ func (r *FabricOrdererNodeReconciler) Reconcile(req ctrl.Request) (ctrl.Result, 
 		if err != nil {
 			return ctrl.Result{}, err
 		}
-		c, err := getConfig(fabricOrdererNode, clientSet)
+		c, err := getConfig(fabricOrdererNode, clientSet, releaseName, req.Namespace)
 		if err != nil {
 			reqLogger.Error(err, "Failed to get config for orderer %s/%s", req.Namespace, req.Name)
 			return ctrl.Result{}, err
@@ -194,10 +204,19 @@ func (r *FabricOrdererNodeReconciler) Reconcile(req ctrl.Request) (ctrl.Result, 
 		log.Println(string(inrec))
 		err = json.Unmarshal(inrec, &inInterface)
 		if err != nil {
+			log.Printf("Failed to unmarshall JSON %v", err)
 			return ctrl.Result{}, err
+		}
+		if fabricOrdererNode.Spec.Genesis == "" && fabricOrdererNode.Spec.BootstrapMethod != "none" {
+			waitForGenesis := 2 * time.Second
+			log.Printf("Waiting %v since bootstrapMethod is %s", waitForGenesis, fabricOrdererNode.Spec.BootstrapMethod)
+			return ctrl.Result{
+				RequeueAfter: waitForGenesis,
+			}, err
 		}
 		release, err := cmd.Run(ch, inInterface)
 		if err != nil {
+			log.Printf("Failed to run release %v", err)
 			return ctrl.Result{}, err
 		}
 		log.Printf("Chart installed %s", release.Name)
@@ -224,35 +243,286 @@ func (r *FabricOrdererNodeReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Complete(r)
 }
 
-func getConfig(conf *hlfv1alpha1.FabricOrdererNode, client *kubernetes.Clientset) (*fabricOrdChart, error) {
+func getExistingTLSAdminCrypto(client *kubernetes.Clientset, chartName string, namespace string) (*x509.Certificate, *ecdsa.PrivateKey, *x509.Certificate, *x509.Certificate, error) {
+	secretName := fmt.Sprintf("%s-admin", chartName)
+	secret, err := client.CoreV1().Secrets(namespace).Get(context.Background(), secretName, v1.GetOptions{})
+	if err != nil {
+		return nil, nil, nil, nil, err
+	}
+	// cacert.pem
+	tlsKeyData := secret.Data["tls.key"]
+	tlsCrtData := secret.Data["tls.crt"]
+	rootTLSCrtData := secret.Data["cacert.crt"]
+	clientRootCrtData := secret.Data["clientcacert.crt"]
+	key, err := utils.ParseECDSAPrivateKey(tlsKeyData)
+	if err != nil {
+		return nil, nil, nil, nil, err
+	}
+	crt, err := utils.ParseX509Certificate(tlsCrtData)
+	if err != nil {
+		return nil, nil, nil, nil, err
+	}
+	rootCrt, err := utils.ParseX509Certificate(rootTLSCrtData)
+	if err != nil {
+		return nil, nil, nil, nil, err
+	}
+	clientRootCrt, err := utils.ParseX509Certificate(clientRootCrtData)
+	if err != nil {
+		return nil, nil, nil, nil, err
+	}
+	return crt, key, rootCrt, clientRootCrt, nil
+}
+
+func getExistingTLSCrypto(client *kubernetes.Clientset, chartName string, namespace string) (*x509.Certificate, *ecdsa.PrivateKey, *x509.Certificate, error) {
+	secretName := fmt.Sprintf("%s-tls", chartName)
+	tlsRootSecretName := fmt.Sprintf("%s-tlsrootcert", chartName)
+	secret, err := client.CoreV1().Secrets(namespace).Get(context.Background(), secretName, v1.GetOptions{})
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	rootCertSecret, err := client.CoreV1().Secrets(namespace).Get(context.Background(), tlsRootSecretName, v1.GetOptions{})
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	// cacert.pem
+	tlsKeyData := secret.Data["tls.key"]
+	tlsCrtData := secret.Data["tls.crt"]
+	rootTLSCrtData := rootCertSecret.Data["cacert.pem"]
+	key, err := utils.ParseECDSAPrivateKey(tlsKeyData)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	crt, err := utils.ParseX509Certificate(tlsCrtData)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	rootCrt, err := utils.ParseX509Certificate(rootTLSCrtData)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	return crt, key, rootCrt, nil
+}
+
+func getExistingSignCrypto(client *kubernetes.Clientset, chartName string, namespace string) (*x509.Certificate, *ecdsa.PrivateKey, *x509.Certificate, error) {
+	secretCrtName := fmt.Sprintf("%s-idcert", chartName)
+	secretKeyName := fmt.Sprintf("%s-idkey", chartName)
+	secretRootCrtName := fmt.Sprintf("%s-cacert", chartName)
+
+	secretCrt, err := client.CoreV1().Secrets(namespace).Get(context.Background(), secretCrtName, v1.GetOptions{})
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	secretKey, err := client.CoreV1().Secrets(namespace).Get(context.Background(), secretKeyName, v1.GetOptions{})
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	secretRootCrt, err := client.CoreV1().Secrets(namespace).Get(context.Background(), secretRootCrtName, v1.GetOptions{})
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	signCrtData := secretCrt.Data["cert.pem"]
+	signKeyData := secretKey.Data["key.pem"]
+	signRootCrtData := secretRootCrt.Data["cacert.pem"]
+	crt, err := utils.ParseX509Certificate(signCrtData)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	rootCrt, err := utils.ParseX509Certificate(signRootCrtData)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	key, err := utils.ParseECDSAPrivateKey(signKeyData)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	return crt, key, rootCrt, nil
+}
+
+func CreateTLSCryptoMaterial(conf *hlfv1alpha1.FabricOrdererNode, caName string, caurl string, enrollID string, enrollSecret string, tlsCertString string, hosts []string) (*x509.Certificate, *ecdsa.PrivateKey, *x509.Certificate, error) {
+	tlsCert, tlsKey, tlsRootCert, err := certs.EnrollUser(certs.EnrollUserRequest{
+		TLSCert:    tlsCertString,
+		URL:        caurl,
+		Name:       caName,
+		MSPID:      conf.Spec.MspID,
+		User:       enrollID,
+		Secret:     enrollSecret,
+		Hosts:      hosts,
+		CN:         "",
+		Profile:    "tls",
+		Attributes: nil,
+	})
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	return tlsCert, tlsKey, tlsRootCert, nil
+}
+
+func CreateTLSAdminCryptoMaterial(conf *hlfv1alpha1.FabricOrdererNode, caName string, caurl string, enrollID string, enrollSecret string, tlsCertString string, hosts []string) (*x509.Certificate, *ecdsa.PrivateKey, *x509.Certificate, *x509.Certificate, error) {
+	tlsCert, tlsKey, tlsRootCert, err := certs.EnrollUser(
+		certs.EnrollUserRequest{
+			TLSCert:    tlsCertString,
+			URL:        caurl,
+			Name:       caName,
+			MSPID:      conf.Spec.MspID,
+			User:       enrollID,
+			Secret:     enrollSecret,
+			Hosts:      hosts,
+			CN:         "",
+			Profile:    "tls",
+			Attributes: nil,
+		},
+	)
+	if err != nil {
+		return nil, nil, nil, nil, err
+	}
+	return tlsCert, tlsKey, tlsRootCert, tlsRootCert, nil
+}
+
+func CreateSignCryptoMaterial(conf *hlfv1alpha1.FabricOrdererNode, caName string, caurl string, enrollID string, enrollSecret string, tlsCertString string) (*x509.Certificate, *ecdsa.PrivateKey, *x509.Certificate, error) {
+	tlsCert, tlsKey, tlsRootCert, err := certs.EnrollUser(certs.EnrollUserRequest{
+		TLSCert: tlsCertString,
+		URL:     caurl,
+		Name:    caName,
+		MSPID:   conf.Spec.MspID,
+		User:    enrollID,
+		Secret:  enrollSecret,
+	})
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	return tlsCert, tlsKey, tlsRootCert, nil
+}
+
+func getConfig(conf *hlfv1alpha1.FabricOrdererNode, client *kubernetes.Clientset, chartName string, namespace string) (*fabricOrdChart, error) {
 	spec := conf.Spec
-	publicIP, err := utils.GetPublicIPKubernetes(client)
+	tlsParams := conf.Spec.Secret.Enrollment.TLS
+	tlsCAUrl := fmt.Sprintf("https://%s:%d", tlsParams.Cahost, tlsParams.Caport)
+	tlsHosts := []string{}
+	ingressHosts := []string{}
+	tlsHosts = append(tlsHosts, tlsParams.Csr.Hosts...)
+	tlsCert, tlsKey, tlsRootCert, err := getExistingTLSCrypto(client, chartName, namespace)
+	if err != nil {
+		cacert, err := base64.StdEncoding.DecodeString(tlsParams.Catls.Cacert)
+		if err != nil {
+			return nil, err
+		}
+		tlsCert, tlsKey, tlsRootCert, err = CreateTLSCryptoMaterial(
+			conf,
+			tlsParams.Caname,
+			tlsCAUrl,
+			tlsParams.Enrollid,
+			tlsParams.Enrollsecret,
+			string(cacert),
+			tlsHosts,
+		)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	adminCert, adminKey, adminRootCert, adminClientRootCert, err := getExistingTLSAdminCrypto(client, chartName, namespace)
+	if err != nil {
+		cacert, err := base64.StdEncoding.DecodeString(tlsParams.Catls.Cacert)
+		if err != nil {
+			return nil, err
+		}
+		adminCert, adminKey, adminRootCert, adminClientRootCert, err = CreateTLSAdminCryptoMaterial(
+			conf,
+			tlsParams.Caname,
+			tlsCAUrl,
+			tlsParams.Enrollid,
+			tlsParams.Enrollsecret,
+			string(cacert),
+			tlsHosts,
+		)
+		if err != nil {
+			return nil, err
+		}
+	}
+	signParams := conf.Spec.Secret.Enrollment.Component
+	caUrl := fmt.Sprintf("https://%s:%d", signParams.Cahost, signParams.Caport)
+	signCert, signKey, signRootCert, err := getExistingSignCrypto(client, chartName, namespace)
+	if err != nil {
+		cacert, err := base64.StdEncoding.DecodeString(signParams.Catls.Cacert)
+		if err != nil {
+			return nil, err
+		}
+		signCert, signKey, signRootCert, err = CreateSignCryptoMaterial(
+			conf,
+			signParams.Caname,
+			caUrl,
+			signParams.Enrollid,
+			signParams.Enrollsecret,
+			string(cacert),
+		)
+		if err != nil {
+			return nil, err
+		}
+	}
+	tlsCRTEncoded := pem.EncodeToMemory(&pem.Block{
+		Type:  "CERTIFICATE",
+		Bytes: tlsCert.Raw,
+	})
+	tlsRootCRTEncoded := pem.EncodeToMemory(&pem.Block{
+		Type:  "CERTIFICATE",
+		Bytes: tlsRootCert.Raw,
+	})
+	tlsEncodedPK, err := utils.EncodePrivateKey(tlsKey)
 	if err != nil {
 		return nil, err
 	}
-	tlsHosts := []string{}
-	ingressHosts := []string{}
-	tlsHosts = append(tlsHosts, spec.Hosts...)
-	ingressHosts = append(ingressHosts, spec.Hosts...)
-	if !utils.Contains(tlsHosts, publicIP) {
-		tlsHosts = append(tlsHosts, publicIP)
+
+	adminCRTEncoded := pem.EncodeToMemory(&pem.Block{
+		Type:  "CERTIFICATE",
+		Bytes: adminCert.Raw,
+	})
+	adminRootCRTEncoded := pem.EncodeToMemory(&pem.Block{
+		Type:  "CERTIFICATE",
+		Bytes: adminRootCert.Raw,
+	})
+	adminClientRootCRTEncoded := pem.EncodeToMemory(&pem.Block{
+		Type:  "CERTIFICATE",
+		Bytes: adminClientRootCert.Raw,
+	})
+	adminEncodedPK, err := utils.EncodePrivateKey(adminKey)
+	if err != nil {
+		return nil, err
 	}
 
+	signCRTEncoded := pem.EncodeToMemory(&pem.Block{
+		Type:  "CERTIFICATE",
+		Bytes: signCert.Raw,
+	})
+	signRootCRTEncoded := pem.EncodeToMemory(&pem.Block{
+		Type:  "CERTIFICATE",
+		Bytes: signRootCert.Raw,
+	})
+	signEncodedPK, err := utils.EncodePrivateKey(signKey)
+	if err != nil {
+		return nil, err
+	}
 	fabricOrdChart := fabricOrdChart{
 		Ingress: ingress{
 			Enabled: false,
 		},
-		Genesis:     spec.Genesis,
-		Cacert:      spec.SignRootCert,
-		Tlsrootcert: spec.TLSRootCert,
-		AdminCert:   "",
-		Cert:        spec.SignCert,
-		Key:         spec.SignKey,
-		TLS: tls{
-			Cert: spec.TLSCert,
-			Key:  spec.TLSKey,
+		Genesis:                     spec.Genesis,
+		Cacert:                      string(signRootCRTEncoded),
+		Tlsrootcert:                 string(tlsRootCRTEncoded),
+		ChannelParticipationEnabled: spec.ChannelParticipationEnabled,
+		BootstrapMethod:             string(spec.BootstrapMethod),
+		Admin: admin{
+			Cert:          string(adminCRTEncoded),
+			Key:           string(adminEncodedPK),
+			RootCAs:       string(adminRootCRTEncoded),
+			ClientRootCAs: string(adminClientRootCRTEncoded),
 		},
-		FullnameOverride: "",
+		Cert: string(signCRTEncoded),
+		Key:  string(signEncodedPK),
+		TLS: tls{
+			Cert: string(tlsCRTEncoded),
+			Key:  string(tlsEncodedPK),
+		},
+		FullnameOverride: conf.Name,
 		HostAliases:      nil,
 		Service: service{
 			Type:               spec.Service.Type,
@@ -264,7 +534,7 @@ func getConfig(conf *hlfv1alpha1.FabricOrdererNode, client *kubernetes.Clientset
 		Image: image{
 			Repository: spec.Image,
 			Tag:        spec.Tag,
-			PullPolicy: spec.PullPolicy,
+			PullPolicy: string(spec.PullPolicy),
 		},
 		Persistence: persistence{
 			Enabled:      true,
@@ -314,14 +584,7 @@ func actionLogger(logger logr.Logger) func(format string, v ...interface{}) {
 	}
 }
 
-type OrdererStatus struct {
-	URL    string
-	Host   string
-	Port   int
-	Status hlfv1alpha1.DeploymentStatus
-}
-
-func GetOrdererState(conf *action.Configuration, config *rest.Config, releaseName string, ns string) (*OrdererStatus, error) {
+func GetOrdererState(conf *action.Configuration, config *rest.Config, releaseName string, ns string) (*hlfv1alpha1.FabricOrdererNodeStatus, error) {
 	ctx := context.Background()
 	cmd := action.NewGet(conf)
 	rel, err := cmd.Run(releaseName)
@@ -336,9 +599,19 @@ func GetOrdererState(conf *action.Configuration, config *rest.Config, releaseNam
 	if err != nil {
 		return nil, err
 	}
-	r := &OrdererStatus{
+	r := &hlfv1alpha1.FabricOrdererNodeStatus{
 		Status: hlfv1alpha1.RunningStatus,
 	}
+	tlsCrt, _, _, err := getExistingTLSCrypto(clientSet, releaseName, ns)
+	if err != nil {
+		return nil, err
+	}
+	r.TlsCert = string(utils.EncodeX509Certificate(tlsCrt))
+	tlsAdminCrt, _, _, _, err := getExistingTLSAdminCrypto(clientSet, releaseName, ns)
+	if err != nil {
+		return nil, err
+	}
+	r.TlsAdminCert = string(utils.EncodeX509Certificate(tlsAdminCrt))
 	objects := utils.ParseK8sYaml([]byte(rel.Manifest))
 	for _, object := range objects {
 		kind := object.GetObjectKind().GroupVersionKind().Kind
@@ -390,6 +663,10 @@ func GetOrdererState(conf *action.Configuration, config *rest.Config, releaseNam
 					r.URL = fmt.Sprintf("grpcs://%s:%d", k8sIP, port.NodePort)
 					r.Port = int(port.NodePort)
 					r.Host = k8sIP
+				} else if port.Name == "admin" {
+					r.AdminPort = int(port.NodePort)
+				} else if port.Name == "operations" {
+					r.OperationsPort = int(port.NodePort)
 				}
 			}
 		}

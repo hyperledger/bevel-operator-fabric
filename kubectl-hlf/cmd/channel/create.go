@@ -112,7 +112,6 @@ func (c *createChannelCmd) run() error {
 		baseProfile,
 		c.channelName,
 	)
-
 	if err != nil {
 		return err
 	}

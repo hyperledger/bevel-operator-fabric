@@ -102,12 +102,15 @@ kubectl hlf ca register --name=ord-ca --user=orderer --secret=ordererpw \
 
 ```
 
-### Deploying the Ordering service
+### Deploying the Orderer nodes node
 
 ```bash
-kubectl hlf ordservice create  --storage-class=standard --enroll-id=orderer --mspid=OrdererMSP \
-    --enroll-pw=ordererpw --capacity=2Gi --name=ordservice --ca-name=ord-ca.default \
-    --system-channel testchainid --num-orderers=1
+kubectl hlf ordnode create  --storage-class=standard --enroll-id=orderer --mspid=OrdererMSP \
+    --enroll-pw=ordererpw --capacity=2Gi --name=ord-node1 --ca-name=ord-ca.default
+kubectl hlf ordnode create  --storage-class=standard --enroll-id=orderer --mspid=OrdererMSP \
+    --enroll-pw=ordererpw --capacity=2Gi --name=ord-node2 --ca-name=ord-ca.default
+kubectl hlf ordnode create  --storage-class=standard --enroll-id=orderer --mspid=OrdererMSP \
+    --enroll-pw=ordererpw --capacity=2Gi --name=ord-node3 --ca-name=ord-ca.default
 kubectl wait --timeout=180s --for=condition=Running fabricorderingservices.hlf.kungfusoftware.es --all
 ```
 
@@ -117,8 +120,12 @@ kubectl hlf inspect --output ordservice.yaml -o OrdererMSP
 kubectl hlf ca register --name=ord-ca --user=admin --secret=adminpw \
     --type=admin --enroll-id enroll --enroll-secret=enrollpw --mspid=Ord2MSP
 
-kubectl hlf ca enroll --name=ord-ca --user=admin --secret=adminpw --mspid Ord2MSP \
+kubectl hlf ca enroll --name=org1-ca --namespace=hlf-operator-azjtfjtjnkdzvwusxdhaaz --user=admin --secret=adminpw --mspid Ord2MSP \
         --ca-name ca  --output admin-ordservice.yaml 
+
+osnadmin channel join --channelID ch1  --config-block ./r1.block \
+    -o 172.2.0.4:31546 --ca-file $OSN_TLS_CA_ROOT_CERT \
+    --client-cert $ADMIN_TLS_SIGN_CERT --client-key $ADMIN_TLS_PRIVATE_KEY
 
 ```
 > IMPORTANT!!: **Add user from admin-ordservice.yaml to ordservice.yaml** if not, following commands will not work

@@ -30,6 +30,7 @@ type ClusterCA struct {
 	Name   string
 }
 type ClusterOrderingService struct {
+	MSPID    string
 	Name     string
 	Object   hlfv1alpha1.FabricOrderingService
 	Spec     hlfv1alpha1.FabricOrderingServiceSpec
@@ -79,11 +80,36 @@ func GetClusterOrderers(
 	ns string,
 ) ([]*Organization, []*ClusterOrderingService, error) {
 	ctx := context.Background()
+	ordererNodes, err := oclient.HlfV1alpha1().FabricOrdererNodes(ns).List(ctx, v1.ListOptions{})
+	if err != nil {
+		return nil, nil, err
+	}
+
 	orderingServices, err := oclient.HlfV1alpha1().FabricOrderingServices(ns).List(ctx, v1.ListOptions{})
 	if err != nil {
 		return nil, nil, err
 	}
 	var orderers []*ClusterOrderingService
+	if len(ordererNodes.Items) > 0 {
+		orderingService := &ClusterOrderingService{
+			Name: ordererNodes.Items[0].FullName(),
+			//Object:   ordService,
+			MSPID: ordererNodes.Items[0].Spec.MspID,
+			//Status:   ordService.Status,
+			Orderers: []*ClusterOrdererNode{},
+		}
+		orderers = append(orderers, orderingService)
+		for _, ordNode := range ordererNodes.Items {
+			orderingService.Orderers = append(
+				orderingService.Orderers,
+				&ClusterOrdererNode{
+					Name:   ordNode.FullName(),
+					Spec:   ordNode.Spec,
+					Status: ordNode.Status,
+				},
+			)
+		}
+	}
 	for _, ordService := range orderingServices.Items {
 		ordNodesRes, err := oclient.HlfV1alpha1().FabricOrdererNodes(ns).List(
 			ctx,
@@ -97,6 +123,7 @@ func GetClusterOrderers(
 		orderingService := &ClusterOrderingService{
 			Name:     ordService.FullName(),
 			Object:   ordService,
+			MSPID:    ordService.Spec.MspID,
 			Spec:     ordService.Spec,
 			Status:   ordService.Status,
 			Orderers: []*ClusterOrdererNode{},
@@ -120,7 +147,7 @@ func GetClusterOrderers(
 	for _, ord := range orderers {
 		org := &Organization{
 			Type:             OrdererType,
-			MspID:            ord.Spec.MspID,
+			MspID:            ord.MSPID,
 			OrderingServices: []*ClusterOrderingService{ord},
 			Peers:            []*ClusterPeer{},
 		}

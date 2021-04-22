@@ -49,6 +49,12 @@ spec:
         - name: genesis
           secret:
             secretName: {{ include "hlf-ordnode.fullname" . }}--genesis
+        {{- if .Values.channelParticipationEnabled }}
+        - name: admin
+          secret:
+            secretName: {{ include "hlf-ordnode.fullname" . }}-admin
+        {{- end }}
+
         - name: nodeou
           configMap:
             name: '{{ include "hlf-ordnode.fullname" . }}-nodeou'
@@ -135,6 +141,10 @@ spec:
               name: tls-clientrootcert
             - mountPath: /hl_config/genesis
               name: genesis
+          {{- if .Values.channelParticipationEnabled }}
+            - mountPath: /var/hyperledger/admin
+              name: admin
+          {{- end }}
 
           resources:
 {{ toYaml .Values.resources | indent 12 }}

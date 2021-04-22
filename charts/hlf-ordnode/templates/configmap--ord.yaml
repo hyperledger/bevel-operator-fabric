@@ -20,7 +20,7 @@ data:
   ORDERER_GENERAL_LOGLEVEL: debug
   ORDERER_GENERAL_LOCALMSPDIR: /var/hyperledger/msp
   ORDERER_GENERAL_LOCALMSPID: {{ .Values.ord.mspID | quote }}
-  ORDERER_GENERAL_GENESISMETHOD: file
+  ORDERER_GENERAL_BOOTSTRAPMETHOD: {{.Values.bootstrapMethod}}
   ORDERER_GENERAL_GENESISFILE: /hl_config/genesis/genesis.block
   ORDERER_GENERAL_GENESISPROFILE: initial
   ORDERER_GENERAL_TLS_ENABLED: {{ .Values.ord.tls.server.enabled | quote }}
@@ -34,6 +34,20 @@ data:
   ORDERER_GENERAL_CLUSTER_ROOTCAS: "/var/hyperledger/tls/server/cert/cacert.pem"
   # This is fixed prior to starting the orderer
   ORDERER_GENERAL_TLS_CLIENTROOTCAS: "/var/hyperledger/tls/client/cert/*"
+
+  # Admin API
+{{- if .Values.channelParticipationEnabled }}
+
+  ORDERER_CHANNELPARTICIPATION_ENABLED: "{{.Values.channelParticipationEnabled}}"
+  ORDERER_ADMIN_TLS_ENABLED: "true"
+  ORDERER_ADMIN_TLS_CERTIFICATE: "/var/hyperledger/admin/tls.crt"
+  ORDERER_ADMIN_TLS_PRIVATEKEY: "/var/hyperledger/admin/tls.key"
+  ORDERER_ADMIN_TLS_ROOTCAS: "[/var/hyperledger/admin/cacert.crt]"
+  ORDERER_ADMIN_TLS_CLIENTROOTCAS: "[/var/hyperledger/admin/clientcacert.crt]"
+  ORDERER_ADMIN_LISTENADDRESS: "0.0.0.0:7053"
+
+{{- end }}
+
   GODEBUG: "netdns=go"
   ADMIN_MSP_PATH: /var/hyperledger/admin_msp
   FABRIC_LOGGING_SPEC: debug

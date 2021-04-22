@@ -5,4 +5,4 @@ kind: Kustomization
 images:
 - name: controller
   newName: quay.io/kfsoftware/hlf-operator
-  newTag: 1.2.0.1-beta
+  newTag: 1.2.0-beta8

@@ -50,13 +50,13 @@ const StateDBCouchDB StateDB = "couchdb"
 type FabricVersion string
 
 const (
-	CouchDBState = "couchdb"
+	CouchDBState = "CouchDB"
 	LevelDBState = "leveldb"
 )
 
 type ExternalBuilder struct {
-	Name                 string   `json:"name"`
-	Path                 string   `json:"path"`
+	Name string `json:"name"`
+	Path string `json:"path"`
 	// +nullable
 	// +kubebuilder:validation:Optional
 	// +optional
@@ -264,6 +264,12 @@ type FabricOrderingServiceSpec struct {
 	Storage       Storage              `json:"storage"`
 	SystemChannel OrdererSystemChannel `json:"systemChannel"`
 }
+type BootstrapMethod string
+
+const (
+	BootstrapMethodNone = "none"
+	BootstrapMethodFile = "file"
+)
 
 // FabricOrderingServiceSpec defines the desired state of FabricOrderingService
 type FabricOrdererNodeSpec struct {
@@ -272,22 +278,23 @@ type FabricOrdererNodeSpec struct {
 	// +kubebuilder:validation:MinLength=1
 	Tag string `json:"tag"`
 	// +kubebuilder:default:="IfNotPresent"
-	PullPolicy string `json:"pullPolicy,omitempty"`
+	PullPolicy corev1.PullPolicy `json:"pullPolicy,omitempty"`
 	// +kubebuilder:validation:MinLength=3
 	MspID string `json:"mspID"`
 
-	Genesis string `json:"genesis"`
-
-	Storage     Storage            `json:"storage"`
-	Service     OrdererNodeService `json:"service"`
-	TLSCert     string             `json:"tlsCert"`
-	TLSKey      string             `json:"tlsKey"`
-	TLSRootCert string             `json:"tlsRootCert"`
-
-	SignCert     string   `json:"signCert"`
-	SignKey      string   `json:"signKey"`
-	SignRootCert string   `json:"signRootCert"`
-	Hosts        []string `json:"hosts"`
+	Genesis                     string             `json:"genesis"`
+	BootstrapMethod             BootstrapMethod    `json:"bootstrapMethod"`
+	ChannelParticipationEnabled bool               `json:"channelParticipationEnabled"`
+	Storage                     Storage            `json:"storage"`
+	Service                     OrdererNodeService `json:"service"`
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +nullable
+	Secret *Secret `json:"secret"`
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +nullable
+	Istio *FabricPeerIstio `json:"istio"`
 }
 
 type OrdererSystemChannel struct {
@@ -334,6 +341,14 @@ type FabricOrdererNodeStatus struct {
 	Host string `json:"host"`
 	// +optional
 	Port int `json:"port"`
+	// +optional
+	TlsCert string `json:"tlsCert"`
+	// +optional
+	TlsAdminCert string `json:"tlsAdminCert"`
+	// +optional
+	OperationsPort int `json:"operationsPort"`
+	// +optional
+	AdminPort int `json:"adminPort"`
 }
 
 type Cors struct {
@@ -459,6 +474,29 @@ type FabricCAItemConf struct {
 	Registry     FabricCARegistry     `json:"registry"`
 	Intermediate FabricCAIntermediate `json:"intermediate"`
 	BCCSP        FabricCABCCSP        `json:"bccsp"`
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +nullable
+	CA *FabricCACrypto `json:"ca"`
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +nullable
+	TlsCA *FabricTLSCACrypto `json:"tlsCa"`
+}
+type FabricTLSCACrypto struct {
+	Key        string             `json:"key"`
+	Cert       string             `json:"cert"`
+	ClientAuth FabricCAClientAuth `json:"clientAuth"`
+}
+type FabricCAClientAuth struct {
+	// NoClientCert, RequestClientCert, RequireAnyClientCert, VerifyClientCertIfGiven and RequireAndVerifyClientCert.
+	Type     string   `json:"type"`
+	CertFile []string `json:"cert_file"`
+}
+type FabricCACrypto struct {
+	Key   string `json:"key"`
+	Cert  string `json:"cert"`
+	Chain string `json:"chain"`
 }
 type FabricCASubject struct {
 	// +kubebuilder:default:="ca"

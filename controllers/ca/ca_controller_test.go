@@ -14,8 +14,8 @@ import (
 
 	"github.com/kfsoftware/hlf-operator/controllers/ordnode"
 	operatorv1alpha1 "github.com/kfsoftware/hlf-operator/pkg/client/clientset/versioned"
-	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	log "github.com/sirupsen/logrus"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 
 	"github.com/Masterminds/sprig"
 	pb "github.com/hyperledger/fabric-protos-go/peer"
@@ -904,7 +904,90 @@ func createPeer(releaseName string, namespace string, params createPeerParams, c
 type createOrdererParams struct {
 	MSPID string
 }
+func createOrdererNode(releaseName string, namespace string, params createOrdererParams, certauth *hlfv1alpha1.FabricCA) *hlfv1alpha1.FabricOrdererNode {
+	mspID := params.MSPID
+	By("create a fabric orderer")
+	caHost := certauth.Status.Host
+	caPort := certauth.Status.Port
+	caName := "ca"
+	caTLSCert := certauth.Status.TlsCert
+	enrollID := certauth.Spec.CA.Registry.Identities[0].Name
+	enrollSecret := certauth.Spec.CA.Registry.Identities[0].Pass
+	caURL := fmt.Sprintf("https://%s:%d", caHost, caPort)
+	ordEnrollID := "orderer"
+	ordEnrollSecret := "ordererpw"
+	ordType := "orderer"
+	log.Infof("Registering user with credentials %s:%s and user %s:%s", enrollID, enrollSecret, ordEnrollID, ordEnrollSecret)
+	_, err := certs.RegisterUser(certs.RegisterUserRequest{
+		TLSCert:      caTLSCert,
+		URL:          caURL,
+		Name:         caName,
+		MSPID:        mspID,
+		EnrollID:     enrollID,
+		EnrollSecret: enrollSecret,
+		User:         ordEnrollID,
+		Secret:       ordEnrollSecret,
+		Type:         ordType,
+		Attributes:   nil,
+	})
+	if err != nil {
+		log.Errorf("Failed to register user %s %v", ordEnrollID, err)
+	}
 
+	fabricOrderer := &hlfv1alpha1.FabricOrdererNode{
+		TypeMeta: NewTypeMeta("FabricOrdererNode"),
+		ObjectMeta: v1.ObjectMeta{
+			Name:      releaseName,
+			Namespace: namespace,
+		},
+		Spec: hlfv1alpha1.FabricOrdererNodeSpec{
+			Storage: hlfv1alpha1.Storage{
+				Size:         "30Gi",
+				StorageClass: "standard",
+				AccessMode:   "ReadWriteOnce",
+			},
+			BootstrapMethod: "none",
+			ChannelParticipationEnabled: true,
+			PullPolicy: corev1.PullAlways,
+			Image: "hyperledger/fabric-orderer",
+			Tag:   "amd64-2.3.0",
+			MspID: mspID,
+			Secret: &hlfv1alpha1.Secret{
+				Enrollment: hlfv1alpha1.Enrollment{
+					Component: hlfv1alpha1.Component{
+						Cahost: caHost,
+						Caname: caName,
+						Caport: caPort,
+						Catls: hlfv1alpha1.Catls{
+							Cacert: base64.StdEncoding.EncodeToString([]byte(caTLSCert)),
+						},
+						Enrollid:     enrollID,
+						Enrollsecret: enrollSecret,
+					},
+					TLS: hlfv1alpha1.TLS{
+						Cahost: caHost,
+						Caname: caName,
+						Caport: caPort,
+						Catls: hlfv1alpha1.Catls{
+							Cacert: base64.StdEncoding.EncodeToString([]byte(caTLSCert)),
+						},
+						Enrollid:     enrollID,
+						Enrollsecret: enrollSecret,
+						Csr: hlfv1alpha1.Csr{
+							Hosts: []string{},
+							CN:    "",
+						},
+					},
+				},
+			},
+			Service: hlfv1alpha1.OrdererNodeService{
+				Type: "NodePort",
+			},
+		},
+	}
+	Expect(K8sClient.Create(context.Background(), fabricOrderer)).Should(Succeed())
+	return fabricOrderer
+}
 func createOrderer(releaseName string, namespace string, params createOrdererParams, certauth *hlfv1alpha1.FabricCA) *hlfv1alpha1.FabricOrderingService {
 	mspID := params.MSPID
 	By("create a fabric orderer")
@@ -1336,6 +1419,41 @@ var _ = Describe("Fabric Controllers", func() {
 		Expect(err).ToNot(HaveOccurred())
 		Expect(installedRes).To(HaveLen(1))
 	})
+	FSpecify("create a new Fabric Orderer with channel participation", func() {
+		releaseNameOrdCA := "org1-ca"
+		releaseNameOrd := "org1-orderer"
+		By("create a fabric ca")
+		ordererCA := randomFabricCA(releaseNameOrdCA, FabricNamespace)
+		Expect(ordererCA).ToNot(BeNil())
+		By("create a fabric orderer")
+		ordererMSPID := "OrdererMSP"
+		ordParams := createOrdererParams{
+			MSPID: ordererMSPID,
+		}
+		createOrdererNode(
+			releaseNameOrd,
+			FabricNamespace,
+			ordParams,
+			ordererCA,
+		)
+		orderer := &hlfv1alpha1.FabricOrdererNode{}
+		ordererKey := types.NamespacedName{
+			Namespace: FabricNamespace,
+			Name:      releaseNameOrd,
+		}
+		Eventually(
+			func() bool {
+				err := K8sClient.Get(context.Background(), ordererKey, orderer)
+				if err != nil {
+					return false
+				}
+				ctrl.Log.WithName("test").Info("after update", "orderer", orderer)
+				return orderer.Status.Status == hlfv1alpha1.RunningStatus
+			},
+			peerTimeoutSecs,
+			defInterval,
+		).Should(BeTrue(), "peer status should have been updated")
+	})
 	Specify("create a new Fabric Orderer instance", func() {
 		releaseNameOrdCA := "org1-ca"
 		releaseNameOrd := "org1-orderer"
@@ -1468,7 +1586,7 @@ var _ = Describe("Fabric Controllers", func() {
 			nodes = append(nodes, testutils.OrdererNode{
 				Port:    item.Status.Port,
 				Host:    item.Status.Host,
-				TLSCert: item.Spec.TLSCert,
+				TLSCert: item.Status.TlsCert,
 			})
 		}
 		orgOrganization := testutils.OrdererOrganization{

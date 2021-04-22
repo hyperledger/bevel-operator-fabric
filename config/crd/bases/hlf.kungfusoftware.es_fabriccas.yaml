@@ -68,6 +68,20 @@ spec:
                     - default
                     - sw
                     type: object
+                  ca:
+                    nullable: true
+                    properties:
+                      cert:
+                        type: string
+                      chain:
+                        type: string
+                      key:
+                        type: string
+                    required:
+                    - cert
+                    - chain
+                    - key
+                    type: object
                   cfg:
                     properties:
                       affiliations:
@@ -257,6 +271,32 @@ spec:
                     - OU
                     - ST
                     - cn
+                    type: object
+                  tlsCa:
+                    nullable: true
+                    properties:
+                      cert:
+                        type: string
+                      clientAuth:
+                        properties:
+                          cert_file:
+                            items:
+                              type: string
+                            type: array
+                          type:
+                            description: NoClientCert, RequestClientCert, RequireAnyClientCert,
+                              VerifyClientCertIfGiven and RequireAndVerifyClientCert.
+                            type: string
+                        required:
+                        - cert_file
+                        - type
+                        type: object
+                      key:
+                        type: string
+                    required:
+                    - cert
+                    - clientAuth
+                    - key
                     type: object
                 required:
                 - bccsp
@@ -461,6 +501,20 @@ spec:
                     - default
                     - sw
                     type: object
+                  ca:
+                    nullable: true
+                    properties:
+                      cert:
+                        type: string
+                      chain:
+                        type: string
+                      key:
+                        type: string
+                    required:
+                    - cert
+                    - chain
+                    - key
+                    type: object
                   cfg:
                     properties:
                       affiliations:
@@ -650,6 +704,32 @@ spec:
                     - OU
                     - ST
                     - cn
+                    type: object
+                  tlsCa:
+                    nullable: true
+                    properties:
+                      cert:
+                        type: string
+                      clientAuth:
+                        properties:
+                          cert_file:
+                            items:
+                              type: string
+                            type: array
+                          type:
+                            description: NoClientCert, RequestClientCert, RequireAnyClientCert,
+                              VerifyClientCertIfGiven and RequireAndVerifyClientCert.
+                            type: string
+                        required:
+                        - cert_file
+                        - type
+                        type: object
+                      key:
+                        type: string
+                    required:
+                    - cert
+                    - clientAuth
+                    - key
                     type: object
                 required:
                 - bccsp

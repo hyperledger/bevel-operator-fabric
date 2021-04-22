@@ -45,21 +45,114 @@ spec:
           spec:
             description: FabricOrderingServiceSpec defines the desired state of FabricOrderingService
             properties:
+              bootstrapMethod:
+                type: string
+              channelParticipationEnabled:
+                type: boolean
               genesis:
                 type: string
-              hosts:
-                items:
-                  type: string
-                type: array
               image:
                 minLength: 1
                 type: string
+              istio:
+                nullable: true
+                properties:
+                  hosts:
+                    items:
+                      type: string
+                    nullable: true
+                    type: array
+                  port:
+                    nullable: true
+                    type: integer
+                type: object
               mspID:
                 minLength: 3
                 type: string
               pullPolicy:
                 default: IfNotPresent
+                description: PullPolicy describes a policy for if/when to pull a container
+                  image
                 type: string
+              secret:
+                nullable: true
+                properties:
+                  enrollment:
+                    properties:
+                      component:
+                        properties:
+                          cahost:
+                            minLength: 1
+                            type: string
+                          caname:
+                            minLength: 1
+                            type: string
+                          caport:
+                            type: integer
+                          catls:
+                            properties:
+                              cacert:
+                                type: string
+                            required:
+                            - cacert
+                            type: object
+                          enrollid:
+                            minLength: 1
+                            type: string
+                          enrollsecret:
+                            minLength: 1
+                            type: string
+                        required:
+                        - cahost
+                        - caname
+                        - caport
+                        - catls
+                        - enrollid
+                        - enrollsecret
+                        type: object
+                      tls:
+                        properties:
+                          cahost:
+                            type: string
+                          caname:
+                            type: string
+                          caport:
+                            type: integer
+                          catls:
+                            properties:
+                              cacert:
+                                type: string
+                            required:
+                            - cacert
+                            type: object
+                          csr:
+                            properties:
+                              cn:
+                                type: string
+                              hosts:
+                                items:
+                                  type: string
+                                type: array
+                            type: object
+                          enrollid:
+                            type: string
+                          enrollsecret:
+                            type: string
+                        required:
+                        - cahost
+                        - caname
+                        - caport
+                        - catls
+                        - enrollid
+                        - enrollsecret
+                        type: object
+                    required:
+                    - component
+                    - tls
+                    type: object
+                required:
+                - enrollment
+                type: object
               service:
                 properties:
                   nodePortOperations:
@@ -71,12 +164,6 @@ spec:
                 required:
                 - type
                 type: object
-              signCert:
-                type: string
-              signKey:
-                type: string
-              signRootCert:
-                type: string
               storage:
                 properties:
                   accessMode:
@@ -99,30 +186,21 @@ spec:
               tag:
                 minLength: 1
                 type: string
-              tlsCert:
-                type: string
-              tlsKey:
-                type: string
-              tlsRootCert:
-                type: string
             required:
+            - bootstrapMethod
+            - channelParticipationEnabled
             - genesis
-            - hosts
             - image
             - mspID
             - service
-            - signCert
-            - signKey
-            - signRootCert
             - storage
             - tag
-            - tlsCert
-            - tlsKey
-            - tlsRootCert
             type: object
           status:
             description: FabricOrdererNodeStatus defines the observed state of FabricOrdererNode
             properties:
+              adminPort:
+                type: integer
               conditions:
                 description: Conditions is a set of Condition instances.
                 items:
@@ -165,9 +243,15 @@ spec:
                 type: array
               host:
                 type: string
+              operationsPort:
+                type: integer
               port:
                 type: integer
               status:
+                type: string
+              tlsAdminCert:
+                type: string
+              tlsCert:
                 type: string
               url:
                 type: string
