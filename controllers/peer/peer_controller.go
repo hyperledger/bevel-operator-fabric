@@ -697,6 +697,15 @@ func GetConfig(conf *hlfv1alpha1.FabricPeer, client *kubernetes.Clientset, chart
 	if imagePullPolicy == "" {
 		imagePullPolicy = hlfv1alpha1.DefaultImagePullPolicy
 	}
+	stateDb := "goleveldb"
+	switch spec.StateDb {
+	case hlfv1alpha1.StateDBCouchDB:
+		stateDb = "CouchDB"
+	case hlfv1alpha1.StateDBLevelDB:
+		stateDb = "goleveldb"
+	default:
+		stateDb = "goleveldb"
+	}
 	var c = FabricPeerChart{
 		Image: Image{
 			Repository: spec.Image,
@@ -706,7 +715,7 @@ func GetConfig(conf *hlfv1alpha1.FabricPeer, client *kubernetes.Clientset, chart
 		ExternalBuilders: externalBuilders,
 		DockerSocketPath: spec.DockerSocketPath,
 		Peer: Peer{
-			DatabaseType: string(spec.StateDb),
+			DatabaseType: stateDb,
 			MspID:        spec.MspID,
 			Gossip: Gossip{
 				Bootstrap:         spec.Gossip.Bootstrap,
