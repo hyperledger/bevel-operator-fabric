@@ -1407,6 +1407,14 @@ var _ = Describe("Fabric Controllers", func() {
 
 		By("add the peer to the consortium")
 		ordClient := getClientForOrderer(orderer, ordererCA)
+		Eventually(func() bool{
+			_, err := ordClient.QueryConfigBlockFromOrderer(systemChannelID)
+			Expect(err).ToNot(HaveOccurred())
+			if err != nil {
+				return false
+			}
+			return true
+		}, "100s", defInterval)
 		block, err := ordClient.QueryConfigBlockFromOrderer(systemChannelID)
 		Expect(err).ToNot(HaveOccurred())
 		systemChannelConfig, err := resource.ExtractConfigFromBlock(block)
