@@ -1,0 +1,120 @@
+apiVersion: hlf.kungfusoftware.es/v1alpha1
+kind: FabricPeer
+metadata:
+  name: org1-peer1
+spec:
+  couchdb:
+    password: couchdb
+    user: couchdb
+  discovery:
+    period: 60s
+    touchPeriod: 60s
+  dockerSocketPath: ""
+  external_chaincode_builder: true
+  externalEndpoint: ""
+  gossip:
+    bootstrap: ""
+    endpoint: ""
+    externalEndpoint: ""
+    orgLeader: true
+    useLeaderElection: false
+  image: quay.io/kfsoftware/peer-external-service
+  tag: amd64-2.3.0
+  externalBuilders:
+    - name: "external-builder"
+      path: "/builders/external-service"
+      propagateEnvironment: []
+    - name: my-golang-builder
+      path: /builders/golang
+      propagateEnvironment:
+        - CHAINCODE_SHARED_DIR
+        - FILE_SERVER_BASE_IP
+        - KUBERNETES_SERVICE_HOST
+        - KUBERNETES_SERVICE_PORT
+        - K8SCC_CFGFILE
+        - TMPDIR
+        - LD_LIBRARY_PATH
+        - LIBPATH
+        - PATH
+        - EXTERNAL_BUILDER_HTTP_PROXY
+        - EXTERNAL_BUILDER_HTTPS_PROXY
+        - EXTERNAL_BUILDER_NO_PROXY
+        - EXTERNAL_BUILDER_PEER_URL
+  imagePullPolicy: "Always"
+  logging:
+    cauthdsl: info
+    gossip: info
+    grpc: info
+    ledger: info
+    level: info
+    msp: info
+    peer: info
+    policies: info
+  mspID: Org1MSP
+  operationHosts: [ ]
+  hosts: []
+  operationIPs:
+    - 172.24.0.2
+    - localhost
+  resources:
+    chaincode:
+      limits:
+        cpu: "2"
+        memory: 4096M
+      requests:
+        cpu: 10m
+        memory: 10M
+    couchdb:
+      limits:
+        cpu: "2"
+        memory: 4096M
+      requests:
+        cpu: 10m
+        memory: 10M
+    peer:
+      limits:
+        cpu: "2"
+        memory: 4096M
+      requests:
+        cpu: 10m
+        memory: 10M
+  secret:
+    enrollment:
+      component:
+        cahost: org1-ca
+        caname: ca
+        caport: 7054
+        catls:
+          cacert: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUNRVENDQWVhZ0F3SUJBZ0lSQUlxY0ROQmtPTW53RTQzUEJ1b1hlRkV3Q2dZSUtvWkl6ajBFQXdJd1VqRVQKTUJFR0ExVUVCaE1LUTJGc2FXWnZjbTVwWVRFSk1BY0dBMVVFQnhNQU1Ra3dCd1lEVlFRSkV3QXhGREFTQmdOVgpCQW9UQzBoNWNHVnliR1ZrWjJWeU1ROHdEUVlEVlFRTEV3WkdZV0p5YVdNd0hoY05NakV3TkRFME1qSXhOVEU1CldoY05NekV3TkRFMU1qSXhOVEU1V2pCU01STXdFUVlEVlFRR0V3cERZV3hwWm05eWJtbGhNUWt3QndZRFZRUUgKRXdBeENUQUhCZ05WQkFrVEFERVVNQklHQTFVRUNoTUxTSGx3WlhKc1pXUm5aWEl4RHpBTkJnTlZCQXNUQmtaaApZbkpwWXpCWk1CTUdCeXFHU000OUFnRUdDQ3FHU000OUF3RUhBMElBQkJiazV1WXRmakkyVFFlcEdGYll6OGVSCjRpVFVKSTAvTW9Nd214bUxxSU1QNWVkKzE3bmRQd2xVekhPZnplMk1aamF6SW9DU3BPWnc0VjVKaHhsZFljMmoKZ1p3d2daa3dEZ1lEVlIwUEFRSC9CQVFEQWdHbU1CMEdBMVVkSlFRV01CUUdDQ3NHQVFVRkJ3TUNCZ2dyQmdFRgpCUWNEQVRBUEJnTlZIUk1CQWY4RUJUQURBUUgvTUNrR0ExVWREZ1FpQkNDSFlhajMveVJWVFdVSUdjNUZmN3JFCkNTdkxUS2hrZldCVVBLUUdzQVVpSGpBc0JnTlZIUkVFSlRBamdnZHZjbWN4TFdOaGdneHZjbWN4TFdOaExtOXkKWnpHSEJIOEFBQUdIQkt3WUFBSXdDZ1lJS29aSXpqMEVBd0lEU1FBd1JnSWhBTHVGN29Vdkl0WHNpT3NPYXJuRAppOWxZK2xRZVhoUXBkVE1MRE1MT1k4RS9BaUVBNWZ4VDQvWkdZUlBKczJKalJTSy9FaHRJU0FmaHpFUGY5aXExCm9aYW1zWTA9Ci0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0K
+        enrollid: peer
+        enrollsecret: peerpw
+      tls:
+        cahost: org1-ca
+        caname: tlsca
+        caport: 7054
+        catls:
+          cacert: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUNRVENDQWVhZ0F3SUJBZ0lSQUlxY0ROQmtPTW53RTQzUEJ1b1hlRkV3Q2dZSUtvWkl6ajBFQXdJd1VqRVQKTUJFR0ExVUVCaE1LUTJGc2FXWnZjbTVwWVRFSk1BY0dBMVVFQnhNQU1Ra3dCd1lEVlFRSkV3QXhGREFTQmdOVgpCQW9UQzBoNWNHVnliR1ZrWjJWeU1ROHdEUVlEVlFRTEV3WkdZV0p5YVdNd0hoY05NakV3TkRFME1qSXhOVEU1CldoY05NekV3TkRFMU1qSXhOVEU1V2pCU01STXdFUVlEVlFRR0V3cERZV3hwWm05eWJtbGhNUWt3QndZRFZRUUgKRXdBeENUQUhCZ05WQkFrVEFERVVNQklHQTFVRUNoTUxTSGx3WlhKc1pXUm5aWEl4RHpBTkJnTlZCQXNUQmtaaApZbkpwWXpCWk1CTUdCeXFHU000OUFnRUdDQ3FHU000OUF3RUhBMElBQkJiazV1WXRmakkyVFFlcEdGYll6OGVSCjRpVFVKSTAvTW9Nd214bUxxSU1QNWVkKzE3bmRQd2xVekhPZnplMk1aamF6SW9DU3BPWnc0VjVKaHhsZFljMmoKZ1p3d2daa3dEZ1lEVlIwUEFRSC9CQVFEQWdHbU1CMEdBMVVkSlFRV01CUUdDQ3NHQVFVRkJ3TUNCZ2dyQmdFRgpCUWNEQVRBUEJnTlZIUk1CQWY4RUJUQURBUUgvTUNrR0ExVWREZ1FpQkNDSFlhajMveVJWVFdVSUdjNUZmN3JFCkNTdkxUS2hrZldCVVBLUUdzQVVpSGpBc0JnTlZIUkVFSlRBamdnZHZjbWN4TFdOaGdneHZjbWN4TFdOaExtOXkKWnpHSEJIOEFBQUdIQkt3WUFBSXdDZ1lJS29aSXpqMEVBd0lEU1FBd1JnSWhBTHVGN29Vdkl0WHNpT3NPYXJuRAppOWxZK2xRZVhoUXBkVE1MRE1MT1k4RS9BaUVBNWZ4VDQvWkdZUlBKczJKalJTSy9FaHRJU0FmaHpFUGY5aXExCm9aYW1zWTA9Ci0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0K
+        csr:
+          cn: ""
+          hosts:
+            - 172.24.0.2
+            - localhost
+            - 127.0.0.1
+        enrollid: peer
+        enrollsecret: peerpw
+  service:
+    type: NodePort
+  stateDb: leveldb
+  storage:
+    chaincode:
+      accessMode: ReadWriteOnce
+      size: 5Gi
+      storageClass: ""
+    couchdb:
+      accessMode: ReadWriteOnce
+      size: 5Gi
+      storageClass: ""
+    peer:
+      accessMode: ReadWriteOnce
+      size: 5Gi
+      storageClass: ""
