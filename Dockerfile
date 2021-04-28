@@ -6,14 +6,14 @@ LABEL name="HLF Operator" \
       version="v1.1.0" \
       release="v1.1.0"
 
+RUN \
+    microdnf update --nodocs && \
+    microdnf install curl ca-certificates shadow-utils --nodocs
+
 COPY CREDITS /licenses/CREDITS
 COPY LICENSE /licenses/LICENSE
 COPY LICENSE /licenses/LICENSE
 COPY charts /charts
-
-RUN \
-    microdnf update --nodocs && \
-    microdnf install curl ca-certificates shadow-utils --nodocs
 
 COPY hlf-operator /hlf-operator
 

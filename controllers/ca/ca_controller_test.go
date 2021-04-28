@@ -14,8 +14,8 @@ import (
 
 	"github.com/kfsoftware/hlf-operator/controllers/ordnode"
 	operatorv1alpha1 "github.com/kfsoftware/hlf-operator/pkg/client/clientset/versioned"
-	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	log "github.com/sirupsen/logrus"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 
 	"github.com/Masterminds/sprig"
 	pb "github.com/hyperledger/fabric-protos-go/peer"
@@ -1407,6 +1407,14 @@ var _ = Describe("Fabric Controllers", func() {
 
 		By("add the peer to the consortium")
 		ordClient := getClientForOrderer(orderer, ordererCA)
+		Eventually(func() bool{
+			_, err := ordClient.QueryConfigBlockFromOrderer(systemChannelID)
+			Expect(err).ToNot(HaveOccurred())
+			if err != nil {
+				return false
+			}
+			return true
+		}, "100s", defInterval)
 		block, err := ordClient.QueryConfigBlockFromOrderer(systemChannelID)
 		Expect(err).ToNot(HaveOccurred())
 		systemChannelConfig, err := resource.ExtractConfigFromBlock(block)
@@ -1539,7 +1547,7 @@ var _ = Describe("Fabric Controllers", func() {
 				}
 				return err == nil
 			},
-			"140s",
+			"280s",
 			defInterval,
 		).Should(BeTrue(), "peer should join the channel")
 
