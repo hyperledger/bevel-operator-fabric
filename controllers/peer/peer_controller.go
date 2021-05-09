@@ -8,6 +8,11 @@ import (
 	"encoding/json"
 	"encoding/pem"
 	"fmt"
+	"os"
+	"reflect"
+	"strings"
+	"time"
+
 	"github.com/operator-framework/operator-lib/status"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
@@ -15,12 +20,8 @@ import (
 	apiv1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/kubernetes/pkg/api/v1/pod"
-	"os"
-	"reflect"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-	"strings"
-	"time"
 
 	"github.com/go-logr/logr"
 	hlfv1alpha1 "github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
@@ -748,6 +749,15 @@ func GetConfig(conf *hlfv1alpha1.FabricPeer, client *kubernetes.Clientset, chart
 			Hostnames: hostAlias.Hostnames,
 		})
 	}
+	stateDb := "goleveldb"
+	switch spec.StateDb {
+	case hlfv1alpha1.StateDBCouchDB:
+		stateDb = "CouchDB"
+	case hlfv1alpha1.StateDBLevelDB:
+		stateDb = "goleveldb"
+	default:
+		stateDb = "goleveldb"
+	}
 	var c = FabricPeerChart{
 		Replicas: spec.Replicas,
 		Image: Image{
@@ -769,7 +779,7 @@ func GetConfig(conf *hlfv1alpha1.FabricPeer, client *kubernetes.Clientset, chart
 		ExternalBuilders: externalBuilders,
 		DockerSocketPath: spec.DockerSocketPath,
 		Peer: Peer{
-			DatabaseType: string(spec.StateDb),
+			DatabaseType: stateDb,
 			MspID:        spec.MspID,
 			Gossip: Gossip{
 				Bootstrap:         spec.Gossip.Bootstrap,

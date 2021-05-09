@@ -23,7 +23,7 @@ spec:
 {{ toYaml .Values.hostAliases | indent 10 }}
       volumes:
         - name: couchdb
-          {{- if eq .Values.peer.databaseType "couchdb" }}
+          {{- if eq .Values.peer.databaseType "CouchDB" }}
           {{- if .Values.persistence.couchdb.enabled }}
           persistentVolumeClaim:
             claimName: {{ include "hlf-peer.fullname" . }}--couchdb
@@ -165,7 +165,7 @@ spec:
               value: '127.0.0.1:8080'
 {{- end }}
           envFrom:
-            {{- if eq .Values.peer.databaseType "couchdb" }}
+            {{- if eq .Values.peer.databaseType "CouchDB" }}
             - secretRef:
                 name: {{ include "hlf-peer.fullname" . }}--couchdb
             {{- end }}
@@ -240,7 +240,7 @@ spec:
                   apiVersion: v1
                   fieldPath: status.podIP
 {{- end }}
-      {{- if eq $.Values.peer.databaseType "couchdb" }}
+      {{- if eq $.Values.peer.databaseType "CouchDB" }}
         - name: couchdb
           image: "couchdb:3.1.1"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
@@ -276,7 +276,7 @@ spec:
     {{- with .Values.affinity }}
       affinity:
         ## This affinity is required to ensure reasonable ledger access speeds
-        {{- if eq $.Values.peer.databaseType "couchdb" }}
+        {{- if eq $.Values.peer.databaseType "CouchDB" }}
         podAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
           - labelSelector:

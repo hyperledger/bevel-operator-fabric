@@ -633,7 +633,7 @@ data:
       blockchain:
 
       state:
-        # stateDatabase - options are "goleveldb", "couchdb"
+        # stateDatabase - options are "goleveldb", "CouchDB"
         # goleveldb - default state database stored in goleveldb.
         # CouchDB - store state database in CouchDB
         stateDatabase: goleveldb
