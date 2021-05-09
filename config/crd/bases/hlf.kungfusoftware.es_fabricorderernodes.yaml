@@ -51,6 +51,22 @@ spec:
                 type: boolean
               genesis:
                 type: string
+              hostAliases:
+                items:
+                  description: HostAlias holds the mapping between IP and hostnames
+                    that will be injected as an entry in the pod's hosts file.
+                  properties:
+                    hostnames:
+                      description: Hostnames for the above IP address.
+                      items:
+                        type: string
+                      type: array
+                    ip:
+                      description: IP address of the host file entry.
+                      type: string
+                  type: object
+                nullable: true
+                type: array
               image:
                 minLength: 1
                 type: string
@@ -74,6 +90,9 @@ spec:
                 description: PullPolicy describes a policy for if/when to pull a container
                   image
                 type: string
+              replicas:
+                default: 1
+                type: integer
               secret:
                 nullable: true
                 properties:
@@ -160,6 +179,8 @@ spec:
                   nodePortRequest:
                     type: integer
                   type:
+                    description: Service Type string describes ingress methods for
+                      a service
                     type: string
                 required:
                 - type
@@ -168,10 +189,6 @@ spec:
                 properties:
                   accessMode:
                     default: ReadWriteOnce
-                    enum:
-                    - ReadWriteOnce
-                    - ReadOnlyMany
-                    - ReadWriteMany
                     type: string
                   size:
                     default: 5Gi
@@ -192,6 +209,7 @@ spec:
             - genesis
             - image
             - mspID
+            - replicas
             - service
             - storage
             - tag
@@ -241,7 +259,7 @@ spec:
                   - type
                   type: object
                 type: array
-              host:
+              message:
                 type: string
               operationsPort:
                 type: integer
@@ -253,12 +271,9 @@ spec:
                 type: string
               tlsCert:
                 type: string
-              url:
-                type: string
             required:
             - conditions
             - status
-            - url
             type: object
         type: object
     served: true

@@ -5,7 +5,7 @@ metadata:
   labels:
 {{ include "labels.standard" . | indent 4 }}
 spec:
-  replicas: 1
+  replicas: {{.Values.replicas}}
   selector:
     matchLabels:
       app: {{ include "hlf-peer.name" . }}
@@ -55,6 +55,11 @@ spec:
         - name: cacert
           secret:
             secretName: {{ include "hlf-peer.fullname" . }}-cacert
+{{- if .Values.intCACert}}
+        - name: intcacert
+          secret:
+            secretName: {{ include "hlf-peer.fullname" . }}-intcacert
+{{- end }}
         - name: tls-clientrootcert
           secret:
             secretName: {{ include "hlf-peer.fullname" . }}--tlsclientrootcerts
@@ -73,6 +78,11 @@ spec:
         - name: tls-rootcert
           secret:
             secretName: "{{ include "hlf-peer.fullname" . }}-tlsrootcert"
+{{- if .Values.intTLSCACert}}
+        - name: tls-introotcert
+          secret:
+            secretName: "{{ include "hlf-peer.fullname" . }}-tlsintcacert"
+{{- end }}
         - name: tls-client
           secret:
             secretName: "{{ include "hlf-peer.fullname" . }}-tls"
@@ -99,17 +109,23 @@ spec:
             - name: operations
               containerPort: 9443
               protocol: TCP
-      {{- if and .Values.dockerSocketPath }}
           livenessProbe:
-            tcpSocket:
-              port: 7051
+            successThreshold: 1
+            failureThreshold: 3
+            timeoutSeconds: 5
+            httpGet:
+              port: 9443
+              path: /healthz
             initialDelaySeconds: 5
             periodSeconds: 5
           readinessProbe:
-            tcpSocket:
-              port: 7051
-            initialDelaySeconds: 15
-    {{- end }}
+            httpGet:
+              port: 9443
+              path: /healthz
+            initialDelaySeconds: 5
+            failureThreshold: 3
+            successThreshold: 1
+            periodSeconds: 5
           command:
             - /bin/sh
             - -c
@@ -170,10 +186,19 @@ spec:
               name: id-key
             - mountPath: /var/hyperledger/msp/cacerts
               name: cacert
+{{- if .Values.intCACert}}
+            - mountPath: /var/hyperledger/msp/intermediatecerts
+              name: intcacert
+{{- end }}
             - mountPath: /var/hyperledger/admin_msp/cacerts
+
               name: cacert
             - mountPath: /var/hyperledger/msp/tlscacerts
               name: tls-rootcert
+{{- if .Values.intTLSCACert}}
+            - mountPath: /var/hyperledger/msp/tlsintermediatecerts
+              name: tls-introotcert
+            {{- end }}
             - mountPath: /var/hyperledger/msp/config.yaml
               name: nodeou
               subPath: config.yaml

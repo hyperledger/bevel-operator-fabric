@@ -14,8 +14,10 @@ import (
 	"github.com/kfsoftware/hlf-operator/controllers/certs"
 	"github.com/kfsoftware/hlf-operator/controllers/utils"
 	"github.com/operator-framework/operator-lib/status"
+	log "github.com/sirupsen/logrus"
 	"helm.sh/helm/v3/pkg/action"
 	"helm.sh/helm/v3/pkg/chart/loader"
+	"helm.sh/helm/v3/pkg/cli"
 	"helm.sh/helm/v3/pkg/storage/driver"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -26,7 +28,6 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/kubernetes/pkg/api/v1/pod"
-	"log"
 	"os"
 	"reflect"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -151,9 +152,7 @@ func (r *FabricOrdererNodeReconciler) Reconcile(req ctrl.Request) (ctrl.Result, 
 		}
 		fOrderer := fabricOrdererNode.DeepCopy()
 		fOrderer.Status.Status = s.Status
-		fOrderer.Status.URL = s.URL
-		fOrderer.Status.Host = s.Host
-		fOrderer.Status.Port = s.Port
+		fOrderer.Status.NodePort = s.NodePort
 		fOrderer.Status.TlsCert = s.TlsCert
 		fOrderer.Status.TlsAdminCert = s.TlsAdminCert
 		fOrderer.Status.AdminPort = s.AdminPort
@@ -162,19 +161,58 @@ func (r *FabricOrdererNodeReconciler) Reconcile(req ctrl.Request) (ctrl.Result, 
 			Type:   status.ConditionType(s.Status),
 			Status: "True",
 		})
-		if reflect.DeepEqual(fOrderer.Status, fabricOrdererNode.Status) {
-			log.Printf("Status hasn't changed, skipping update")
-		} else {
+
+		log.Printf("Status hasn't changed, skipping update")
+		c, err := getConfig(fabricOrdererNode, clientSet, releaseName, req.Namespace)
+		if err != nil {
+			return ctrl.Result{}, err
+		}
+		inrec, err := json.Marshal(c)
+		if err != nil {
+			return ctrl.Result{}, err
+		}
+		var inInterface map[string]interface{}
+		err = json.Unmarshal(inrec, &inInterface)
+		if err != nil {
+			return ctrl.Result{}, err
+		}
+		cmd := action.NewUpgrade(cfg)
+		err = os.Setenv("HELM_NAMESPACE", ns)
+		if err != nil {
+			return ctrl.Result{}, err
+		}
+		settings := cli.New()
+		chartPath, err := cmd.LocateChart(r.ChartPath, settings)
+		ch, err := loader.Load(chartPath)
+		if err != nil {
+			return ctrl.Result{}, err
+		}
+		release, err := cmd.Run(releaseName, ch, inInterface)
+		if err != nil {
+			setConditionStatus(fabricOrdererNode, hlfv1alpha1.FailedStatus, false, err, false)
+			return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricOrdererNode)
+		}
+		log.Infof("Chart upgraded %s", release.Name)
+		if !reflect.DeepEqual(fOrderer.Status, fabricOrdererNode.Status) {
 			if err := r.Status().Update(ctx, fOrderer); err != nil {
 				log.Printf("Error updating the status: %v", err)
 				return ctrl.Result{}, err
 			}
 		}
-		if s.Status == hlfv1alpha1.RunningStatus {
+		switch s.Status {
+		case hlfv1alpha1.PendingStatus:
+			log.Infof("Orderer %s in pending status", fabricOrdererNode.Name)
 			return ctrl.Result{
-				//RequeueAfter: 120 * time.Second,
+				RequeueAfter: 10 * time.Second,
 			}, nil
-		} else {
+		case hlfv1alpha1.RunningStatus:
+			return ctrl.Result{}, nil
+		case hlfv1alpha1.FailedStatus:
+			log.Infof("Orderer %s in failed status", fabricOrdererNode.Name)
+			return ctrl.Result{
+				RequeueAfter: 10 * time.Second,
+			}, nil
+		default:
 			return ctrl.Result{
 				RequeueAfter: 2 * time.Second,
 			}, nil
@@ -193,7 +231,7 @@ func (r *FabricOrdererNodeReconciler) Reconcile(req ctrl.Request) (ctrl.Result, 
 		}
 		c, err := getConfig(fabricOrdererNode, clientSet, releaseName, req.Namespace)
 		if err != nil {
-			reqLogger.Error(err, "Failed to get config for orderer %s/%s", req.Namespace, req.Name)
+			reqLogger.Error(err, fmt.Sprintf("Failed to get config for orderer %s/%s", req.Namespace, req.Name))
 			return ctrl.Result{}, err
 		}
 		var inInterface map[string]interface{}
@@ -201,7 +239,6 @@ func (r *FabricOrdererNodeReconciler) Reconcile(req ctrl.Request) (ctrl.Result, 
 		if err != nil {
 			return ctrl.Result{}, err
 		}
-		log.Println(string(inrec))
 		err = json.Unmarshal(inrec, &inInterface)
 		if err != nil {
 			log.Printf("Failed to unmarshall JSON %v", err)
@@ -216,11 +253,12 @@ func (r *FabricOrdererNodeReconciler) Reconcile(req ctrl.Request) (ctrl.Result, 
 		}
 		release, err := cmd.Run(ch, inInterface)
 		if err != nil {
-			log.Printf("Failed to run release %v", err)
-			return ctrl.Result{}, err
+			setConditionStatus(fabricOrdererNode, hlfv1alpha1.FailedStatus, false, err, false)
+			return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricOrdererNode)
 		}
 		log.Printf("Chart installed %s", release.Name)
 		fabricOrdererNode.Status.Status = hlfv1alpha1.PendingStatus
+		fabricOrdererNode.Status.Message = ""
 		fabricOrdererNode.Status.Conditions.SetCondition(status.Condition{
 			Type:               "DEPLOYED",
 			Status:             "True",
@@ -234,6 +272,50 @@ func (r *FabricOrdererNodeReconciler) Reconcile(req ctrl.Request) (ctrl.Result, 
 			RequeueAfter: 10 * time.Second,
 		}, nil
 	}
+}
+
+var (
+	ErrClientK8s = errors.New("k8sAPIClientError")
+)
+
+func (r *FabricOrdererNodeReconciler) updateCRStatusOrFailReconcile(ctx context.Context, log logr.Logger, p *hlfv1alpha1.FabricOrdererNode) (
+	ctrl.Result, error) {
+	if err := r.Status().Update(ctx, p); err != nil {
+		log.Error(err, fmt.Sprintf("%v failed to update the application status", ErrClientK8s))
+		return ctrl.Result{}, err
+	}
+	return ctrl.Result{}, nil
+}
+func setConditionStatus(p *hlfv1alpha1.FabricOrdererNode, conditionType hlfv1alpha1.DeploymentStatus, statusFlag bool, err error, statusUnknown bool) (update bool) {
+	statusStr := func() corev1.ConditionStatus {
+		if statusUnknown {
+			return corev1.ConditionUnknown
+		}
+		if statusFlag {
+			return corev1.ConditionTrue
+		} else {
+			return corev1.ConditionFalse
+		}
+	}
+	p.Status.Status = conditionType
+	if err != nil {
+		p.Status.Message = err.Error()
+	}
+	condition := func() status.Condition {
+		if err != nil {
+			return status.Condition{
+				Type:    status.ConditionType(conditionType),
+				Status:  statusStr(),
+				Reason:  status.ConditionReason(err.Error()),
+				Message: err.Error(),
+			}
+		}
+		return status.Condition{
+			Type:   status.ConditionType(conditionType),
+			Status: statusStr(),
+		}
+	}
+	return p.Status.Conditions.SetCondition(condition())
 }
 
 func (r *FabricOrdererNodeReconciler) SetupWithManager(mgr ctrl.Manager) error {
@@ -501,15 +583,35 @@ func getConfig(conf *hlfv1alpha1.FabricOrdererNode, client *kubernetes.Clientset
 	if err != nil {
 		return nil, err
 	}
+	var hostAliases []HostAlias
+	for _, hostAlias := range spec.HostAliases {
+		hostAliases = append(hostAliases, HostAlias{
+			IP:        hostAlias.IP,
+			Hostnames: hostAlias.Hostnames,
+		})
+	}
 	fabricOrdChart := fabricOrdChart{
+		Replicas: spec.Replicas,
 		Ingress: ingress{
 			Enabled: false,
 		},
+		Logging:                     Logging{Spec: "info"},
 		Genesis:                     spec.Genesis,
 		Cacert:                      string(signRootCRTEncoded),
 		Tlsrootcert:                 string(tlsRootCRTEncoded),
 		ChannelParticipationEnabled: spec.ChannelParticipationEnabled,
 		BootstrapMethod:             string(spec.BootstrapMethod),
+		ServiceMonitor: ServiceMonitor{
+			Enabled:           true,
+			Labels:            map[string]string{},
+			Interval:          "10s",
+			ScrapeTimeout:     "10s",
+			Scheme:            "http",
+			Relabelings:       []interface{}{},
+			TargetLabels:      []interface{}{},
+			MetricRelabelings: []interface{}{},
+			SampleLimit:       0,
+		},
 		Admin: admin{
 			Cert:          string(adminCRTEncoded),
 			Key:           string(adminEncodedPK),
@@ -523,9 +625,9 @@ func getConfig(conf *hlfv1alpha1.FabricOrdererNode, client *kubernetes.Clientset
 			Key:  string(tlsEncodedPK),
 		},
 		FullnameOverride: conf.Name,
-		HostAliases:      nil,
+		HostAliases:      hostAliases,
 		Service: service{
-			Type:               spec.Service.Type,
+			Type:               string(spec.Service.Type),
 			Port:               7050,
 			PortOperations:     9443,
 			NodePort:           spec.Service.NodePortRequest,
@@ -595,12 +697,9 @@ func GetOrdererState(conf *action.Configuration, config *rest.Config, releaseNam
 	if err != nil {
 		return nil, err
 	}
-	k8sIP, err := utils.GetPublicIPKubernetes(clientSet)
-	if err != nil {
-		return nil, err
-	}
 	r := &hlfv1alpha1.FabricOrdererNodeStatus{
-		Status: hlfv1alpha1.RunningStatus,
+		Status:  hlfv1alpha1.RunningStatus,
+		Message: "",
 	}
 	tlsCrt, _, _, err := getExistingTLSCrypto(clientSet, releaseName, ns)
 	if err != nil {
@@ -660,9 +759,7 @@ func GetOrdererState(conf *action.Configuration, config *rest.Config, releaseNam
 			}
 			for _, port := range svc.Spec.Ports {
 				if port.Name == "grpc" {
-					r.URL = fmt.Sprintf("grpcs://%s:%d", k8sIP, port.NodePort)
-					r.Port = int(port.NodePort)
-					r.Host = k8sIP
+					r.NodePort = int(port.NodePort)
 				} else if port.Name == "admin" {
 					r.AdminPort = int(port.NodePort)
 				} else if port.Name == "operations" {

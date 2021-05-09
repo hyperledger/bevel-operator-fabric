@@ -8,10 +8,10 @@ import (
 	"crypto/sha256"
 	"crypto/x509"
 	"crypto/x509/pkix"
+	"encoding/base64"
 	"encoding/json"
 	"encoding/pem"
 	"fmt"
-
 	"github.com/operator-framework/operator-lib/status"
 	"helm.sh/helm/v3/pkg/cli"
 	"k8s.io/kubernetes/pkg/api/v1/pod"
@@ -77,7 +77,6 @@ func parseX509Certificate(contents []byte) (*x509.Certificate, error) {
 
 func getExistingTLSCrypto(client *kubernetes.Clientset, chartName string, namespace string) (*x509.Certificate, *ecdsa.PrivateKey, error) {
 	secretName := fmt.Sprintf("%s--tls-cryptomaterial", chartName)
-
 	secret, err := client.CoreV1().Secrets(namespace).Get(context.Background(), secretName, v1.GetOptions{})
 	if err != nil {
 		return nil, nil, err
@@ -335,9 +334,27 @@ func mapCRDItemConfToChart(conf hlfv1alpha1.FabricCAItemConf) FabricCAChartItemC
 	}
 	return item
 }
+func parseCrypto(key string, cert string) (*x509.Certificate, *ecdsa.PrivateKey, error) {
+	keyBytes, err := base64.StdEncoding.DecodeString(key)
+	if err != nil {
+		return nil, nil, err
+	}
+	pk, err := utils.ParseECDSAPrivateKey(keyBytes)
+	if err != nil {
+		return nil, nil, err
+	}
+	certBytes, err := base64.StdEncoding.DecodeString(cert)
+	if err != nil {
+		return nil, nil, err
+	}
+	x509Cert, err := utils.ParseX509Certificate(certBytes)
+	if err != nil {
+		return nil, nil, err
+	}
+	return x509Cert, pk, nil
+}
 func GetConfig(conf *hlfv1alpha1.FabricCA, client *kubernetes.Clientset, chartName string, namespace string) (*FabricCAChart, error) {
 	spec := conf.Spec
-
 	tlsCert, tlsKey, err := getExistingTLSCrypto(client, chartName, namespace)
 	if err != nil {
 		tlsCert, tlsKey, err = CreateDefaultTLSCA(client, spec)
@@ -347,14 +364,22 @@ func GetConfig(conf *hlfv1alpha1.FabricCA, client *kubernetes.Clientset, chartNa
 	}
 	signCert, signKey, err := getExistingSignCrypto(client, chartName, namespace)
 	if err != nil {
-		signCert, signKey, err = CreateDefaultCA(spec.CA)
+		if conf.Spec.CA.CA.Key != "" && conf.Spec.CA.CA.Cert != "" {
+			signCert, signKey, err = parseCrypto(conf.Spec.CA.CA.Key, conf.Spec.CA.CA.Cert)
+		} else {
+			signCert, signKey, err = CreateDefaultCA(spec.CA)
+		}
 		if err != nil {
 			return nil, err
 		}
 	}
 	caTLSSignCert, caTLSSignKey, err := getExistingSignTLSCrypto(client, chartName, namespace)
 	if err != nil {
-		caTLSSignCert, caTLSSignKey, err = CreateDefaultCA(spec.TLSCA)
+		if conf.Spec.TLSCA.CA.Key != "" && conf.Spec.TLSCA.CA.Cert != "" {
+			caTLSSignCert, caTLSSignKey, err = parseCrypto(conf.Spec.TLSCA.CA.Key, conf.Spec.TLSCA.CA.Cert)
+		} else {
+			caTLSSignCert, caTLSSignKey, err = CreateDefaultCA(spec.TLSCA)
+		}
 		if err != nil {
 			return nil, err
 		}
@@ -411,6 +436,17 @@ func GetConfig(conf *hlfv1alpha1.FabricCA, client *kubernetes.Clientset, chartNa
 			Port:  istioPort,
 			Hosts: istioHosts,
 		},
+		ServiceMonitor: ServiceMonitor{
+			Enabled:           true,
+			Labels:            map[string]string{},
+			Interval:          "10s",
+			ScrapeTimeout:     "10s",
+			Scheme:            "http",
+			Relabelings:       []interface{}{},
+			TargetLabels:      []interface{}{},
+			MetricRelabelings: []interface{}{},
+			SampleLimit:       0,
+		},
 		Image: Image{
 			Repository: spec.Image,
 			Tag:        spec.Version,
@@ -428,12 +464,14 @@ func GetConfig(conf *hlfv1alpha1.FabricCA, client *kubernetes.Clientset, chartNa
 			Size:         spec.Storage.Size,
 		},
 		Msp: Msp{
-			Keyfile:       string(signPEMEncodedPK),
-			Certfile:      string(signCRTEncoded),
-			TLSCAKeyfile:  string(caTLSSignPEMEncodedPK),
-			TLSCACertfile: string(caTLSSignCRTEncoded),
-			TlsKeyFile:    string(tlsPEMEncodedPK),
-			TlsCertFile:   string(tlsCRTEncoded),
+			Keyfile:        string(signPEMEncodedPK),
+			Certfile:       string(signCRTEncoded),
+			Chainfile:      conf.Spec.CA.CA.Chain,
+			TLSCAKeyfile:   string(caTLSSignPEMEncodedPK),
+			TLSCACertfile:  string(caTLSSignCRTEncoded),
+			TLSCAChainfile: conf.Spec.TLSCA.CA.Chain,
+			TlsKeyFile:     string(tlsPEMEncodedPK),
+			TlsCertFile:    string(tlsCRTEncoded),
 		},
 		Database: Database{
 			Type:       spec.Database.Type,
@@ -475,13 +513,13 @@ func GetConfig(conf *hlfv1alpha1.FabricCA, client *kubernetes.Clientset, chartNa
 }
 
 type Status struct {
-	URL       string
-	Port      int
-	Host      string
 	Status    hlfv1alpha1.DeploymentStatus
 	TlsCert   string
 	CACert    string
 	TLSCACert string
+	NodeURL   string
+	NodePort  int
+	NodeHost  string
 }
 
 func GetServiceName(releaseName string) string {
@@ -534,21 +572,15 @@ func GetCAState(clientSet *kubernetes.Clientset, ca *hlfv1alpha1.FabricCA, relea
 			r.Status = hlfv1alpha1.PendingStatus
 		}
 	}
-	if ca.Spec.Istio != nil && len(ca.Spec.Istio.Hosts) > 0 {
-		r.URL = fmt.Sprintf("https://%s:%d", ca.Spec.Istio.Hosts[0], ca.Spec.Istio.Port)
-		r.Host = ca.Spec.Istio.Hosts[0]
-		r.Port = ca.Spec.Istio.Port
-	} else {
-		svcName := GetServiceName(releaseName)
-		svc, err := clientSet.CoreV1().Services(ns).Get(ctx, svcName, v1.GetOptions{})
-		if err != nil {
-			return nil, err
-		}
-		nodePort := svc.Spec.Ports[0].NodePort
-		r.URL = fmt.Sprintf("https://%s:%d", k8sIP, nodePort)
-		r.Port = int(nodePort)
-		r.Host = k8sIP
+	svcName := GetServiceName(releaseName)
+	svc, err := clientSet.CoreV1().Services(ns).Get(ctx, svcName, v1.GetOptions{})
+	if err != nil {
+		return nil, err
 	}
+	nodePort := svc.Spec.Ports[0].NodePort
+	r.NodeURL = fmt.Sprintf("https://%s:%d", k8sIP, nodePort)
+	r.NodePort = int(nodePort)
+	r.NodeHost = k8sIP
 	tlsCrt, _, err := getExistingTLSCrypto(clientSet, releaseName, ns)
 	if err != nil {
 		return nil, err
@@ -682,56 +714,58 @@ func Reconcile(
 		}
 		fca := hlf.DeepCopy()
 		fca.Status.Status = s.Status
-		fca.Status.URL = s.URL
 		fca.Status.TlsCert = s.TlsCert
 		fca.Status.TLSCACert = s.TLSCACert
 		fca.Status.CACert = s.CACert
-		fca.Status.Host = s.Host
-		fca.Status.Port = s.Port
+		fca.Status.NodePort = s.NodePort
 		fca.Status.Conditions.SetCondition(status.Condition{
 			Type:               status.ConditionType(s.Status),
 			Status:             "True",
 			LastTransitionTime: v1.Time{},
 		})
-		if reflect.DeepEqual(fca.Status, hlf.Status) {
-			c, err := GetConfig(hlf, clientSet, releaseName, req.Namespace)
-			if err != nil {
-				return ctrl.Result{}, err
-			}
-			inrec, err := json.Marshal(c)
-			if err != nil {
-				return ctrl.Result{}, err
-			}
-			var inInterface map[string]interface{}
-			err = json.Unmarshal(inrec, &inInterface)
-			if err != nil {
-				return ctrl.Result{}, err
-			}
-			cmd := action.NewUpgrade(cfg)
-			settings := cli.New()
-			chartPath, err := cmd.LocateChart(r.ChartPath, settings)
-			ch, err := loader.Load(chartPath)
-			if err != nil {
-				return ctrl.Result{}, err
-			}
-			release, err := cmd.Run(releaseName, ch, inInterface)
-			if err != nil {
-				return ctrl.Result{}, err
-			}
-			log.Debugf("Chart upgraded %s", release.Name)
-		} else {
+		c, err := GetConfig(hlf, clientSet, releaseName, req.Namespace)
+		if err != nil {
+			return ctrl.Result{}, err
+		}
+		inrec, err := json.Marshal(c)
+		if err != nil {
+			return ctrl.Result{}, err
+		}
+		var inInterface map[string]interface{}
+		err = json.Unmarshal(inrec, &inInterface)
+		if err != nil {
+			return ctrl.Result{}, err
+		}
+		cmd := action.NewUpgrade(cfg)
+		settings := cli.New()
+		chartPath, err := cmd.LocateChart(r.ChartPath, settings)
+		ch, err := loader.Load(chartPath)
+		if err != nil {
+			return ctrl.Result{}, err
+		}
+		release, err := cmd.Run(releaseName, ch, inInterface)
+		if err != nil {
+			setConditionStatus(hlf, hlfv1alpha1.FailedStatus, false, err, false)
+			return r.updateCRStatusOrFailReconcile(ctx, r.Log, hlf)
+		}
+		log.Debugf("Chart upgraded %s", release.Name)
+		if !reflect.DeepEqual(fca.Status, hlf.Status) {
 			if err := r.Status().Update(ctx, fca); err != nil {
 				log.Debugf("Error updating the status: %v", err)
 				return ctrl.Result{}, err
 			}
 		}
-
-		if s.Status == hlfv1alpha1.RunningStatus {
-			return ctrl.Result{}, nil
-		} else {
+		switch s.Status {
+		case hlfv1alpha1.PendingStatus:
+			log.Infof("CA %s in pending status, refreshing state in 10 seconds", fca.Name)
 			return ctrl.Result{
-				Requeue:      false,
-				RequeueAfter: 5 * time.Second,
+				RequeueAfter: 10 * time.Second,
+			}, nil
+		case hlfv1alpha1.RunningStatus:
+			return ctrl.Result{}, nil
+		default:
+			return ctrl.Result{
+				RequeueAfter: 2 * time.Second,
 			}, nil
 		}
 	} else {
@@ -740,7 +774,6 @@ func Reconcile(
 		if err != nil {
 			return ctrl.Result{}, err
 		}
-
 		cmd.ReleaseName = name
 		ch, err := loader.Load(chart)
 		if err != nil {
@@ -757,15 +790,14 @@ func Reconcile(
 			reqLogger.Error(err, "Failed to marshall helm values")
 			return ctrl.Result{}, err
 		}
-		log.Debugf("Values.yaml for FabricCA: %s", string(inrec))
 		err = json.Unmarshal(inrec, &inInterface)
 		if err != nil {
 			return ctrl.Result{}, err
 		}
 		release, err := cmd.Run(ch, inInterface)
 		if err != nil {
-			reqLogger.Error(err, "Failed to install helm chart")
-			return ctrl.Result{}, err
+			setConditionStatus(hlf, hlfv1alpha1.FailedStatus, false, err, false)
+			return r.updateCRStatusOrFailReconcile(ctx, r.Log, hlf)
 		}
 		log.Debugf("Chart installed %s", release.Name)
 		hlf.Status.Status = hlfv1alpha1.PendingStatus
@@ -783,6 +815,51 @@ func Reconcile(
 		}, nil
 	}
 }
+var (
+	ErrClientK8s = errors.New("k8sAPIClientError")
+)
+
+func (r *FabricCAReconciler) updateCRStatusOrFailReconcile(ctx context.Context, log logr.Logger, p *hlfv1alpha1.FabricCA) (
+	ctrl.Result, error) {
+	if err := r.Status().Update(ctx, p); err != nil {
+		log.Error(err, fmt.Sprintf("%v failed to update the application status", ErrClientK8s))
+		return ctrl.Result{}, err
+	}
+	return ctrl.Result{}, nil
+}
+
+func setConditionStatus(p *hlfv1alpha1.FabricCA, conditionType hlfv1alpha1.DeploymentStatus, statusFlag bool, err error, statusUnknown bool) (update bool) {
+	statusStr := func() corev1.ConditionStatus {
+		if statusUnknown {
+			return corev1.ConditionUnknown
+		}
+		if statusFlag {
+			return corev1.ConditionTrue
+		} else {
+			return corev1.ConditionFalse
+		}
+	}
+	p.Status.Status = conditionType
+	if err != nil {
+		p.Status.Message = err.Error()
+	}
+	condition := func() status.Condition {
+		if err != nil {
+			return status.Condition{
+				Type:    status.ConditionType(conditionType),
+				Status:  statusStr(),
+				Reason:  status.ConditionReason(err.Error()),
+				Message: err.Error(),
+			}
+		}
+		return status.Condition{
+			Type:   status.ConditionType(conditionType),
+			Status: statusStr(),
+		}
+	}
+	return p.Status.Conditions.SetCondition(condition())
+}
+
 
 // +kubebuilder:rbac:groups=hlf.kungfusoftware.es,resources=fabriccas,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=hlf.kungfusoftware.es,resources=fabriccas/status,verbs=get;update;patch

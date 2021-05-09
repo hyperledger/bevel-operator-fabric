@@ -457,7 +457,7 @@ func randomFabricCA(releaseName string, namespace string) *hlfv1alpha1.FabricCA 
 			},
 			Metrics: hlfv1alpha1.FabricCAMetrics{
 				Provider: "prometheus",
-				Statsd: hlfv1alpha1.FabricCAMetricsStatsd{
+				Statsd: &hlfv1alpha1.FabricCAMetricsStatsd{
 					Network:       "udp",
 					Address:       "127.0.0.1:8125",
 					WriteInterval: "10s",
@@ -1303,7 +1303,7 @@ var _ = Describe("Fabric Controllers", func() {
 				},
 				Metrics: hlfv1alpha1.FabricCAMetrics{
 					Provider: "prometheus",
-					Statsd: hlfv1alpha1.FabricCAMetricsStatsd{
+					Statsd: &hlfv1alpha1.FabricCAMetricsStatsd{
 						Network:       "udp",
 						Address:       "127.0.0.1:8125",
 						WriteInterval: "10s",

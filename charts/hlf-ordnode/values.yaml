@@ -1,4 +1,5 @@
 fullnameOverride: ''
+replicas: 1
 image:
   repository: hyperledger/fabric-orderer
   tag: amd64-2.3.0
@@ -13,8 +14,27 @@ admin:
   clientRootCAs: ""
 logging:
   spec: info
+
 storage:
   size: 30Gi
   accessMode: ReadWriteOnce
   storageClass: ''
 mspID: OrdererMSP
+
+
+serviceMonitor:
+  ## If true, a ServiceMonitor CRD is created for a prometheus operator
+  ## https://github.com/coreos/prometheus-operator
+  ##
+  enabled: false
+  #  namespace: monitoring
+  labels: { }
+  interval: 10s
+  scrapeTimeout: 10s
+  scheme: http
+  relabelings: [ ]
+  targetLabels: [ ]
+  metricRelabelings: [ ]
+  sampleLimit: 0
+
+

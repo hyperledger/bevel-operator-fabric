@@ -109,6 +109,22 @@ spec:
                 - orgLeader
                 - useLeaderElection
                 type: object
+              hostAliases:
+                items:
+                  description: HostAlias holds the mapping between IP and hostnames
+                    that will be injected as an entry in the pod's hosts file.
+                  properties:
+                    hostnames:
+                      description: Hostnames for the above IP address.
+                      items:
+                        type: string
+                      type: array
+                    ip:
+                      description: IP address of the host file entry.
+                      type: string
+                  type: object
+                nullable: true
+                type: array
               hosts:
                 items:
                   type: string
@@ -171,6 +187,9 @@ spec:
                 items:
                   type: string
                 type: array
+              replicas:
+                default: 1
+                type: integer
               resources:
                 properties:
                   chaincode:
@@ -349,15 +368,12 @@ spec:
               service:
                 properties:
                   type:
-                    allOf:
-                    - enum:
-                      - NodePort
-                      - ClusterIP
-                      - LoadBalancer
-                    - enum:
-                      - NodePort
-                      - ClusterIP
-                      - LoadBalancer
+                    description: Service Type string describes ingress methods for
+                      a service
+                    enum:
+                    - NodePort
+                    - ClusterIP
+                    - LoadBalancer
                     type: string
                 required:
                 - type
@@ -373,10 +389,6 @@ spec:
                     properties:
                       accessMode:
                         default: ReadWriteOnce
-                        enum:
-                        - ReadWriteOnce
-                        - ReadOnlyMany
-                        - ReadWriteMany
                         type: string
                       size:
                         default: 5Gi
@@ -392,10 +404,6 @@ spec:
                     properties:
                       accessMode:
                         default: ReadWriteOnce
-                        enum:
-                        - ReadWriteOnce
-                        - ReadOnlyMany
-                        - ReadWriteMany
                         type: string
                       size:
                         default: 5Gi
@@ -411,10 +419,6 @@ spec:
                     properties:
                       accessMode:
                         default: ReadWriteOnce
-                        enum:
-                        - ReadWriteOnce
-                        - ReadOnlyMany
-                        - ReadWriteMany
                         type: string
                       size:
                         default: 5Gi
@@ -447,6 +451,7 @@ spec:
             - mspID
             - operationHosts
             - operationIPs
+            - replicas
             - resources
             - secret
             - service
@@ -457,6 +462,8 @@ spec:
           status:
             description: FabricPeerStatus defines the observed state of FabricPeer
             properties:
+              caCert:
+                type: string
               conditions:
                 description: Conditions is a set of Condition instances.
                 items:
@@ -499,18 +506,18 @@ spec:
                 type: array
               message:
                 type: string
+              port:
+                type: integer
               status:
                 type: string
               tls_cert:
                 type: string
-              url:
+              tlsCaCert:
                 type: string
             required:
             - conditions
             - message
             - status
-            - tls_cert
-            - url
             type: object
         type: object
     served: true

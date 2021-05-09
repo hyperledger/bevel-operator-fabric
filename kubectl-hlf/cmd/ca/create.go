@@ -7,9 +7,9 @@ import (
 	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/helpers"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"sigs.k8s.io/yaml"
 	"io"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"sigs.k8s.io/yaml"
 )
 
 type Options struct {
@@ -220,7 +220,7 @@ func (c *createCmd) run(args []string) error {
 			},
 			Metrics: v1alpha1.FabricCAMetrics{
 				Provider: "prometheus",
-				Statsd: v1alpha1.FabricCAMetricsStatsd{
+				Statsd: &v1alpha1.FabricCAMetricsStatsd{
 					Network:       "udp",
 					Address:       "127.0.0.1:8125",
 					WriteInterval: "10s",

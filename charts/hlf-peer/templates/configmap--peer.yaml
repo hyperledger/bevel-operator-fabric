@@ -25,7 +25,7 @@ data:
   ##############
   # Operations #
   ##############
-  CORE_OPERATIONS_TLS_ENABLED: "true"
+  CORE_OPERATIONS_TLS_ENABLED: "false"
   CORE_OPERATIONS_TLS_KEY_FILE: "/var/hyperledger/tls/operations/pair/tls.key"
   CORE_OPERATIONS_TLS_CERT_FILE: "/var/hyperledger/tls/operations/pair/tls.crt"
   CORE_OPERATIONS_TLS_CLIENTAUTHREQUIRED: "false"

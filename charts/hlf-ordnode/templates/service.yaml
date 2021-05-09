@@ -11,7 +11,8 @@ spec:
       targetPort: 7050
       protocol: TCP
       name: grpc
-{{- if eq .Values.service.type "NodePort" }}
+
+{{- if and (eq .Values.service.type "NodePort") (gt .Values.service.nodePort 29999.0) }}
       nodePort: {{.Values.service.nodePort}}
 {{- end }}
 {{- if .Values.channelParticipationEnabled }}
@@ -24,7 +25,7 @@ spec:
       targetPort: 9444
       protocol: TCP
       name: operations
-{{- if eq .Values.service.type "NodePort" }}
+{{- if and (eq .Values.service.type "NodePort") (gt .Values.service.nodePortOperations 29999.0) }}
       nodePort: {{.Values.service.nodePortOperations}}
 {{- end }}
   selector:

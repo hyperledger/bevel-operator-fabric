@@ -17,7 +17,7 @@ data:
   ORDERER_GENERAL_ORDERERTYPE: {{ .Values.ord.type | quote }}
   ORDERER_GENERAL_LISTENADDRESS: 0.0.0.0
   ORDERER_GENERAL_LISTENPORT: "7050"
-  ORDERER_GENERAL_LOGLEVEL: debug
+  ORDERER_GENERAL_LOGLEVEL: {{.Values.logging.spec}}
   ORDERER_GENERAL_LOCALMSPDIR: /var/hyperledger/msp
   ORDERER_GENERAL_LOCALMSPID: {{ .Values.ord.mspID | quote }}
   ORDERER_GENERAL_BOOTSTRAPMETHOD: {{.Values.bootstrapMethod}}
@@ -50,7 +50,11 @@ data:
 
   GODEBUG: "netdns=go"
   ADMIN_MSP_PATH: /var/hyperledger/admin_msp
-  FABRIC_LOGGING_SPEC: debug
+  FABRIC_LOGGING_SPEC: {{.Values.logging.spec}}
+  ##############
+  # Metrics #
+  ##############
+  ORDERER_METRICS_PROVIDER: "prometheus"
   ##############
   # Operations #
   ##############

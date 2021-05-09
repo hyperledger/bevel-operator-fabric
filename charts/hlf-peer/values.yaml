@@ -1,7 +1,3 @@
-# Default values for  hlf-peer.
-# This is a YAML-formatted file.
-# Declare variables to be passed into your templates.
-
 image:
   repository: hyperledger/fabric-peer
   tag: amd64-2.2.0
@@ -19,9 +15,6 @@ ingress:
   hosts:
     - hlf-peer.local
   tls: [ ]
-  #  - secretName: hlf-peer-tls
-  #    hosts:
-  #      - hlf-peer.local
 
 rbac:
   ns: default
@@ -31,8 +24,6 @@ rbac:
 peer:
   # Type of database ("goleveldb" or "CouchDB"):
   databaseType: goleveldb
-  # If CouchDB is used, which chart holds it
-  couchdbInstance: cdb-peer1
   ## MSP ID of the Peer
   mspID: Org1MSP
   gossip:
@@ -106,6 +97,32 @@ tls:
     NvmizMpmB5M55epHFCWSieyTslyhRANCAAQwkLHwXb1YUetEtJYDYaqVicHeEmYD
     CdYzrQEu1aEXcLNBPQUlc10OhCiZVyCYVlKb02wJpXyTBPAQpTKLNy3F
     -----END PRIVATE KEY-----
+#
+#intCACert: ""
+#intCACert: |
+#  -----BEGIN CERTIFICATE-----
+#  MIIDyjCCAbKgAwIBAgIUfAOjdL2u+bl+pWqRNnA5gaKDGxkwDQYJKoZIhvcNAQEL
+#  BQAwLzERMA8GA1UEChMIT3JnMTBNU1AxDTALBgNVBAsTBFRlY2gxCzAJBgNVBAMT
+#  AmNhMB4XDTIxMDUwMzEwMTUzOVoXDTI2MDUwMjEwMTYwOVowdTEWMBQGA1UEBhMN
+#  VW5pdGVkIFN0YXRlczERMA8GA1UECBMIRGVsYXdhcmUxETAPBgNVBAcTCERlbGF3
+#  YXJlMRkwFwYDVQQKExBBcmlzZSBUZWNobm9sb2d5MQ0wCwYDVQQLEwR0ZWNoMQsw
+#  CQYDVQQDEwJjYTBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABGVqnon8SbZ8qFe1
+#  13jSO7daVK2gmKcgkK3t/pH5A4t0EhFdWNDz2OJ/M2dLyh8AXlADHNcxX3TC0scm
+#  U+AQCzijYzBhMA4GA1UdDwEB/wQEAwIBBjAPBgNVHRMBAf8EBTADAQH/MB0GA1Ud
+#  DgQWBBTDMgCPz/7v7lsBplcHPIHDunu6fTAfBgNVHSMEGDAWgBSG3tV1ToKkeByN
+#  QWf73XxKCaeG4DANBgkqhkiG9w0BAQsFAAOCAgEAT5sj8zhAb0ZgcZI8j5tLZllv
+#  hDCKwuG3vdPYaArtI3t7+Qm++g4oJdvnKNlpxeM5rDV1vLqZuKVhrif1b3atzs2Y
+#  H98DOnpqgg8qgDZwH/Qnawz9X81FCZjewGNztT9xIbIec+1uwy+h0tntAnSryUFM
+#  y3tmnpjemyu6U9Pt7j6aYE9dz5ZUGu/vECMPGke9gOtK5wR7EmpVYSycygplMz/9
+#  y7+XTg8u0dIOGeCpbkZOpWQfzwpyHa/Z+P8aMQvZWtbcb1Ntg7BNGnh8yRoOvfJP
+#  NLqjgstHuyWVg04YbZfq9nVjQ3xYSQsIZvDpoEfpNs2GTLxhrr7ZhHX+27lfud14
+#  eddD4O+PfX7nZo+I+Xm1CZusxT/7LSnRl3govt/CYgzCiTDmW3zxg9q63FnQxbeh
+#  9/8U7Daj7TJbVmjZSmsAXG5dr2oAbbiGCMGTqS0CzxyMamhyN5qcEBofWxh7p3Qp
+#  I41iXK2oQdl8dzJn8BmHvkiUWnM0l75mm50WCVfu4elO4mMGejXA6H2PudV5fZ7f
+#  lyWN19V+82aDzueiYAItJZztLNWOCt2fjYljww5dV+JJPjoQRwpUd8iFNdItnR71
+#  7MVPyoMjCKo3uEr9pi01vKThztWxia6iOZv1mchladzgOJjLQEq6j+vhi7FceBuh
+#  MkUBqd/Rg4yotw+WEac=
+#  -----END CERTIFICATE-----
 
 # CA Cert: as 'cacert.pem'
 cacert: |
@@ -140,7 +157,32 @@ tlsrootcert: |
   ADBGAiEA9QJ4AlRTpXgfOoEhRVqc0Pu6y13uWfTHdyScr4eLlJwCIQD1h1C+PdYW
   oRFWxr6uC0xDev2/rnwz01gHosiUzyg3eg==
   -----END CERTIFICATE-----
-
+#
+#intTLSCACert: |
+#  -----BEGIN CERTIFICATE-----
+#  MIIDzTCCAbWgAwIBAgIUBAjpFIRfdzyrcLOgjbCDVb6nWCgwDQYJKoZIhvcNAQEL
+#  BQAwMjERMA8GA1UEChMIT3JnMTBNU1AxDTALBgNVBAsTBFRlY2gxDjAMBgNVBAMT
+#  BXRsc2NhMB4XDTIxMDUwMzEwMTU0MFoXDTI2MDUwMjEwMTYxMFowdTEWMBQGA1UE
+#  BhMNVW5pdGVkIFN0YXRlczERMA8GA1UECBMIRGVsYXdhcmUxETAPBgNVBAcTCERl
+#  bGF3YXJlMRkwFwYDVQQKExBBcmlzZSBUZWNobm9sb2d5MQ0wCwYDVQQLEwR0ZWNo
+#  MQswCQYDVQQDEwJjYTBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABI7nE6jWCDC8
+#  QQSBcQx4MEgmk3vfW2wlZsJ1HkJB/3DkiYe/PO2vATOrx5agKe+Mtl5n1Sx+0yKU
+#  SGCK1L9tV82jYzBhMA4GA1UdDwEB/wQEAwIBBjAPBgNVHRMBAf8EBTADAQH/MB0G
+#  A1UdDgQWBBScqgRdXu0dHmlwwuoKQqppJ/k/djAfBgNVHSMEGDAWgBT5j1fm/9BC
+#  IkHCN21mQH1beD4rxTANBgkqhkiG9w0BAQsFAAOCAgEAx7MhyY4qCXiHcinV9TE8
+#  W6Dl791n9TqOwS3EH2QEmgy2gPIZ9m5mmsewwQFO/iO5vj2z8Rvimwuzrg6ABk8e
+#  gl0/kk+fN2XkwaUIrqJNI82EOjOHTxFgew632Bo8bS72s/Xg8Yx+Bh+9K+KHUJWJ
+#  BWaHhMbCisK6VOH75AkLVQzAHQ6g1aPr801/tBGflWgElOqvRFtooEbdpNAG6Sxv
+#  UnQv2eUCtwTX8UivFI8QeZlnVZ/cyLDqlrja8wljTXF+cZPURmEby2GX3pRUxbsL
+#  LOhTzzItgb2kUaeWJEII/AgQaYj2Jfp3qlj/WvnQXyLTk/JIRlPwpttatMsCvfyP
+#  ARd3lah7sDCbLua2QICuZl9Avv4PUaO0xp4C+O3/hggcWqJTv4Tf5Zp2/MDjHuGM
+#  wQ+EZGW+fNulT3sdcl/kVi9WqfnqI6J2DLN/2kAUhjW2H+vjQJHF12OAytktTYaW
+#  hJuResd5O3Bl/cuvLvksdOEv9uQFmQRhPwqAzK2kUP4NAt4qa7fuZlbb5GSEyqzw
+#  lumKmCFY0yA4Xra2x9smM+dR1/iuPgY80gX9/OA37v4gQrXRo0eH/JEgpK9l+cFB
+#  Ixjhv9LPUvnaDXwK4H8WywLa3+fkkji2B2IgA6I/zaf9tliDrv2rDOq58D53P0Cg
+#  495uDWkW3B8Jo5CTmm/wFgU=
+#  -----END CERTIFICATE-----
+#
 
 
 resources:
@@ -150,7 +192,7 @@ resources:
   requests:
     cpu: 100m
     memory: 128Mi
-
+replicas: 1
 nodeSelector: { }
 
 tolerations: [ ]
@@ -198,10 +240,21 @@ logging:
 
 externalChaincodeBuilder: false
 
-externalBuilders:
-  - path: "12"
-    name: external-sample-builder
+externalBuilders: [ ]
 
-opsTLS:
-  key: ""
-  cert: ""
+
+serviceMonitor:
+  ## If true, a ServiceMonitor CRD is created for a prometheus operator
+  ## https://github.com/coreos/prometheus-operator
+  ##
+  enabled: false
+  #  namespace: monitoring
+  labels: { }
+  interval: 10s
+  scrapeTimeout: 10s
+  scheme: http
+  relabelings: [ ]
+  targetLabels: [ ]
+  metricRelabelings: [ ]
+  sampleLimit: 0
+

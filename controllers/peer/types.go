@@ -4,6 +4,7 @@ type RBAC struct {
 	Ns string `json:"ns"`
 }
 type FabricPeerChart struct {
+	Replicas                 int               `json:"replicas"`
 	ExternalChaincodeBuilder bool              `json:"externalChaincodeBuilder"`
 	CouchdbUsername          string            `json:"couchdbUsername"`
 	CouchdbPassword          string            `json:"couchdbPassword"`
@@ -19,6 +20,7 @@ type FabricPeerChart struct {
 	TLS                      TLS               `json:"tls"`
 	OPSTLS                   TLS               `json:"opsTLS"`
 	Cacert                   string            `json:"cacert"`
+	IntCacert                string            `json:"intCAcert"`
 	Tlsrootcert              string            `json:"tlsrootcert"`
 	Resources                Resources         `json:"resources,omitempty"`
 	NodeSelector             NodeSelector      `json:"nodeSelector,omitempty"`
@@ -26,11 +28,24 @@ type FabricPeerChart struct {
 	Affinity                 Affinity          `json:"affinity,omitempty"`
 	ExternalHost             string            `json:"externalHost"`
 	FullnameOverride         string            `json:"fullnameOverride"`
-	HostAliases              []HostAliases     `json:"hostAliases"`
+	HostAliases              []HostAlias       `json:"hostAliases"`
 	Service                  Service           `json:"service"`
 	Persistence              PeerPersistence   `json:"persistence"`
 	Logging                  Logging           `json:"logging"`
 	ExternalBuilders         []ExternalBuilder `json:"externalBuilders"`
+	ServiceMonitor           ServiceMonitor    `json:"serviceMonitor"`
+}
+
+type ServiceMonitor struct {
+	Enabled           bool              `json:"enabled"`
+	Labels            map[string]string `json:"labels"`
+	Interval          string            `json:"interval"`
+	ScrapeTimeout     string            `json:"scrapeTimeout"`
+	Scheme            string            `json:"scheme"`
+	Relabelings       []interface{}     `json:"relabelings"`
+	TargetLabels      []interface{}     `json:"targetLabels"`
+	MetricRelabelings []interface{}     `json:"metricRelabelings"`
+	SampleLimit       int               `json:"sampleLimit"`
 }
 
 type ExternalBuilder struct {
@@ -107,7 +122,7 @@ type NodeSelector struct {
 }
 type Affinity struct {
 }
-type HostAliases struct {
+type HostAlias struct {
 	IP        string   `json:"ip"`
 	Hostnames []string `json:"hostnames"`
 }
