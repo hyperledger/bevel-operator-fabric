@@ -207,3 +207,9 @@ serviceMonitor:
   targetLabels: []
   metricRelabelings: []
   sampleLimit: 0
+
+istio:
+  port: 443
+  hosts: []
+  ingressGateway: ingressgateway
+

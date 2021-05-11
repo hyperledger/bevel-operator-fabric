@@ -4,6 +4,7 @@ type RBAC struct {
 	Ns string `json:"ns"`
 }
 type FabricPeerChart struct {
+	Istio                    Istio             `json:"istio"`
 	Replicas                 int               `json:"replicas"`
 	ExternalChaincodeBuilder bool              `json:"externalChaincodeBuilder"`
 	CouchdbUsername          string            `json:"couchdbUsername"`
@@ -11,12 +12,10 @@ type FabricPeerChart struct {
 	Image                    Image             `json:"image"`
 	Rbac                     RBAC              `json:"rbac"`
 	DockerSocketPath         string            `json:"dockerSocketPath"`
-	Ingress                  Ingress           `json:"ingress"`
 	Peer                     Peer              `json:"peer"`
 	Cert                     string            `json:"cert"`
 	Key                      string            `json:"key"`
 	Hosts                    []string          `json:"hosts"`
-	OperationHosts           []string          `json:"operationHosts"`
 	TLS                      TLS               `json:"tls"`
 	OPSTLS                   TLS               `json:"opsTLS"`
 	Cacert                   string            `json:"cacert"`
@@ -55,8 +54,9 @@ type ExternalBuilder struct {
 }
 
 type Istio struct {
-	Port  int      `json:"port"`
-	Hosts []string `json:"hosts"`
+	Port           int      `json:"port"`
+	Hosts          []string `json:"hosts"`
+	IngressGateway string   `json:"ingressGateway"`
 }
 
 type PeerPersistence struct {
@@ -71,13 +71,7 @@ type Image struct {
 }
 type Annotations struct {
 }
-type Ingress struct {
-	Enabled     bool          `json:"enabled"`
-	Annotations Annotations   `json:"annotations"`
-	Path        string        `json:"path"`
-	Hosts       []string      `json:"hosts"`
-	TLS         []interface{} `json:"tls"`
-}
+
 type Gossip struct {
 	Bootstrap         string `json:"bootstrap"`
 	Endpoint          string `json:"endpoint"`

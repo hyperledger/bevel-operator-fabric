@@ -66,7 +66,7 @@ spec:
                 - touchPeriod
                 type: object
               dockerSocketPath:
-                default: /var/run/docker.sock
+                default: ""
                 type: string
               external_chaincode_builder:
                 type: boolean
@@ -144,9 +144,13 @@ spec:
                       type: string
                     nullable: true
                     type: array
+                  ingressGateway:
+                    type: string
                   port:
                     nullable: true
                     type: integer
+                required:
+                - ingressGateway
                 type: object
               logging:
                 properties:
@@ -179,14 +183,6 @@ spec:
               mspID:
                 minLength: 3
                 type: string
-              operationHosts:
-                items:
-                  type: string
-                type: array
-              operationIPs:
-                items:
-                  type: string
-                type: array
               replicas:
                 default: 1
                 type: integer
@@ -378,6 +374,31 @@ spec:
                 required:
                 - type
                 type: object
+              serviceMonitor:
+                nullable: true
+                properties:
+                  enabled:
+                    default: false
+                    type: boolean
+                  interval:
+                    default: 10s
+                    type: string
+                  labels:
+                    additionalProperties:
+                      type: string
+                    type: object
+                  sampleLimit:
+                    default: 0
+                    type: integer
+                  scrapeTimeout:
+                    default: 10s
+                    type: string
+                required:
+                - enabled
+                - interval
+                - sampleLimit
+                - scrapeTimeout
+                type: object
               stateDb:
                 enum:
                 - couchdb
@@ -449,8 +470,6 @@ spec:
             - image
             - logging
             - mspID
-            - operationHosts
-            - operationIPs
             - replicas
             - resources
             - secret

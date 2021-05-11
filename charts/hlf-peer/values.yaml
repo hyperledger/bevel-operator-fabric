@@ -5,6 +5,8 @@ image:
 
 istio:
   port: 443
+  hosts: []
+  ingressGateway: ingressgateway
 
 dockerSocketPath: /var/run/docker.sock
 

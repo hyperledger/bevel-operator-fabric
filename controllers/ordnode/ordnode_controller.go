@@ -590,36 +590,37 @@ func getConfig(conf *hlfv1alpha1.FabricOrdererNode, client *kubernetes.Clientset
 			Hostnames: hostAlias.Hostnames,
 		})
 	}
+	var istio Istio
+	if spec.Istio != nil {
+		istio = Istio{
+			Port:           spec.Istio.Port,
+			Hosts:          spec.Istio.Hosts,
+			IngressGateway: spec.Istio.IngressGateway,
+		}
+	} else {
+		istio = Istio{
+			Port:           0,
+			Hosts:          []string{},
+			IngressGateway: "",
+		}
+	}
 	fabricOrdChart := fabricOrdChart{
-		Replicas: spec.Replicas,
-		Ingress: ingress{
-			Enabled: false,
-		},
-		Logging:                     Logging{Spec: "info"},
+		Istio:                       istio,
+		Replicas:                    spec.Replicas,
 		Genesis:                     spec.Genesis,
-		Cacert:                      string(signRootCRTEncoded),
-		Tlsrootcert:                 string(tlsRootCRTEncoded),
 		ChannelParticipationEnabled: spec.ChannelParticipationEnabled,
 		BootstrapMethod:             string(spec.BootstrapMethod),
-		ServiceMonitor: ServiceMonitor{
-			Enabled:           true,
-			Labels:            map[string]string{},
-			Interval:          "10s",
-			ScrapeTimeout:     "10s",
-			Scheme:            "http",
-			Relabelings:       []interface{}{},
-			TargetLabels:      []interface{}{},
-			MetricRelabelings: []interface{}{},
-			SampleLimit:       0,
-		},
 		Admin: admin{
 			Cert:          string(adminCRTEncoded),
 			Key:           string(adminEncodedPK),
 			RootCAs:       string(adminRootCRTEncoded),
 			ClientRootCAs: string(adminClientRootCRTEncoded),
 		},
-		Cert: string(signCRTEncoded),
-		Key:  string(signEncodedPK),
+		Cacert:      string(signRootCRTEncoded),
+		Tlsrootcert: string(tlsRootCRTEncoded),
+		AdminCert:   "",
+		Cert:        string(signCRTEncoded),
+		Key:         string(signEncodedPK),
 		TLS: tls{
 			Cert: string(tlsCRTEncoded),
 			Key:  string(tlsEncodedPK),
@@ -659,6 +660,18 @@ func getConfig(conf *hlfv1alpha1.FabricOrdererNode, client *kubernetes.Clientset
 		},
 		Clientcerts: clientcerts{},
 		Hosts:       ingressHosts,
+		Logging:     Logging{Spec: "info"},
+		ServiceMonitor: ServiceMonitor{
+			Enabled:           true,
+			Labels:            map[string]string{},
+			Interval:          "10s",
+			ScrapeTimeout:     "10s",
+			Scheme:            "http",
+			Relabelings:       []interface{}{},
+			TargetLabels:      []interface{}{},
+			MetricRelabelings: []interface{}{},
+			SampleLimit:       0,
+		},
 	}
 
 	return &fabricOrdChart, nil

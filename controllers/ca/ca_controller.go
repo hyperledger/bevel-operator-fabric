@@ -364,7 +364,7 @@ func GetConfig(conf *hlfv1alpha1.FabricCA, client *kubernetes.Clientset, chartNa
 	}
 	signCert, signKey, err := getExistingSignCrypto(client, chartName, namespace)
 	if err != nil {
-		if conf.Spec.CA.CA.Key != "" && conf.Spec.CA.CA.Cert != "" {
+		if conf.Spec.CA.CA != nil && conf.Spec.CA.CA.Key != "" && conf.Spec.CA.CA.Cert != "" {
 			signCert, signKey, err = parseCrypto(conf.Spec.CA.CA.Key, conf.Spec.CA.CA.Cert)
 		} else {
 			signCert, signKey, err = CreateDefaultCA(spec.CA)
@@ -375,7 +375,7 @@ func GetConfig(conf *hlfv1alpha1.FabricCA, client *kubernetes.Clientset, chartNa
 	}
 	caTLSSignCert, caTLSSignKey, err := getExistingSignTLSCrypto(client, chartName, namespace)
 	if err != nil {
-		if conf.Spec.TLSCA.CA.Key != "" && conf.Spec.TLSCA.CA.Cert != "" {
+		if conf.Spec.TLSCA.CA != nil && conf.Spec.TLSCA.CA.Key != "" && conf.Spec.TLSCA.CA.Cert != "" {
 			caTLSSignCert, caTLSSignKey, err = parseCrypto(conf.Spec.TLSCA.CA.Key, conf.Spec.TLSCA.CA.Cert)
 		} else {
 			caTLSSignCert, caTLSSignKey, err = CreateDefaultCA(spec.TLSCA)
@@ -430,6 +430,22 @@ func GetConfig(conf *hlfv1alpha1.FabricCA, client *kubernetes.Clientset, chartNa
 	if spec.Istio != nil && len(spec.Istio.Hosts) > 0 {
 		istioHosts = spec.Istio.Hosts
 	}
+	msp := Msp{
+		Keyfile:        string(signPEMEncodedPK),
+		Certfile:       string(signCRTEncoded),
+		Chainfile:      "",
+		TLSCAKeyfile:   string(caTLSSignPEMEncodedPK),
+		TLSCACertfile:  string(caTLSSignCRTEncoded),
+		TLSCAChainfile: "",
+		TlsKeyFile:     string(tlsPEMEncodedPK),
+		TlsCertFile:    string(tlsCRTEncoded),
+	}
+	if conf.Spec.CA.CA != nil {
+		msp.Chainfile = conf.Spec.CA.CA.Chain
+	}
+	if conf.Spec.TLSCA.CA != nil {
+		msp.TLSCAChainfile = conf.Spec.TLSCA.CA.Chain
+	}
 	var c = FabricCAChart{
 		FullNameOverride: conf.Name,
 		Istio: Istio{
@@ -463,16 +479,7 @@ func GetConfig(conf *hlfv1alpha1.FabricCA, client *kubernetes.Clientset, chartNa
 			AccessMode:   string(spec.Storage.AccessMode),
 			Size:         spec.Storage.Size,
 		},
-		Msp: Msp{
-			Keyfile:        string(signPEMEncodedPK),
-			Certfile:       string(signCRTEncoded),
-			Chainfile:      conf.Spec.CA.CA.Chain,
-			TLSCAKeyfile:   string(caTLSSignPEMEncodedPK),
-			TLSCACertfile:  string(caTLSSignCRTEncoded),
-			TLSCAChainfile: conf.Spec.TLSCA.CA.Chain,
-			TlsKeyFile:     string(tlsPEMEncodedPK),
-			TlsCertFile:    string(tlsCRTEncoded),
-		},
+		Msp: msp,
 		Database: Database{
 			Type:       spec.Database.Type,
 			Datasource: spec.Database.Datasource,

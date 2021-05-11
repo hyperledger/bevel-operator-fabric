@@ -600,7 +600,6 @@ func GetConfig(conf *hlfv1alpha1.FabricPeer, client *kubernetes.Clientset, chart
 	tlsParams := conf.Spec.Secret.Enrollment.TLS
 	tlsCAUrl := fmt.Sprintf("https://%s:%d", tlsParams.Cahost, tlsParams.Caport)
 	ingressHosts := spec.Hosts
-	operationHosts := spec.OperationHosts
 	var hosts []string
 	hosts = append(hosts, tlsParams.Csr.Hosts...)
 	hosts = append(hosts, ingressHosts...)
@@ -758,24 +757,49 @@ func GetConfig(conf *hlfv1alpha1.FabricPeer, client *kubernetes.Clientset, chart
 	default:
 		stateDb = "goleveldb"
 	}
+	var monitor ServiceMonitor
+	if spec.ServiceMonitor != nil && spec.ServiceMonitor.Enabled {
+		monitor = ServiceMonitor{
+			Enabled:           spec.ServiceMonitor.Enabled,
+			Labels:            spec.ServiceMonitor.Labels,
+			Interval:          spec.ServiceMonitor.Interval,
+			ScrapeTimeout:     spec.ServiceMonitor.ScrapeTimeout,
+			Scheme:            "http",
+			Relabelings:       []interface{}{},
+			TargetLabels:      []interface{}{},
+			MetricRelabelings: []interface{}{},
+			SampleLimit:       spec.ServiceMonitor.SampleLimit,
+		}
+	} else {
+		monitor = ServiceMonitor{Enabled: false}
+	}
+	var istio Istio
+	if spec.Istio != nil {
+		gateway := spec.Istio.IngressGateway
+		if gateway == "" {
+			gateway = "ingressgateway"
+		}
+		istio = Istio{
+			Port:           spec.Istio.Port,
+			Hosts:          spec.Istio.Hosts,
+			IngressGateway: gateway,
+		}
+	} else {
+		istio = Istio{
+			Port:           0,
+			Hosts:          []string{},
+			IngressGateway: "",
+		}
+	}
 	var c = FabricPeerChart{
 		Replicas: spec.Replicas,
+		Istio:    istio,
 		Image: Image{
 			Repository: spec.Image,
 			Tag:        spec.Tag,
 			PullPolicy: string(imagePullPolicy),
 		},
-		ServiceMonitor: ServiceMonitor{
-			Enabled:           true,
-			Labels:            map[string]string{},
-			Interval:          "10s",
-			ScrapeTimeout:     "10s",
-			Scheme:            "http",
-			Relabelings:       []interface{}{},
-			TargetLabels:      []interface{}{},
-			MetricRelabelings: []interface{}{},
-			SampleLimit:       0,
-		},
+		ServiceMonitor:   monitor,
 		ExternalBuilders: externalBuilders,
 		DockerSocketPath: spec.DockerSocketPath,
 		Peer: Peer{
@@ -800,7 +824,6 @@ func GetConfig(conf *hlfv1alpha1.FabricPeer, client *kubernetes.Clientset, chart
 		Cert:                     string(signCRTEncoded),
 		Key:                      string(signPEMEncodedPK),
 		Hosts:                    ingressHosts,
-		OperationHosts:           operationHosts,
 		TLS: TLS{
 			Cert: string(tlsCRTEncoded),
 			Key:  string(tlsPEMEncodedPK),

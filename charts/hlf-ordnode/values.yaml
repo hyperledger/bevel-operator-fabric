@@ -21,6 +21,10 @@ storage:
   storageClass: ''
 mspID: OrdererMSP
 
+istio:
+  port: 443
+  hosts: []
+  ingressGateway: ingressgateway
 
 serviceMonitor:
   ## If true, a ServiceMonitor CRD is created for a prometheus operator

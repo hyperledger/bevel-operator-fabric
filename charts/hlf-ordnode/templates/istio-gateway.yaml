@@ -1,20 +1,20 @@
-{{- if .Values.hosts -}}
+{{- if .Values.istio.hosts -}}
 apiVersion: networking.istio.io/v1alpha3
 kind: Gateway
 metadata:
   name: {{ include "hlf-ordnode.fullname" . }}-gateway
 spec:
   selector:
-    istio: ingressgateway # use istio default ingress gateway
+    istio: {{.Values.istio.ingressGateway}}
   servers:
     - port:
-        number: 443
+        number: {{.Values.istio.port}}
         name: tcp
         protocol: TLS
       tls:
         mode: PASSTHROUGH
       hosts:
-          {{- range .Values.hosts }}
+          {{- range .Values.istio.hosts }}
           - {{ . }}
           {{- end }}
 

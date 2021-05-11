@@ -5,7 +5,7 @@ metadata:
   name: {{ include "hlf-ca.fullname" . }}-gateway
 spec:
   selector:
-    istio: ingressgateway # use istio default ingress gateway
+    istio: {{.Values.istio.ingressGateway}}
   servers:
     - port:
         number: {{.Values.istio.port}}

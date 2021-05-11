@@ -1,12 +1,12 @@
 package ordnode
 
 type fabricOrdChart struct {
+	Istio                       Istio          `json:"istio"`
 	Replicas                    int            `json:"replicas"`
 	Genesis                     string         `json:"genesis"`
 	ChannelParticipationEnabled bool           `json:"channelParticipationEnabled"`
 	BootstrapMethod             string         `json:"bootstrapMethod"`
 	Admin                       admin          `json:"admin"`
-	Ingress                     ingress        `json:"ingress"`
 	Cacert                      string         `json:"cacert"`
 	Tlsrootcert                 string         `json:"tlsrootcert"`
 	AdminCert                   string         `json:"adminCert"`
@@ -40,13 +40,7 @@ type ServiceMonitor struct {
 type Logging struct {
 	Spec string `json:"spec"`
 }
-type ingress struct {
-	Enabled     bool          `json:"enabled"`
-	Annotations annotations   `json:"annotations"`
-	Path        string        `json:"path"`
-	Hosts       []string      `json:"hosts"`
-	TLS         []interface{} `json:"tls"`
-}
+
 type admin struct {
 	Cert          string `json:"cert"`
 	Key           string `json:"key"`
@@ -99,4 +93,10 @@ type ord struct {
 }
 type clientcerts struct {
 	CertPem string `json:"cert.pem,omitempty"`
+}
+
+type Istio struct {
+	Port           int      `json:"port"`
+	Hosts          []string `json:"hosts"`
+	IngressGateway string   `json:"ingressGateway"`
 }

@@ -97,12 +97,12 @@ func (c *createCmd) run() error {
 	if len(c.peerOpts.Hosts) > 0 {
 		externalEndpoint = fmt.Sprintf("%s:443", c.peerOpts.Hosts[0])
 	}
-	istio := &v1alpha1.FabricPeerIstio{
+	istio := &v1alpha1.FabricIstio{
 		Port:  443,
 		Hosts: []string{},
 	}
 	if len(c.peerOpts.Hosts) > 0 {
-		istio = &v1alpha1.FabricPeerIstio{
+		istio = &v1alpha1.FabricIstio{
 			Port:  443,
 			Hosts: c.peerOpts.Hosts,
 		}
@@ -117,7 +117,7 @@ func (c *createCmd) run() error {
 			Namespace: c.peerOpts.NS,
 		},
 		Spec: v1alpha1.FabricPeerSpec{
-			DockerSocketPath: "/var/run/docker.sock",
+			DockerSocketPath: "",
 			Image:            c.peerOpts.Image,
 			Istio:            istio,
 			Gossip: v1alpha1.FabricPeerSpecGossip{

@@ -49,11 +49,6 @@ const StateDBCouchDB StateDB = "couchdb"
 // +kubebuilder:validation:Enum="2.1.1";"2.2.0"
 type FabricVersion string
 
-const (
-	CouchDBState = "CouchDB"
-	LevelDBState = "leveldb"
-)
-
 type ExternalBuilder struct {
 	Name string `json:"name"`
 	Path string `json:"path"`
@@ -66,15 +61,31 @@ type ExternalBuilder struct {
 
 const DefaultImagePullPolicy = corev1.PullAlways
 
+type ServiceMonitor struct {
+	// +kubebuilder:default:=false
+	Enabled bool `json:"enabled"`
+	// +optional
+	Labels map[string]string `json:"labels"`
+	// +kubebuilder:default:=0
+	SampleLimit int `json:"sampleLimit"`
+	// +kubebuilder:default:="10s"
+	Interval string `json:"interval"`
+	// +kubebuilder:default:="10s"
+	ScrapeTimeout string `json:"scrapeTimeout"`
+}
+
 // FabricPeerSpec defines the desired state of FabricPeer
 type FabricPeerSpec struct {
+	// +optional
+	// +nullable
+	ServiceMonitor *ServiceMonitor `json:"serviceMonitor"`
 	// +optional
 	// +nullable
 	HostAliases []corev1.HostAlias `json:"hostAliases"`
 
 	// +kubebuilder:default:=1
 	Replicas int `json:"replicas"`
-	// +kubebuilder:default:="/var/run/docker.sock"
+	// +kubebuilder:default:=""
 	DockerSocketPath string `json:"dockerSocketPath"`
 	// +kubebuilder:validation:MinLength=1
 	Image string `json:"image"`
@@ -86,7 +97,7 @@ type FabricPeerSpec struct {
 	// +optional
 	// +kubebuilder:validation:Optional
 	// +nullable
-	Istio            *FabricPeerIstio     `json:"istio"`
+	Istio            *FabricIstio         `json:"istio"`
 	Gossip           FabricPeerSpecGossip `json:"gossip"`
 	ExternalEndpoint string               `json:"externalEndpoint"`
 	// +kubebuilder:validation:MinLength=1
@@ -95,17 +106,15 @@ type FabricPeerSpec struct {
 	ExternalChaincodeBuilder bool              `json:"external_chaincode_builder"`
 	CouchDB                  FabricPeerCouchDB `json:"couchdb"`
 	// +kubebuilder:validation:MinLength=3
-	MspID          string              `json:"mspID"`
-	Secret         Secret              `json:"secret"`
-	Service        PeerService         `json:"service"`
-	StateDb        StateDB             `json:"stateDb"`
-	Storage        FabricPeerStorage   `json:"storage"`
-	Discovery      FabricPeerDiscovery `json:"discovery"`
-	Logging        FabricPeerLogging   `json:"logging"`
-	Resources      FabricPeerResources `json:"resources"`
-	Hosts          []string            `json:"hosts"`
-	OperationHosts []string            `json:"operationHosts"`
-	OperationIPs   []string            `json:"operationIPs"`
+	MspID     string              `json:"mspID"`
+	Secret    Secret              `json:"secret"`
+	Service   PeerService         `json:"service"`
+	StateDb   StateDB             `json:"stateDb"`
+	Storage   FabricPeerStorage   `json:"storage"`
+	Discovery FabricPeerDiscovery `json:"discovery"`
+	Logging   FabricPeerLogging   `json:"logging"`
+	Resources FabricPeerResources `json:"resources"`
+	Hosts     []string            `json:"hosts"`
 }
 type FabricPeerResources struct {
 	Peer      Resources `json:"peer"`
@@ -135,8 +144,7 @@ type FabricPeerCouchDB struct {
 	User     string `json:"user"`
 	Password string `json:"password"`
 }
-
-type FabricPeerIstio struct {
+type FabricIstio struct {
 	// +optional
 	// +nullable
 	Port int `json:"port"`
@@ -145,6 +153,8 @@ type FabricPeerIstio struct {
 	// +optional
 	// +kubebuilder:validation:Default={}
 	Hosts []string `json:"hosts,omitempty"`
+	// +kubebuilder:validation:Default=ingressgateway
+	IngressGateway string `json:"ingressGateway"`
 }
 
 type FabricPeerSpecGossip struct {
@@ -313,7 +323,7 @@ type FabricOrdererNodeSpec struct {
 	// +optional
 	// +kubebuilder:validation:Optional
 	// +nullable
-	Istio *FabricPeerIstio `json:"istio"`
+	Istio *FabricIstio `json:"istio"`
 }
 
 type OrdererSystemChannel struct {
@@ -366,7 +376,7 @@ type FabricOrdererNodeStatus struct {
 	// +optional
 	NodePort int `json:"port"`
 	// +optional
-	Message  string `json:"message"`
+	Message string `json:"message"`
 }
 
 type Cors struct {
@@ -384,7 +394,7 @@ type FabricCASpec struct {
 	// +optional
 	// +kubebuilder:validation:Optional
 	// +nullable
-	Istio    *FabricCAIstio   `json:"istio"`
+	Istio    *FabricIstio   `json:"istio"`
 	Database FabricCADatabase `json:"db"`
 	// +kubebuilder:validation:MinItems=1
 	// Hosts for the Fabric CA
@@ -406,17 +416,7 @@ type FabricCASpec struct {
 	Storage      Storage          `json:"storage"`
 	Metrics      FabricCAMetrics  `json:"metrics"`
 }
-type FabricCAIstio struct {
-	// +kubebuilder:validation:Optional
-	// +optional
-	// +nullable
-	Port int `json:"port"`
-	// +nullable
-	// +kubebuilder:validation:Optional
-	// +optional
-	// +kubebuilder:validation:Default={}
-	Hosts []string `json:"hosts"`
-}
+
 type FabricCATLSConf struct {
 	Subject FabricCASubject `json:"subject"`
 }

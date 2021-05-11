@@ -78,9 +78,13 @@ spec:
                       type: string
                     nullable: true
                     type: array
+                  ingressGateway:
+                    type: string
                   port:
                     nullable: true
                     type: integer
+                required:
+                - ingressGateway
                 type: object
               mspID:
                 minLength: 3
