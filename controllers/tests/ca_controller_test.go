@@ -223,6 +223,7 @@ func randomFabricCA(releaseName string, namespace string) *hlfv1alpha1.FabricCA 
 			Namespace: namespace,
 		},
 		Spec: hlfv1alpha1.FabricCASpec{
+
 			Istio: &hlfv1alpha1.FabricIstio{
 				Hosts: []string{},
 			},

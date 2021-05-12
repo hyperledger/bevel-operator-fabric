@@ -189,6 +189,31 @@ spec:
                 required:
                 - type
                 type: object
+              serviceMonitor:
+                nullable: true
+                properties:
+                  enabled:
+                    default: false
+                    type: boolean
+                  interval:
+                    default: 10s
+                    type: string
+                  labels:
+                    additionalProperties:
+                      type: string
+                    type: object
+                  sampleLimit:
+                    default: 0
+                    type: integer
+                  scrapeTimeout:
+                    default: 10s
+                    type: string
+                required:
+                - enabled
+                - interval
+                - sampleLimit
+                - scrapeTimeout
+                type: object
               storage:
                 properties:
                   accessMode:

@@ -446,23 +446,32 @@ func GetConfig(conf *hlfv1alpha1.FabricCA, client *kubernetes.Clientset, chartNa
 	if conf.Spec.TLSCA.CA != nil {
 		msp.TLSCAChainfile = conf.Spec.TLSCA.CA.Chain
 	}
+	var serviceMonitor ServiceMonitor
+	if spec.ServiceMonitor != nil  && spec.ServiceMonitor.Enabled{
+		serviceMonitor = ServiceMonitor{
+			Enabled:           spec.ServiceMonitor.Enabled,
+			Labels:            spec.ServiceMonitor.Labels,
+			Interval:          spec.ServiceMonitor.Interval,
+			ScrapeTimeout:     spec.ServiceMonitor.ScrapeTimeout,
+			Scheme:            "http",
+			Relabelings:       []interface{}{},
+			TargetLabels:      []interface{}{},
+			MetricRelabelings: []interface{}{},
+			SampleLimit:       spec.ServiceMonitor.SampleLimit,
+		}
+	} else {
+		serviceMonitor = ServiceMonitor{
+			Enabled:           false,
+		}
+	}
+
 	var c = FabricCAChart{
 		FullNameOverride: conf.Name,
 		Istio: Istio{
 			Port:  istioPort,
 			Hosts: istioHosts,
 		},
-		ServiceMonitor: ServiceMonitor{
-			Enabled:           true,
-			Labels:            map[string]string{},
-			Interval:          "10s",
-			ScrapeTimeout:     "10s",
-			Scheme:            "http",
-			Relabelings:       []interface{}{},
-			TargetLabels:      []interface{}{},
-			MetricRelabelings: []interface{}{},
-			SampleLimit:       0,
-		},
+		ServiceMonitor: serviceMonitor,
 		Image: Image{
 			Repository: spec.Image,
 			Tag:        spec.Version,

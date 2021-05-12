@@ -14,7 +14,7 @@ import (
 	// +kubebuilder:scaffold:imports
 )
 
-var _ = FDescribe("Fabric Orderer Controller", func() {
+var _ = Describe("Fabric Orderer Controller", func() {
 	FabricNamespace := ""
 	BeforeEach(func() {
 		FabricNamespace = "hlf-operator-" + getRandomChannelID()
@@ -26,7 +26,7 @@ var _ = FDescribe("Fabric Orderer Controller", func() {
 		log.Infof("Creating namespace %s", FabricNamespace)
 		Expect(K8sClient.Create(context.Background(), testNamespace)).Should(Succeed())
 	})
-	FSpecify("create a new Fabric Orderer with channel participation", func() {
+	Specify("create a new Fabric Orderer with channel participation", func() {
 		releaseNameOrdCA := "org1-ca"
 		releaseNameOrd := "org1-orderer"
 		By("create a fabric ca")

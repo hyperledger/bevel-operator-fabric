@@ -298,6 +298,9 @@ const (
 type FabricOrdererNodeSpec struct {
 	// +optional
 	// +nullable
+	ServiceMonitor *ServiceMonitor `json:"serviceMonitor"`
+	// +optional
+	// +nullable
 	HostAliases []corev1.HostAlias `json:"hostAliases"`
 
 	// +kubebuilder:default:=1
@@ -391,6 +394,9 @@ type FabricCADatabase struct {
 
 // FabricCASpec defines the desired state of FabricCA
 type FabricCASpec struct {
+	// +optional
+	// +nullable
+	ServiceMonitor *ServiceMonitor `json:"serviceMonitor"`
 	// +optional
 	// +kubebuilder:validation:Optional
 	// +nullable

@@ -604,6 +604,22 @@ func getConfig(conf *hlfv1alpha1.FabricOrdererNode, client *kubernetes.Clientset
 			IngressGateway: "",
 		}
 	}
+	var monitor ServiceMonitor
+	if spec.ServiceMonitor != nil && spec.ServiceMonitor.Enabled {
+		monitor = ServiceMonitor{
+			Enabled:           spec.ServiceMonitor.Enabled,
+			Labels:            spec.ServiceMonitor.Labels,
+			Interval:          spec.ServiceMonitor.Interval,
+			ScrapeTimeout:     spec.ServiceMonitor.ScrapeTimeout,
+			Scheme:            "http",
+			Relabelings:       []interface{}{},
+			TargetLabels:      []interface{}{},
+			MetricRelabelings: []interface{}{},
+			SampleLimit:       spec.ServiceMonitor.SampleLimit,
+		}
+	} else {
+		monitor = ServiceMonitor{Enabled: false}
+	}
 	fabricOrdChart := fabricOrdChart{
 		Istio:                       istio,
 		Replicas:                    spec.Replicas,
@@ -658,20 +674,10 @@ func getConfig(conf *hlfv1alpha1.FabricOrdererNode, client *kubernetes.Clientset
 				},
 			},
 		},
-		Clientcerts: clientcerts{},
-		Hosts:       ingressHosts,
-		Logging:     Logging{Spec: "info"},
-		ServiceMonitor: ServiceMonitor{
-			Enabled:           true,
-			Labels:            map[string]string{},
-			Interval:          "10s",
-			ScrapeTimeout:     "10s",
-			Scheme:            "http",
-			Relabelings:       []interface{}{},
-			TargetLabels:      []interface{}{},
-			MetricRelabelings: []interface{}{},
-			SampleLimit:       0,
-		},
+		Clientcerts:    clientcerts{},
+		Hosts:          ingressHosts,
+		Logging:        Logging{Spec: "info"},
+		ServiceMonitor: monitor,
 	}
 
 	return &fabricOrdChart, nil
