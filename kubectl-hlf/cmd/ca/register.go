@@ -1,7 +1,9 @@
 package ca
 
 import (
+	"fmt"
 	"github.com/kfsoftware/hlf-operator/controllers/certs"
+	"github.com/kfsoftware/hlf-operator/controllers/utils"
 	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/helpers"
 	"github.com/spf13/cobra"
 	"io"
@@ -40,10 +42,18 @@ func (c *registerCmd) run(args []string) error {
 	if err != nil {
 		return err
 	}
-
+	client, err := helpers.GetKubeClient()
+	if err != nil {
+		return err
+	}
+	ip, err := utils.GetPublicIPKubernetes(client)
+	if err != nil {
+		return err
+	}
+	url := fmt.Sprintf("https://%s:%d", ip, certAuth.Status.NodePort)
 	_, err = certs.RegisterUser(certs.RegisterUserRequest{
 		TLSCert:      certAuth.Status.TlsCert,
-		URL:          certAuth.Status.URL,
+		URL:          url,
 		Name:         "",
 		MSPID:        c.caOpts.MspID,
 		EnrollID:     c.caOpts.EnrollID,

@@ -7,14 +7,11 @@ import (
 	"github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
 	"github.com/kfsoftware/hlf-operator/controllers/utils"
 	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/helpers"
-	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"io"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"net/url"
 	"sigs.k8s.io/yaml"
-	"strings"
 )
 
 type Options struct {
@@ -66,32 +63,32 @@ func (c *createCmd) run() error {
 	if err != nil {
 		return err
 	}
-	var bootstrapPeerURL string
-	if len(c.peerOpts.BootstrapPeers) > 0 {
-		var bootstrapPeerUrls []string
-		for _, bp := range c.peerOpts.BootstrapPeers {
-			boostrapPeer, err := helpers.GetPeerByFullName(oclient, bp)
-			if err != nil {
-				return err
-			}
-			if boostrapPeer.Status.Status != v1alpha1.RunningStatus {
-				return errors.Errorf("Peer %s is not running", boostrapPeer.Name)
-			}
-			u, err := url.Parse(boostrapPeer.Status.URL)
-			if err != nil {
-				return err
-			}
-			chunks := strings.Split(u.Host, ":")
-			ip := chunks[0]
-			port := chunks[1]
-			bootstrapPeerURL := fmt.Sprintf("%s:%s", ip, port)
-			bootstrapPeerUrls = append(bootstrapPeerUrls, bootstrapPeerURL)
-			log.Infof("Bootstrap peer url %s ip=%s port=%s", bootstrapPeerURL, ip, port)
-		}
-		bootstrapPeerURL = strings.Join(bootstrapPeerUrls, " ")
-	} else {
-		bootstrapPeerURL = ""
-	}
+	//var bootstrapPeerURL string
+	//if len(c.peerOpts.BootstrapPeers) > 0 {
+	//	var bootstrapPeerUrls []string
+	//	for _, bp := range c.peerOpts.BootstrapPeers {
+	//		boostrapPeer, err := helpers.GetPeerByFullName(oclient, bp)
+	//		if err != nil {
+	//			return err
+	//		}
+	//		if boostrapPeer.Status.Status != v1alpha1.RunningStatus {
+	//			return errors.Errorf("Peer %s is not running", boostrapPeer.Name)
+	//		}
+	//		u, err := url.Parse(boostrapPeer.Status.URL)
+	//		if err != nil {
+	//			return err
+	//		}
+	//		chunks := strings.Split(u.Host, ":")
+	//		ip := chunks[0]
+	//		port := chunks[1]
+	//		bootstrapPeerURL := fmt.Sprintf("%s:%s", ip, port)
+	//		bootstrapPeerUrls = append(bootstrapPeerUrls, bootstrapPeerURL)
+	//		log.Infof("Bootstrap peer url %s ip=%s port=%s", bootstrapPeerURL, ip, port)
+	//	}
+	//	bootstrapPeerURL = strings.Join(bootstrapPeerUrls, " ")
+	//} else {
+	//	bootstrapPeerURL = ""
+	//}
 
 	externalEndpoint := ""
 	if len(c.peerOpts.Hosts) > 0 {
@@ -122,7 +119,7 @@ func (c *createCmd) run() error {
 			Istio:            istio,
 			Gossip: v1alpha1.FabricPeerSpecGossip{
 				ExternalEndpoint:  externalEndpoint,
-				Bootstrap:         bootstrapPeerURL,
+				Bootstrap:         "",
 				Endpoint:          "",
 				UseLeaderElection: !c.peerOpts.Leader,
 				OrgLeader:         c.peerOpts.Leader,
@@ -138,9 +135,9 @@ func (c *createCmd) run() error {
 			Secret: v1alpha1.Secret{
 				Enrollment: v1alpha1.Enrollment{
 					Component: v1alpha1.Component{
-						Cahost: certAuth.Status.Host,
+						Cahost: fmt.Sprintf("%s.%s", certAuth.Object.Name, certAuth.Object.Namespace),
 						Caname: certAuth.Spec.CA.Name,
-						Caport: certAuth.Status.Port,
+						Caport: 7054,
 						Catls: v1alpha1.Catls{
 							Cacert: base64.StdEncoding.EncodeToString([]byte(certAuth.Status.TlsCert)),
 						},
@@ -148,9 +145,9 @@ func (c *createCmd) run() error {
 						Enrollsecret: c.peerOpts.EnrollPW,
 					},
 					TLS: v1alpha1.TLS{
-						Cahost: certAuth.Status.Host,
+						Cahost: fmt.Sprintf("%s.%s", certAuth.Object.Name, certAuth.Object.Namespace),
 						Caname: certAuth.Spec.TLSCA.Name,
-						Caport: certAuth.Status.Port,
+						Caport: 7054,
 						Catls: v1alpha1.Catls{
 							Cacert: base64.StdEncoding.EncodeToString([]byte(certAuth.Status.TlsCert)),
 						},
@@ -235,8 +232,6 @@ func (c *createCmd) run() error {
 				},
 			},
 			Hosts:          c.peerOpts.Hosts,
-			OperationHosts: []string{},
-			OperationIPs:   []string{},
 		},
 		Status: v1alpha1.FabricPeerStatus{},
 	}

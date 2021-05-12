@@ -29,6 +29,10 @@ type ClusterCA struct {
 	Status hlfv1alpha1.FabricCAStatus
 	Name   string
 }
+
+func (c ClusterCA) GetFullName() string {
+	return fmt.Sprintf("%s.%s", c.Object.Name, c.Object.Namespace)
+}
 type ClusterOrderingService struct {
 	MSPID    string
 	Name     string
@@ -161,11 +165,8 @@ func GetCertAuthByURL(oclient *operatorv1.Clientset, host string, port int) (*Cl
 		return nil, err
 	}
 	for _, certAuth := range certAuths {
-		if
-		// if host and port is specified by NodePort
-		certAuth.Status.Host == host && certAuth.Status.Port == port ||
-			// if host and port is specified by kubernetes DNS
-			certAuth.Name == host && certAuth.Status.Port == 7054 {
+		if	// if host and port is specified by kubernetes DNS
+			certAuth.Name == host && certAuth.Status.NodePort == 7054 || (certAuth.Status.NodePort != 7054 && certAuth.Status.NodePort == port) {
 			return certAuth, nil
 		}
 

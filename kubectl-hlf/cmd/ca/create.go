@@ -85,7 +85,7 @@ func (c *createCmd) run(args []string) error {
 			Image:   c.caOpts.Image,
 			Version: c.caOpts.Version,
 			Debug:   false,
-			Istio: &v1alpha1.FabricCAIstio{
+			Istio: &v1alpha1.FabricIstio{
 				Hosts: []string{},
 			},
 			CLRSizeLimit: 512000,

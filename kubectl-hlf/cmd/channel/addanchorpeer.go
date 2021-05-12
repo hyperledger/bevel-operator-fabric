@@ -128,7 +128,7 @@ func (c *addAnchorPeerCmd) run() error {
 	configValues := modifiedConfig.ChannelGroup.Groups[channelconfig.ApplicationGroupKey].Groups[mspID].Values
 	anchorPeersBytes, ok := configValues[channelconfig.AnchorPeersKey]
 	anchorPeers := &peer.AnchorPeers{}
-	u, err := url.Parse(adminPeer.Status.URL)
+	u, err := url.Parse(adminPeer.Status.Message)
 	if err != nil {
 		return err
 	}
