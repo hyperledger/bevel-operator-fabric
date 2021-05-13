@@ -11,10 +11,6 @@ spec:
       targetPort: 7050
       protocol: TCP
       name: grpc
-
-{{- if and (eq .Values.service.type "NodePort") (gt .Values.service.nodePort 29999.0) }}
-      nodePort: {{.Values.service.nodePort}}
-{{- end }}
 {{- if .Values.channelParticipationEnabled }}
     - port: 7053
       targetPort: 7053
@@ -25,9 +21,6 @@ spec:
       targetPort: 9444
       protocol: TCP
       name: operations
-{{- if and (eq .Values.service.type "NodePort") (gt .Values.service.nodePortOperations 29999.0) }}
-      nodePort: {{.Values.service.nodePortOperations}}
-{{- end }}
   selector:
     app: {{ include "hlf-ordnode.name" . }}
     release: {{ .Release.Name }}

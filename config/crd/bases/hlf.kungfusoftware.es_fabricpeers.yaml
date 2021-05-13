@@ -189,94 +189,85 @@ spec:
               resources:
                 properties:
                   chaincode:
+                    description: ResourceRequirements describes the compute resource
+                      requirements.
                     properties:
                       limits:
-                        properties:
-                          cpu:
-                            default: "2"
-                            type: string
-                          memory:
-                            default: 4Gi
-                            type: string
-                        required:
-                        - cpu
-                        - memory
+                        additionalProperties:
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                          x-kubernetes-int-or-string: true
+                        description: 'Limits describes the maximum amount of compute
+                          resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
                         type: object
                       requests:
-                        properties:
-                          cpu:
-                            default: 10m
-                            type: string
-                          memory:
-                            default: 256Mi
-                            type: string
-                        required:
-                        - cpu
-                        - memory
+                        additionalProperties:
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                          x-kubernetes-int-or-string: true
+                        description: 'Requests describes the minimum amount of compute
+                          resources required. If Requests is omitted for a container,
+                          it defaults to Limits if that is explicitly specified, otherwise
+                          to an implementation-defined value. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
                         type: object
-                    required:
-                    - limits
-                    - requests
                     type: object
                   couchdb:
+                    description: ResourceRequirements describes the compute resource
+                      requirements.
                     properties:
                       limits:
-                        properties:
-                          cpu:
-                            default: "2"
-                            type: string
-                          memory:
-                            default: 4Gi
-                            type: string
-                        required:
-                        - cpu
-                        - memory
+                        additionalProperties:
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                          x-kubernetes-int-or-string: true
+                        description: 'Limits describes the maximum amount of compute
+                          resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
                         type: object
                       requests:
-                        properties:
-                          cpu:
-                            default: 10m
-                            type: string
-                          memory:
-                            default: 256Mi
-                            type: string
-                        required:
-                        - cpu
-                        - memory
+                        additionalProperties:
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                          x-kubernetes-int-or-string: true
+                        description: 'Requests describes the minimum amount of compute
+                          resources required. If Requests is omitted for a container,
+                          it defaults to Limits if that is explicitly specified, otherwise
+                          to an implementation-defined value. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
                         type: object
-                    required:
-                    - limits
-                    - requests
                     type: object
                   peer:
+                    description: ResourceRequirements describes the compute resource
+                      requirements.
                     properties:
                       limits:
-                        properties:
-                          cpu:
-                            default: "2"
-                            type: string
-                          memory:
-                            default: 4Gi
-                            type: string
-                        required:
-                        - cpu
-                        - memory
+                        additionalProperties:
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                          x-kubernetes-int-or-string: true
+                        description: 'Limits describes the maximum amount of compute
+                          resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
                         type: object
                       requests:
-                        properties:
-                          cpu:
-                            default: 10m
-                            type: string
-                          memory:
-                            default: 256Mi
-                            type: string
-                        required:
-                        - cpu
-                        - memory
+                        additionalProperties:
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                          x-kubernetes-int-or-string: true
+                        description: 'Requests describes the minimum amount of compute
+                          resources required. If Requests is omitted for a container,
+                          it defaults to Limits if that is explicitly specified, otherwise
+                          to an implementation-defined value. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
                         type: object
-                    required:
-                    - limits
-                    - requests
                     type: object
                 required:
                 - chaincode

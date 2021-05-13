@@ -117,9 +117,9 @@ type FabricPeerSpec struct {
 	Hosts     []string            `json:"hosts"`
 }
 type FabricPeerResources struct {
-	Peer      Resources `json:"peer"`
-	CouchDB   Resources `json:"couchdb"`
-	Chaincode Resources `json:"chaincode"`
+	Peer      corev1.ResourceRequirements `json:"peer"`
+	CouchDB   corev1.ResourceRequirements `json:"couchdb"`
+	Chaincode corev1.ResourceRequirements `json:"chaincode"`
 }
 type FabricPeerDiscovery struct {
 	Period      string `json:"period"`
@@ -303,6 +303,10 @@ type FabricOrdererNodeSpec struct {
 	// +nullable
 	HostAliases []corev1.HostAlias `json:"hostAliases"`
 
+	// +optional
+	// +nullable
+	Resources *corev1.ResourceRequirements `json:"resources"`
+
 	// +kubebuilder:default:=1
 	Replicas int `json:"replicas"`
 	// +kubebuilder:validation:MinLength=1
@@ -327,6 +331,10 @@ type FabricOrdererNodeSpec struct {
 	// +kubebuilder:validation:Optional
 	// +nullable
 	Istio *FabricIstio `json:"istio"`
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +nullable
+	AdminIstio *FabricIstio `json:"adminIstio"`
 }
 
 type OrdererSystemChannel struct {
@@ -400,7 +408,7 @@ type FabricCASpec struct {
 	// +optional
 	// +kubebuilder:validation:Optional
 	// +nullable
-	Istio    *FabricIstio   `json:"istio"`
+	Istio    *FabricIstio     `json:"istio"`
 	Database FabricCADatabase `json:"db"`
 	// +kubebuilder:validation:MinItems=1
 	// Hosts for the Fabric CA
@@ -418,9 +426,12 @@ type FabricCASpec struct {
 	CA           FabricCAItemConf `json:"ca"`
 	TLSCA        FabricCAItemConf `json:"tlsCA"`
 	Cors         Cors             `json:"cors"`
-	Resources    Resources        `json:"resources"`
-	Storage      Storage          `json:"storage"`
-	Metrics      FabricCAMetrics  `json:"metrics"`
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +nullable
+	Resources *corev1.ResourceRequirements `json:"resources"`
+	Storage   Storage                      `json:"storage"`
+	Metrics   FabricCAMetrics              `json:"metrics"`
 }
 
 type FabricCATLSConf struct {
@@ -470,22 +481,7 @@ type Storage struct {
 	// +kubebuilder:default:="ReadWriteOnce"
 	AccessMode corev1.PersistentVolumeAccessMode `json:"accessMode"`
 }
-type Resources struct {
-	Requests Requests      `json:"requests"`
-	Limits   RequestsLimit `json:"limits"`
-}
-type Requests struct {
-	// +kubebuilder:default:="10m"
-	CPU string `json:"cpu"`
-	// +kubebuilder:default:="256Mi"
-	Memory string `json:"memory"`
-}
-type RequestsLimit struct {
-	// +kubebuilder:default:="2"
-	CPU string `json:"cpu"`
-	// +kubebuilder:default:="4Gi"
-	Memory string `json:"memory"`
-}
+
 type FabricCAItemConf struct {
 	Name         string               `json:"name"`
 	CFG          FabricCACFG          `json:"cfg"`

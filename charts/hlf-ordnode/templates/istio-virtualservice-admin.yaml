@@ -1,0 +1,27 @@
+{{- if and .Values.channelParticipationEnabled .Values.adminIstio.hosts  -}}
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: {{ include "hlf-ordnode.fullname" . }}-virtualservice-admin
+spec:
+  hosts:
+    {{- range .Values.adminIstio.hosts }}
+    - {{ . }}
+    {{- end }}
+  gateways:
+    - {{ include "hlf-ordnode.fullname" . }}-gateway-admin
+  tls:
+    - match:
+        - port: 443
+          sniHosts:
+          {{- range .Values.adminIstio.hosts }}
+              - {{ . }}
+          {{- end }}
+      route:
+        - destination:
+            host: {{ include "hlf-ordnode.fullname" . }}
+            port:
+              number: 7053
+
+
+{{- end -}}

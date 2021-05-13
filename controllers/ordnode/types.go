@@ -2,6 +2,7 @@ package ordnode
 
 type fabricOrdChart struct {
 	Istio                       Istio          `json:"istio"`
+	AdminIstio                  Istio          `json:"adminIstio"`
 	Replicas                    int            `json:"replicas"`
 	Genesis                     string         `json:"genesis"`
 	ChannelParticipationEnabled bool           `json:"channelParticipationEnabled"`
@@ -13,6 +14,7 @@ type fabricOrdChart struct {
 	Cert                        string         `json:"cert"`
 	Key                         string         `json:"key"`
 	TLS                         tls            `json:"tls"`
+	Resources                Resources         `json:"resources,omitempty"`
 	FullnameOverride            string         `json:"fullnameOverride"`
 	HostAliases                 []HostAlias    `json:"hostAliases"`
 	Service                     service        `json:"service"`
@@ -24,7 +26,18 @@ type fabricOrdChart struct {
 	Logging                     Logging        `json:"logging"`
 	ServiceMonitor              ServiceMonitor `json:"serviceMonitor"`
 }
-
+type Resources struct {
+	Limits   Limits   `json:"limits"`
+	Requests Requests `json:"requests"`
+}
+type Limits struct {
+	CPU    string `json:"cpu"`
+	Memory string `json:"memory"`
+}
+type Requests struct {
+	CPU    string `json:"cpu"`
+	Memory string `json:"memory"`
+}
 type ServiceMonitor struct {
 	Enabled           bool              `json:"enabled"`
 	Labels            map[string]string `json:"labels"`

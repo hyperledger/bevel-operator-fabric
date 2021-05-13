@@ -26,6 +26,12 @@ istio:
   hosts: []
   ingressGateway: ingressgateway
 
+adminIstio:
+  port: 443
+  hosts: []
+  ingressGateway: ingressgateway
+
+
 serviceMonitor:
   ## If true, a ServiceMonitor CRD is created for a prometheus operator
   ## https://github.com/coreos/prometheus-operator

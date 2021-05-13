@@ -495,12 +495,12 @@ func GetConfig(conf *hlfv1alpha1.FabricCA, client *kubernetes.Clientset, chartNa
 		},
 		Resources: Resources{
 			Requests: Requests{
-				CPU:    spec.Resources.Requests.CPU,
-				Memory: spec.Resources.Requests.Memory,
+				CPU:    spec.Resources.Requests.Cpu().String(),
+				Memory: spec.Resources.Requests.Memory().String(),
 			},
 			Limits: RequestsLimit{
-				CPU:    spec.Resources.Limits.CPU,
-				Memory: spec.Resources.Limits.Memory,
+				CPU:    spec.Resources.Limits.Cpu().String(),
+				Memory: spec.Resources.Limits.Memory().String(),
 			},
 		},
 		NodeSelector: NodeSelector{},

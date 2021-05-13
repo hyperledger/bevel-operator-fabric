@@ -592,13 +592,35 @@ func getConfig(conf *hlfv1alpha1.FabricOrdererNode, client *kubernetes.Clientset
 	}
 	var istio Istio
 	if spec.Istio != nil {
+		gateway := spec.Istio.IngressGateway
+		if gateway == "" {
+			gateway = "ingressgateway"
+		}
 		istio = Istio{
 			Port:           spec.Istio.Port,
 			Hosts:          spec.Istio.Hosts,
-			IngressGateway: spec.Istio.IngressGateway,
+			IngressGateway: gateway,
 		}
 	} else {
 		istio = Istio{
+			Port:           0,
+			Hosts:          []string{},
+			IngressGateway: "",
+		}
+	}
+	var adminIstio Istio
+	if spec.AdminIstio != nil {
+		gateway := spec.AdminIstio.IngressGateway
+		if gateway == "" {
+			gateway = "ingressgateway"
+		}
+		adminIstio = Istio{
+			Port:           spec.AdminIstio.Port,
+			Hosts:          spec.AdminIstio.Hosts,
+			IngressGateway: gateway,
+		}
+	} else {
+		adminIstio = Istio{
 			Port:           0,
 			Hosts:          []string{},
 			IngressGateway: "",
@@ -620,8 +642,26 @@ func getConfig(conf *hlfv1alpha1.FabricOrdererNode, client *kubernetes.Clientset
 	} else {
 		monitor = ServiceMonitor{Enabled: false}
 	}
+	resources := Resources{
+		Limits: Limits{
+			CPU:    "2",
+			Memory: "1Gi",
+		},
+		Requests: Requests{
+			CPU:    "100m",
+			Memory: "128Mi",
+		},
+	}
+	if spec.Resources != nil {
+		resources.Limits.CPU = spec.Resources.Limits.Cpu().String()
+		resources.Limits.Memory = spec.Resources.Limits.Memory().String()
+		resources.Requests.CPU = spec.Resources.Requests.Cpu().String()
+		resources.Requests.Memory = spec.Resources.Requests.Memory().String()
+	}
 	fabricOrdChart := fabricOrdChart{
+		Resources:                   resources,
 		Istio:                       istio,
+		AdminIstio:                  adminIstio,
 		Replicas:                    spec.Replicas,
 		Genesis:                     spec.Genesis,
 		ChannelParticipationEnabled: spec.ChannelParticipationEnabled,
