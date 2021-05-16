@@ -643,20 +643,14 @@ func getConfig(conf *hlfv1alpha1.FabricOrdererNode, client *kubernetes.Clientset
 		monitor = ServiceMonitor{Enabled: false}
 	}
 	resources := Resources{
-		Limits: Limits{
-			CPU:    "2",
-			Memory: "1Gi",
-		},
 		Requests: Requests{
-			CPU:    "100m",
-			Memory: "128Mi",
+			CPU:    spec.Resources.Requests.Cpu().String(),
+			Memory: spec.Resources.Requests.Memory().String(),
 		},
-	}
-	if spec.Resources != nil {
-		resources.Limits.CPU = spec.Resources.Limits.Cpu().String()
-		resources.Limits.Memory = spec.Resources.Limits.Memory().String()
-		resources.Requests.CPU = spec.Resources.Requests.Cpu().String()
-		resources.Requests.Memory = spec.Resources.Requests.Memory().String()
+		Limits: Limits{
+			CPU:    spec.Resources.Limits.Cpu().String(),
+			Memory: spec.Resources.Limits.Memory().String(),
+		},
 	}
 	fabricOrdChart := fabricOrdChart{
 		Resources:                   resources,

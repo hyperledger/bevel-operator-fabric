@@ -835,14 +835,36 @@ func GetConfig(conf *hlfv1alpha1.FabricPeer, client *kubernetes.Clientset, chart
 		Cacert:      string(signRootCRTEncoded),
 		IntCacert:   ``,
 		Tlsrootcert: string(tlsRootCRTEncoded),
-		Resources: Resources{
-			Limits: Limits{
-				CPU:    "100m",
-				Memory: "128Mi",
+		Resources: PeerResources{
+			Peer: Resources{
+				Requests: Requests{
+					CPU:    spec.Resources.Peer.Requests.Cpu().String(),
+					Memory: spec.Resources.Peer.Requests.Memory().String(),
+				},
+				Limits: Limits{
+					CPU:    spec.Resources.Peer.Limits.Cpu().String(),
+					Memory: spec.Resources.Peer.Limits.Memory().String(),
+				},
 			},
-			Requests: Requests{
-				CPU:    "100m",
-				Memory: "128Mi",
+			CouchDB: Resources{
+				Requests: Requests{
+					CPU:    spec.Resources.CouchDB.Requests.Cpu().String(),
+					Memory: spec.Resources.CouchDB.Requests.Memory().String(),
+				},
+				Limits: Limits{
+					CPU:    spec.Resources.CouchDB.Limits.Cpu().String(),
+					Memory: spec.Resources.CouchDB.Limits.Memory().String(),
+				},
+			},
+			Chaincode: Resources{
+				Requests: Requests{
+					CPU:    spec.Resources.Chaincode.Requests.Cpu().String(),
+					Memory: spec.Resources.Chaincode.Requests.Memory().String(),
+				},
+				Limits: Limits{
+					CPU:    spec.Resources.Chaincode.Limits.Cpu().String(),
+					Memory: spec.Resources.Chaincode.Limits.Memory().String(),
+				},
 			},
 		},
 		NodeSelector:     NodeSelector{},

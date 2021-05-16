@@ -21,7 +21,7 @@ type FabricPeerChart struct {
 	Cacert                   string            `json:"cacert"`
 	IntCacert                string            `json:"intCAcert"`
 	Tlsrootcert              string            `json:"tlsrootcert"`
-	Resources                Resources         `json:"resources,omitempty"`
+	Resources                PeerResources     `json:"resources,omitempty"`
 	NodeSelector             NodeSelector      `json:"nodeSelector,omitempty"`
 	Tolerations              []interface{}     `json:"tolerations"`
 	Affinity                 Affinity          `json:"affinity,omitempty"`
@@ -58,7 +58,11 @@ type Istio struct {
 	Hosts          []string `json:"hosts"`
 	IngressGateway string   `json:"ingressGateway"`
 }
-
+type PeerResources struct {
+	Peer      Resources `json:"peer"`
+	CouchDB   Resources `json:"couchdb"`
+	Chaincode Resources `json:"chaincode"`
+}
 type PeerPersistence struct {
 	Peer      Persistence `json:"peer"`
 	CouchDB   Persistence `json:"couchdb"`
