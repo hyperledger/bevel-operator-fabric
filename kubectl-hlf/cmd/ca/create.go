@@ -8,6 +8,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"io"
+	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/yaml"
 )
@@ -203,14 +204,11 @@ func (c *createCmd) run(args []string) error {
 				Enabled: false,
 				Origins: []string{},
 			},
-			Resources: v1alpha1.Resources{
-				Requests: v1alpha1.Requests{
-					CPU:    "10m",
-					Memory: "256Mi",
+			Resources: corev1.ResourceRequirements{
+				Requests: corev1.ResourceList{
+
 				},
-				Limits: v1alpha1.RequestsLimit{
-					CPU:    "2",
-					Memory: "4Gi",
+				Limits: corev1.ResourceList{
 				},
 			},
 			Storage: v1alpha1.Storage{

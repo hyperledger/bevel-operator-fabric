@@ -115,7 +115,6 @@ spec:
                 type: integer
               resources:
                 description: ResourceRequirements describes the compute resource requirements.
-                nullable: true
                 properties:
                   limits:
                     additionalProperties:
@@ -282,6 +281,7 @@ spec:
             - image
             - mspID
             - replicas
+            - resources
             - service
             - storage
             - tag

@@ -679,11 +679,7 @@ func (in *FabricCASpec) DeepCopyInto(out *FabricCASpec) {
 	in.CA.DeepCopyInto(&out.CA)
 	in.TLSCA.DeepCopyInto(&out.TLSCA)
 	in.Cors.DeepCopyInto(&out.Cors)
-	if in.Resources != nil {
-		in, out := &in.Resources, &out.Resources
-		*out = new(v1.ResourceRequirements)
-		(*in).DeepCopyInto(*out)
-	}
+	in.Resources.DeepCopyInto(&out.Resources)
 	out.Storage = in.Storage
 	in.Metrics.DeepCopyInto(&out.Metrics)
 }
@@ -860,11 +856,7 @@ func (in *FabricOrdererNodeSpec) DeepCopyInto(out *FabricOrdererNodeSpec) {
 			(*in)[i].DeepCopyInto(&(*out)[i])
 		}
 	}
-	if in.Resources != nil {
-		in, out := &in.Resources, &out.Resources
-		*out = new(v1.ResourceRequirements)
-		(*in).DeepCopyInto(*out)
-	}
+	in.Resources.DeepCopyInto(&out.Resources)
 	out.Storage = in.Storage
 	out.Service = in.Service
 	if in.Secret != nil {

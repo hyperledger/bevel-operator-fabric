@@ -10,6 +10,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"io"
+	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/yaml"
 )
@@ -200,38 +201,29 @@ func (c *createCmd) run() error {
 				Policies: "info",
 			},
 			Resources: v1alpha1.FabricPeerResources{
-				Peer: v1alpha1.Resources{
-					Requests: v1alpha1.Requests{
-						CPU:    "10m",
-						Memory: "10M",
+				Peer: corev1.ResourceRequirements{
+					Requests: corev1.ResourceList{
+
 					},
-					Limits: v1alpha1.RequestsLimit{
-						CPU:    "2",
-						Memory: "4096M",
+					Limits: corev1.ResourceList{
 					},
 				},
-				CouchDB: v1alpha1.Resources{
-					Requests: v1alpha1.Requests{
-						CPU:    "10m",
-						Memory: "10M",
+				CouchDB: corev1.ResourceRequirements{
+					Requests: corev1.ResourceList{
+
 					},
-					Limits: v1alpha1.RequestsLimit{
-						CPU:    "2",
-						Memory: "4096M",
+					Limits: corev1.ResourceList{
 					},
 				},
-				Chaincode: v1alpha1.Resources{
-					Requests: v1alpha1.Requests{
-						CPU:    "10m",
-						Memory: "10M",
+				Chaincode: corev1.ResourceRequirements{
+					Requests: corev1.ResourceList{
+
 					},
-					Limits: v1alpha1.RequestsLimit{
-						CPU:    "2",
-						Memory: "4096M",
+					Limits: corev1.ResourceList{
 					},
 				},
 			},
-			Hosts:          c.peerOpts.Hosts,
+			Hosts: c.peerOpts.Hosts,
 		},
 		Status: v1alpha1.FabricPeerStatus{},
 	}

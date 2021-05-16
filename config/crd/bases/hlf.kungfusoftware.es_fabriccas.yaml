@@ -391,7 +391,6 @@ spec:
                 type: object
               resources:
                 description: ResourceRequirements describes the compute resource requirements.
-                nullable: true
                 properties:
                   limits:
                     additionalProperties:
@@ -773,6 +772,7 @@ spec:
             - hosts
             - image
             - metrics
+            - resources
             - rootCA
             - service
             - storage

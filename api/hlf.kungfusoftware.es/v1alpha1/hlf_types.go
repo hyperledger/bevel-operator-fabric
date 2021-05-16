@@ -303,9 +303,7 @@ type FabricOrdererNodeSpec struct {
 	// +nullable
 	HostAliases []corev1.HostAlias `json:"hostAliases"`
 
-	// +optional
-	// +nullable
-	Resources *corev1.ResourceRequirements `json:"resources"`
+	Resources corev1.ResourceRequirements `json:"resources"`
 
 	// +kubebuilder:default:=1
 	Replicas int `json:"replicas"`
@@ -426,12 +424,10 @@ type FabricCASpec struct {
 	CA           FabricCAItemConf `json:"ca"`
 	TLSCA        FabricCAItemConf `json:"tlsCA"`
 	Cors         Cors             `json:"cors"`
-	// +optional
-	// +kubebuilder:validation:Optional
-	// +nullable
-	Resources *corev1.ResourceRequirements `json:"resources"`
-	Storage   Storage                      `json:"storage"`
-	Metrics   FabricCAMetrics              `json:"metrics"`
+
+	Resources corev1.ResourceRequirements `json:"resources"`
+	Storage   Storage                     `json:"storage"`
+	Metrics   FabricCAMetrics             `json:"metrics"`
 }
 
 type FabricCATLSConf struct {
