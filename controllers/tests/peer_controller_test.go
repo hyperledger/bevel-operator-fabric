@@ -62,6 +62,8 @@ func createPeer(releaseName string, namespace string, params createPeerParams, c
 		"127.0.0.1",
 		publicIP,
 	}
+	resources, err := getDefaultResources()
+	Expect(err).ToNot(HaveOccurred())
 	fabricPeer := &hlfv1alpha1.FabricPeer{
 		TypeMeta: NewTypeMeta("FabricPeer"),
 		ObjectMeta: v1.ObjectMeta{
@@ -159,36 +161,9 @@ func createPeer(releaseName string, namespace string, params createPeerParams, c
 				Policies: "info",
 			},
 			Resources: hlfv1alpha1.FabricPeerResources{
-				Peer: hlfv1alpha1.Resources{
-					Requests: hlfv1alpha1.Requests{
-						CPU:    "10m",
-						Memory: "10M",
-					},
-					Limits: hlfv1alpha1.RequestsLimit{
-						CPU:    "2",
-						Memory: "4096M",
-					},
-				},
-				CouchDB: hlfv1alpha1.Resources{
-					Requests: hlfv1alpha1.Requests{
-						CPU:    "10m",
-						Memory: "10M",
-					},
-					Limits: hlfv1alpha1.RequestsLimit{
-						CPU:    "2",
-						Memory: "4096M",
-					},
-				},
-				Chaincode: hlfv1alpha1.Resources{
-					Requests: hlfv1alpha1.Requests{
-						CPU:    "10m",
-						Memory: "10M",
-					},
-					Limits: hlfv1alpha1.RequestsLimit{
-						CPU:    "2",
-						Memory: "4096M",
-					},
-				},
+				Peer: resources,
+				CouchDB: resources,
+				Chaincode: resources,
 			},
 			Hosts: []string{},
 		},

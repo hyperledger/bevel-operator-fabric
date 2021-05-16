@@ -46,7 +46,6 @@ func getOrderers(releaseName string, ns string) []hlfv1alpha1.FabricOrdererNode 
 	return ordNodesRes.Items
 }
 
-
 const (
 	defTimeoutSecs  = "240s"
 	peerTimeoutSecs = "240s"
@@ -216,6 +215,9 @@ func randomFabricCA(releaseName string, namespace string) *hlfv1alpha1.FabricCA 
 		Identities:   hlfv1alpha1.FabricCACFGIdentities{AllowRemove: true},
 		Affiliations: hlfv1alpha1.FabricCACFGAffilitions{AllowRemove: true},
 	}
+	resources, err := getDefaultResources()
+	Expect(err).ToNot(HaveOccurred())
+
 	fabricCa := &hlfv1alpha1.FabricCA{
 		TypeMeta: NewTypeMeta("FabricCA"),
 		ObjectMeta: v1.ObjectMeta{
@@ -300,16 +302,7 @@ func randomFabricCA(releaseName string, namespace string) *hlfv1alpha1.FabricCA 
 				Enabled: false,
 				Origins: []string{},
 			},
-			Resources: hlfv1alpha1.Resources{
-				Requests: hlfv1alpha1.Requests{
-					CPU:    "10m",
-					Memory: "256Mi",
-				},
-				Limits: hlfv1alpha1.RequestsLimit{
-					CPU:    "2",
-					Memory: "4Gi",
-				},
-			},
+			Resources: resources,
 			Storage: hlfv1alpha1.Storage{
 				Size:         "3Gi",
 				StorageClass: "",
@@ -596,7 +589,6 @@ func getClientForPeerWithOrderer(peer *hlfv1alpha1.FabricPeer, ca *hlfv1alpha1.F
 	return resClient
 }
 
-
 type createOrdererParams struct {
 	MSPID string
 }
@@ -632,7 +624,8 @@ func createOrdererNode(releaseName string, namespace string, params createOrdere
 	if err != nil {
 		log.Errorf("Failed to register user %s %v", ordEnrollID, err)
 	}
-
+	resources, err := getDefaultResources()
+	Expect(err).ToNot(HaveOccurred())
 	fabricOrderer := &hlfv1alpha1.FabricOrdererNode{
 		TypeMeta: NewTypeMeta("FabricOrdererNode"),
 		ObjectMeta: v1.ObjectMeta{
@@ -651,6 +644,8 @@ func createOrdererNode(releaseName string, namespace string, params createOrdere
 			Image:                       "hyperledger/fabric-orderer",
 			Tag:                         "amd64-2.3.0",
 			MspID:                       mspID,
+			Replicas:                    1,
+			Resources:                   resources,
 			Secret: &hlfv1alpha1.Secret{
 				Enrollment: hlfv1alpha1.Enrollment{
 					Component: hlfv1alpha1.Component{
@@ -794,6 +789,8 @@ var _ = Describe("Fabric Controllers", func() {
 			Identities:   hlfv1alpha1.FabricCACFGIdentities{AllowRemove: true},
 			Affiliations: hlfv1alpha1.FabricCACFGAffilitions{AllowRemove: true},
 		}
+		resources, err := getDefaultResources()
+		Expect(err).ToNot(HaveOccurred())
 		fabricCa := &hlfv1alpha1.FabricCA{
 			TypeMeta: NewTypeMeta("FabricCA"),
 			ObjectMeta: v1.ObjectMeta{
@@ -877,16 +874,7 @@ var _ = Describe("Fabric Controllers", func() {
 					Enabled: false,
 					Origins: []string{},
 				},
-				Resources: hlfv1alpha1.Resources{
-					Requests: hlfv1alpha1.Requests{
-						CPU:    "10m",
-						Memory: "256Mi",
-					},
-					Limits: hlfv1alpha1.RequestsLimit{
-						CPU:    "2",
-						Memory: "4Gi",
-					},
-				},
+				Resources: resources,
 				Storage: hlfv1alpha1.Storage{
 					Size:         "3Gi",
 					StorageClass: "",

@@ -631,6 +631,8 @@ data:
     ledger:
 
       blockchain:
+      snapshots:
+        rootDir: /var/hyperledger/production/snapshots
 
       state:
         # stateDatabase - options are "goleveldb", "CouchDB"
