@@ -3,13 +3,14 @@ package inspect
 import (
 	"bytes"
 	"fmt"
+	"io"
+	"io/ioutil"
+	"text/template"
+
 	"github.com/Masterminds/sprig/v3"
 	"github.com/kfsoftware/hlf-operator/controllers/utils"
 	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/helpers"
 	"github.com/spf13/cobra"
-	"io"
-	"io/ioutil"
-	"text/template"
 )
 
 const (

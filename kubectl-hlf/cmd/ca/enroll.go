@@ -2,13 +2,14 @@ package ca
 
 import (
 	"fmt"
+	"io"
+	"io/ioutil"
+
 	"github.com/ghodss/yaml"
 	"github.com/kfsoftware/hlf-operator/controllers/certs"
 	"github.com/kfsoftware/hlf-operator/controllers/utils"
 	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/helpers"
 	"github.com/spf13/cobra"
-	"io"
-	"io/ioutil"
 )
 
 type EnrollOptions struct {

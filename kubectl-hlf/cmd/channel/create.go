@@ -3,6 +3,8 @@ package channel
 import (
 	"bytes"
 	"fmt"
+	"io"
+
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/resmgmt"
 	"github.com/hyperledger/fabric-sdk-go/pkg/core/config"
 	"github.com/hyperledger/fabric-sdk-go/pkg/fab/resource"
@@ -14,7 +16,6 @@ import (
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"io"
 )
 
 type createChannelCmd struct {

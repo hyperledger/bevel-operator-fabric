@@ -3,11 +3,12 @@ package ca
 import (
 	"context"
 	"fmt"
+	"io"
+
 	"github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
 	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/helpers"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"io"
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/yaml"
@@ -205,11 +206,8 @@ func (c *createCmd) run(args []string) error {
 				Origins: []string{},
 			},
 			Resources: corev1.ResourceRequirements{
-				Requests: corev1.ResourceList{
-
-				},
-				Limits: corev1.ResourceList{
-				},
+				Requests: corev1.ResourceList{},
+				Limits:   corev1.ResourceList{},
 			},
 			Storage: v1alpha1.Storage{
 				Size:         c.caOpts.Capacity,

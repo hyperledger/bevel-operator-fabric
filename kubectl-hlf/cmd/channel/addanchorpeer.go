@@ -3,6 +3,11 @@ package channel
 import (
 	"bytes"
 	"fmt"
+	"io"
+	"net/url"
+	"strconv"
+	"strings"
+
 	"github.com/gogo/protobuf/proto"
 	"github.com/hyperledger/fabric-config/protolator"
 	"github.com/hyperledger/fabric-protos-go/common"
@@ -15,10 +20,6 @@ import (
 	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/helpers"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"io"
-	"net/url"
-	"strconv"
-	"strings"
 )
 
 type addAnchorPeerCmd struct {

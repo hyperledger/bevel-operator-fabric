@@ -12,6 +12,7 @@ import (
 	"encoding/json"
 	"encoding/pem"
 	"fmt"
+
 	"github.com/operator-framework/operator-lib/status"
 	"helm.sh/helm/v3/pkg/cli"
 	"k8s.io/kubernetes/pkg/api/v1/pod"
@@ -447,7 +448,7 @@ func GetConfig(conf *hlfv1alpha1.FabricCA, client *kubernetes.Clientset, chartNa
 		msp.TLSCAChainfile = conf.Spec.TLSCA.CA.Chain
 	}
 	var serviceMonitor ServiceMonitor
-	if spec.ServiceMonitor != nil  && spec.ServiceMonitor.Enabled{
+	if spec.ServiceMonitor != nil && spec.ServiceMonitor.Enabled {
 		serviceMonitor = ServiceMonitor{
 			Enabled:           spec.ServiceMonitor.Enabled,
 			Labels:            spec.ServiceMonitor.Labels,
@@ -461,7 +462,7 @@ func GetConfig(conf *hlfv1alpha1.FabricCA, client *kubernetes.Clientset, chartNa
 		}
 	} else {
 		serviceMonitor = ServiceMonitor{
-			Enabled:           false,
+			Enabled: false,
 		}
 	}
 
@@ -831,6 +832,7 @@ func Reconcile(
 		}, nil
 	}
 }
+
 var (
 	ErrClientK8s = errors.New("k8sAPIClientError")
 )
@@ -875,7 +877,6 @@ func setConditionStatus(p *hlfv1alpha1.FabricCA, conditionType hlfv1alpha1.Deplo
 	}
 	return p.Status.Conditions.SetCondition(condition())
 }
-
 
 // +kubebuilder:rbac:groups=hlf.kungfusoftware.es,resources=fabriccas,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=hlf.kungfusoftware.es,resources=fabriccas/status,verbs=get;update;patch

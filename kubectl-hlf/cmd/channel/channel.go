@@ -1,8 +1,9 @@
 package channel
 
 import (
-	"github.com/spf13/cobra"
 	"io"
+
+	"github.com/spf13/cobra"
 )
 
 func NewChannelCmd(stdOut io.Writer, stdErr io.Writer) *cobra.Command {

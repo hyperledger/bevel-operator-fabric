@@ -3,6 +3,7 @@ package helpers
 import (
 	"context"
 	"fmt"
+
 	hlfv1alpha1 "github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
 	operatorv1 "github.com/kfsoftware/hlf-operator/pkg/client/clientset/versioned"
 	"github.com/pkg/errors"
@@ -33,6 +34,7 @@ type ClusterCA struct {
 func (c ClusterCA) GetFullName() string {
 	return fmt.Sprintf("%s.%s", c.Object.Name, c.Object.Namespace)
 }
+
 type ClusterOrderingService struct {
 	MSPID    string
 	Name     string
@@ -165,8 +167,8 @@ func GetCertAuthByURL(oclient *operatorv1.Clientset, host string, port int) (*Cl
 		return nil, err
 	}
 	for _, certAuth := range certAuths {
-		if	// if host and port is specified by kubernetes DNS
-			certAuth.Name == host && certAuth.Status.NodePort == 7054 || (certAuth.Status.NodePort != 7054 && certAuth.Status.NodePort == port) {
+		if // if host and port is specified by kubernetes DNS
+		certAuth.Name == host && certAuth.Status.NodePort == 7054 || (certAuth.Status.NodePort != 7054 && certAuth.Status.NodePort == port) {
 			return certAuth, nil
 		}
 

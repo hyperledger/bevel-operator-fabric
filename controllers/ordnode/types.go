@@ -14,7 +14,7 @@ type fabricOrdChart struct {
 	Cert                        string         `json:"cert"`
 	Key                         string         `json:"key"`
 	TLS                         tls            `json:"tls"`
-	Resources                Resources         `json:"resources,omitempty"`
+	Resources                   Resources      `json:"resources,omitempty"`
 	FullnameOverride            string         `json:"fullnameOverride"`
 	HostAliases                 []HostAlias    `json:"hostAliases"`
 	Service                     service        `json:"service"`

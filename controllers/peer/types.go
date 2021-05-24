@@ -75,7 +75,6 @@ type Image struct {
 }
 type Annotations struct {
 }
-
 type Gossip struct {
 	Bootstrap         string `json:"bootstrap"`
 	Endpoint          string `json:"endpoint"`

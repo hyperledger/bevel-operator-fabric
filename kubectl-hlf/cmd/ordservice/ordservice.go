@@ -1,8 +1,9 @@
 package ordservice
 
 import (
-	"github.com/spf13/cobra"
 	"io"
+
+	"github.com/spf13/cobra"
 )
 
 // NewOrdServiceCmd creates a new root command to manage Ordering Services
