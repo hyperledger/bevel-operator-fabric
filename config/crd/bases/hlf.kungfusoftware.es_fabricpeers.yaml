@@ -472,8 +472,6 @@ spec:
           status:
             description: FabricPeerStatus defines the observed state of FabricPeer
             properties:
-              caCert:
-                type: string
               conditions:
                 description: Conditions is a set of Condition instances.
                 items:
@@ -518,11 +516,15 @@ spec:
                 type: string
               port:
                 type: integer
+              signCaCert:
+                type: string
+              signCert:
+                type: string
               status:
                 type: string
-              tls_cert:
-                type: string
               tlsCaCert:
+                type: string
+              tlsCert:
                 type: string
             required:
             - conditions

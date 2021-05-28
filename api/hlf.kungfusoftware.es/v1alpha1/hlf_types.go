@@ -254,11 +254,13 @@ type FabricPeerStatus struct {
 	Status     DeploymentStatus  `json:"status"`
 
 	// +optional
-	TlsCert string `json:"tls_cert"`
+	SignCert string `json:"signCert"`
 	// +optional
-	CaCert string `json:"caCert"`
+	TlsCert string `json:"tlsCert"`
 	// +optional
 	TlsCACert string `json:"tlsCaCert"`
+	// +optional
+	SignCACert string `json:"signCaCert"`
 	// +optional
 	NodePort int `json:"port"`
 }
