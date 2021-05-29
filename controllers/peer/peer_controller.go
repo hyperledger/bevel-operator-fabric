@@ -137,17 +137,19 @@ func GetPeerState(peer *hlfv1alpha1.FabricPeer, conf *action.Configuration, conf
 		}
 	}
 
-	tlsCrt, _, _, err := getExistingTLSCrypto(clientSet, releaseName, ns)
+	tlsCrt, _, rootTlsCrt, err := getExistingTLSCrypto(clientSet, releaseName, ns)
 	if err != nil {
 		return nil, err
 	}
 	r.TlsCert = string(utils.EncodeX509Certificate(tlsCrt))
+	r.TlsCACert = string(utils.EncodeX509Certificate(rootTlsCrt))
 
-	signCrt, _, _, err := getExistingSignCrypto(clientSet, releaseName, ns)
+	signCrt, _, rootSignCrt, err := getExistingSignCrypto(clientSet, releaseName, ns)
 	if err != nil {
 		return nil, err
 	}
 	r.SignCert = string(utils.EncodeX509Certificate(signCrt))
+	r.SignCACert = string(utils.EncodeX509Certificate(rootSignCrt))
 	return r, nil
 }
 
