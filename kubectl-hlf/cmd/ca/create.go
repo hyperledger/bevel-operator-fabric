@@ -214,6 +214,7 @@ func (c *createCmd) run(args []string) error {
 				StorageClass: c.caOpts.StorageClass,
 				AccessMode:   "ReadWriteOnce",
 			},
+			ServiceMonitor: nil,
 			Metrics: v1alpha1.FabricCAMetrics{
 				Provider: "prometheus",
 				Statsd: &v1alpha1.FabricCAMetricsStatsd{

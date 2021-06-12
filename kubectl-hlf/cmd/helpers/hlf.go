@@ -3,6 +3,7 @@ package helpers
 import (
 	"context"
 	"fmt"
+	log "github.com/sirupsen/logrus"
 
 	hlfv1alpha1 "github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
 	operatorv1 "github.com/kfsoftware/hlf-operator/pkg/client/clientset/versioned"
@@ -43,6 +44,7 @@ type ClusterOrderingService struct {
 	Status   hlfv1alpha1.FabricOrderingServiceStatus
 	Orderers []*ClusterOrdererNode
 }
+
 type ClusterOrdererNode struct {
 	Name   string
 	Spec   hlfv1alpha1.FabricOrdererNodeSpec
@@ -161,6 +163,31 @@ func GetClusterOrderers(
 	}
 	return organizations, orderers, nil
 }
+
+func GetClusterOrdererNodes(
+	oclient *operatorv1.Clientset,
+	ns string,
+) ([]*ClusterOrdererNode, error) {
+	ctx := context.Background()
+	ordererNodeList, err := oclient.HlfV1alpha1().FabricOrdererNodes(ns).List(ctx, v1.ListOptions{})
+	if err != nil {
+		return nil, err
+	}
+	var ordererNodes []*ClusterOrdererNode
+
+	for _, ordNode := range ordererNodeList.Items {
+		ordererNodes = append(
+			ordererNodes,
+			&ClusterOrdererNode{
+				Name:   ordNode.FullName(),
+				Spec:   ordNode.Spec,
+				Status: ordNode.Status,
+			},
+		)
+	}
+	log.Printf("Nodes=%v", ordererNodes)
+	return ordererNodes, nil
+}
 func GetCertAuthByURL(oclient *operatorv1.Clientset, host string, port int) (*ClusterCA, error) {
 	certAuths, err := GetClusterCAs(oclient, "")
 	if err != nil {
@@ -215,6 +242,19 @@ func GetPeerByFullName(oclient *operatorv1.Clientset, name string) (*ClusterPeer
 
 	}
 	return nil, errors.Errorf("Peer with name=%s not found", name)
+}
+func GetOrdererNodeByFullName(oclient *operatorv1.Clientset, name string) (*ClusterOrdererNode, error) {
+	ordererNodes, err := GetClusterOrdererNodes(oclient, "")
+	if err != nil {
+		return nil, err
+	}
+	for _, ordNode := range ordererNodes {
+		if ordNode.Name == name {
+			return ordNode, nil
+		}
+
+	}
+	return nil, errors.Errorf("Orderer Node with name=%s not found", name)
 }
 func GetCertAuthByFullName(oclient *operatorv1.Clientset, name string) (*ClusterCA, error) {
 	certAuths, err := GetClusterCAs(oclient, "")

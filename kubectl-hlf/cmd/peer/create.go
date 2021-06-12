@@ -4,7 +4,9 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
+	"github.com/pkg/errors"
 	"io"
+	"k8s.io/apimachinery/pkg/api/resource"
 
 	"github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
 	"github.com/kfsoftware/hlf-operator/controllers/utils"
@@ -57,6 +59,9 @@ func (c *createCmd) run() error {
 	if err != nil {
 		return err
 	}
+	if certAuth.Status.Status != v1alpha1.RunningStatus {
+		return errors.Errorf("ca %s is in %s status", certAuth.Name, certAuth.Status.Status)
+	}
 	clientSet, err := helpers.GetKubeClient()
 	if err != nil {
 		return err
@@ -65,46 +70,35 @@ func (c *createCmd) run() error {
 	if err != nil {
 		return err
 	}
-	//var bootstrapPeerURL string
-	//if len(c.peerOpts.BootstrapPeers) > 0 {
-	//	var bootstrapPeerUrls []string
-	//	for _, bp := range c.peerOpts.BootstrapPeers {
-	//		boostrapPeer, err := helpers.GetPeerByFullName(oclient, bp)
-	//		if err != nil {
-	//			return err
-	//		}
-	//		if boostrapPeer.Status.Status != v1alpha1.RunningStatus {
-	//			return errors.Errorf("Peer %s is not running", boostrapPeer.Name)
-	//		}
-	//		u, err := url.Parse(boostrapPeer.Status.URL)
-	//		if err != nil {
-	//			return err
-	//		}
-	//		chunks := strings.Split(u.Host, ":")
-	//		ip := chunks[0]
-	//		port := chunks[1]
-	//		bootstrapPeerURL := fmt.Sprintf("%s:%s", ip, port)
-	//		bootstrapPeerUrls = append(bootstrapPeerUrls, bootstrapPeerURL)
-	//		log.Infof("Bootstrap peer url %s ip=%s port=%s", bootstrapPeerURL, ip, port)
-	//	}
-	//	bootstrapPeerURL = strings.Join(bootstrapPeerUrls, " ")
-	//} else {
-	//	bootstrapPeerURL = ""
-	//}
-
 	externalEndpoint := ""
 	if len(c.peerOpts.Hosts) > 0 {
 		externalEndpoint = fmt.Sprintf("%s:443", c.peerOpts.Hosts[0])
 	}
+	ingressGateway := "ingressgateway"
 	istio := &v1alpha1.FabricIstio{
-		Port:  443,
-		Hosts: []string{},
+		Port:           443,
+		Hosts:          []string{},
+		IngressGateway: ingressGateway,
 	}
+	log.Printf("Istio %s", ingressGateway)
 	if len(c.peerOpts.Hosts) > 0 {
 		istio = &v1alpha1.FabricIstio{
-			Port:  443,
-			Hosts: c.peerOpts.Hosts,
+			Port:           443,
+			Hosts:          c.peerOpts.Hosts,
+			IngressGateway: ingressGateway,
 		}
+	}
+	peerRequirements, err := getPeerResourceRequirements()
+	if err != nil {
+		return err
+	}
+	couchdbRequirements, err := getCouchdbResourceRequirements()
+	if err != nil {
+		return err
+	}
+	chaincodeRequirements, err := getChaincodeResourceRequirements()
+	if err != nil {
+		return err
 	}
 	fabricPeer := &v1alpha1.FabricPeer{
 		TypeMeta: v1.TypeMeta{
@@ -116,8 +110,12 @@ func (c *createCmd) run() error {
 			Namespace: c.peerOpts.NS,
 		},
 		Spec: v1alpha1.FabricPeerSpec{
+			ServiceMonitor:   nil,
+			HostAliases:      nil,
+			Replicas:         1,
 			DockerSocketPath: "",
 			Image:            c.peerOpts.Image,
+			ExternalBuilders: nil,
 			Istio:            istio,
 			Gossip: v1alpha1.FabricPeerSpecGossip{
 				ExternalEndpoint:  externalEndpoint,
@@ -128,6 +126,7 @@ func (c *createCmd) run() error {
 			},
 			ExternalEndpoint:         externalEndpoint,
 			Tag:                      c.peerOpts.Version,
+			ImagePullPolicy:          "Always",
 			ExternalChaincodeBuilder: true,
 			CouchDB: v1alpha1.FabricPeerCouchDB{
 				User:     "couchdb",
@@ -202,18 +201,9 @@ func (c *createCmd) run() error {
 				Policies: "info",
 			},
 			Resources: v1alpha1.FabricPeerResources{
-				Peer: corev1.ResourceRequirements{
-					Requests: corev1.ResourceList{},
-					Limits:   corev1.ResourceList{},
-				},
-				CouchDB: corev1.ResourceRequirements{
-					Requests: corev1.ResourceList{},
-					Limits:   corev1.ResourceList{},
-				},
-				Chaincode: corev1.ResourceRequirements{
-					Requests: corev1.ResourceList{},
-					Limits:   corev1.ResourceList{},
-				},
+				Peer:      peerRequirements,
+				CouchDB:   couchdbRequirements,
+				Chaincode: chaincodeRequirements,
 			},
 			Hosts: c.peerOpts.Hosts,
 		},
@@ -238,6 +228,93 @@ func (c *createCmd) run() error {
 		log.Infof("Peer %s created on namespace %s", fabricPeer.Name, fabricPeer.Namespace)
 	}
 	return nil
+}
+
+func getChaincodeResourceRequirements() (corev1.ResourceRequirements, error) {
+	requestCpu, err := resource.ParseQuantity("10m")
+	if err != nil {
+		return corev1.ResourceRequirements{}, err
+	}
+	requestMemory, err := resource.ParseQuantity("10m")
+	if err != nil {
+		return corev1.ResourceRequirements{}, err
+	}
+	limitsCpu, err := resource.ParseQuantity("1")
+	if err != nil {
+		return corev1.ResourceRequirements{}, err
+	}
+	limitsMemory, err := resource.ParseQuantity("100Mi")
+	if err != nil {
+		return corev1.ResourceRequirements{}, err
+	}
+	return corev1.ResourceRequirements{
+		Requests: corev1.ResourceList{
+			corev1.ResourceCPU:    requestCpu,
+			corev1.ResourceMemory: requestMemory,
+		},
+		Limits: corev1.ResourceList{
+			corev1.ResourceCPU:    limitsCpu,
+			corev1.ResourceMemory: limitsMemory,
+		},
+	}, nil
+}
+
+func getCouchdbResourceRequirements() (corev1.ResourceRequirements, error) {
+	requestCpu, err := resource.ParseQuantity("10m")
+	if err != nil {
+		return corev1.ResourceRequirements{}, err
+	}
+	requestMemory, err := resource.ParseQuantity("10m")
+	if err != nil {
+		return corev1.ResourceRequirements{}, err
+	}
+	limitsCpu, err := resource.ParseQuantity("1")
+	if err != nil {
+		return corev1.ResourceRequirements{}, err
+	}
+	limitsMemory, err := resource.ParseQuantity("512Mi")
+	if err != nil {
+		return corev1.ResourceRequirements{}, err
+	}
+	return corev1.ResourceRequirements{
+		Requests: corev1.ResourceList{
+			corev1.ResourceCPU:    requestCpu,
+			corev1.ResourceMemory: requestMemory,
+		},
+		Limits: corev1.ResourceList{
+			corev1.ResourceCPU:    limitsCpu,
+			corev1.ResourceMemory: limitsMemory,
+		},
+	}, nil
+}
+
+func getPeerResourceRequirements() (corev1.ResourceRequirements, error) {
+	requestCpu, err := resource.ParseQuantity("10m")
+	if err != nil {
+		return corev1.ResourceRequirements{}, err
+	}
+	requestMemory, err := resource.ParseQuantity("128Mi")
+	if err != nil {
+		return corev1.ResourceRequirements{}, err
+	}
+	limitsCpu, err := resource.ParseQuantity("1")
+	if err != nil {
+		return corev1.ResourceRequirements{}, err
+	}
+	limitsMemory, err := resource.ParseQuantity("512Mi")
+	if err != nil {
+		return corev1.ResourceRequirements{}, err
+	}
+	return corev1.ResourceRequirements{
+		Requests: corev1.ResourceList{
+			corev1.ResourceCPU:    requestCpu,
+			corev1.ResourceMemory: requestMemory,
+		},
+		Limits: corev1.ResourceList{
+			corev1.ResourceCPU:    limitsCpu,
+			corev1.ResourceMemory: limitsMemory,
+		},
+	}, nil
 }
 func newCreatePeerCmd(out io.Writer, errOut io.Writer) *cobra.Command {
 	c := createCmd{out: out, errOut: errOut}

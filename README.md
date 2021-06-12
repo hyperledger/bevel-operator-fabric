@@ -24,11 +24,6 @@ title: Getting started
 - [ ] More parametrization on the Fabric CA
 - [ ] More parametrization on the Fabric Ordering services
 
-## Ideas for the future
-
-- [ ] Install chaincode in peer using Custom Resource Definitions
-- [ ] Manage channel configuration using Custom Resource Definitions
-
 ## Getting started
 
 ### Requirements
@@ -84,7 +79,7 @@ kubectl hlf ca register --name=org1-ca --user=peer --secret=peerpw --type=peer \
 
  ```bash
 
-kubectl hlf peer create --storage-class=standard --enroll-id=peer --mspid=Org1MSP \
+kubectl hlf peer create --storage-class= --enroll-id=peer --mspid=Org1MSP \
         --enroll-pw=peerpw --capacity=5Gi --name=org1-peer0 --ca-name=org1-ca.default
 kubectl wait --timeout=180s --for=condition=Running fabricpeers.hlf.kungfusoftware.es --all
 ```
@@ -111,31 +106,27 @@ kubectl hlf ordnode create  --storage-class=standard --enroll-id=orderer --mspid
     --enroll-pw=ordererpw --capacity=2Gi --name=ord-node2 --ca-name=ord-ca.default
 kubectl hlf ordnode create  --storage-class=standard --enroll-id=orderer --mspid=OrdererMSP \
     --enroll-pw=ordererpw --capacity=2Gi --name=ord-node3 --ca-name=ord-ca.default
-kubectl wait --timeout=180s --for=condition=Running fabricorderingservices.hlf.kungfusoftware.es --all
+kubectl wait --timeout=180s --for=condition=Running fabricorderernodes.hlf.kungfusoftware.es --all
 ```
 
 ## Preparing a connection string for the ordering service
 ```bash
 kubectl hlf inspect --output ordservice.yaml -o OrdererMSP
 kubectl hlf ca register --name=ord-ca --user=admin --secret=adminpw \
-    --type=admin --enroll-id enroll --enroll-secret=enrollpw --mspid=Ord2MSP
+    --type=admin --enroll-id enroll --enroll-secret=enrollpw --mspid=OrdererMSP
 
-kubectl hlf ca enroll --name=org1-ca --namespace=hlf-operator-azjtfjtjnkdzvwusxdhaaz --user=admin --secret=adminpw --mspid Ord2MSP \
-        --ca-name ca  --output admin-ordservice.yaml 
+kubectl hlf channel generate --output=ch.block --name=ch1 --organizations Org1MSP --ordererOrganizations OrdererMSP
 
-osnadmin channel join --channelID ch1  --config-block ./r1.block \
-    -o 172.2.0.4:31546 --ca-file $OSN_TLS_CA_ROOT_CERT \
-    --client-cert $ADMIN_TLS_SIGN_CERT --client-key $ADMIN_TLS_PRIVATE_KEY
+
+kubectl hlf ca enroll --name=ord-ca --namespace=default --user=admin --secret=adminpw --mspid OrdererMSP \
+        --ca-name tlsca  --output admin-tls-ordservice.yaml 
+
+kubectl hlf ordnode join --block=ch.block --name=ord-node1 --namespace=default --identity=admin-tls-ordservice.yaml
 
 ```
 > IMPORTANT!!: **Add user from admin-ordservice.yaml to ordservice.yaml** if not, following commands will not work
 
-## Create a consortium
-```bash
-kubectl hlf consortiums create --name=Default --system-channel-id="testchainid" \
-    --config=ordservice.yaml --orderer-org=ordservice.default --user=admin \
-    -p=org1-peer0.default
-```
+
 ## Preparing a connection string for the peer
 ```bash
 kubectl hlf ca register --name=org1-ca --user=admin --secret=adminpw --type=admin \
