@@ -18,6 +18,18 @@ type FabricCAChart struct {
 	Ca               FabricCAChartItemConf `json:"ca"`
 	TLSCA            FabricCAChartItemConf `json:"tlsCA"`
 	Cors             Cors                  `json:"cors"`
+	ServiceMonitor   ServiceMonitor        `json:"serviceMonitor"`
+}
+type ServiceMonitor struct {
+	Enabled           bool              `json:"enabled"`
+	Labels            map[string]string `json:"labels"`
+	Interval          string            `json:"interval"`
+	ScrapeTimeout     string            `json:"scrapeTimeout"`
+	Scheme            string            `json:"scheme"`
+	Relabelings       []interface{}     `json:"relabelings"`
+	TargetLabels      []interface{}     `json:"targetLabels"`
+	MetricRelabelings []interface{}     `json:"metricRelabelings"`
+	SampleLimit       int               `json:"sampleLimit"`
 }
 type Istio struct {
 	Port  int      `json:"port"`
@@ -156,12 +168,14 @@ type Persistence struct {
 	Size         string            `json:"size"`
 }
 type Msp struct {
-	Keyfile       string `json:"keyfile"`
-	Certfile      string `json:"certfile"`
-	TLSCAKeyfile  string `json:"tlsCAKeyFile"`
-	TLSCACertfile string `json:"tlsCACertFile"`
-	TlsKeyFile    string `json:"tlsKeyFile"`
-	TlsCertFile   string `json:"tlsCertFile"`
+	Keyfile        string `json:"keyfile"`
+	Certfile       string `json:"certfile"`
+	Chainfile      string `json:"chainfile"`
+	TLSCAKeyfile   string `json:"tlsCAKeyFile"`
+	TLSCACertfile  string `json:"tlsCACertFile"`
+	TLSCAChainfile string `json:"tlsCAChainfile"`
+	TlsKeyFile     string `json:"tlsKeyFile"`
+	TlsCertFile    string `json:"tlsCertFile"`
 }
 
 type ConfigurationFiles struct {

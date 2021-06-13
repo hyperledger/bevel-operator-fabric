@@ -129,6 +129,37 @@ func GetPublicIPKubernetes(clientSet *kubernetes.Clientset) (string, error) {
 		return "", nil
 	}
 }
+func GetPublicIPsKubernetes(clientSet *kubernetes.Clientset) ([]string, error) {
+	ctx := context.Background()
+	resp, err := clientSet.CoreV1().Nodes().List(ctx, v1.ListOptions{})
+	if err != nil {
+		return nil, err
+	}
+	var externalIPAdresses []string
+	var internalIPaddresses []string
+	for _, node := range resp.Items {
+		for _, ipaddress := range node.Status.Addresses {
+			switch ipaddress.Type {
+			case v12.NodeHostName:
+			case v12.NodeExternalDNS:
+			case v12.NodeInternalDNS:
+				continue
+			case v12.NodeExternalIP:
+				externalIPAdresses = append(externalIPAdresses, ipaddress.Address)
+			case v12.NodeInternalIP:
+				internalIPaddresses = append(internalIPaddresses, ipaddress.Address)
+
+			}
+		}
+	}
+	if len(externalIPAdresses) > 0 {
+		return externalIPAdresses, nil
+	} else if len(internalIPaddresses) > 0 {
+		return internalIPaddresses, nil
+	} else {
+		return nil, nil
+	}
+}
 
 func Contains(slice []string, item string) bool {
 	set := make(map[string]struct{}, len(slice))

@@ -338,7 +338,7 @@ func getConfig(conf *hlfv1alpha1.FabricOrderingService, client *kubernetes.Clien
 	genesisB64 := base64.StdEncoding.EncodeToString(genesisBytes)
 
 	fabricOrdChart = FabricOrdChart{
-		FullNameOverride: "",
+		FullNameOverride: conf.Name,
 		Image: Image{
 			Repository: spec.Image,
 			Tag:        spec.Tag,

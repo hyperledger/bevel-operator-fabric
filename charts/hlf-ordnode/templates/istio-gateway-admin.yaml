@@ -1,0 +1,21 @@
+{{- if and .Values.channelParticipationEnabled .Values.adminIstio.hosts  -}}
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: {{ include "hlf-ordnode.fullname" . }}-gateway-admin
+spec:
+  selector:
+    istio: {{.Values.adminIstio.ingressGateway}}
+  servers:
+    - port:
+        number: {{.Values.adminIstio.port}}
+        name: tcp
+        protocol: TLS
+      tls:
+        mode: PASSTHROUGH
+      hosts:
+          {{- range .Values.adminIstio.hosts }}
+          - {{ . }}
+          {{- end }}
+
+{{- end -}}

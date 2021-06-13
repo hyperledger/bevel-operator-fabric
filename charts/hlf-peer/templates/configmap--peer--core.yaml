@@ -471,7 +471,7 @@ data:
       # unix:///var/run/docker.sock
       # http://localhost:2375
       # https://localhost:2376
-      endpoint: unix:///var/run/docker.sock
+      endpoint: ""
 
       # settings for docker vms
       docker:
@@ -631,6 +631,8 @@ data:
     ledger:
 
       blockchain:
+      snapshots:
+        rootDir: /var/hyperledger/production/snapshots
 
       state:
         # stateDatabase - options are "goleveldb", "CouchDB"

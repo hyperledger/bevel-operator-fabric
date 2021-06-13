@@ -3,13 +3,14 @@ package inspect
 import (
 	"bytes"
 	"fmt"
+	"io"
+	"io/ioutil"
+	"text/template"
+
 	"github.com/Masterminds/sprig/v3"
 	"github.com/kfsoftware/hlf-operator/controllers/utils"
 	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/helpers"
 	"github.com/spf13/cobra"
-	"io"
-	"io/ioutil"
-	"text/template"
 )
 
 const (
@@ -68,19 +69,19 @@ orderers:
 {{- range $ordService := .Orderers }}
 {{- range $orderer := $ordService.Orderers }}
   "{{$orderer.Name}}":
-    url: {{ $orderer.Status.URL }}
+    url: grpcs://{{ $.K8SIP }}:{{ $orderer.Status.NodePort }}
     grpcOptions:
       allow-insecure: false
     tlsCACerts:
       pem: |
-{{ $orderer.Spec.TLSRootCert | indent 8 }}
+{{ $orderer.Status.TlsCert | indent 8 }}
 {{- end }}
 {{- end }}
 
 peers:
   {{- range $peer := .Peers }}
   "{{$peer.Name}}":
-    url: {{ $peer.Status.URL }}
+    url: grpcs://{{ $.K8SIP }}:{{ $peer.Status.NodePort }}
     grpcOptions:
       hostnameOverride: ""
       ssl-target-name-override: ""
@@ -95,6 +96,10 @@ channels: {}
 
 func (c *inspectCmd) run(out io.Writer) error {
 	oclient, err := helpers.GetKubeOperatorClient()
+	if err != nil {
+		return err
+	}
+	clientSet, err := helpers.GetKubeClient()
 	if err != nil {
 		return err
 	}
@@ -128,7 +133,12 @@ func (c *inspectCmd) run(out io.Writer) error {
 		return err
 	}
 	var buf bytes.Buffer
+	k8sIP, err := utils.GetPublicIPKubernetes(clientSet)
+	if err != nil {
+		return err
+	}
 	err = tmpl.Execute(&buf, map[string]interface{}{
+		"K8SIP":         k8sIP,
 		"Peers":         peers,
 		"Orderers":      orderers,
 		"Organizations": orgMap,

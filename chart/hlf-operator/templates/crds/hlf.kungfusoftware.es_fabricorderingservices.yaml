@@ -159,6 +159,15 @@ spec:
               service:
                 properties:
                   type:
+                    allOf:
+                    - enum:
+                      - NodePort
+                      - ClusterIP
+                      - LoadBalancer
+                    - enum:
+                      - NodePort
+                      - ClusterIP
+                      - LoadBalancer
                     type: string
                 required:
                 - type
@@ -167,10 +176,6 @@ spec:
                 properties:
                   accessMode:
                     default: ReadWriteOnce
-                    enum:
-                    - ReadWriteOnce
-                    - ReadOnlyMany
-                    - ReadWriteMany
                     type: string
                   size:
                     default: 5Gi

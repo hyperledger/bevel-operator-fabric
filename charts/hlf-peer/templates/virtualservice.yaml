@@ -1,11 +1,11 @@
-{{- if .Values.hosts -}}
+{{- if .Values.istio.hosts -}}
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
   name: {{ include "hlf-peer.fullname" . }}-virtualservice
 spec:
   hosts:
-    {{- range .Values.hosts }}
+    {{- range .Values.istio.hosts }}
     - {{ . }}
     {{- end }}
   gateways:
@@ -14,7 +14,7 @@ spec:
     - match:
         - port: 443
           sniHosts:
-          {{- range .Values.hosts }}
+          {{- range .Values.istio.hosts }}
               - {{ . }}
           {{- end }}
       route:

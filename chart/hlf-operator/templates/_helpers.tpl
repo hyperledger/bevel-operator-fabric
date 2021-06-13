@@ -48,7 +48,6 @@ Selector labels
 {{- define "hlf-operator.selectorLabels" -}}
 app.kubernetes.io/name: {{ include "hlf-operator.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
-control-plane: controller-manager
 {{- end }}
 
 {{/*

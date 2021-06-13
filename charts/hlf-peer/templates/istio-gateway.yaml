@@ -6,7 +6,7 @@ metadata:
   name: {{ include "hlf-peer.fullname" . }}-gateway
 spec:
   selector:
-    istio: ingressgateway # use istio default ingress gateway
+    istio: {{.Values.istio.ingressGateway}}
   servers:
     - port:
         number: {{.Values.istio.port}}
@@ -15,7 +15,7 @@ spec:
       tls:
         mode: PASSTHROUGH
       hosts:
-          {{- range .Values.hosts }}
+          {{- range .Values.istio.hosts }}
           - {{ . }}
           {{- end }}
 
