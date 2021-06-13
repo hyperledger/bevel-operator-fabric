@@ -8,9 +8,11 @@ import (
 	"github.com/kfsoftware/hlf-operator/controllers/utils"
 	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/helpers"
 	"github.com/pkg/errors"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"io"
 	"io/ioutil"
+	"strings"
 )
 
 type generateChannelCmd struct {
@@ -102,7 +104,7 @@ func (c generateChannelCmd) run() error {
 		for _, node := range orderers {
 			ordererUrls = append(
 				ordererUrls,
-				fmt.Sprintf("grpcs://%s:%d", k8sIP, node.Status.NodePort),
+				fmt.Sprintf("%s:%d", k8sIP, node.Status.NodePort),
 			)
 		}
 		ordererOrgs = append(ordererOrgs, testutils.CreateOrdererOrg(
@@ -118,12 +120,13 @@ func (c generateChannelCmd) run() error {
 		return err
 	}
 	for _, peer := range peers {
-		if !utils.Contains(c.organizations, peer.Name) {
+		if !utils.Contains(c.organizations, peer.Spec.MspID) {
 			continue
 		}
+		caHost := strings.Split(peer.Spec.Secret.Enrollment.Component.Cahost, ".")[0]
 		certAuth, err := helpers.GetCertAuthByURL(
 			oclient,
-			peer.Spec.Secret.Enrollment.Component.Cahost,
+			caHost,
 			peer.Spec.Secret.Enrollment.Component.Caport,
 		)
 		if err != nil {
@@ -143,6 +146,8 @@ func (c generateChannelCmd) run() error {
 			rootCert,
 		))
 	}
+	log.Infof("Peer organizations=%v", peerOrgs)
+	log.Infof("Orderer organizations=%v", ordererOrgs)
 
 	block, err := chStore.GetApplicationChannelBlock(
 		ctx,

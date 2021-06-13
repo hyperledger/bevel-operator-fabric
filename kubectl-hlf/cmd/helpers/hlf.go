@@ -30,6 +30,7 @@ type ClusterCA struct {
 	Spec   hlfv1alpha1.FabricCASpec
 	Status hlfv1alpha1.FabricCAStatus
 	Name   string
+	Item   hlfv1alpha1.FabricCA
 }
 
 func (c ClusterCA) GetFullName() string {
@@ -78,6 +79,7 @@ func GetClusterCAs(oclient *operatorv1.Clientset, ns string) ([]*ClusterCA, erro
 			Spec:   certAuth.Spec,
 			Status: certAuth.Status,
 			Name:   certauthName,
+			Item:   certAuth,
 		})
 	}
 	return certAuths, nil
@@ -195,7 +197,7 @@ func GetCertAuthByURL(oclient *operatorv1.Clientset, host string, port int) (*Cl
 	}
 	for _, certAuth := range certAuths {
 		if // if host and port is specified by kubernetes DNS
-		certAuth.Name == host && certAuth.Status.NodePort == 7054 || (certAuth.Status.NodePort != 7054 && certAuth.Status.NodePort == port) {
+		certAuth.Item.Name == host || (certAuth.Status.NodePort != 7054 && certAuth.Status.NodePort == port) {
 			return certAuth, nil
 		}
 

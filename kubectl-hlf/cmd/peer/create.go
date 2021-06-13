@@ -66,7 +66,7 @@ func (c *createCmd) run() error {
 	if err != nil {
 		return err
 	}
-	k8sIP, err := utils.GetPublicIPKubernetes(clientSet)
+	k8sIPs, err := utils.GetPublicIPsKubernetes(clientSet)
 	if err != nil {
 		return err
 	}
@@ -99,6 +99,13 @@ func (c *createCmd) run() error {
 	chaincodeRequirements, err := getChaincodeResourceRequirements()
 	if err != nil {
 		return err
+	}
+	csrHosts := []string{
+		"127.0.0.1",
+		"localhost",
+	}
+	for _, k8sIP := range k8sIPs {
+		csrHosts = append(csrHosts, k8sIP)
 	}
 	fabricPeer := &v1alpha1.FabricPeer{
 		TypeMeta: v1.TypeMeta{
@@ -153,12 +160,8 @@ func (c *createCmd) run() error {
 							Cacert: base64.StdEncoding.EncodeToString([]byte(certAuth.Status.TlsCert)),
 						},
 						Csr: v1alpha1.Csr{
-							Hosts: []string{
-								"127.0.0.1",
-								"localhost",
-								k8sIP,
-							},
-							CN: "",
+							Hosts: csrHosts,
+							CN:    "",
 						},
 						Enrollid:     c.peerOpts.EnrollID,
 						Enrollsecret: c.peerOpts.EnrollPW,

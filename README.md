@@ -58,7 +58,7 @@ helm install hlf-operator ./chart/hlf-operator
 
 
 ```bash
-kubectl krew install hlf 
+kubectl krew install hlf
 ```
 
 ## Deploy a Peer Organization
@@ -102,10 +102,6 @@ kubectl hlf ca register --name=ord-ca --user=orderer --secret=ordererpw \
 ```bash
 kubectl hlf ordnode create  --storage-class=standard --enroll-id=orderer --mspid=OrdererMSP \
     --enroll-pw=ordererpw --capacity=2Gi --name=ord-node1 --ca-name=ord-ca.default
-kubectl hlf ordnode create  --storage-class=standard --enroll-id=orderer --mspid=OrdererMSP \
-    --enroll-pw=ordererpw --capacity=2Gi --name=ord-node2 --ca-name=ord-ca.default
-kubectl hlf ordnode create  --storage-class=standard --enroll-id=orderer --mspid=OrdererMSP \
-    --enroll-pw=ordererpw --capacity=2Gi --name=ord-node3 --ca-name=ord-ca.default
 kubectl wait --timeout=180s --for=condition=Running fabricorderernodes.hlf.kungfusoftware.es --all
 ```
 
@@ -115,14 +111,13 @@ kubectl hlf inspect --output ordservice.yaml -o OrdererMSP
 kubectl hlf ca register --name=ord-ca --user=admin --secret=adminpw \
     --type=admin --enroll-id enroll --enroll-secret=enrollpw --mspid=OrdererMSP
 
-kubectl hlf channel generate --output=ch.block --name=ch1 --organizations Org1MSP --ordererOrganizations OrdererMSP
+kubectl hlf channel generate --output=demo.block --name=demo --organizations Org1MSP --ordererOrganizations OrdererMSP
 
 
 kubectl hlf ca enroll --name=ord-ca --namespace=default --user=admin --secret=adminpw --mspid OrdererMSP \
         --ca-name tlsca  --output admin-tls-ordservice.yaml 
 
-kubectl hlf ordnode join --block=ch.block --name=ord-node1 --namespace=default --identity=admin-tls-ordservice.yaml
-
+kubectl hlf ordnode join --block=demo.block --name=ord-node1 --namespace=default --identity=admin-tls-ordservice.yaml
 ```
 > IMPORTANT!!: **Add user from admin-ordservice.yaml to ordservice.yaml** if not, following commands will not work
 
@@ -140,24 +135,21 @@ kubectl hlf inspect --output org1.yaml -o Org1MSP -o OrdererMSP
 ```
 
 > IMPORTANT!!: **Add user from peer-org1.yaml to org1.yaml** if not, following commands will not work
-## Create a channel
+
+## Inspect the channel
 ```bash
-
-kubectl hlf channel create --name=ch1 --config=org1.yaml \
-    --admin-org=org1-peer0.default --user=admin \
-    -p=org1-peer0.default --ordering-service=ordservice.default \
-    --consortium=Default
+kubectl hlf channel inspect --channel=demo --config=org1.yaml \
+    --user=admin -p=org1-peer0.default > demo.json
 ```
-
 ## Add anchor peer
 ```bash
-kubectl hlf channel addanchorpeer --channel=ch1 --config=org1.yaml \
+kubectl hlf channel addanchorpeer --channel=demo --config=org1.yaml \
     --user=admin --peer=org1-peer0.default 
 
 ```
 ## Join channel
 ```bash
-kubectl hlf channel join --name=ch1 --config=org1.yaml \
+kubectl hlf channel join --name=demo --config=org1.yaml \
     --user=admin -p=org1-peer0.default
 
 ```
@@ -168,15 +160,18 @@ In case of error, you may need to add the following to the org1.yaml configurati
 ```yaml
 channels:
   _default:
+    orderers:
+      - ord-node1.default
     peers:
       "org1-peer0.default":
-          endorsingPeer: true
-          chaincodeQuery: true
-          ledgerQuery: true
-          eventSource: true
+        endorsingPeer: true
+        chaincodeQuery: true
+        ledgerQuery: true
+        eventSource: true
+
 ```
 ```bash
-kubectl hlf channel top --channel=ch1 --config=org1.yaml \
+kubectl hlf channel top --channel=demo --config=org1.yaml \
     --user=admin -p=org1-peer0.default
 ```
 
@@ -196,16 +191,16 @@ kubectl hlf chaincode queryinstalled --config=org1.yaml --user=admin --peer=org1
 ## Approve chaincode
 ```bash
 kubectl hlf chaincode approveformyorg --config=org1.yaml --user=admin --peer=org1-peer0.default \
-    --package-id=fabcar:db8d009f7e2e9fa4a40ddfd6b7e603d3177b126d18cdbeabcf8481f9a6de519f \
+    --package-id=fabcar:0c616be7eebace4b3c2aa0890944875f695653dbf80bef7d95f3eed6667b5f40 \
     --version "1.0" --sequence 1 --name=fabcar \
-    --policy="OR('Org1MSP.member')" --channel=ch1
+    --policy="OR('Org1MSP.member')" --channel=demo
 ```
 
 ## Commit chaincode
 ```bash
 kubectl hlf chaincode commit --config=org1.yaml --user=admin --peer=org1-peer0.default \
     --version "1.0" --sequence 1 --name=fabcar \
-    --policy="OR('Org1MSP.member')" --channel=ch1
+    --policy="OR('Org1MSP.member')" --channel=demo
 ```
 
 
@@ -213,7 +208,7 @@ kubectl hlf chaincode commit --config=org1.yaml --user=admin --peer=org1-peer0.d
 ```bash
 kubectl hlf chaincode invoke --config=org1.yaml \
     --user=admin --peer=org1-peer0.default \
-    --chaincode=fabcar --channel=ch1 \
+    --chaincode=fabcar --channel=demo \
     --fcn=initLedger -a '[]'
 ```
 
@@ -221,7 +216,7 @@ kubectl hlf chaincode invoke --config=org1.yaml \
 ```bash
 kubectl hlf chaincode query --config=org1.yaml \
     --user=admin --peer=org1-peer0.default \
-    --chaincode=fabcar --channel=ch1 \
+    --chaincode=fabcar --channel=demo \
     --fcn=QueryAllCars -a '[]'
 ```
 
@@ -229,7 +224,7 @@ At this point, you should have:
 
 - Ordering service with 3 nodes and a CA
 - Peer organization with a peer and a CA
-- A channel **ch1**
+- A channel **demo**
 - A chaincode install in peer0
 - A chaincode approved and committed
 
@@ -238,7 +233,7 @@ If something went wrong or didn't work, please, open an issue.
 ### Cleanup the environment
 
 ```bash
-kubectl delete fabricorderingservices.hlf.kungfusoftware.es --all-namespaces --all
+kubectl delete fabricorderernodes.hlf.kungfusoftware.es --all-namespaces --all
 kubectl delete fabricpeers.hlf.kungfusoftware.es --all-namespaces --all
 kubectl delete fabriccas.hlf.kungfusoftware.es --all-namespaces --all
 ```

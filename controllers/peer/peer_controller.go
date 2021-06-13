@@ -9,7 +9,6 @@ import (
 	"encoding/pem"
 	"fmt"
 	"os"
-	"reflect"
 	"strings"
 	"time"
 
@@ -351,13 +350,13 @@ func (r *FabricPeerReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) 
 			return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricPeer)
 		}
 		log.Infof("Chart upgraded %s", release.Name)
-		if !reflect.DeepEqual(fPeer.Status, fabricPeer.Status) {
+		//if !reflect.DeepEqual(fPeer.Status, fabricPeer.Status) {
 			if err := r.Status().Update(ctx, fPeer); err != nil {
 				log.Errorf("Error updating the status: %v", err)
 				setConditionStatus(fabricPeer, hlfv1alpha1.FailedStatus, false, err, false)
 				return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricPeer)
 			}
-		}
+		//}
 		log.Infof("Peer %s in %s status", fPeer.Name, string(s.Status))
 		switch s.Status {
 		case hlfv1alpha1.PendingStatus:
