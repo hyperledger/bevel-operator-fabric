@@ -176,10 +176,6 @@ spec:
                 properties:
                   accessMode:
                     default: ReadWriteOnce
-                    enum:
-                    - ReadWriteOnce
-                    - ReadOnlyMany
-                    - ReadWriteMany
                     type: string
                   size:
                     default: 5Gi

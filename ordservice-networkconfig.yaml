@@ -1,0 +1,41 @@
+
+name: hlf-network
+version: 1.0.0
+client:
+  organization: ""
+organizations:
+  
+  OrdererMSP:
+    mspid: OrdererMSP
+    cryptoPath: /tmp/cryptopath
+    users: {}
+    peers:
+    orderers:
+      - org1-orderer.hlf-operator-azjtfjtjnkdzvwusxdhaaz
+
+orderers:
+  "org1-orderer.hlf-operator-azjtfjtjnkdzvwusxdhaaz":
+    url: grpcs://172.24.0.2:31480
+    grpcOptions:
+      allow-insecure: false
+    tlsCACerts:
+      pem: |
+        -----BEGIN CERTIFICATE-----
+        MIICGzCCAcGgAwIBAgIUXnWWUKEAmcpy+OmROqYLGKQr3YowCgYIKoZIzj0EAwIw
+        ajELMAkGA1UEBhMCRVMxETAPBgNVBAcTCEFsaWNhbnRlMREwDwYDVQQJEwhBbGlj
+        YW50ZTEZMBcGA1UEChMQS3VuZyBGdSBTb2Z0d2FyZTENMAsGA1UECxMEVGVjaDEL
+        MAkGA1UEAxMCY2EwHhcNMjEwNDA2MjMxNDAwWhcNMjIwNDA2MjMxOTAwWjAiMQ8w
+        DQYDVQQLEwZjbGllbnQxDzANBgNVBAMTBmVucm9sbDBZMBMGByqGSM49AgEGCCqG
+        SM49AwEHA0IABM4hI1z13fXPIIDRFW/dr9e/Pl8IAWbSode2+6tc5stiouGudJPe
+        FtdOXg97BTmrqqec5n7TF24GTZcdgJ2GvAijgYwwgYkwDgYDVR0PAQH/BAQDAgOo
+        MB0GA1UdJQQWMBQGCCsGAQUFBwMBBggrBgEFBQcDAjAMBgNVHRMBAf8EAjAAMB0G
+        A1UdDgQWBBR+/a6aXzDl5Pkg7NHOw95YEKOaaDArBgNVHSMEJDAigCANZVwJvrQU
+        z0XSDzwxmRqjfE0NAYlFR5sUUPo0QT5GxDAKBggqhkjOPQQDAgNIADBFAiEAgVxV
+        /Ec5siaKIhNhsVbkqXwixMBOSe7oCycHsB1SRtUCIGShY8+vZm+Yu8BXMj74njyz
+        MersQVxmxVLaZFBmVcI0
+        -----END CERTIFICATE-----
+
+
+peers:
+
+channels: {}

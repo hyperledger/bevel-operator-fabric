@@ -45,21 +45,179 @@ spec:
           spec:
             description: FabricOrderingServiceSpec defines the desired state of FabricOrderingService
             properties:
+              adminIstio:
+                nullable: true
+                properties:
+                  hosts:
+                    items:
+                      type: string
+                    nullable: true
+                    type: array
+                  ingressGateway:
+                    type: string
+                  port:
+                    nullable: true
+                    type: integer
+                required:
+                - ingressGateway
+                type: object
+              bootstrapMethod:
+                type: string
+              channelParticipationEnabled:
+                type: boolean
               genesis:
                 type: string
-              hosts:
+              hostAliases:
                 items:
-                  type: string
+                  description: HostAlias holds the mapping between IP and hostnames
+                    that will be injected as an entry in the pod's hosts file.
+                  properties:
+                    hostnames:
+                      description: Hostnames for the above IP address.
+                      items:
+                        type: string
+                      type: array
+                    ip:
+                      description: IP address of the host file entry.
+                      type: string
+                  type: object
+                nullable: true
                 type: array
               image:
                 minLength: 1
                 type: string
+              istio:
+                nullable: true
+                properties:
+                  hosts:
+                    items:
+                      type: string
+                    nullable: true
+                    type: array
+                  ingressGateway:
+                    type: string
+                  port:
+                    nullable: true
+                    type: integer
+                required:
+                - ingressGateway
+                type: object
               mspID:
                 minLength: 3
                 type: string
               pullPolicy:
                 default: IfNotPresent
+                description: PullPolicy describes a policy for if/when to pull a container
+                  image
                 type: string
+              replicas:
+                default: 1
+                type: integer
+              resources:
+                description: ResourceRequirements describes the compute resource requirements.
+                properties:
+                  limits:
+                    additionalProperties:
+                      anyOf:
+                      - type: integer
+                      - type: string
+                      pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                      x-kubernetes-int-or-string: true
+                    description: 'Limits describes the maximum amount of compute resources
+                      allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
+                    type: object
+                  requests:
+                    additionalProperties:
+                      anyOf:
+                      - type: integer
+                      - type: string
+                      pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                      x-kubernetes-int-or-string: true
+                    description: 'Requests describes the minimum amount of compute
+                      resources required. If Requests is omitted for a container,
+                      it defaults to Limits if that is explicitly specified, otherwise
+                      to an implementation-defined value. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
+                    type: object
+                type: object
+              secret:
+                nullable: true
+                properties:
+                  enrollment:
+                    properties:
+                      component:
+                        properties:
+                          cahost:
+                            minLength: 1
+                            type: string
+                          caname:
+                            minLength: 1
+                            type: string
+                          caport:
+                            type: integer
+                          catls:
+                            properties:
+                              cacert:
+                                type: string
+                            required:
+                            - cacert
+                            type: object
+                          enrollid:
+                            minLength: 1
+                            type: string
+                          enrollsecret:
+                            minLength: 1
+                            type: string
+                        required:
+                        - cahost
+                        - caname
+                        - caport
+                        - catls
+                        - enrollid
+                        - enrollsecret
+                        type: object
+                      tls:
+                        properties:
+                          cahost:
+                            type: string
+                          caname:
+                            type: string
+                          caport:
+                            type: integer
+                          catls:
+                            properties:
+                              cacert:
+                                type: string
+                            required:
+                            - cacert
+                            type: object
+                          csr:
+                            properties:
+                              cn:
+                                type: string
+                              hosts:
+                                items:
+                                  type: string
+                                type: array
+                            type: object
+                          enrollid:
+                            type: string
+                          enrollsecret:
+                            type: string
+                        required:
+                        - cahost
+                        - caname
+                        - caport
+                        - catls
+                        - enrollid
+                        - enrollsecret
+                        type: object
+                    required:
+                    - component
+                    - tls
+                    type: object
+                required:
+                - enrollment
+                type: object
               service:
                 properties:
                   nodePortOperations:
@@ -67,24 +225,41 @@ spec:
                   nodePortRequest:
                     type: integer
                   type:
+                    description: Service Type string describes ingress methods for
+                      a service
                     type: string
                 required:
                 - type
                 type: object
-              signCert:
-                type: string
-              signKey:
-                type: string
-              signRootCert:
-                type: string
+              serviceMonitor:
+                nullable: true
+                properties:
+                  enabled:
+                    default: false
+                    type: boolean
+                  interval:
+                    default: 10s
+                    type: string
+                  labels:
+                    additionalProperties:
+                      type: string
+                    type: object
+                  sampleLimit:
+                    default: 0
+                    type: integer
+                  scrapeTimeout:
+                    default: 10s
+                    type: string
+                required:
+                - enabled
+                - interval
+                - sampleLimit
+                - scrapeTimeout
+                type: object
               storage:
                 properties:
                   accessMode:
                     default: ReadWriteOnce
-                    enum:
-                    - ReadWriteOnce
-                    - ReadOnlyMany
-                    - ReadWriteMany
                     type: string
                   size:
                     default: 5Gi
@@ -99,30 +274,23 @@ spec:
               tag:
                 minLength: 1
                 type: string
-              tlsCert:
-                type: string
-              tlsKey:
-                type: string
-              tlsRootCert:
-                type: string
             required:
+            - bootstrapMethod
+            - channelParticipationEnabled
             - genesis
-            - hosts
             - image
             - mspID
+            - replicas
+            - resources
             - service
-            - signCert
-            - signKey
-            - signRootCert
             - storage
             - tag
-            - tlsCert
-            - tlsKey
-            - tlsRootCert
             type: object
           status:
             description: FabricOrdererNodeStatus defines the observed state of FabricOrdererNode
             properties:
+              adminPort:
+                type: integer
               conditions:
                 description: Conditions is a set of Condition instances.
                 items:
@@ -163,18 +331,21 @@ spec:
                   - type
                   type: object
                 type: array
-              host:
+              message:
                 type: string
+              operationsPort:
+                type: integer
               port:
                 type: integer
               status:
                 type: string
-              url:
+              tlsAdminCert:
+                type: string
+              tlsCert:
                 type: string
             required:
             - conditions
             - status
-            - url
             type: object
         type: object
     served: true

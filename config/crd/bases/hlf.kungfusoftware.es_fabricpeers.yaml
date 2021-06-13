@@ -66,7 +66,7 @@ spec:
                 - touchPeriod
                 type: object
               dockerSocketPath:
-                default: /var/run/docker.sock
+                default: ""
                 type: string
               external_chaincode_builder:
                 type: boolean
@@ -109,6 +109,22 @@ spec:
                 - orgLeader
                 - useLeaderElection
                 type: object
+              hostAliases:
+                items:
+                  description: HostAlias holds the mapping between IP and hostnames
+                    that will be injected as an entry in the pod's hosts file.
+                  properties:
+                    hostnames:
+                      description: Hostnames for the above IP address.
+                      items:
+                        type: string
+                      type: array
+                    ip:
+                      description: IP address of the host file entry.
+                      type: string
+                  type: object
+                nullable: true
+                type: array
               hosts:
                 items:
                   type: string
@@ -128,9 +144,13 @@ spec:
                       type: string
                     nullable: true
                     type: array
+                  ingressGateway:
+                    type: string
                   port:
                     nullable: true
                     type: integer
+                required:
+                - ingressGateway
                 type: object
               logging:
                 properties:
@@ -163,105 +183,91 @@ spec:
               mspID:
                 minLength: 3
                 type: string
-              operationHosts:
-                items:
-                  type: string
-                type: array
-              operationIPs:
-                items:
-                  type: string
-                type: array
+              replicas:
+                default: 1
+                type: integer
               resources:
                 properties:
                   chaincode:
+                    description: ResourceRequirements describes the compute resource
+                      requirements.
                     properties:
                       limits:
-                        properties:
-                          cpu:
-                            default: "2"
-                            type: string
-                          memory:
-                            default: 4Gi
-                            type: string
-                        required:
-                        - cpu
-                        - memory
+                        additionalProperties:
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                          x-kubernetes-int-or-string: true
+                        description: 'Limits describes the maximum amount of compute
+                          resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
                         type: object
                       requests:
-                        properties:
-                          cpu:
-                            default: 10m
-                            type: string
-                          memory:
-                            default: 256Mi
-                            type: string
-                        required:
-                        - cpu
-                        - memory
+                        additionalProperties:
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                          x-kubernetes-int-or-string: true
+                        description: 'Requests describes the minimum amount of compute
+                          resources required. If Requests is omitted for a container,
+                          it defaults to Limits if that is explicitly specified, otherwise
+                          to an implementation-defined value. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
                         type: object
-                    required:
-                    - limits
-                    - requests
                     type: object
                   couchdb:
+                    description: ResourceRequirements describes the compute resource
+                      requirements.
                     properties:
                       limits:
-                        properties:
-                          cpu:
-                            default: "2"
-                            type: string
-                          memory:
-                            default: 4Gi
-                            type: string
-                        required:
-                        - cpu
-                        - memory
+                        additionalProperties:
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                          x-kubernetes-int-or-string: true
+                        description: 'Limits describes the maximum amount of compute
+                          resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
                         type: object
                       requests:
-                        properties:
-                          cpu:
-                            default: 10m
-                            type: string
-                          memory:
-                            default: 256Mi
-                            type: string
-                        required:
-                        - cpu
-                        - memory
+                        additionalProperties:
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                          x-kubernetes-int-or-string: true
+                        description: 'Requests describes the minimum amount of compute
+                          resources required. If Requests is omitted for a container,
+                          it defaults to Limits if that is explicitly specified, otherwise
+                          to an implementation-defined value. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
                         type: object
-                    required:
-                    - limits
-                    - requests
                     type: object
                   peer:
+                    description: ResourceRequirements describes the compute resource
+                      requirements.
                     properties:
                       limits:
-                        properties:
-                          cpu:
-                            default: "2"
-                            type: string
-                          memory:
-                            default: 4Gi
-                            type: string
-                        required:
-                        - cpu
-                        - memory
+                        additionalProperties:
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                          x-kubernetes-int-or-string: true
+                        description: 'Limits describes the maximum amount of compute
+                          resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
                         type: object
                       requests:
-                        properties:
-                          cpu:
-                            default: 10m
-                            type: string
-                          memory:
-                            default: 256Mi
-                            type: string
-                        required:
-                        - cpu
-                        - memory
+                        additionalProperties:
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                          x-kubernetes-int-or-string: true
+                        description: 'Requests describes the minimum amount of compute
+                          resources required. If Requests is omitted for a container,
+                          it defaults to Limits if that is explicitly specified, otherwise
+                          to an implementation-defined value. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
                         type: object
-                    required:
-                    - limits
-                    - requests
                     type: object
                 required:
                 - chaincode
@@ -349,18 +355,40 @@ spec:
               service:
                 properties:
                   type:
-                    allOf:
-                    - enum:
-                      - NodePort
-                      - ClusterIP
-                      - LoadBalancer
-                    - enum:
-                      - NodePort
-                      - ClusterIP
-                      - LoadBalancer
+                    description: Service Type string describes ingress methods for
+                      a service
+                    enum:
+                    - NodePort
+                    - ClusterIP
+                    - LoadBalancer
                     type: string
                 required:
                 - type
+                type: object
+              serviceMonitor:
+                nullable: true
+                properties:
+                  enabled:
+                    default: false
+                    type: boolean
+                  interval:
+                    default: 10s
+                    type: string
+                  labels:
+                    additionalProperties:
+                      type: string
+                    type: object
+                  sampleLimit:
+                    default: 0
+                    type: integer
+                  scrapeTimeout:
+                    default: 10s
+                    type: string
+                required:
+                - enabled
+                - interval
+                - sampleLimit
+                - scrapeTimeout
                 type: object
               stateDb:
                 enum:
@@ -373,10 +401,6 @@ spec:
                     properties:
                       accessMode:
                         default: ReadWriteOnce
-                        enum:
-                        - ReadWriteOnce
-                        - ReadOnlyMany
-                        - ReadWriteMany
                         type: string
                       size:
                         default: 5Gi
@@ -392,10 +416,6 @@ spec:
                     properties:
                       accessMode:
                         default: ReadWriteOnce
-                        enum:
-                        - ReadWriteOnce
-                        - ReadOnlyMany
-                        - ReadWriteMany
                         type: string
                       size:
                         default: 5Gi
@@ -411,10 +431,6 @@ spec:
                     properties:
                       accessMode:
                         default: ReadWriteOnce
-                        enum:
-                        - ReadWriteOnce
-                        - ReadOnlyMany
-                        - ReadWriteMany
                         type: string
                       size:
                         default: 5Gi
@@ -445,8 +461,7 @@ spec:
             - image
             - logging
             - mspID
-            - operationHosts
-            - operationIPs
+            - replicas
             - resources
             - secret
             - service
@@ -499,18 +514,22 @@ spec:
                 type: array
               message:
                 type: string
+              port:
+                type: integer
+              signCaCert:
+                type: string
+              signCert:
+                type: string
               status:
                 type: string
-              tls_cert:
+              tlsCaCert:
                 type: string
-              url:
+              tlsCert:
                 type: string
             required:
             - conditions
             - message
             - status
-            - tls_cert
-            - url
             type: object
         type: object
     served: true
