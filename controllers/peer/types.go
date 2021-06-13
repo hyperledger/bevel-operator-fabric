@@ -4,33 +4,47 @@ type RBAC struct {
 	Ns string `json:"ns"`
 }
 type FabricPeerChart struct {
+	Istio                    Istio             `json:"istio"`
+	Replicas                 int               `json:"replicas"`
 	ExternalChaincodeBuilder bool              `json:"externalChaincodeBuilder"`
 	CouchdbUsername          string            `json:"couchdbUsername"`
 	CouchdbPassword          string            `json:"couchdbPassword"`
 	Image                    Image             `json:"image"`
 	Rbac                     RBAC              `json:"rbac"`
 	DockerSocketPath         string            `json:"dockerSocketPath"`
-	Ingress                  Ingress           `json:"ingress"`
 	Peer                     Peer              `json:"peer"`
 	Cert                     string            `json:"cert"`
 	Key                      string            `json:"key"`
 	Hosts                    []string          `json:"hosts"`
-	OperationHosts           []string          `json:"operationHosts"`
 	TLS                      TLS               `json:"tls"`
 	OPSTLS                   TLS               `json:"opsTLS"`
 	Cacert                   string            `json:"cacert"`
+	IntCacert                string            `json:"intCAcert"`
 	Tlsrootcert              string            `json:"tlsrootcert"`
-	Resources                Resources         `json:"resources,omitempty"`
+	Resources                PeerResources     `json:"resources,omitempty"`
 	NodeSelector             NodeSelector      `json:"nodeSelector,omitempty"`
 	Tolerations              []interface{}     `json:"tolerations"`
 	Affinity                 Affinity          `json:"affinity,omitempty"`
 	ExternalHost             string            `json:"externalHost"`
 	FullnameOverride         string            `json:"fullnameOverride"`
-	HostAliases              []HostAliases     `json:"hostAliases"`
+	HostAliases              []HostAlias       `json:"hostAliases"`
 	Service                  Service           `json:"service"`
 	Persistence              PeerPersistence   `json:"persistence"`
 	Logging                  Logging           `json:"logging"`
 	ExternalBuilders         []ExternalBuilder `json:"externalBuilders"`
+	ServiceMonitor           ServiceMonitor    `json:"serviceMonitor"`
+}
+
+type ServiceMonitor struct {
+	Enabled           bool              `json:"enabled"`
+	Labels            map[string]string `json:"labels"`
+	Interval          string            `json:"interval"`
+	ScrapeTimeout     string            `json:"scrapeTimeout"`
+	Scheme            string            `json:"scheme"`
+	Relabelings       []interface{}     `json:"relabelings"`
+	TargetLabels      []interface{}     `json:"targetLabels"`
+	MetricRelabelings []interface{}     `json:"metricRelabelings"`
+	SampleLimit       int               `json:"sampleLimit"`
 }
 
 type ExternalBuilder struct {
@@ -40,10 +54,15 @@ type ExternalBuilder struct {
 }
 
 type Istio struct {
-	Port  int      `json:"port"`
-	Hosts []string `json:"hosts"`
+	Port           int      `json:"port"`
+	Hosts          []string `json:"hosts"`
+	IngressGateway string   `json:"ingressGateway"`
 }
-
+type PeerResources struct {
+	Peer      Resources `json:"peer"`
+	CouchDB   Resources `json:"couchdb"`
+	Chaincode Resources `json:"chaincode"`
+}
 type PeerPersistence struct {
 	Peer      Persistence `json:"peer"`
 	CouchDB   Persistence `json:"couchdb"`
@@ -55,13 +74,6 @@ type Image struct {
 	PullPolicy string `json:"pullPolicy"`
 }
 type Annotations struct {
-}
-type Ingress struct {
-	Enabled     bool          `json:"enabled"`
-	Annotations Annotations   `json:"annotations"`
-	Path        string        `json:"path"`
-	Hosts       []string      `json:"hosts"`
-	TLS         []interface{} `json:"tls"`
 }
 type Gossip struct {
 	Bootstrap         string `json:"bootstrap"`
@@ -107,7 +119,7 @@ type NodeSelector struct {
 }
 type Affinity struct {
 }
-type HostAliases struct {
+type HostAlias struct {
 	IP        string   `json:"ip"`
 	Hostnames []string `json:"hostnames"`
 }

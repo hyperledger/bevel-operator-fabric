@@ -1,35 +1,70 @@
 package ordnode
 
 type fabricOrdChart struct {
-	Genesis          string        `json:"genesis"`
-	Ingress          ingress       `json:"ingress"`
-	Cacert           string        `json:"cacert"`
-	Tlsrootcert      string        `json:"tlsrootcert"`
-	AdminCert        string        `json:"adminCert"`
-	Cert             string        `json:"cert"`
-	Key              string        `json:"key"`
-	TLS              tls           `json:"tls"`
-	FullnameOverride string        `json:"fullnameOverride"`
-	HostAliases      []hostAliases `json:"hostAliases"`
-	Service          service       `json:"service"`
-	Image            image         `json:"image"`
-	Persistence      persistence   `json:"persistence"`
-	Ord              ord           `json:"ord"`
-	Clientcerts      clientcerts   `json:"clientcerts"`
-	Hosts            []string      `json:"hosts"`
+	Istio                       Istio          `json:"istio"`
+	AdminIstio                  Istio          `json:"adminIstio"`
+	Replicas                    int            `json:"replicas"`
+	Genesis                     string         `json:"genesis"`
+	ChannelParticipationEnabled bool           `json:"channelParticipationEnabled"`
+	BootstrapMethod             string         `json:"bootstrapMethod"`
+	Admin                       admin          `json:"admin"`
+	Cacert                      string         `json:"cacert"`
+	Tlsrootcert                 string         `json:"tlsrootcert"`
+	AdminCert                   string         `json:"adminCert"`
+	Cert                        string         `json:"cert"`
+	Key                         string         `json:"key"`
+	TLS                         tls            `json:"tls"`
+	Resources                   Resources      `json:"resources,omitempty"`
+	FullnameOverride            string         `json:"fullnameOverride"`
+	HostAliases                 []HostAlias    `json:"hostAliases"`
+	Service                     service        `json:"service"`
+	Image                       image          `json:"image"`
+	Persistence                 persistence    `json:"persistence"`
+	Ord                         ord            `json:"ord"`
+	Clientcerts                 clientcerts    `json:"clientcerts"`
+	Hosts                       []string       `json:"hosts"`
+	Logging                     Logging        `json:"logging"`
+	ServiceMonitor              ServiceMonitor `json:"serviceMonitor"`
 }
-type ingress struct {
-	Enabled     bool          `json:"enabled"`
-	Annotations annotations   `json:"annotations"`
-	Path        string        `json:"path"`
-	Hosts       []string      `json:"hosts"`
-	TLS         []interface{} `json:"tls"`
+type Resources struct {
+	Limits   Limits   `json:"limits"`
+	Requests Requests `json:"requests"`
+}
+type Limits struct {
+	CPU    string `json:"cpu"`
+	Memory string `json:"memory"`
+}
+type Requests struct {
+	CPU    string `json:"cpu"`
+	Memory string `json:"memory"`
+}
+type ServiceMonitor struct {
+	Enabled           bool              `json:"enabled"`
+	Labels            map[string]string `json:"labels"`
+	Interval          string            `json:"interval"`
+	ScrapeTimeout     string            `json:"scrapeTimeout"`
+	Scheme            string            `json:"scheme"`
+	Relabelings       []interface{}     `json:"relabelings"`
+	TargetLabels      []interface{}     `json:"targetLabels"`
+	MetricRelabelings []interface{}     `json:"metricRelabelings"`
+	SampleLimit       int               `json:"sampleLimit"`
+}
+
+type Logging struct {
+	Spec string `json:"spec"`
+}
+
+type admin struct {
+	Cert          string `json:"cert"`
+	Key           string `json:"key"`
+	RootCAs       string `json:"rootCAs"`
+	ClientRootCAs string `json:"clientRootCAs"`
 }
 type tls struct {
 	Cert string `json:"cert"`
 	Key  string `json:"key"`
 }
-type hostAliases struct {
+type HostAlias struct {
 	IP        string   `json:"ip"`
 	Hostnames []string `json:"hostnames"`
 }
@@ -71,4 +106,10 @@ type ord struct {
 }
 type clientcerts struct {
 	CertPem string `json:"cert.pem,omitempty"`
+}
+
+type Istio struct {
+	Port           int      `json:"port"`
+	Hosts          []string `json:"hosts"`
+	IngressGateway string   `json:"ingressGateway"`
 }

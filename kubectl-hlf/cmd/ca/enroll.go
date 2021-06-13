@@ -1,13 +1,15 @@
 package ca
 
 import (
+	"fmt"
+	"io"
+	"io/ioutil"
+
 	"github.com/ghodss/yaml"
 	"github.com/kfsoftware/hlf-operator/controllers/certs"
 	"github.com/kfsoftware/hlf-operator/controllers/utils"
 	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/helpers"
 	"github.com/spf13/cobra"
-	"io"
-	"io/ioutil"
 )
 
 type EnrollOptions struct {
@@ -46,10 +48,18 @@ func (c *enrollCmd) run(args []string) error {
 	if err != nil {
 		return err
 	}
-
+	client, err := helpers.GetKubeClient()
+	if err != nil {
+		return err
+	}
+	ip, err := utils.GetPublicIPKubernetes(client)
+	if err != nil {
+		return err
+	}
+	url := fmt.Sprintf("https://%s:%d", ip, certAuth.Status.NodePort)
 	crt, pk, _, err := certs.EnrollUser(certs.EnrollUserRequest{
 		TLSCert:    certAuth.Status.TlsCert,
-		URL:        certAuth.Status.URL,
+		URL:        url,
 		Name:       c.enrollOpts.CAName,
 		MSPID:      c.enrollOpts.MspID,
 		User:       c.enrollOpts.User,

@@ -68,6 +68,20 @@ spec:
                     - default
                     - sw
                     type: object
+                  ca:
+                    nullable: true
+                    properties:
+                      cert:
+                        type: string
+                      chain:
+                        type: string
+                      key:
+                        type: string
+                    required:
+                    - cert
+                    - chain
+                    - key
+                    type: object
                   cfg:
                     properties:
                       affiliations:
@@ -257,6 +271,32 @@ spec:
                     - OU
                     - ST
                     - cn
+                    type: object
+                  tlsCa:
+                    nullable: true
+                    properties:
+                      cert:
+                        type: string
+                      clientAuth:
+                        properties:
+                          cert_file:
+                            items:
+                              type: string
+                            type: array
+                          type:
+                            description: NoClientCert, RequestClientCert, RequireAnyClientCert,
+                              VerifyClientCertIfGiven and RequireAndVerifyClientCert.
+                            type: string
+                        required:
+                        - cert_file
+                        - type
+                        type: object
+                      key:
+                        type: string
+                    required:
+                    - cert
+                    - clientAuth
+                    - key
                     type: object
                 required:
                 - bccsp
@@ -314,9 +354,13 @@ spec:
                       type: string
                     nullable: true
                     type: array
+                  ingressGateway:
+                    type: string
                   port:
                     nullable: true
                     type: integer
+                required:
+                - ingressGateway
                 type: object
               metrics:
                 properties:
@@ -346,34 +390,30 @@ spec:
                 - provider
                 type: object
               resources:
+                description: ResourceRequirements describes the compute resource requirements.
                 properties:
                   limits:
-                    properties:
-                      cpu:
-                        default: "2"
-                        type: string
-                      memory:
-                        default: 4Gi
-                        type: string
-                    required:
-                    - cpu
-                    - memory
+                    additionalProperties:
+                      anyOf:
+                      - type: integer
+                      - type: string
+                      pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                      x-kubernetes-int-or-string: true
+                    description: 'Limits describes the maximum amount of compute resources
+                      allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
                     type: object
                   requests:
-                    properties:
-                      cpu:
-                        default: 10m
-                        type: string
-                      memory:
-                        default: 256Mi
-                        type: string
-                    required:
-                    - cpu
-                    - memory
+                    additionalProperties:
+                      anyOf:
+                      - type: integer
+                      - type: string
+                      pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                      x-kubernetes-int-or-string: true
+                    description: 'Requests describes the minimum amount of compute
+                      resources required. If Requests is omitted for a container,
+                      it defaults to Limits if that is explicitly specified, otherwise
+                      to an implementation-defined value. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
                     type: object
-                required:
-                - limits
-                - requests
                 type: object
               rootCA:
                 properties:
@@ -411,22 +451,41 @@ spec:
               service:
                 properties:
                   type:
-                    enum:
-                    - NodePort
-                    - ClusterIP
-                    - LoadBalancer
+                    description: Service Type string describes ingress methods for
+                      a service
                     type: string
                 required:
                 - type
+                type: object
+              serviceMonitor:
+                nullable: true
+                properties:
+                  enabled:
+                    default: false
+                    type: boolean
+                  interval:
+                    default: 10s
+                    type: string
+                  labels:
+                    additionalProperties:
+                      type: string
+                    type: object
+                  sampleLimit:
+                    default: 0
+                    type: integer
+                  scrapeTimeout:
+                    default: 10s
+                    type: string
+                required:
+                - enabled
+                - interval
+                - sampleLimit
+                - scrapeTimeout
                 type: object
               storage:
                 properties:
                   accessMode:
                     default: ReadWriteOnce
-                    enum:
-                    - ReadWriteOnce
-                    - ReadOnlyMany
-                    - ReadWriteMany
                     type: string
                   size:
                     default: 5Gi
@@ -460,6 +519,20 @@ spec:
                     required:
                     - default
                     - sw
+                    type: object
+                  ca:
+                    nullable: true
+                    properties:
+                      cert:
+                        type: string
+                      chain:
+                        type: string
+                      key:
+                        type: string
+                    required:
+                    - cert
+                    - chain
+                    - key
                     type: object
                   cfg:
                     properties:
@@ -650,6 +723,32 @@ spec:
                     - OU
                     - ST
                     - cn
+                    type: object
+                  tlsCa:
+                    nullable: true
+                    properties:
+                      cert:
+                        type: string
+                      clientAuth:
+                        properties:
+                          cert_file:
+                            items:
+                              type: string
+                            type: array
+                          type:
+                            description: NoClientCert, RequestClientCert, RequireAnyClientCert,
+                              VerifyClientCertIfGiven and RequireAndVerifyClientCert.
+                            type: string
+                        required:
+                        - cert_file
+                        - type
+                        type: object
+                      key:
+                        type: string
+                    required:
+                    - cert
+                    - clientAuth
+                    - key
                     type: object
                 required:
                 - bccsp
@@ -726,13 +825,9 @@ spec:
                   - type
                   type: object
                 type: array
-              host:
-                description: Host of the FabricCA
-                type: string
               message:
                 type: string
-              port:
-                description: Port of the FabricCA
+              nodePort:
                 type: integer
               status:
                 description: Status of the FabricCA
@@ -743,19 +838,13 @@ spec:
               tlsca_cert:
                 description: Root certificate for TLS certificates generated by FabricCA
                 type: string
-              url:
-                description: URL accessible for the FabricCA
-                type: string
             required:
             - ca_cert
             - conditions
-            - host
             - message
-            - port
             - status
             - tls_cert
             - tlsca_cert
-            - url
             type: object
         type: object
     served: true

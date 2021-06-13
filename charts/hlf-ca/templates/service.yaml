@@ -11,6 +11,10 @@ spec:
       targetPort: 7054
       protocol: TCP
       name: http
+    - port: 9443
+      targetPort: 9443
+      protocol: TCP
+      name: operations
   selector:
     app: {{ include "hlf-ca.name" . }}
     release: {{ .Release.Name }}

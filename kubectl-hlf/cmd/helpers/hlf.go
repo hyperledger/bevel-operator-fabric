@@ -3,6 +3,8 @@ package helpers
 import (
 	"context"
 	"fmt"
+	log "github.com/sirupsen/logrus"
+
 	hlfv1alpha1 "github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
 	operatorv1 "github.com/kfsoftware/hlf-operator/pkg/client/clientset/versioned"
 	"github.com/pkg/errors"
@@ -28,14 +30,22 @@ type ClusterCA struct {
 	Spec   hlfv1alpha1.FabricCASpec
 	Status hlfv1alpha1.FabricCAStatus
 	Name   string
+	Item   hlfv1alpha1.FabricCA
 }
+
+func (c ClusterCA) GetFullName() string {
+	return fmt.Sprintf("%s.%s", c.Object.Name, c.Object.Namespace)
+}
+
 type ClusterOrderingService struct {
+	MSPID    string
 	Name     string
 	Object   hlfv1alpha1.FabricOrderingService
 	Spec     hlfv1alpha1.FabricOrderingServiceSpec
 	Status   hlfv1alpha1.FabricOrderingServiceStatus
 	Orderers []*ClusterOrdererNode
 }
+
 type ClusterOrdererNode struct {
 	Name   string
 	Spec   hlfv1alpha1.FabricOrdererNodeSpec
@@ -69,6 +79,7 @@ func GetClusterCAs(oclient *operatorv1.Clientset, ns string) ([]*ClusterCA, erro
 			Spec:   certAuth.Spec,
 			Status: certAuth.Status,
 			Name:   certauthName,
+			Item:   certAuth,
 		})
 	}
 	return certAuths, nil
@@ -79,11 +90,36 @@ func GetClusterOrderers(
 	ns string,
 ) ([]*Organization, []*ClusterOrderingService, error) {
 	ctx := context.Background()
+	ordererNodes, err := oclient.HlfV1alpha1().FabricOrdererNodes(ns).List(ctx, v1.ListOptions{})
+	if err != nil {
+		return nil, nil, err
+	}
+
 	orderingServices, err := oclient.HlfV1alpha1().FabricOrderingServices(ns).List(ctx, v1.ListOptions{})
 	if err != nil {
 		return nil, nil, err
 	}
 	var orderers []*ClusterOrderingService
+	if len(ordererNodes.Items) > 0 {
+		orderingService := &ClusterOrderingService{
+			Name: ordererNodes.Items[0].FullName(),
+			//Object:   ordService,
+			MSPID: ordererNodes.Items[0].Spec.MspID,
+			//Status:   ordService.Status,
+			Orderers: []*ClusterOrdererNode{},
+		}
+		orderers = append(orderers, orderingService)
+		for _, ordNode := range ordererNodes.Items {
+			orderingService.Orderers = append(
+				orderingService.Orderers,
+				&ClusterOrdererNode{
+					Name:   ordNode.FullName(),
+					Spec:   ordNode.Spec,
+					Status: ordNode.Status,
+				},
+			)
+		}
+	}
 	for _, ordService := range orderingServices.Items {
 		ordNodesRes, err := oclient.HlfV1alpha1().FabricOrdererNodes(ns).List(
 			ctx,
@@ -97,6 +133,7 @@ func GetClusterOrderers(
 		orderingService := &ClusterOrderingService{
 			Name:     ordService.FullName(),
 			Object:   ordService,
+			MSPID:    ordService.Spec.MspID,
 			Spec:     ordService.Spec,
 			Status:   ordService.Status,
 			Orderers: []*ClusterOrdererNode{},
@@ -120,7 +157,7 @@ func GetClusterOrderers(
 	for _, ord := range orderers {
 		org := &Organization{
 			Type:             OrdererType,
-			MspID:            ord.Spec.MspID,
+			MspID:            ord.MSPID,
 			OrderingServices: []*ClusterOrderingService{ord},
 			Peers:            []*ClusterPeer{},
 		}
@@ -128,17 +165,39 @@ func GetClusterOrderers(
 	}
 	return organizations, orderers, nil
 }
+
+func GetClusterOrdererNodes(
+	oclient *operatorv1.Clientset,
+	ns string,
+) ([]*ClusterOrdererNode, error) {
+	ctx := context.Background()
+	ordererNodeList, err := oclient.HlfV1alpha1().FabricOrdererNodes(ns).List(ctx, v1.ListOptions{})
+	if err != nil {
+		return nil, err
+	}
+	var ordererNodes []*ClusterOrdererNode
+
+	for _, ordNode := range ordererNodeList.Items {
+		ordererNodes = append(
+			ordererNodes,
+			&ClusterOrdererNode{
+				Name:   ordNode.FullName(),
+				Spec:   ordNode.Spec,
+				Status: ordNode.Status,
+			},
+		)
+	}
+	log.Printf("Nodes=%v", ordererNodes)
+	return ordererNodes, nil
+}
 func GetCertAuthByURL(oclient *operatorv1.Clientset, host string, port int) (*ClusterCA, error) {
 	certAuths, err := GetClusterCAs(oclient, "")
 	if err != nil {
 		return nil, err
 	}
 	for _, certAuth := range certAuths {
-		if
-		// if host and port is specified by NodePort
-		certAuth.Status.Host == host && certAuth.Status.Port == port ||
-			// if host and port is specified by kubernetes DNS
-			certAuth.Name == host && certAuth.Status.Port == 7054 {
+		if // if host and port is specified by kubernetes DNS
+		certAuth.Item.Name == host || (certAuth.Status.NodePort != 7054 && certAuth.Status.NodePort == port) {
 			return certAuth, nil
 		}
 
@@ -185,6 +244,19 @@ func GetPeerByFullName(oclient *operatorv1.Clientset, name string) (*ClusterPeer
 
 	}
 	return nil, errors.Errorf("Peer with name=%s not found", name)
+}
+func GetOrdererNodeByFullName(oclient *operatorv1.Clientset, name string) (*ClusterOrdererNode, error) {
+	ordererNodes, err := GetClusterOrdererNodes(oclient, "")
+	if err != nil {
+		return nil, err
+	}
+	for _, ordNode := range ordererNodes {
+		if ordNode.Name == name {
+			return ordNode, nil
+		}
+
+	}
+	return nil, errors.Errorf("Orderer Node with name=%s not found", name)
 }
 func GetCertAuthByFullName(oclient *operatorv1.Clientset, name string) (*ClusterCA, error) {
 	certAuths, err := GetClusterCAs(oclient, "")
