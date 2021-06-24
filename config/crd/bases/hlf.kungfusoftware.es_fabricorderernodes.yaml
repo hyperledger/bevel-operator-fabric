@@ -331,6 +331,10 @@ spec:
                   - type
                   type: object
                 type: array
+              lastCertificateUpdate:
+                format: date-time
+                nullable: true
+                type: string
               message:
                 type: string
               operationsPort:
@@ -342,6 +346,10 @@ spec:
               tlsAdminCert:
                 type: string
               tlsCert:
+                type: string
+              updateCertificateTime:
+                format: date-time
+                nullable: true
                 type: string
             required:
             - conditions
