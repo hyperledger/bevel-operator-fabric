@@ -376,7 +376,7 @@ func (r *FabricPeerReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) 
 					// update the certs
 					// scale up the peer
 					log.Infof("Trying to upgrade certs")
-					err := r.updateCerts(req, fabricPeer, fabricPeer, clientSet, releaseName, svc, ctx, cfg, ns)
+					err := r.updateCerts(req, fabricPeer, clientSet, releaseName, svc, ctx, cfg, ns)
 					if err != nil {
 						log.Errorf("Error renewing certs: %v", err)
 						setConditionStatus(fabricPeer, hlfv1alpha1.FailedStatus, false, err, false)
@@ -385,7 +385,7 @@ func (r *FabricPeerReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) 
 				}
 			}
 		} else if fabricPeer.Status.LastCertificateUpdate == nil && fabricPeer.Spec.UpdateCertificateTime != nil {
-			err := r.updateCerts(req, fabricPeer, fabricPeer, clientSet, releaseName, svc, ctx, cfg, ns)
+			err := r.updateCerts(req, fabricPeer, clientSet, releaseName, svc, ctx, cfg, ns)
 			if err != nil {
 				log.Errorf("Error renewing certs: %v", err)
 				setConditionStatus(fabricPeer, hlfv1alpha1.FailedStatus, false, err, false)
@@ -497,16 +497,16 @@ func (r *FabricPeerReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) 
 	}
 }
 
-func (r *FabricPeerReconciler) updateCerts(req ctrl.Request, fabricPeer *hlfv1alpha1.FabricPeer, fPeer *hlfv1alpha1.FabricPeer, clientSet *kubernetes.Clientset, releaseName string, svc *corev1.Service, ctx context.Context, cfg *action.Configuration, ns string) ( error) {
+func (r *FabricPeerReconciler) updateCerts(req ctrl.Request, fPeer *hlfv1alpha1.FabricPeer, clientSet *kubernetes.Clientset, releaseName string, svc *corev1.Service, ctx context.Context, cfg *action.Configuration, ns string) ( error) {
 	log.Infof("Trying to upgrade certs")
-	setConditionStatus(fabricPeer, hlfv1alpha1.UpdatingCertificates, false, nil, false)
+	setConditionStatus(fPeer, hlfv1alpha1.UpdatingCertificates, false, nil, false)
 	config, err := GetConfig(fPeer, clientSet, releaseName, req.Namespace, svc, true)
 	if err != nil {
 		log.Errorf("Error getting the config: %v", err)
 		return err
 	}
 	//config.Replicas = 0
-	err = r.upgradeChart(cfg, err, ns, fabricPeer, ctx, releaseName, config)
+	err = r.upgradeChart(cfg, err, ns, fPeer, ctx, releaseName, config)
 	if err != nil {
 		return err
 	}
@@ -526,21 +526,6 @@ func (r *FabricPeerReconciler) updateCerts(req ctrl.Request, fabricPeer *hlfv1al
 	if err != nil {
 		return err
 	}
-	s, err := GetPeerState(cfg, r.Config, releaseName, ns, svc)
-	if err != nil {
-		return err
-	}
-	fPeer.Status.Status = s.Status
-	fPeer.Status.TlsCert = s.TlsCert
-	fPeer.Status.TlsCACert = s.TlsCACert
-	fPeer.Status.SignCert = s.SignCert
-	fPeer.Status.SignCACert = s.SignCACert
-	fPeer.Status.NodePort = s.NodePort
-	fPeer.Status.Conditions.SetCondition(status.Condition{
-		Type:   status.ConditionType(s.Status),
-		Status: "True",
-	})
-	fPeer.Status.LastCertificateUpdate = fPeer.Spec.UpdateCertificateTime
 	return nil
 }
 
@@ -565,6 +550,7 @@ func (r *FabricPeerReconciler) upgradeChart(cfg *action.Configuration, err error
 	if err != nil {
 		return err
 	}
+	cmd.Wait = true
 	release, err := cmd.Run(releaseName, ch, inInterface)
 	if err != nil {
 		return err
