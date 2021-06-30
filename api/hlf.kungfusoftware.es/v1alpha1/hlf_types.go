@@ -305,8 +305,11 @@ const (
 	BootstrapMethodFile = "file"
 )
 
-// FabricOrderingServiceSpec defines the desired state of FabricOrderingService
+// FabricOrdererNodeSpec defines the desired state of FabricOrdererNode
 type FabricOrdererNodeSpec struct {
+	// +optional
+	// +nullable
+	UpdateCertificateTime *metav1.Time `json:"updateCertificateTime"`
 	// +optional
 	// +nullable
 	ServiceMonitor *ServiceMonitor `json:"serviceMonitor"`
@@ -383,10 +386,6 @@ type FabricOrderingServiceStatus struct {
 
 // FabricOrdererNodeStatus defines the observed state of FabricOrdererNode
 type FabricOrdererNodeStatus struct {
-	// +optional
-	// +nullable
-	UpdateCertificateTime *metav1.Time `json:"updateCertificateTime"`
-
 	Conditions status.Conditions `json:"conditions"`
 	Status     DeploymentStatus  `json:"status"`
 
