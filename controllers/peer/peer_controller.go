@@ -366,6 +366,7 @@ func (r *FabricPeerReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) 
 			setConditionStatus(fabricPeer, hlfv1alpha1.FailedStatus, false, err, false)
 			return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricPeer)
 		}
+		lastTimeCertsRenewed := fabricPeer.Status.LastCertificateUpdate
 		if fabricPeer.Status.LastCertificateUpdate != nil {
 			if fabricPeer.Status.LastCertificateUpdate != nil {
 				lastCertificateUpdate := fabricPeer.Status.LastCertificateUpdate.Time
@@ -382,15 +383,18 @@ func (r *FabricPeerReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) 
 						setConditionStatus(fabricPeer, hlfv1alpha1.FailedStatus, false, err, false)
 						return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricPeer)
 					}
+					lastTimeCertsRenewed = fabricPeer.Spec.UpdateCertificateTime
 				}
 			}
 		} else if fabricPeer.Status.LastCertificateUpdate == nil && fabricPeer.Spec.UpdateCertificateTime != nil {
+			log.Infof("Trying to upgrade certs")
 			err := r.updateCerts(req, fabricPeer, clientSet, releaseName, svc, ctx, cfg, ns)
 			if err != nil {
 				log.Errorf("Error renewing certs: %v", err)
 				setConditionStatus(fabricPeer, hlfv1alpha1.FailedStatus, false, err, false)
 				return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricPeer)
 			}
+			lastTimeCertsRenewed = fabricPeer.Spec.UpdateCertificateTime
 		}
 		s, err := GetPeerState(cfg, r.Config, releaseName, ns, svc)
 		if err != nil {
@@ -405,6 +409,7 @@ func (r *FabricPeerReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) 
 		fPeer.Status.SignCert = s.SignCert
 		fPeer.Status.SignCACert = s.SignCACert
 		fPeer.Status.NodePort = s.NodePort
+		fPeer.Status.LastCertificateUpdate = lastTimeCertsRenewed
 		fPeer.Status.Conditions.SetCondition(status.Condition{
 			Type:   status.ConditionType(s.Status),
 			Status: "True",
@@ -497,7 +502,7 @@ func (r *FabricPeerReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) 
 	}
 }
 
-func (r *FabricPeerReconciler) updateCerts(req ctrl.Request, fPeer *hlfv1alpha1.FabricPeer, clientSet *kubernetes.Clientset, releaseName string, svc *corev1.Service, ctx context.Context, cfg *action.Configuration, ns string) ( error) {
+func (r *FabricPeerReconciler) updateCerts(req ctrl.Request, fPeer *hlfv1alpha1.FabricPeer, clientSet *kubernetes.Clientset, releaseName string, svc *corev1.Service, ctx context.Context, cfg *action.Configuration, ns string) error {
 	log.Infof("Trying to upgrade certs")
 	setConditionStatus(fPeer, hlfv1alpha1.UpdatingCertificates, false, nil, false)
 	config, err := GetConfig(fPeer, clientSet, releaseName, req.Namespace, svc, true)
