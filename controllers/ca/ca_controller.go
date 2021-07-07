@@ -753,6 +753,7 @@ func Reconcile(
 			return ctrl.Result{}, err
 		}
 		cmd := action.NewUpgrade(cfg)
+		cmd.MaxHistory = 5
 		settings := cli.New()
 		chartPath, err := cmd.LocateChart(r.ChartPath, settings)
 		ch, err := loader.Load(chartPath)
