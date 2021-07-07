@@ -401,6 +401,7 @@ func (r *FabricOrdererNodeReconciler) upgradeChart(
 		return err
 	}
 	cmd := action.NewUpgrade(cfg)
+	cmd.MaxHistory = 5
 	err = os.Setenv("HELM_NAMESPACE", ns)
 	if err != nil {
 		return err
