@@ -11,10 +11,10 @@ import (
 	"github.com/go-logr/logr"
 	hlfv1alpha1 "github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
 	"github.com/kfsoftware/hlf-operator/controllers/certs"
+	"github.com/kfsoftware/hlf-operator/controllers/hlfmetrics"
 	"github.com/kfsoftware/hlf-operator/controllers/utils"
 	"github.com/operator-framework/operator-lib/status"
 	"github.com/pkg/errors"
-	"github.com/prometheus/client_golang/prometheus"
 	log "github.com/sirupsen/logrus"
 	"helm.sh/helm/v3/pkg/action"
 	"helm.sh/helm/v3/pkg/chart/loader"
@@ -35,24 +35,13 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
-	"sigs.k8s.io/controller-runtime/pkg/metrics"
 	"strings"
 	"time"
 )
 
-var (
-	ordererCertificateExpiryTimeSeconds = prometheus.NewGauge(
-		prometheus.GaugeOpts{
-			Name: "hlf_operator_orderer_certificate_expiration_timestamp_seconds",
-			Help: "The date after which the certificate expires. Expressed as a Unix Epoch Time.",
-		},
-	)
-)
 
-func init() {
-	// Register custom metrics with the global prometheus registry
-	metrics.Registry.MustRegister(ordererCertificateExpiryTimeSeconds)
-}
+
+
 
 // FabricOrdererNodeReconciler reconciles a FabricOrdererNode object
 type FabricOrdererNodeReconciler struct {
@@ -203,7 +192,7 @@ func (r *FabricOrdererNodeReconciler) Reconcile(req ctrl.Request) (ctrl.Result, 
 			}
 			lastTimeCertsRenewed = fabricOrdererNode.Spec.UpdateCertificateTime
 		}
-		s, err := GetOrdererState(cfg, r.Config, releaseName, ns)
+		s, err := GetOrdererState(cfg, r.Config, releaseName, ns, fabricOrdererNode)
 		if err != nil {
 			log.Printf("Failed to get orderer state=%v", err)
 			return ctrl.Result{}, err
@@ -465,9 +454,11 @@ func GetOrdererDeployment(conf *action.Configuration, config *rest.Config, relea
 	return nil, errors.Errorf("Deployment not found")
 
 }
+
 const (
 	deploymentRestartTriggerAnnotation = "es.kungfusoftware.hlf.deployment-restart.timestamp"
 )
+
 func restartDeployment(config *rest.Config, deployment *appsv1.Deployment) error {
 	clientSet, err := utils.GetClientKubeWithConf(config)
 	if err != nil {
@@ -972,7 +963,7 @@ func actionLogger(logger logr.Logger) func(format string, v ...interface{}) {
 	}
 }
 
-func GetOrdererState(conf *action.Configuration, config *rest.Config, releaseName string, ns string) (*hlfv1alpha1.FabricOrdererNodeStatus, error) {
+func GetOrdererState(conf *action.Configuration, config *rest.Config, releaseName string, ns string, ordNode *hlfv1alpha1.FabricOrdererNode) (*hlfv1alpha1.FabricOrdererNodeStatus, error) {
 	ctx := context.Background()
 	cmd := action.NewGet(conf)
 	rel, err := cmd.Run(releaseName)
@@ -992,18 +983,37 @@ func GetOrdererState(conf *action.Configuration, config *rest.Config, releaseNam
 		return nil, err
 	}
 	r.TlsCert = string(utils.EncodeX509Certificate(tlsCrt))
+	hlfmetrics.UpdateCertificateExpiry(
+		"orderer",
+		"tls",
+		tlsCrt,
+		ordNode.Name,
+		ns,
+	)
 	tlsAdminCrt, _, _, _, err := getExistingTLSAdminCrypto(clientSet, releaseName, ns)
 	if err != nil {
 		return nil, err
 	}
 	r.TlsAdminCert = string(utils.EncodeX509Certificate(tlsAdminCrt))
-
+	hlfmetrics.UpdateCertificateExpiry(
+		"orderer",
+		"tls_admin",
+		tlsAdminCrt,
+		ordNode.Name,
+		ns,
+	)
 	signCrt, _, _, err := getExistingSignCrypto(clientSet, releaseName, ns)
 	if err != nil {
 		return nil, err
 	}
 	r.SignCert = string(utils.EncodeX509Certificate(signCrt))
-
+	hlfmetrics.UpdateCertificateExpiry(
+		"orderer",
+		"sign",
+		signCrt,
+		ordNode.Name,
+		ns,
+	)
 	objects := utils.ParseK8sYaml([]byte(rel.Manifest))
 	for _, object := range objects {
 		kind := object.GetObjectKind().GroupVersionKind().Kind
