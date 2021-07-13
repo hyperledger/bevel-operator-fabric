@@ -394,6 +394,8 @@ type FabricOrdererNodeStatus struct {
 	LastCertificateUpdate *metav1.Time `json:"lastCertificateUpdate"`
 
 	// +optional
+	SignCert string `json:"signCert"`
+	// +optional
 	TlsCert string `json:"tlsCert"`
 	// +optional
 	TlsAdminCert string `json:"tlsAdminCert"`
