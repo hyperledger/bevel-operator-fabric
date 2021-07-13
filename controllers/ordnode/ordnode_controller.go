@@ -8,18 +8,13 @@ import (
 	"encoding/json"
 	"encoding/pem"
 	"fmt"
-	"github.com/pkg/errors"
-	"k8s.io/apimachinery/pkg/types"
-	"os"
-	"reflect"
-	"strings"
-	"time"
-
 	"github.com/go-logr/logr"
 	hlfv1alpha1 "github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
 	"github.com/kfsoftware/hlf-operator/controllers/certs"
 	"github.com/kfsoftware/hlf-operator/controllers/utils"
 	"github.com/operator-framework/operator-lib/status"
+	"github.com/pkg/errors"
+	"github.com/prometheus/client_golang/prometheus"
 	log "github.com/sirupsen/logrus"
 	"helm.sh/helm/v3/pkg/action"
 	"helm.sh/helm/v3/pkg/chart/loader"
@@ -30,14 +25,34 @@ import (
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/cli-runtime/pkg/genericclioptions"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/kubernetes/pkg/api/v1/pod"
+	"os"
+	"reflect"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
+	"sigs.k8s.io/controller-runtime/pkg/metrics"
+	"strings"
+	"time"
 )
+
+var (
+	ordererCertificateExpiryTimeSeconds = prometheus.NewGauge(
+		prometheus.GaugeOpts{
+			Name: "hlf_operator_orderer_certificate_expiration_timestamp_seconds",
+			Help: "The date after which the certificate expires. Expressed as a Unix Epoch Time.",
+		},
+	)
+)
+
+func init() {
+	// Register custom metrics with the global prometheus registry
+	metrics.Registry.MustRegister(ordererCertificateExpiryTimeSeconds)
+}
 
 // FabricOrdererNodeReconciler reconciles a FabricOrdererNode object
 type FabricOrdererNodeReconciler struct {
@@ -981,6 +996,13 @@ func GetOrdererState(conf *action.Configuration, config *rest.Config, releaseNam
 		return nil, err
 	}
 	r.TlsAdminCert = string(utils.EncodeX509Certificate(tlsAdminCrt))
+
+	signCrt, _, _, err := getExistingSignCrypto(clientSet, releaseName, ns)
+	if err != nil {
+		return nil, err
+	}
+	r.SignCert = string(utils.EncodeX509Certificate(signCrt))
+
 	objects := utils.ParseK8sYaml([]byte(rel.Manifest))
 	for _, object := range objects {
 		kind := object.GetObjectKind().GroupVersionKind().Kind
