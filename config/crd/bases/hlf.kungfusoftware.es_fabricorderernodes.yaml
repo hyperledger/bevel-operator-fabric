@@ -345,6 +345,8 @@ spec:
                 type: integer
               port:
                 type: integer
+              signCert:
+                type: string
               status:
                 type: string
               tlsAdminCert:
