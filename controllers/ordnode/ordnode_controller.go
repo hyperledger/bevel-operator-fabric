@@ -212,6 +212,7 @@ func (r *FabricOrdererNodeReconciler) Reconcile(req ctrl.Request) (ctrl.Result, 
 		fOrderer.Status.Status = s.Status
 		fOrderer.Status.NodePort = s.NodePort
 		fOrderer.Status.TlsCert = s.TlsCert
+		fOrderer.Status.SignCert = s.SignCert
 		fOrderer.Status.TlsAdminCert = s.TlsAdminCert
 		fOrderer.Status.AdminPort = s.AdminPort
 		fOrderer.Status.OperationsPort = s.OperationsPort
