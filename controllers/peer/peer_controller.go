@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"encoding/pem"
 	"fmt"
+	"github.com/kfsoftware/hlf-operator/controllers/hlfmetrics"
 	"k8s.io/apimachinery/pkg/types"
 	"os"
 	"reflect"
@@ -203,13 +204,26 @@ func GetPeerState(conf *action.Configuration, config *rest.Config, releaseName s
 	}
 	r.TlsCert = string(utils.EncodeX509Certificate(tlsCrt))
 	r.TlsCACert = string(utils.EncodeX509Certificate(rootTlsCrt))
-
+	hlfmetrics.UpdateCertificateExpiry(
+		"peer",
+		"tls",
+		tlsCrt,
+		releaseName,
+		ns,
+	)
 	signCrt, _, rootSignCrt, err := getExistingSignCrypto(clientSet, releaseName, ns)
 	if err != nil {
 		return nil, err
 	}
 	r.SignCert = string(utils.EncodeX509Certificate(signCrt))
 	r.SignCACert = string(utils.EncodeX509Certificate(rootSignCrt))
+	hlfmetrics.UpdateCertificateExpiry(
+		"peer",
+		"sign",
+		signCrt,
+		releaseName,
+		ns,
+	)
 	return r, nil
 }
 
