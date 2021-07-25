@@ -77,7 +77,6 @@ type ServiceMonitor struct {
 type FabricPeerCouchdbExporter struct {
 	// +kubebuilder:default:=false
 	Enabled   bool                        `json:"enabled"`
-	Resources corev1.ResourceRequirements `json:"resources"`
 	// +kubebuilder:default:="gesellix/couchdb-prometheus-exporter"
 	Image string `json:"image"`
 	// +kubebuilder:default:="v30.0.0"
