@@ -10,6 +10,12 @@ istio:
 
 dockerSocketPath: /var/run/docker.sock
 
+couchdbExporter:
+  enabled: false
+  image: "gesellix/couchdb-prometheus-exporter"
+  tag: "v30.0.0"
+  pullPolicy: IfNotPresent
+
 ingress:
   enabled: false
   annotations: { }
@@ -195,6 +201,13 @@ resources:
     requests:
       cpu: 100m
       memory: 128Mi
+  couchdbExporter:
+    limits:
+      cpu: 300m
+      memory: 128Mi
+    requests:
+      cpu: 100m
+      memory: 64Mi
   couchdb:
     limits:
       cpu: 100m
@@ -275,3 +288,5 @@ serviceMonitor:
   metricRelabelings: [ ]
   sampleLimit: 0
 
+couchdbUsername: "couchdb"
+couchdbPassword: "couchdb"
