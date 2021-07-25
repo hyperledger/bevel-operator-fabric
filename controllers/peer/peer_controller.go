@@ -262,7 +262,6 @@ const chartName = "hlf-peer"
 // +kubebuilder:rbac:groups="",resources=replicasets,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=extensions,resources=replicasets,verbs=get;list;watch;create;update;patch;delete
 
-
 // +kubebuilder:rbac:groups=apps,resources=persistentvolumeclaims,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups="",resources=persistentvolumeclaims,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=extensions,resources=persistentvolumeclaims,verbs=get;list;watch;create;update;patch;delete
@@ -1053,6 +1052,36 @@ func GetConfig(
 			IngressGateway: "",
 		}
 	}
+	exporter := CouchDBExporter{
+		Enabled:    false,
+		Image:      "",
+		Tag:        "",
+		PullPolicy: "",
+	}
+	var couchDBExporterResources *Resources
+	if spec.CouchDBExporter != nil && spec.CouchDBExporter.Enabled {
+		exporter.Enabled = spec.CouchDBExporter.Enabled
+		if spec.CouchDBExporter.Image != "" {
+			exporter.Image = spec.CouchDBExporter.Image
+		}
+		if spec.CouchDBExporter.Tag != "" {
+			exporter.Tag = spec.CouchDBExporter.Tag
+		}
+		if spec.CouchDBExporter.ImagePullPolicy != "" {
+			exporter.PullPolicy = string(spec.CouchDBExporter.ImagePullPolicy)
+		}
+		couchDBExporterResources = &Resources{
+			Requests: Requests{
+				CPU:    spec.CouchDBExporter.Resources.Requests.Cpu().String(),
+				Memory: spec.CouchDBExporter.Resources.Requests.Memory().String(),
+			},
+			Limits: Limits{
+				CPU:    spec.CouchDBExporter.Resources.Limits.Cpu().String(),
+				Memory: spec.CouchDBExporter.Resources.Limits.Memory().String(),
+			},
+		}
+	}
+
 	var c = FabricPeerChart{
 		Replicas: spec.Replicas,
 		Istio:    istio,
@@ -1064,6 +1093,7 @@ func GetConfig(
 		ServiceMonitor:   monitor,
 		ExternalBuilders: externalBuilders,
 		DockerSocketPath: spec.DockerSocketPath,
+		CouchDBExporter:  exporter,
 		Peer: Peer{
 			DatabaseType: stateDb,
 			MspID:        spec.MspID,
@@ -1128,6 +1158,7 @@ func GetConfig(
 					Memory: spec.Resources.Chaincode.Limits.Memory().String(),
 				},
 			},
+			CouchDBExporter: couchDBExporterResources,
 		},
 		NodeSelector:     NodeSelector{},
 		Tolerations:      nil,
