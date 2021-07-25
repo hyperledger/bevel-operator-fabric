@@ -1070,15 +1070,17 @@ func GetConfig(
 		if spec.CouchDBExporter.ImagePullPolicy != "" {
 			exporter.PullPolicy = string(spec.CouchDBExporter.ImagePullPolicy)
 		}
-		couchDBExporterResources = &Resources{
-			Requests: Requests{
-				CPU:    spec.CouchDBExporter.Resources.Requests.Cpu().String(),
-				Memory: spec.CouchDBExporter.Resources.Requests.Memory().String(),
-			},
-			Limits: Limits{
-				CPU:    spec.CouchDBExporter.Resources.Limits.Cpu().String(),
-				Memory: spec.CouchDBExporter.Resources.Limits.Memory().String(),
-			},
+		if spec.Resources.CouchDBExporter != nil {
+			couchDBExporterResources = &Resources{
+				Requests: Requests{
+					CPU:    spec.Resources.CouchDBExporter.Requests.Cpu().String(),
+					Memory: spec.Resources.CouchDBExporter.Requests.Memory().String(),
+				},
+				Limits: Limits{
+					CPU:    spec.Resources.CouchDBExporter.Limits.Cpu().String(),
+					Memory: spec.Resources.CouchDBExporter.Limits.Memory().String(),
+				},
+			}
 		}
 	}
 
