@@ -74,6 +74,17 @@ type ServiceMonitor struct {
 	// +kubebuilder:default:="10s"
 	ScrapeTimeout string `json:"scrapeTimeout"`
 }
+type FabricPeerCouchdbExporter struct {
+	// +kubebuilder:default:=false
+	Enabled   bool                        `json:"enabled"`
+	Resources corev1.ResourceRequirements `json:"resources"`
+	// +kubebuilder:default:="gesellix/couchdb-prometheus-exporter"
+	Image string `json:"image"`
+	// +kubebuilder:default:="v30.0.0"
+	Tag string `json:"tag"`
+	// +kubebuilder:default:="IfNotPresent"
+	ImagePullPolicy corev1.PullPolicy `json:"imagePullPolicy"`
+}
 
 // FabricPeerSpec defines the desired state of FabricPeer
 type FabricPeerSpec struct {
@@ -87,6 +98,10 @@ type FabricPeerSpec struct {
 	// +optional
 	// +nullable
 	HostAliases []corev1.HostAlias `json:"hostAliases"`
+
+	// +optional
+	// +nullable
+	CouchDBExporter *FabricPeerCouchdbExporter `json:"couchDBexporter"`
 
 	// +kubebuilder:default:=1
 	Replicas int `json:"replicas"`
@@ -106,7 +121,8 @@ type FabricPeerSpec struct {
 	Gossip           FabricPeerSpecGossip `json:"gossip"`
 	ExternalEndpoint string               `json:"externalEndpoint"`
 	// +kubebuilder:validation:MinLength=1
-	Tag                      string            `json:"tag"`
+	Tag string `json:"tag"`
+	// +kubebuilder:default:="IfNotPresent"
 	ImagePullPolicy          corev1.PullPolicy `json:"imagePullPolicy,omitempty"`
 	ExternalChaincodeBuilder bool              `json:"external_chaincode_builder"`
 	CouchDB                  FabricPeerCouchDB `json:"couchdb"`
@@ -125,6 +141,9 @@ type FabricPeerResources struct {
 	Peer      corev1.ResourceRequirements `json:"peer"`
 	CouchDB   corev1.ResourceRequirements `json:"couchdb"`
 	Chaincode corev1.ResourceRequirements `json:"chaincode"`
+	// +optional
+	// +nullable
+	CouchDBExporter *corev1.ResourceRequirements `json:"couchdbExporter"`
 }
 type FabricPeerDiscovery struct {
 	Period      string `json:"period"`
