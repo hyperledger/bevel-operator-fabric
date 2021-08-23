@@ -243,6 +243,33 @@ spec:
                   fieldPath: status.podIP
 {{- end }}
       {{- if eq $.Values.peer.databaseType "CouchDB" }}
+  {{- if .Values.couchdbExporter.enabled}}
+        - name: couchdb-exporter
+          image: "{{.Values.couchdbExporter.image }}:{{.Values.couchdbExporter.tag}}"
+          imagePullPolicy: {{.Values.couchdbExporter.pullPolicy}}
+          ports:
+            - name: couchdb-metrics
+              containerPort: 9984
+              protocol: TCP
+{{- if .Values.resources.couchdbExporter}}
+          resources:
+{{ toYaml .Values.resources.couchdbExporter | indent 12 }}
+{{- end }}
+          envFrom:
+            - secretRef:
+                name: {{ include "hlf-peer.fullname" . }}--couchdb
+          command:
+            - "/bin/sh"
+            - "-c"
+            - |
+                /couchdb-prometheus-exporter \
+                -telemetry.address=0.0.0.0:9984 \
+                -logtostderr \
+                -couchdb.uri=http://localhost:5984 \
+                -databases=_all_dbs \
+                -couchdb.username=$COUCHDB_USER \
+                -couchdb.password=$COUCHDB_PASSWORD
+        {{- end }}
         - name: couchdb
           image: "couchdb:3.1.1"
           imagePullPolicy: {{ .Values.image.pullPolicy }}

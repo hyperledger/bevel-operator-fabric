@@ -27,6 +27,7 @@ type FabricPeerChart struct {
 	Affinity                 Affinity          `json:"affinity,omitempty"`
 	ExternalHost             string            `json:"externalHost"`
 	FullnameOverride         string            `json:"fullnameOverride"`
+	CouchDBExporter          CouchDBExporter   `json:"couchdbExporter"`
 	HostAliases              []HostAlias       `json:"hostAliases"`
 	Service                  Service           `json:"service"`
 	Persistence              PeerPersistence   `json:"persistence"`
@@ -59,9 +60,16 @@ type Istio struct {
 	IngressGateway string   `json:"ingressGateway"`
 }
 type PeerResources struct {
-	Peer      Resources `json:"peer"`
-	CouchDB   Resources `json:"couchdb"`
-	Chaincode Resources `json:"chaincode"`
+	Peer            Resources `json:"peer"`
+	CouchDB         Resources `json:"couchdb"`
+	Chaincode       Resources `json:"chaincode"`
+	CouchDBExporter *Resources `json:"couchdbExporter,omitempty"`
+}
+type CouchDBExporter struct {
+	Enabled    bool   `json:"enabled"`
+	Image      string `json:"image"`
+	Tag        string `json:"tag"`
+	PullPolicy string `json:"pullPolicy"`
 }
 type PeerPersistence struct {
 	Peer      Persistence `json:"peer"`
