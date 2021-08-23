@@ -74,15 +74,33 @@ type ServiceMonitor struct {
 	// +kubebuilder:default:="10s"
 	ScrapeTimeout string `json:"scrapeTimeout"`
 }
+type FabricPeerCouchdbExporter struct {
+	// +kubebuilder:default:=false
+	Enabled   bool                        `json:"enabled"`
+	// +kubebuilder:default:="gesellix/couchdb-prometheus-exporter"
+	Image string `json:"image"`
+	// +kubebuilder:default:="v30.0.0"
+	Tag string `json:"tag"`
+	// +kubebuilder:default:="IfNotPresent"
+	ImagePullPolicy corev1.PullPolicy `json:"imagePullPolicy"`
+}
 
 // FabricPeerSpec defines the desired state of FabricPeer
 type FabricPeerSpec struct {
+	// +optional
+	// +nullable
+	UpdateCertificateTime *metav1.Time `json:"updateCertificateTime"`
+
 	// +optional
 	// +nullable
 	ServiceMonitor *ServiceMonitor `json:"serviceMonitor"`
 	// +optional
 	// +nullable
 	HostAliases []corev1.HostAlias `json:"hostAliases"`
+
+	// +optional
+	// +nullable
+	CouchDBExporter *FabricPeerCouchdbExporter `json:"couchDBexporter"`
 
 	// +kubebuilder:default:=1
 	Replicas int `json:"replicas"`
@@ -102,7 +120,8 @@ type FabricPeerSpec struct {
 	Gossip           FabricPeerSpecGossip `json:"gossip"`
 	ExternalEndpoint string               `json:"externalEndpoint"`
 	// +kubebuilder:validation:MinLength=1
-	Tag                      string            `json:"tag"`
+	Tag string `json:"tag"`
+	// +kubebuilder:default:="IfNotPresent"
 	ImagePullPolicy          corev1.PullPolicy `json:"imagePullPolicy,omitempty"`
 	ExternalChaincodeBuilder bool              `json:"external_chaincode_builder"`
 	CouchDB                  FabricPeerCouchDB `json:"couchdb"`
@@ -121,6 +140,9 @@ type FabricPeerResources struct {
 	Peer      corev1.ResourceRequirements `json:"peer"`
 	CouchDB   corev1.ResourceRequirements `json:"couchdb"`
 	Chaincode corev1.ResourceRequirements `json:"chaincode"`
+	// +optional
+	// +nullable
+	CouchDBExporter *corev1.ResourceRequirements `json:"couchdbExporter"`
 }
 type FabricPeerDiscovery struct {
 	Period      string `json:"period"`
@@ -254,6 +276,10 @@ type FabricPeerStatus struct {
 	Status     DeploymentStatus  `json:"status"`
 
 	// +optional
+	// +nullable
+	LastCertificateUpdate *metav1.Time `json:"lastCertificateUpdate"`
+
+	// +optional
 	SignCert string `json:"signCert"`
 	// +optional
 	TlsCert string `json:"tlsCert"`
@@ -297,8 +323,11 @@ const (
 	BootstrapMethodFile = "file"
 )
 
-// FabricOrderingServiceSpec defines the desired state of FabricOrderingService
+// FabricOrdererNodeSpec defines the desired state of FabricOrdererNode
 type FabricOrdererNodeSpec struct {
+	// +optional
+	// +nullable
+	UpdateCertificateTime *metav1.Time `json:"updateCertificateTime"`
 	// +optional
 	// +nullable
 	ServiceMonitor *ServiceMonitor `json:"serviceMonitor"`
@@ -377,6 +406,13 @@ type FabricOrderingServiceStatus struct {
 type FabricOrdererNodeStatus struct {
 	Conditions status.Conditions `json:"conditions"`
 	Status     DeploymentStatus  `json:"status"`
+
+	// +optional
+	// +nullable
+	LastCertificateUpdate *metav1.Time `json:"lastCertificateUpdate"`
+
+	// +optional
+	SignCert string `json:"signCert"`
 	// +optional
 	TlsCert string `json:"tlsCert"`
 	// +optional
@@ -624,10 +660,12 @@ type FabricCASpecService struct {
 type DeploymentStatus string
 
 const (
-	PendingStatus DeploymentStatus = "PENDING"
-	FailedStatus  DeploymentStatus = "FAILED"
-	RunningStatus DeploymentStatus = "RUNNING"
-	UnknownStatus DeploymentStatus = "UNKNOWN"
+	PendingStatus        DeploymentStatus = "PENDING"
+	FailedStatus         DeploymentStatus = "FAILED"
+	RunningStatus        DeploymentStatus = "RUNNING"
+	UnknownStatus        DeploymentStatus = "UNKNOWN"
+	UpdatingVersion      DeploymentStatus = "UPDATING_VERSION"
+	UpdatingCertificates DeploymentStatus = "UPDATING_CERTIFICATES"
 )
 
 // FabricCAStatus defines the observed state of FabricCA
@@ -636,6 +674,7 @@ type FabricCAStatus struct {
 	Message    string            `json:"message"`
 	// Status of the FabricCA
 	Status DeploymentStatus `json:"status"`
+
 	// +optional
 	NodePort int `json:"nodePort"`
 	// TLS Certificate to connect to the FabricCA
