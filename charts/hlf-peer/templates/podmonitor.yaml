@@ -1,0 +1,21 @@
+{{- if and .Values.serviceMonitor.enabled .Values.couchdbExporter.enabled }}
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: {{ template "hlf-peer.fullname" . }}--couchdb
+  labels:
+{{ include "labels.standard" . | nindent 4 }}
+spec:
+  jobLabel: "{{ .Release.Name }}--couchdb"
+  namespaceSelector:
+    any: true
+  selector:
+    matchLabels:
+      app: {{ include "hlf-peer.name" . }}
+      release: {{ .Release.Name }}
+  podMetricsEndpoints:
+    - port: couchdb-metrics
+      path: /metrics
+  sampleLimit: {{ .Values.serviceMonitor.sampleLimit }}
+  {{- end }}
