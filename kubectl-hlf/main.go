@@ -2,12 +2,25 @@ package main
 
 import (
 	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd"
+	"github.com/sirupsen/logrus"
 	"k8s.io/cli-runtime/pkg/genericclioptions"
 	"os"
 )
 
 func main() {
-	if err := cmd.NewCmdHLF(genericclioptions.IOStreams{In: os.Stdin, Out: os.Stdout, ErrOut: os.Stderr}).Execute(); err != nil {
+	lvl, ok := os.LookupEnv("LOG_LEVEL")
+	// LOG_LEVEL not set, let's default to debug
+	if !ok {
+		lvl = "info"
+	}
+	// parse string, this is built-in feature of logrus
+	ll, err := logrus.ParseLevel(lvl)
+	if err != nil {
+		ll = logrus.DebugLevel
+	}
+	// set global log level
+	logrus.SetLevel(ll)
+	if err := cmd.NewCmdHLF().Execute(); err != nil {
 		os.Exit(1)
 	}
 }

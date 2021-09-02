@@ -45,6 +45,29 @@ spec:
           spec:
             description: FabricPeerSpec defines the desired state of FabricPeer
             properties:
+              couchDBexporter:
+                nullable: true
+                properties:
+                  enabled:
+                    default: false
+                    type: boolean
+                  image:
+                    default: gesellix/couchdb-prometheus-exporter
+                    type: string
+                  imagePullPolicy:
+                    default: IfNotPresent
+                    description: PullPolicy describes a policy for if/when to pull
+                      a container image
+                    type: string
+                  tag:
+                    default: v30.0.0
+                    type: string
+                required:
+                - enabled
+                - image
+                - imagePullPolicy
+                - tag
+                type: object
               couchdb:
                 properties:
                   password:
@@ -133,6 +156,7 @@ spec:
                 minLength: 1
                 type: string
               imagePullPolicy:
+                default: IfNotPresent
                 description: PullPolicy describes a policy for if/when to pull a container
                   image
                 type: string
@@ -218,6 +242,34 @@ spec:
                   couchdb:
                     description: ResourceRequirements describes the compute resource
                       requirements.
+                    properties:
+                      limits:
+                        additionalProperties:
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                          x-kubernetes-int-or-string: true
+                        description: 'Limits describes the maximum amount of compute
+                          resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
+                        type: object
+                      requests:
+                        additionalProperties:
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                          x-kubernetes-int-or-string: true
+                        description: 'Requests describes the minimum amount of compute
+                          resources required. If Requests is omitted for a container,
+                          it defaults to Limits if that is explicitly specified, otherwise
+                          to an implementation-defined value. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
+                        type: object
+                    type: object
+                  couchdbExporter:
+                    description: ResourceRequirements describes the compute resource
+                      requirements.
+                    nullable: true
                     properties:
                       limits:
                         additionalProperties:
@@ -450,6 +502,10 @@ spec:
               tag:
                 minLength: 1
                 type: string
+              updateCertificateTime:
+                format: date-time
+                nullable: true
+                type: string
             required:
             - couchdb
             - discovery
@@ -512,6 +568,10 @@ spec:
                   - type
                   type: object
                 type: array
+              lastCertificateUpdate:
+                format: date-time
+                nullable: true
+                type: string
               message:
                 type: string
               port:
