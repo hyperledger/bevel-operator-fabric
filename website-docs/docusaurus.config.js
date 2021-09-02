@@ -6,7 +6,7 @@ module.exports = {
   baseUrl: "/hlf-operator/",
   onBrokenLinks: "throw",
   onBrokenMarkdownLinks: "warn",
-  favicon: "img/favicon.ico",
+  favicon: "img/favicon.png",
   organizationName: "kfsoftware", // Usually your GitHub org/user name.
   projectName: "hlf-operator", // Usually your repo name.
   themeConfig: {
@@ -46,8 +46,8 @@ module.exports = {
     navbar: {
       title: "HLF Operator",
       logo: {
-        alt: "My Site Logo",
-        src: "img/logo.svg",
+        alt: "HLF Operator",
+        src: "img/favicon.png",
       },
       items: [
         {
@@ -87,7 +87,7 @@ module.exports = {
             },
             {
               label: "Kubectl Plugin",
-              to: "docs/kubectl-plugin/",
+              to: "docs/kubectl-plugin/installation",
             },
           ],
         },

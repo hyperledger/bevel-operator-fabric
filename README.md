@@ -18,11 +18,6 @@ title: Getting started
 - [x] Managed genesis for Ordering services
 - [x] E2E testing including the execution of chaincodes in KIND
 
-## Roadmap
-
-- [ ] More parametrization on the Peer
-- [ ] More parametrization on the Fabric CA
-- [ ] More parametrization on the Fabric Ordering services
 
 ## Stay Up-to-Date
 
