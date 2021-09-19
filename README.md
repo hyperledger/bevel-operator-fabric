@@ -17,13 +17,19 @@ title: Getting started
 - [x] Support Hyperledger Fabric 2.3+
 - [x] Managed genesis for Ordering services
 - [x] E2E testing including the execution of chaincodes in KIND
-
+- [x] Renewal of certificates
 
 ## Stay Up-to-Date
 
 `hlf-operator` is currently in beta. Watch **releases** of this repository to be notified for future updates:
 
 ![hlf-operator-star-github](https://user-images.githubusercontent.com/6862893/123808402-022aa800-d8f1-11eb-8df4-8a9552f126a2.gif)
+
+## Sponsor
+
+|||
+|-|-|
+|![kfs logo](https://avatars.githubusercontent.com/u/74511895?s=200&v=4)|If you want to design and deploy a secure Blockchain network based on the latest version of  Hyperledger Fabric, feel free to contact dviejo@kungfusoftware.es or visit [https://kfs.es/blockchain](https://kfs.es/blockchain)|
 
 
 ## Getting started
