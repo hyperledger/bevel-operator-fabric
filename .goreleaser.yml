@@ -18,6 +18,7 @@ before:
 
 builds:
   -
+    id: hlf-operator
     goos:
       - linux
     goarch:
@@ -47,6 +48,10 @@ builds:
       - -trimpath
 
 archives:
+  -
+    id: hlf-operator
+    format: binary
+    allow_different_binary_count: true
   -
     id: kubectl-hlf
     format: zip
