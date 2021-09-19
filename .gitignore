@@ -30,4 +30,5 @@ kubectl-hlf/kubectl-hlf
 *.minisig
 *.zip
 dist/
-hlf-operator
+/hlf-operator
+/kubectl-hlf/hlf-operator
