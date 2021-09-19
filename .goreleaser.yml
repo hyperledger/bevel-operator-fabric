@@ -48,7 +48,8 @@ builds:
 
 archives:
   -
-    format: binary
+    id: kubectl-hlf
+    format: zip
     allow_different_binary_count: true
 
 dockers:
