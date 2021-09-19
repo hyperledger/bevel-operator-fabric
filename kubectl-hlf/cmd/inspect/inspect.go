@@ -91,7 +91,23 @@ peers:
 {{ $peer.Status.TlsCert | indent 8 }}
 {{- end }}
 
-channels: {}
+channels:
+  _default:
+    orderers:
+{{- range $ordService := .Orderers }}
+{{- range $orderer := $ordService.Orderers }}
+      - "{{$orderer.Name}}"
+{{- end }}
+{{- end }}
+    peers:
+{{- range $peer := .Peers }}
+      "{{$peer.Name}}":
+        endorsingPeer: true
+        chaincodeQuery: true
+        ledgerQuery: true
+        eventSource: true
+{{- end }}
+
 `
 
 func (c *inspectCmd) run(out io.Writer) error {

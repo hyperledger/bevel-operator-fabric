@@ -7,32 +7,27 @@ import (
 	"github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
 	"github.com/kfsoftware/hlf-operator/controllers/utils"
 	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/helpers"
-	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"io"
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/yaml"
-	"strconv"
-	"strings"
 )
 
 type OrdererOptions struct {
-	Name              string
-	StorageClass      string
-	Capacity          string
-	NS                string
-	Image             string
-	Version           string
-	MspID             string
-	EnrollID          string
-	EnrollPW          string
-	CAName            string
-	SystemChannelName string
-	NumOrderers       int
-	Hosts             []string
-	Output            bool
+	Name         string
+	StorageClass string
+	Capacity     string
+	NS           string
+	Image        string
+	Version      string
+	MspID        string
+	EnrollID     string
+	EnrollPW     string
+	CAName       string
+	Hosts        []string
+	Output       bool
 }
 
 func (o OrdererOptions) Validate() error {
@@ -65,44 +60,6 @@ func (c *createCmd) run(args []string) error {
 	k8sIP, err := utils.GetPublicIPKubernetes(clientSet)
 	if err != nil {
 		return err
-	}
-	includeHosts := len(c.ordererOpts.Hosts) > 0
-	if includeHosts && len(c.ordererOpts.Hosts) != c.ordererOpts.NumOrderers {
-		return errors.Errorf("there are %d orderers but %d hosts", c.ordererOpts.NumOrderers, len(c.ordererOpts.Hosts))
-	}
-	var nodes []v1alpha1.OrdererNode
-	for i := 0; i < c.ordererOpts.NumOrderers; i++ {
-		hosts := []string{}
-		host := ""
-		port := 0
-		if includeHosts {
-			ordHost := c.ordererOpts.Hosts[i]
-			chunks := strings.Split(ordHost, ":")
-			host = chunks[0]
-			if len(chunks) < 2 {
-				return errors.Errorf("Host %s doesn't have port", ordHost)
-			}
-			port, err = strconv.Atoi(chunks[1])
-			if err != nil {
-				return err
-			}
-			hosts = append(hosts, host)
-		}
-		nodes = append(nodes, v1alpha1.OrdererNode{
-			ID:   fmt.Sprintf("orderer%d", i),
-			Host: host,
-			Port: port,
-			Enrollment: v1alpha1.OrdererNodeEnrollment{
-				TLS: v1alpha1.OrdererNodeEnrollmentTLS{
-					Csr: v1alpha1.Csr{
-						Hosts: hosts,
-					},
-				},
-			},
-		})
-	}
-	if len(nodes) == 0 {
-		return errors.Errorf("Orderers are empty")
 	}
 
 	fabricOrderer := &v1alpha1.FabricOrdererNode{
@@ -213,8 +170,6 @@ func newCreateOrdererNodeCmd(out io.Writer, errOut io.Writer) *cobra.Command {
 	f.StringVarP(&c.ordererOpts.Image, "image", "", helpers.DefaultOrdererImage, "version of the Fabric Orderer")
 	f.StringVarP(&c.ordererOpts.Version, "version", "", helpers.DefaultOrdererVersion, "version of the Fabric Orderer")
 	f.StringVarP(&c.ordererOpts.MspID, "mspid", "", "", "MSP ID of the organization")
-	f.StringVarP(&c.ordererOpts.SystemChannelName, "system-channel", "", "system-channel", "System channel name")
-	f.IntVarP(&c.ordererOpts.NumOrderers, "num-orderers", "", 3, "Orderers nodes to create")
 	f.StringArrayVarP(&c.ordererOpts.Hosts, "hosts", "", []string{}, "Hosts")
 	f.BoolVarP(&c.ordererOpts.Output, "output", "o", false, "output in yaml")
 	return cmd

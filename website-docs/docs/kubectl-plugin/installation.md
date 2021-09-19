@@ -1,5 +1,5 @@
 ---
-id: kubectl-plugin
+id: installation
 title: Installation
 ---
 

@@ -10,12 +10,10 @@ import (
 	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/ordservice"
 	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/org"
 	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/peer"
+	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/utils"
 	"github.com/spf13/cobra"
-	"k8s.io/cli-runtime/pkg/genericclioptions"
-
 	// Workaround for authentication plugins https://krew.sigs.k8s.io/docs/developer-guide/develop/best-practices/#auth-plugins
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
-
 )
 
 const (
@@ -24,7 +22,7 @@ kubectl plugin to manage HLF operator CRDs.`
 )
 
 // NewCmdHLF creates a new root command for kubectl-hlf
-func NewCmdHLF(streams genericclioptions.IOStreams) *cobra.Command {
+func NewCmdHLF() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:          "hlf",
 		Short:        "manage HLF operator CRDs",
@@ -40,5 +38,6 @@ func NewCmdHLF(streams genericclioptions.IOStreams) *cobra.Command {
 	cmd.AddCommand(ordnode.NewOrdNodeCmd(cmd.OutOrStdout(), cmd.ErrOrStderr()))
 	cmd.AddCommand(chaincode.NewChaincodeCmd(cmd.OutOrStdout(), cmd.ErrOrStderr()))
 	cmd.AddCommand(org.NewOrgCmd(cmd.OutOrStdout(), cmd.ErrOrStderr()))
+	cmd.AddCommand(utils.NewUtilsCMD(cmd.OutOrStdout(), cmd.ErrOrStderr()))
 	return cmd
 }
