@@ -1,0 +1,42 @@
+---
+id: create-channel
+title: Create channel
+---
+
+As a pre requisite, you need to have:
+[x] a running ordering service
+[x] a running peer network
+[x] a network configuration file, see this [link](./network-config.md)
+
+> The ordering service must be configured with channel participation API enabled
+
+Prepare the parameters:
+
+```bash
+CHANNEL_NAME=demo
+```
+
+## Generate the config channel block
+
+```bash
+kubectl hlf channel generate --output=demo.block \
+    --name=demo --organizations Org1MSP --ordererOrganizations OrdererMSP
+```
+
+## Join orderer to channel
+If you haven't generated the org1.yaml, [please visit this page to generate it](./network-config)
+```bash
+kubectl hlf ordnode join --block=demo.block --name=ordservice \
+    --namespace=default --identity=admin-tls-ordservice.yaml
+```
+
+
+## Join peer to the channel
+If you haven't generated the org1.yaml, [please visit this page to generate it](./network-config)
+```bash
+kubectl hlf channel join --name=demo --config=org1.yaml \
+    --user=admin -p=org1-peer0.default
+```
+
+
+

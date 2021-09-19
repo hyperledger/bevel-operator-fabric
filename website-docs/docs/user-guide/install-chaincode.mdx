@@ -1,0 +1,96 @@
+---
+id: install-chaincode
+title: Install Chaincode
+---
+
+Smart contracts are how users interact with the blockchain ledger. Smart contracts are implemented in Hyperledger Fabric in the form of chaincode packages. Organizations that want to validate transactions or query the ledger need to install a chaincode on their peers.
+
+The Fabric chaincode lifecycle is the process through which a chaincode is distributed to a channel. Before a chaincode may be used to create transactions, different organizations can agree on how it will be operated using the Fabric chaincode lifecycle. While an endorsement policy specifies which companies must execute a chaincode to validate a transaction, channel members must agree on the chaincode endorsement policy using the Fabric chaincode lifecycle.
+
+The steps for deploying a chaincode are:
+- Install the package on the peer
+- Approve the chaincode definition on the channel
+- Commit the chaincode definition on the channel
+
+
+## Prerequisites
+You must have a networkconfig file, if you haven't, please, go to [the network config documentation](./network-config).
+
+## Install the chaincode
+
+For this step you'll need to install the chaincode package on your peer. To do this, run the following command:
+
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+function getCodeExampleText(language){
+  return `
+kubectl hlf chaincode install \
+    --path=./fixtures/chaincodes/fabcar/go --config=networkConfig.yaml \
+    --language=${language} --label=fabcar --user=admin --peer=org1-peer0.default
+`
+}
+
+<Tabs
+  defaultValue="nodejs"
+  values={[
+    {label: 'Node JS', value: 'nodejs'},
+    {label: 'Java', value: 'java'},
+    {label: 'Go', value: 'golang'},
+  ]}>
+  <TabItem value="java">
+
+```bash
+kubectl hlf chaincode install \
+    --path=./fixtures/chaincodes/fabcar/java --config=networkConfig.yaml \
+    --language=java --label=fabcar --user=admin --peer=org1-peer0.default
+```
+  </TabItem>
+  <TabItem value="golang">
+
+```bash
+kubectl hlf chaincode install \
+    --path=./fixtures/chaincodes/fabcar/go --config=networkConfig.yaml \
+    --language=golang --label=fabcar --user=admin --peer=org1-peer0.default
+```
+  </TabItem>
+  <TabItem value="nodejs">
+
+```bash
+kubectl hlf chaincode install \
+    --path=./fixtures/chaincodes/fabcar/nodejs --config=networkConfig.yaml \
+    --language=node --label=fabcar --user=admin --peer=org1-peer0.default
+```
+  </TabItem>
+</Tabs>
+
+
+The parameters are:
+- `--path`: The path to the chaincode package.
+- `--config`: The network configuration file.
+- `--language`: The language of the chaincode.
+- `--label`: The label of the chaincode.
+- `--user`: The user to use to install the chaincode, this user must be defined in the network config file.
+- `--peer`: The peer to install the chaincode on.
+
+If you don't have any chaincode packages, you can download them from [the hlf-operator github repository](https://github.com/kfsoftware/hlf-operator/tree/main/fixtures/chaincodes/fabcar).
+
+If no user is found in the networkConfig.yaml, the following error will be thrown:
+
+```text
+Error: failed to create resmgmt client due to context error: user not found
+```
+
+After a couple of minutes, depending on your set up, the chaincode will be installed on the peer and a package id will be returned.
+
+The list of all chaincodes installed in the peer can be obtained with the following command:
+
+```bash
+NETWORK_CONFIG_PATH=org1.yaml
+PEER_NAME=org1-peer0.default # <name>.<ns>
+USER_NAME=admin # username in the networkconfig
+
+kubectl hlf chaincode queryinstalled --config=$NETWORK_CONFIG_PATH \
+  --user=$USER_NAME --peer=$PEER_NAME
+```
+
