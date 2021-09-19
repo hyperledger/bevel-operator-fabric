@@ -1,7 +1,6 @@
 package ca
 
 import (
-	"fmt"
 	log "github.com/kfsoftware/hlf-operator/internal/github.com/hyperledger/fabric-ca/sdkpatch/logbridge"
 	"io"
 	"io/ioutil"
@@ -49,9 +48,10 @@ func (c *enrollCmd) run(args []string) error {
 	if err != nil {
 		return err
 	}
-	host := certAuth.Spec.Istio.Hosts[0]
-	port := certAuth.Spec.Istio.Port
-	url := fmt.Sprintf("https://%s:%d", host, port)
+	url, err := helpers.GetURLForCA(certAuth)
+	if err != nil {
+		return err
+	}
 	log.Debugf("CA URL=%s", url)
 	crt, pk, _, err := certs.EnrollUser(certs.EnrollUserRequest{
 		TLSCert:    certAuth.Status.TlsCert,

@@ -3,7 +3,6 @@ package main
 import (
 	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd"
 	"github.com/sirupsen/logrus"
-	"k8s.io/cli-runtime/pkg/genericclioptions"
 	"os"
 )
 
