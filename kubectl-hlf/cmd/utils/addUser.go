@@ -57,10 +57,9 @@ func (c *addUserCmd) run(args []string) error {
 	if err != nil {
 		return err
 	}
-	orgsMap := networkConfigMap["organizations"].(map[string]interface{})
-	orgMap := orgsMap[c.opts.mspID].(map[string]interface{})
-	users := orgMap["users"].(map[string]interface{})
-
+	orgsMap := networkConfigMap["organizations"].(map[interface{}]interface{})
+	orgMap := orgsMap[c.opts.mspID].(map[interface{}]interface{})
+	users := orgMap["users"].(map[interface{}]interface{})
 	users[c.opts.userName] = userMap
 	configBytesNew, err :=  yaml.Marshal(networkConfigMap)
 	if err != nil {

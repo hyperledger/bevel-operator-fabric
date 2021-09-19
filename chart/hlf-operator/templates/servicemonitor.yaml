@@ -1,0 +1,27 @@
+{{- if .Values.serviceMonitor.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "hlf-operator.fullname" . }}--svc-metrics
+  namespace: monitoring
+spec:
+  endpoints:
+    - interval: 60s
+      path: /metrics
+      bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
+      scrapeTimeout: 30s
+      port: https
+      scheme: https
+      tlsConfig:
+        caFile: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+        insecureSkipVerify: true
+
+  jobLabel: "{{ .Release.Name }}"
+  namespaceSelector:
+    matchNames:
+      - {{.Release.Namespace}}
+  selector:
+    matchLabels:
+  {{- include "hlf-operator.selectorLabels" . | nindent 6 }}
+
+{{- end }}

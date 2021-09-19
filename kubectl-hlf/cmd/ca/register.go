@@ -1,7 +1,6 @@
 package ca
 
 import (
-	"fmt"
 	"io"
 
 	"github.com/kfsoftware/hlf-operator/controllers/certs"
@@ -42,9 +41,11 @@ func (c *registerCmd) run(args []string) error {
 	if err != nil {
 		return err
 	}
-	host := certAuth.Spec.Istio.Hosts[0]
-	port := certAuth.Spec.Istio.Port
-	url := fmt.Sprintf("https://%s:%d", host, port)
+
+	url, err := helpers.GetURLForCA(certAuth)
+	if err != nil {
+		return err
+	}
 	_, err = certs.RegisterUser(certs.RegisterUserRequest{
 		TLSCert:      certAuth.Status.TlsCert,
 		URL:          url,

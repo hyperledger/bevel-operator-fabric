@@ -3,6 +3,7 @@ package helpers
 import (
 	"context"
 	"fmt"
+	"github.com/kfsoftware/hlf-operator/controllers/utils"
 	log "github.com/sirupsen/logrus"
 
 	hlfv1alpha1 "github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
@@ -204,7 +205,25 @@ func GetCertAuthByURL(oclient *operatorv1.Clientset, host string, port int) (*Cl
 	}
 	return nil, errors.Errorf("CA with host=%s port=%d not found", host, port)
 }
-
+func GetURLForCA(certAuth *ClusterCA) (string, error) {
+	var host string
+	var port int
+	if len(certAuth.Spec.Istio.Hosts) > 0 {
+		host = certAuth.Spec.Istio.Hosts[0]
+		port = certAuth.Spec.Istio.Port
+	} else {
+		client, err := GetKubeClient()
+		if err != nil {
+			return "", err
+		}
+		host, err = utils.GetPublicIPKubernetes(client)
+		if err != nil {
+			return "", err
+		}
+		port = certAuth.Status.NodePort
+	}
+	return fmt.Sprintf("https://%s:%d", host, port), nil
+}
 func GetCertAuthByName(oclient *operatorv1.Clientset, name string, ns string) (*ClusterCA, error) {
 	certAuths, err := GetClusterCAs(oclient, "")
 	if err != nil {

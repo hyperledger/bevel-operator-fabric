@@ -113,15 +113,23 @@ kubectl hlf inspect --output ordservice.yaml -o OrdererMSP
 kubectl hlf ca register --name=ord-ca --user=admin --secret=adminpw \
     --type=admin --enroll-id enroll --enroll-secret=enrollpw --mspid=OrdererMSP
 
+kubectl hlf ca enroll --name=ord-ca --user=admin --secret=adminpw --mspid OrdererMSP \
+        --ca-name ca  --output admin-ordservice.yaml 
+## add user from admin-ordservice.yaml to ordservice.yaml
+kubectl hlf utils adduser --userPath=admin-ordservice.yaml --config=ordservice.yaml --username=admin --mspid=OrdererMSP
+```
+
+## Create a channel
+```bash
 kubectl hlf channel generate --output=demo.block --name=demo --organizations Org1MSP --ordererOrganizations OrdererMSP
 
-
+# enroll using the TLS CA
 kubectl hlf ca enroll --name=ord-ca --namespace=default --user=admin --secret=adminpw --mspid OrdererMSP \
         --ca-name tlsca  --output admin-tls-ordservice.yaml 
 
-kubectl hlf ordnode join --block=demo.block --name=ord-node1 --namespace=default --identity=admin-tls-ordservice.yaml
+kubectl hlf ordnode join --block=demo.block --name=ordservice --namespace=default --identity=admin-tls-ordservice.yaml
+
 ```
-> IMPORTANT!!: **Add user from admin-ordservice.yaml to ordservice.yaml** if not, following commands will not work
 
 
 ## Preparing a connection string for the peer
@@ -134,10 +142,17 @@ kubectl hlf ca enroll --name=org1-ca --user=admin --secret=adminpw --mspid Org1M
 
 kubectl hlf inspect --output org1.yaml -o Org1MSP -o OrdererMSP
 
+## add user key and cert to org1.yaml from admin-ordservice.yaml
+kubectl hlf utils adduser --userPath=peer-org1.yaml --config=org1.yaml --username=admin --mspid=Org1MSP
 ```
 
-> IMPORTANT!!: **Add user from peer-org1.yaml to org1.yaml** if not, following commands will not work
 
+## Join channel
+```bash
+kubectl hlf channel join --name=demo --config=org1.yaml \
+    --user=admin -p=org1-peer0.default
+
+```
 ## Inspect the channel
 ```bash
 kubectl hlf channel inspect --channel=demo --config=org1.yaml \
@@ -149,13 +164,6 @@ kubectl hlf channel addanchorpeer --channel=demo --config=org1.yaml \
     --user=admin --peer=org1-peer0.default 
 
 ```
-## Join channel
-```bash
-kubectl hlf channel join --name=demo --config=org1.yaml \
-    --user=admin -p=org1-peer0.default
-
-```
-
 
 ## See ledger height
 In case of error, you may need to add the following to the org1.yaml configuration file:
@@ -192,8 +200,9 @@ kubectl hlf chaincode queryinstalled --config=org1.yaml --user=admin --peer=org1
 
 ## Approve chaincode
 ```bash
+PACKAGE_ID=fabcar:0c616be7eebace4b3c2aa0890944875f695653dbf80bef7d95f3eed6667b5f40 # replace it with the package id of your 
 kubectl hlf chaincode approveformyorg --config=org1.yaml --user=admin --peer=org1-peer0.default \
-    --package-id=fabcar:0c616be7eebace4b3c2aa0890944875f695653dbf80bef7d95f3eed6667b5f40 \
+    --package-id=$PACKAGE_ID \
     --version "1.0" --sequence 1 --name=fabcar \
     --policy="OR('Org1MSP.member')" --channel=demo
 ```
