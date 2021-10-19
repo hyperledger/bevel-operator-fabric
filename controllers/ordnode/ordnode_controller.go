@@ -39,10 +39,6 @@ import (
 	"time"
 )
 
-
-
-
-
 // FabricOrdererNodeReconciler reconciles a FabricOrdererNode object
 type FabricOrdererNodeReconciler struct {
 	client.Client
@@ -413,11 +409,15 @@ func (r *FabricOrdererNodeReconciler) upgradeChart(
 	}
 	settings := cli.New()
 	chartPath, err := cmd.LocateChart(r.ChartPath, settings)
+	if err != nil {
+		return err
+	}
 	ch, err := loader.Load(chartPath)
 	if err != nil {
 		return err
 	}
 	cmd.Wait = true
+	cmd.Timeout = time.Minute * 5
 	release, err := cmd.Run(releaseName, ch, inInterface)
 	if err != nil {
 		return err
@@ -425,7 +425,7 @@ func (r *FabricOrdererNodeReconciler) upgradeChart(
 	log.Infof("Chart upgraded %s", release.Name)
 	return nil
 }
-func GetOrdererDeployment(conf *action.Configuration, config *rest.Config, releaseName string, ns string, ) (*appsv1.Deployment, error, ) {
+func GetOrdererDeployment(conf *action.Configuration, config *rest.Config, releaseName string, ns string) (*appsv1.Deployment, error) {
 	ctx := context.Background()
 	cmd := action.NewGet(conf)
 	rel, err := cmd.Run(releaseName)

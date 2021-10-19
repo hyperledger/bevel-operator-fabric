@@ -581,6 +581,7 @@ func (r *FabricPeerReconciler) upgradeChart(
 		return err
 	}
 	cmd.Wait = true
+	cmd.Timeout = time.Minute * 5
 	release, err := cmd.Run(releaseName, ch, inInterface)
 	if err != nil {
 		return err

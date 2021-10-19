@@ -155,12 +155,10 @@ spec:
 
 {{- if $.Values.externalChaincodeBuilder }}
           env:
-            - name: FILE_SERVER_BASE_IP
-              value: {{ include "hlf-peer.fullname" . }}-fs
-{{/*            - name: EXTERNAL_BUILDER_PEER_URL*/}}
-{{/*              value: {{ include "hlf-peer.fullname" . }}:7052*/}}
             - name: K8SCC_CFGFILE
               value: "/builders/golang/bin/k8scc.yaml"
+            - name: FILE_SERVER_BASE_IP
+              value: {{ include "hlf-peer.fullname" . }}-fs
             - name: FILE_SERVER_ENDPOINT
               value: '127.0.0.1:8080'
 {{- end }}
