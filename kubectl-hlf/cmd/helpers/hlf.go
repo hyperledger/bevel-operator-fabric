@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/kfsoftware/hlf-operator/controllers/utils"
+	log "github.com/sirupsen/logrus"
 	"k8s.io/client-go/kubernetes"
 
 	hlfv1alpha1 "github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
@@ -52,24 +53,21 @@ type ClusterOrderingService struct {
 }
 
 type ClusterOrdererNode struct {
-	Name       string
-	PublicURL  string
-	PrivateURL string
-	Spec       hlfv1alpha1.FabricOrdererNodeSpec
-	Status     hlfv1alpha1.FabricOrdererNodeStatus
-	Item       hlfv1alpha1.FabricOrdererNode
+	Name      string
+	PublicURL string
+	Spec      hlfv1alpha1.FabricOrdererNodeSpec
+	Status    hlfv1alpha1.FabricOrdererNodeStatus
+	Item      hlfv1alpha1.FabricOrdererNode
 }
 
 type ClusterPeer struct {
-	Name       string
-	Spec       hlfv1alpha1.FabricPeerSpec
-	Status     hlfv1alpha1.FabricPeerStatus
-	PublicURL  string
-	PrivateURL string
-	TLSCACert  string
-	RootCert   string
-	Identity   Identity
-	MSPID      string
+	Name      string
+	Spec      hlfv1alpha1.FabricPeerSpec
+	Status    hlfv1alpha1.FabricPeerStatus
+	PublicURL string
+	TLSCACert string
+	RootCert  string
+	Identity  Identity
 }
 type Identity struct {
 	Key  string
@@ -140,15 +138,13 @@ func GetClusterOrderers(
 			if err != nil {
 				return nil, nil, err
 			}
-			privateURL := GetOrdererPrivateURL(ordNode)
 			orderingService.Orderers = append(
 				orderingService.Orderers,
 				&ClusterOrdererNode{
-					Name:       ordNode.FullName(),
-					Spec:       ordNode.Spec,
-					Status:     ordNode.Status,
-					PublicURL:  publicURL,
-					PrivateURL: privateURL,
+					Name:      ordNode.FullName(),
+					Spec:      ordNode.Spec,
+					Status:    ordNode.Status,
+					PublicURL: publicURL,
 				},
 			)
 		}
@@ -309,65 +305,8 @@ func GetOrdererPublicURL(clientset *kubernetes.Clientset, node hlfv1alpha1.Fabri
 	}
 	return fmt.Sprintf("%s:%d", hostPort.Host, hostPort.Port), nil
 }
-func GetOrdererPrivateURL(node hlfv1alpha1.FabricOrdererNode) string {
-	return fmt.Sprintf("%s.%s:%s", node.Name, node.Namespace, "7050")
-}
 
-func GetCAPublicURL(clientset *kubernetes.Clientset, node hlfv1alpha1.FabricCA) (string, error) {
-	hostPort, err := GetCAHostPort(clientset, node)
-	if err != nil {
-		return "", err
-	}
-	return fmt.Sprintf("%s:%d", hostPort.Host, hostPort.Port), nil
-}
-func GetCAPrivateURL(node hlfv1alpha1.FabricCA) string {
-	return fmt.Sprintf("%s.%s:%s", node.Name, node.Namespace, "7054")
-}
-
-func GetPeerPublicURL(clientset *kubernetes.Clientset, node hlfv1alpha1.FabricPeer) (string, error) {
-	hostPort, err := GetPeerHostPort(clientset, node)
-	if err != nil {
-		return "", err
-	}
-	return fmt.Sprintf("%s:%d", hostPort.Host, hostPort.Port), nil
-}
-func GetPeerHostPort(clientset *kubernetes.Clientset, node hlfv1alpha1.FabricPeer) (*HostPort, error) {
-	k8sIP, err := utils.GetPublicIPKubernetes(clientset)
-	if err != nil {
-		return nil, err
-	}
-	if node.Spec.Istio != nil && len(node.Spec.Istio.Hosts) > 0 {
-		return &HostPort{
-			Host: node.Spec.Istio.Hosts[0],
-			Port: node.Spec.Istio.Port,
-		}, nil
-	}
-	return &HostPort{
-		Host: k8sIP,
-		Port: node.Status.NodePort,
-	}, nil
-}
-func GetPeerPrivateURL(node hlfv1alpha1.FabricPeer) string {
-	return fmt.Sprintf("%s.%s:%s", node.Name, node.Namespace, "7051")
-}
 func GetOrdererHostPort(clientset *kubernetes.Clientset, node hlfv1alpha1.FabricOrdererNode) (*HostPort, error) {
-	k8sIP, err := utils.GetPublicIPKubernetes(clientset)
-	if err != nil {
-		return nil, err
-	}
-	if node.Spec.Istio != nil && len(node.Spec.Istio.Hosts) > 0 {
-		return &HostPort{
-			Host: node.Spec.Istio.Hosts[0],
-			Port: node.Spec.Istio.Port,
-		}, nil
-	}
-	return &HostPort{
-		Host: k8sIP,
-		Port: node.Status.NodePort,
-	}, nil
-}
-
-func GetCAHostPort(clientset *kubernetes.Clientset, node hlfv1alpha1.FabricCA) (*HostPort, error) {
 	k8sIP, err := utils.GetPublicIPKubernetes(clientset)
 	if err != nil {
 		return nil, err
