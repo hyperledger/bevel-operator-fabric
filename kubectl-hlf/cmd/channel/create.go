@@ -36,12 +36,16 @@ func (c *createChannelCmd) run() error {
 	if err != nil {
 		return err
 	}
+	clientSet, err := helpers.GetKubeClient()
+	if err != nil {
+		return err
+	}
 	configBackend := config.FromFile(c.configPath)
 	sdk, err := fabsdk.New(configBackend)
 	if err != nil {
 		return err
 	}
-	ordService, err := helpers.GetOrderingServiceByFullName(oclient, c.ordererOrg)
+	ordService, err := helpers.GetOrderingServiceByFullName(clientSet, oclient, c.ordererOrg)
 	if err != nil {
 		return err
 	}

@@ -15,7 +15,6 @@ import (
 	"github.com/spf13/cobra"
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"sigs.k8s.io/yaml"
 )
 
 type Options struct {
@@ -80,7 +79,6 @@ func (c *createCmd) run() error {
 		Hosts:          []string{},
 		IngressGateway: ingressGateway,
 	}
-	log.Printf("Istio %s", ingressGateway)
 	if len(c.peerOpts.Hosts) > 0 {
 		istio = &v1alpha1.FabricIstio{
 			Port:           443,
@@ -213,7 +211,7 @@ func (c *createCmd) run() error {
 		Status: v1alpha1.FabricPeerStatus{},
 	}
 	if c.peerOpts.Output {
-		ot, err := yaml.Marshal(&fabricPeer)
+		ot, err := helpers.MarshallWithoutStatus(&fabricPeer)
 		if err != nil {
 			return err
 		}

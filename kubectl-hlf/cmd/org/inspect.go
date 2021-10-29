@@ -1,12 +1,16 @@
 package org
 
 import (
+	"bytes"
+	"github.com/Masterminds/sprig/v3"
 	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/helpers"
 	"github.com/spf13/cobra"
 	"io"
 	"io/ioutil"
 	"os"
 	"path"
+	"strings"
+	"text/template"
 )
 
 type InspectOptions struct {
@@ -18,10 +22,75 @@ func (o InspectOptions) Validate() error {
 	return nil
 }
 
+const tmplGoConfigtx = `
+---
+################################################################################
+#
+#   ORGANIZATIONS
+#
+#   This section defines the organizational identities that can be referenced
+#   in the configuration profiles.
+#
+################################################################################
+Organizations:
+{{ range $mspID, $org := .Organizations }}
+  # {{$mspID}} defines an MSP using the sampleconfig. It should never be used
+  # in production but may be used as a template for other definitions.
+  -
+    # Name is the key by which this org will be referenced in channel
+    # configuration transactions.
+    # Name can include alphanumeric characters as well as dots and dashes.
+    Name: {{$mspID}}
+
+    # SkipAsForeign can be set to true for org definitions which are to be
+    # inherited from the orderer system channel during channel creation.  This
+    # is especially useful when an admin of a single org without access to the
+    # MSP directories of the other orgs wishes to create a channel.  Note
+    # this property must always be set to false for orgs included in block
+    # creation.
+    SkipAsForeign: false
+
+    # ID is the key by which this org's MSP definition will be referenced.
+    # ID can include alphanumeric characters as well as dots and dashes.
+    ID: {{$mspID}}
+
+    # MSPDir is the filesystem path which contains the MSP configuration.
+    MSPDir: {{$org.MPSDir}}
+    MSPType: bccsp
+
+    # Policies defines the set of policies at this level of the config tree
+    # For organization policies, their canonical path is usually
+    #   /Channel/<Application|Orderer>/<OrgName>/<PolicyName>
+    Policies: &{{$mspID}}Policies
+      Readers:
+        Type: Signature
+        Rule: "OR('{{$mspID}}.member')"
+        # If your MSP is configured with the new NodeOUs, you might
+        # want to use a more specific rule like the following:
+        # Rule: "OR('{{$mspID}}.admin', '{{$mspID}}.peer', '{{$mspID}}.client')"
+      Writers:
+        Type: Signature
+        Rule: "OR('{{$mspID}}.member')"
+        # If your MSP is configured with the new NodeOUs, you might
+        # want to use a more specific rule like the following:
+        # Rule: "OR('{{$mspID}}.admin', '{{$mspID}}.client')"
+      Admins:
+        Type: Signature
+        Rule: "OR('{{$mspID}}.admin')"
+      Endorsement:
+        Type: Signature
+        Rule: "OR('{{$mspID}}.member')"
+{{- end }}
+
+`
+
 type inspectCmd struct {
 	out    io.Writer
 	errOut io.Writer
 	caOpts InspectOptions
+}
+type OrganizationItem struct {
+	MPSDir string
 }
 
 func (c *inspectCmd) validate() error {
@@ -37,11 +106,13 @@ func (c *inspectCmd) run(args []string) error {
 	if err != nil {
 		return err
 	}
+	orgMap := map[string]OrganizationItem{}
 	for _, peerOrg := range peerOrgs {
 		firstPeer := peerOrg.Peers[0]
+		caHost := strings.Split(firstPeer.Spec.Secret.Enrollment.Component.Cahost, ".")[0]
 		certAuth, err := helpers.GetCertAuthByURL(
 			oclient,
-			firstPeer.Spec.Secret.Enrollment.Component.Cahost,
+			caHost,
 			firstPeer.Spec.Secret.Enrollment.Component.Caport,
 		)
 		if err != nil {
@@ -91,6 +162,22 @@ NodeOUs:
 		if err != nil {
 			return err
 		}
+		orgMap[peerOrg.MspID] = OrganizationItem{MPSDir: mspPath}
+	}
+	tmpl, err := template.New("test").Funcs(sprig.HermeticTxtFuncMap()).Parse(tmplGoConfigtx)
+	if err != nil {
+		return err
+	}
+	var buf bytes.Buffer
+	err = tmpl.Execute(&buf, map[string]interface{}{
+		"Organizations": orgMap,
+	})
+	if err != nil {
+		return err
+	}
+	err = ioutil.WriteFile("configtx.yaml", buf.Bytes(), 0777)
+	if err != nil {
+		return err
 	}
 	return nil
 }

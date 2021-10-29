@@ -1,13 +1,11 @@
-package channel
+package ordorg
 
 import (
-	"bytes"
 	"github.com/kfsoftware/hlf-operator/internal/github.com/hyperledger/fabric/common/channelconfig"
 	"io"
 	"io/ioutil"
 
 	"github.com/golang/protobuf/proto"
-	"github.com/hyperledger/fabric-config/protolator"
 	"github.com/hyperledger/fabric-protos-go/common"
 	cb "github.com/hyperledger/fabric-protos-go/common"
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/resmgmt"
@@ -25,26 +23,19 @@ import (
 type addOrgCmd struct {
 	configPath  string
 	orgPath     string
-	peer        string
 	channelName string
 	userName    string
 	mspID       string
 	dryRun      bool
+	signMSPID   string
+	output      string
 }
 
 func (c *addOrgCmd) validate() error {
 	return nil
 }
 func (c *addOrgCmd) run(out io.Writer) error {
-	oclient, err := helpers.GetKubeOperatorClient()
-	if err != nil {
-		return err
-	}
-	peer, err := helpers.GetPeerByFullName(oclient, c.peer)
-	if err != nil {
-		return err
-	}
-	mspID := peer.Spec.MspID
+	mspID := c.signMSPID
 	configBackend := config.FromFile(c.configPath)
 	sdk, err := fabsdk.New(configBackend)
 	if err != nil {
@@ -84,7 +75,7 @@ func (c *addOrgCmd) run(out io.Writer) error {
 	var orgConfig *cb.ConfigGroup
 	for _, org := range topLevel.Organizations {
 		if org.Name == c.mspID {
-			orgConfig, err = encoder.NewApplicationOrgGroup(org)
+			orgConfig, err = encoder.NewOrdererOrgGroup(org)
 			if err != nil {
 				return err
 			}
@@ -93,31 +84,20 @@ func (c *addOrgCmd) run(out io.Writer) error {
 	if orgConfig == nil {
 		return errors.Errorf("msp ID %s not found", c.mspID)
 	}
-	modifiedConfig.ChannelGroup.Groups[channelconfig.ApplicationGroupKey].Groups[c.mspID] = orgConfig
+	modifiedConfig.ChannelGroup.Groups[channelconfig.OrdererGroupKey].Groups[c.mspID] = orgConfig
 	confUpdate, err := resmgmt.CalculateConfigUpdate(channelID, channelConfig, modifiedConfig)
 	if err != nil {
 		return err
 	}
-	if c.dryRun {
-		err = protolator.DeepMarshalJSON(out, confUpdate)
-		if err != nil {
-			return err
-		}
-	} else {
-		configEnvelopeBytes, err := helpers.GetConfigEnvelopeBytes(confUpdate)
-		if err != nil {
-			return err
-		}
-		configReader := bytes.NewReader(configEnvelopeBytes)
-		txID, err := resClient.SaveChannel(resmgmt.SaveChannelRequest{
-			ChannelID:     channelID,
-			ChannelConfig: configReader,
-		})
-		if err != nil {
-			return err
-		}
-		log.Infof("Channel updated, txID=%s", string(txID.TransactionID))
+	configEnvelopeBytes, err := helpers.GetConfigEnvelopeBytes(confUpdate)
+	if err != nil {
+		return err
 	}
+	err = ioutil.WriteFile(c.output, configEnvelopeBytes, 0755)
+	if err != nil {
+		return err
+	}
+	log.Infof("output file: %s", c.output)
 	return nil
 }
 func newAddOrgToChannelCMD(out io.Writer, errOut io.Writer) *cobra.Command {
@@ -132,16 +112,16 @@ func newAddOrgToChannelCMD(out io.Writer, errOut io.Writer) *cobra.Command {
 		},
 	}
 	persistentFlags := cmd.PersistentFlags()
-	persistentFlags.StringVarP(&c.peer, "peer", "", "", "Admin org to invoke the updates")
 	persistentFlags.StringVarP(&c.channelName, "name", "", "", "Channel name")
 	persistentFlags.StringVarP(&c.configPath, "config", "", "", "Configuration file for the SDK")
 	persistentFlags.StringVarP(&c.userName, "user", "", "", "User name for the transaction")
+	persistentFlags.StringVarP(&c.signMSPID, "config-msp-id", "", "", "MSP ID for the new organization")
 	persistentFlags.StringVarP(&c.mspID, "msp-id", "", "", "MSP ID for the new organization")
 	persistentFlags.StringVarP(&c.orgPath, "org-config", "", "", "JSON with the crypto material for the new org")
-	persistentFlags.BoolVarP(&c.dryRun, "dry-run", "", false, "Output configuration as JSON and not update")
+	persistentFlags.StringVarP(&c.output, "output", "", "", "Output file")
 	cmd.MarkPersistentFlagRequired("name")
 	cmd.MarkPersistentFlagRequired("config")
-	cmd.MarkPersistentFlagRequired("peer")
+	cmd.MarkPersistentFlagRequired("config-msp-id")
 	cmd.MarkPersistentFlagRequired("org-config")
 	cmd.MarkPersistentFlagRequired("msp-id")
 	cmd.MarkPersistentFlagRequired("user")

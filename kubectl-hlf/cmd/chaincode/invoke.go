@@ -34,7 +34,6 @@ func (c *invokeChaincodeCmd) run(out io.Writer) error {
 		return err
 	}
 	mspID := peer.Spec.MspID
-	peerName := peer.Name
 	configBackend := config.FromFile(c.configPath)
 	sdk, err := fabsdk.New(configBackend)
 	if err != nil {
@@ -63,7 +62,6 @@ func (c *invokeChaincodeCmd) run(out io.Writer) error {
 			InvocationChain: nil,
 			IsInit:          false,
 		},
-		channel.WithTargetEndpoints(peerName),
 	)
 	if err != nil {
 		return err

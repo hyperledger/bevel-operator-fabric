@@ -12,7 +12,6 @@ import (
 	"io"
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"sigs.k8s.io/yaml"
 )
 
 type OrdererOptions struct {
@@ -64,7 +63,7 @@ func (c *createCmd) run(args []string) error {
 
 	fabricOrderer := &v1alpha1.FabricOrdererNode{
 		TypeMeta: v1.TypeMeta{
-			Kind:       "FabricOrderingService",
+			Kind:       "FabricOrdererNode",
 			APIVersion: v1alpha1.GroupVersion.String(),
 		},
 		ObjectMeta: v1.ObjectMeta{
@@ -128,7 +127,7 @@ func (c *createCmd) run(args []string) error {
 		},
 	}
 	if c.ordererOpts.Output {
-		ot, err := yaml.Marshal(&fabricOrderer)
+		ot, err := helpers.MarshallWithoutStatus(&fabricOrderer)
 		if err != nil {
 			return err
 		}

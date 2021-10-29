@@ -30,7 +30,7 @@ require (
 	github.com/hashicorp/go-version v1.3.0 // indirect
 	github.com/hyperledger/fabric v2.1.1+incompatible
 	github.com/hyperledger/fabric-amcl v0.0.0-20210603140002-2670f91851c8 // indirect
-	github.com/hyperledger/fabric-config v0.0.5
+	github.com/hyperledger/fabric-config v0.1.0
 	github.com/hyperledger/fabric-lib-go v1.0.0
 	github.com/hyperledger/fabric-protos-go v0.0.0-20201028172056-a3136dde2354
 	github.com/hyperledger/fabric-sdk-go v1.0.0-rc1

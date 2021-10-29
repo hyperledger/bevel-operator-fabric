@@ -2,7 +2,6 @@ package channel
 
 import (
 	"context"
-	"fmt"
 	"github.com/golang/protobuf/proto"
 	"github.com/kfsoftware/hlf-operator/controllers/testutils"
 	"github.com/kfsoftware/hlf-operator/controllers/utils"
@@ -102,9 +101,13 @@ func (c generateChannelCmd) run() error {
 		}
 		var ordererUrls []string
 		for _, node := range orderers {
+			ordererURL, err := helpers.GetOrdererPublicURL(clientSet, node.Item)
+			if err != nil {
+				return err
+			}
 			ordererUrls = append(
 				ordererUrls,
-				fmt.Sprintf("%s:%d", k8sIP, node.Status.NodePort),
+				ordererURL,
 			)
 		}
 		ordererOrgs = append(ordererOrgs, testutils.CreateOrdererOrg(

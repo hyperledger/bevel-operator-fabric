@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/kfsoftware/hlf-operator/controllers/utils"
 	log "github.com/sirupsen/logrus"
+	"k8s.io/client-go/kubernetes"
 
 	hlfv1alpha1 "github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
 	operatorv1 "github.com/kfsoftware/hlf-operator/pkg/client/clientset/versioned"
@@ -48,15 +49,18 @@ type ClusterOrderingService struct {
 }
 
 type ClusterOrdererNode struct {
-	Name   string
-	Spec   hlfv1alpha1.FabricOrdererNodeSpec
-	Status hlfv1alpha1.FabricOrdererNodeStatus
+	Name      string
+	PublicURL string
+	Spec      hlfv1alpha1.FabricOrdererNodeSpec
+	Status    hlfv1alpha1.FabricOrdererNodeStatus
+	Item      hlfv1alpha1.FabricOrdererNode
 }
 
 type ClusterPeer struct {
 	Name      string
 	Spec      hlfv1alpha1.FabricPeerSpec
 	Status    hlfv1alpha1.FabricPeerStatus
+	PublicURL string
 	TLSCACert string
 	RootCert  string
 	Identity  Identity
@@ -87,6 +91,7 @@ func GetClusterCAs(oclient *operatorv1.Clientset, ns string) ([]*ClusterCA, erro
 }
 
 func GetClusterOrderers(
+	clientSet *kubernetes.Clientset,
 	oclient *operatorv1.Clientset,
 	ns string,
 ) ([]*Organization, []*ClusterOrderingService, error) {
@@ -103,20 +108,23 @@ func GetClusterOrderers(
 	var orderers []*ClusterOrderingService
 	if len(ordererNodes.Items) > 0 {
 		orderingService := &ClusterOrderingService{
-			Name: ordererNodes.Items[0].FullName(),
-			//Object:   ordService,
-			MSPID: ordererNodes.Items[0].Spec.MspID,
-			//Status:   ordService.Status,
+			Name:     ordererNodes.Items[0].FullName(),
+			MSPID:    ordererNodes.Items[0].Spec.MspID,
 			Orderers: []*ClusterOrdererNode{},
 		}
 		orderers = append(orderers, orderingService)
 		for _, ordNode := range ordererNodes.Items {
+			publicURL, err := GetOrdererPublicURL(clientSet, ordNode)
+			if err != nil {
+				return nil, nil, err
+			}
 			orderingService.Orderers = append(
 				orderingService.Orderers,
 				&ClusterOrdererNode{
-					Name:   ordNode.FullName(),
-					Spec:   ordNode.Spec,
-					Status: ordNode.Status,
+					Name:      ordNode.FullName(),
+					Spec:      ordNode.Spec,
+					Status:    ordNode.Status,
+					PublicURL: publicURL,
 				},
 			)
 		}
@@ -185,6 +193,7 @@ func GetClusterOrdererNodes(
 				Name:   ordNode.FullName(),
 				Spec:   ordNode.Spec,
 				Status: ordNode.Status,
+				Item:   ordNode,
 			},
 		)
 	}
@@ -238,8 +247,8 @@ func GetCertAuthByName(oclient *operatorv1.Clientset, name string, ns string) (*
 	return nil, errors.Errorf("CA with name=%s not found", name)
 }
 
-func GetOrderingServiceByFullName(oclient *operatorv1.Clientset, name string) (*ClusterOrderingService, error) {
-	_, ordServices, err := GetClusterOrderers(oclient, "")
+func GetOrderingServiceByFullName(clientSet *kubernetes.Clientset, oclient *operatorv1.Clientset, name string) (*ClusterOrderingService, error) {
+	_, ordServices, err := GetClusterOrderers(clientSet, oclient, "")
 	if err != nil {
 		return nil, err
 	}
@@ -263,6 +272,36 @@ func GetPeerByFullName(oclient *operatorv1.Clientset, name string) (*ClusterPeer
 
 	}
 	return nil, errors.Errorf("Peer with name=%s not found", name)
+}
+
+type HostPort struct {
+	Host string
+	Port int
+}
+
+func GetOrdererPublicURL(clientset *kubernetes.Clientset, node hlfv1alpha1.FabricOrdererNode) (string, error) {
+	hostPort, err := GetOrdererHostPort(clientset, node)
+	if err != nil {
+		return "", err
+	}
+	return fmt.Sprintf("%s:%d", hostPort.Host, hostPort.Port), nil
+}
+
+func GetOrdererHostPort(clientset *kubernetes.Clientset, node hlfv1alpha1.FabricOrdererNode) (*HostPort, error) {
+	k8sIP, err := utils.GetPublicIPKubernetes(clientset)
+	if err != nil {
+		return nil, err
+	}
+	if node.Spec.Istio != nil && len(node.Spec.Istio.Hosts) > 0 {
+		return &HostPort{
+			Host: node.Spec.Istio.Hosts[0],
+			Port: node.Spec.Istio.Port,
+		}, nil
+	}
+	return &HostPort{
+		Host: k8sIP,
+		Port: node.Status.NodePort,
+	}, nil
 }
 func GetOrdererNodeByFullName(oclient *operatorv1.Clientset, name string) (*ClusterOrdererNode, error) {
 	ordererNodes, err := GetClusterOrdererNodes(oclient, "")

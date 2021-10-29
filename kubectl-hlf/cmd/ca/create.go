@@ -11,7 +11,6 @@ import (
 	"github.com/spf13/cobra"
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"sigs.k8s.io/yaml"
 )
 
 type Options struct {
@@ -227,7 +226,7 @@ func (c *createCmd) run(args []string) error {
 		},
 	}
 	if c.caOpts.Output {
-		ot, err := yaml.Marshal(&fabricCA)
+		ot, err := helpers.MarshallWithoutStatus(fabricCA)
 		if err != nil {
 			return err
 		}
@@ -247,6 +246,7 @@ func (c *createCmd) run(args []string) error {
 
 	return nil
 }
+
 func newCreateCACmd(out io.Writer, errOut io.Writer) *cobra.Command {
 	c := createCmd{out: out, errOut: errOut}
 	cmd := &cobra.Command{

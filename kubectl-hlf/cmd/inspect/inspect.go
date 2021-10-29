@@ -69,7 +69,7 @@ orderers:
 {{- range $ordService := .Orderers }}
 {{- range $orderer := $ordService.Orderers }}
   "{{$orderer.Name}}":
-    url: grpcs://{{ $.K8SIP }}:{{ $orderer.Status.NodePort }}
+    url: grpcs://{{ $orderer.PublicURL }}
     grpcOptions:
       allow-insecure: false
     tlsCACerts:
@@ -102,6 +102,7 @@ channels:
     peers:
 {{- range $peer := .Peers }}
       "{{$peer.Name}}":
+        discover: true
         endorsingPeer: true
         chaincodeQuery: true
         ledgerQuery: true
@@ -124,7 +125,7 @@ func (c *inspectCmd) run(out io.Writer) error {
 	if err != nil {
 		return err
 	}
-	ordOrgs, orderers, err := helpers.GetClusterOrderers(oclient, ns)
+	ordOrgs, orderers, err := helpers.GetClusterOrderers(clientSet, oclient, ns)
 	if err != nil {
 		return err
 	}
