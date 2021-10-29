@@ -73,12 +73,8 @@ organizations:
 orderers:
 {{- range $ordService := .Orderers }}
 {{- range $orderer := $ordService.Orderers }}
-  {{$orderer.Name}}:
-{{if $.Internal }}
-    url: grpcs://{{ $orderer.PrivateURL }}
-{{ else }}
+  "{{$orderer.Name}}":
     url: grpcs://{{ $orderer.PublicURL }}
-{{ end }}
     grpcOptions:
       allow-insecure: false
     tlsCACerts:
@@ -136,7 +132,7 @@ channels:
 {{- end }}
     peers:
 {{- range $peer := .Peers }}
-       {{$peer.Name}}:
+      "{{$peer.Name}}":
         discover: true
         endorsingPeer: true
         chaincodeQuery: true
