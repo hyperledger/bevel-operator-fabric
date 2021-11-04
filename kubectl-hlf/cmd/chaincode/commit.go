@@ -74,7 +74,6 @@ func (c *commitChaincodeCmd) run() error {
 			CollectionConfig:  collectionConfigs,
 			InitRequired:      c.initRequired,
 		},
-		resmgmt.WithTargetEndpoints("org1-peer0.default"),
 		resmgmt.WithTimeout(fab.ResMgmt, 20*time.Minute),
 		resmgmt.WithTimeout(fab.PeerResponse, 20*time.Minute),
 	)
