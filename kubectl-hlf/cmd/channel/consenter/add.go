@@ -18,12 +18,12 @@ import (
 )
 
 type addConsenterCmd struct {
-	configPath  string
-	channelName string
-	userName    string
-	ordNodeName string
-	mspID       string
-	output      string
+	configPath   string
+	channelName  string
+	userName     string
+	ordNodeNames []string
+	mspID        string
+	output       string
 }
 
 func (c *addConsenterCmd) validate() error {
@@ -63,38 +63,33 @@ func (c *addConsenterCmd) run() error {
 	}
 	cftxGen := configtx.New(cfgBlock)
 	cfgOrd := cftxGen.Orderer()
-	ordNode, err := helpers.GetOrdererNodeByFullName(oClient, c.ordNodeName)
-	if err != nil {
-		return err
+	for _, ordNodeName := range c.ordNodeNames {
+		ordNode, err := helpers.GetOrdererNodeByFullName(oClient, ordNodeName)
+		if err != nil {
+			return err
+		}
+		tlsCert, err := utils.ParseX509Certificate([]byte(ordNode.Status.TlsCert))
+		if err != nil {
+			return err
+		}
+		ordererHostPort, err := helpers.GetOrdererHostPort(clientSet, ordNode.Item)
+		if err != nil {
+			return err
+		}
+		log.Infof("Orderer host=%s port=%d", ordererHostPort.Host, ordererHostPort.Port)
+		err = cfgOrd.AddConsenter(orderer.Consenter{
+			Address: orderer.EtcdAddress{
+				Host: ordererHostPort.Host,
+				Port: ordererHostPort.Port,
+			},
+			ClientTLSCert: tlsCert,
+			ServerTLSCert: tlsCert,
+		})
+		if err != nil {
+			return err
+		}
 	}
-	certAuth, err := helpers.GetCertAuthByURL(
-		oClient,
-		ordNode.Spec.Secret.Enrollment.Component.Cahost,
-		ordNode.Spec.Secret.Enrollment.Component.Caport,
-	)
-	if err != nil {
-		return err
-	}
-	tlsCert, err := utils.ParseX509Certificate([]byte(certAuth.Status.TLSCACert))
-	if err != nil {
-		return err
-	}
-	ordererHostPort, err := helpers.GetOrdererHostPort(clientSet, ordNode.Item)
-	if err != nil {
-		return err
-	}
-	log.Infof("Orderer host=%s port=%d", ordererHostPort.Host, ordererHostPort.Port)
-	err = cfgOrd.AddConsenter(orderer.Consenter{
-		Address: orderer.EtcdAddress{
-			Host: ordererHostPort.Host,
-			Port: ordererHostPort.Port,
-		},
-		ClientTLSCert: tlsCert,
-		ServerTLSCert: tlsCert,
-	})
-	if err != nil {
-		return err
-	}
+
 	configUpdateBytes, err := cftxGen.ComputeMarshaledUpdate(c.channelName)
 	if err != nil {
 		return err
@@ -130,13 +125,13 @@ func newAddConsenterCMD(io.Writer, io.Writer) *cobra.Command {
 	persistentFlags.StringVarP(&c.channelName, "channel", "", "", "Channel name")
 	persistentFlags.StringVarP(&c.configPath, "config", "", "", "Configuration file for the SDK")
 	persistentFlags.StringVarP(&c.mspID, "mspid", "", "", "MSP ID")
-	persistentFlags.StringVarP(&c.ordNodeName, "orderer", "", "", "Orderer name")
+	persistentFlags.StringSliceVarP(&c.ordNodeNames, "orderers", "", []string{}, "Orderer name")
 	persistentFlags.StringVarP(&c.userName, "user", "", "", "User name for the transaction")
 	persistentFlags.StringVarP(&c.output, "output", "o", "", "Output block")
 	cmd.MarkPersistentFlagRequired("channel")
 	cmd.MarkPersistentFlagRequired("config")
 	cmd.MarkPersistentFlagRequired("user")
-	cmd.MarkPersistentFlagRequired("orderer")
+	cmd.MarkPersistentFlagRequired("orderers")
 	cmd.MarkPersistentFlagRequired("mspid")
 	cmd.MarkPersistentFlagRequired("output")
 	return cmd
