@@ -74,7 +74,11 @@ data:
   CORE_LEDGER_STATE_STATEDATABASE: {{ .Values.peer.databaseType | quote }}
   # Containers in the same pod share the host
   {{- if eq .Values.peer.databaseType "CouchDB" }}
+  {{- if .Values.couchdb.external.enabled }}
+  CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS: {{.Values.couchdb.external.host}}:{{.Values.couchdb.external.port}}
+  {{- else }}
   CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS: localhost:5984
+  {{- end }}
   {{- end }}
   PEER_CFG_PATH: /var/hyperledger/config
   FABRIC_CFG_PATH: /var/hyperledger/fabric_cfg

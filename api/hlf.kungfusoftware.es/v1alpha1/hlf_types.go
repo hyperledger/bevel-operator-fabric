@@ -76,7 +76,7 @@ type ServiceMonitor struct {
 }
 type FabricPeerCouchdbExporter struct {
 	// +kubebuilder:default:=false
-	Enabled   bool                        `json:"enabled"`
+	Enabled bool `json:"enabled"`
 	// +kubebuilder:default:="gesellix/couchdb-prometheus-exporter"
 	Image string `json:"image"`
 	// +kubebuilder:default:="v30.0.0"
@@ -166,6 +166,14 @@ type FabricPeerStorage struct {
 type FabricPeerCouchDB struct {
 	User     string `json:"user"`
 	Password string `json:"password"`
+	// +optional
+	// +nullable
+	ExternalCouchDB *FabricPeerExternalCouchDB `json:"externalCouchDB"`
+}
+type FabricPeerExternalCouchDB struct {
+	Enabled bool   `json:"enabled"`
+	Host    string `json:"host"`
+	Port    int    `json:"port"`
 }
 type FabricIstio struct {
 	// +optional
