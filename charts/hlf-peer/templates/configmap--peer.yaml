@@ -72,6 +72,9 @@ data:
   CORE_VM_ENDPOINT: unix:///host/var/run/docker.sock
   {{- end }}
   CORE_LEDGER_STATE_STATEDATABASE: {{ .Values.peer.databaseType | quote }}
+  {{- if .Values.externalChaincodeBuilder }}
+  CORE_CHAINCODEADDRESS: "{{ include "hlf-peer.fullname" . }}:7052"
+  {{- end }}
   # Containers in the same pod share the host
   {{- if eq .Values.peer.databaseType "CouchDB" }}
   {{- if .Values.couchdb.external.enabled }}

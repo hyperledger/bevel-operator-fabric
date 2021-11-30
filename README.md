@@ -133,7 +133,7 @@ kubectl hlf channel generate --output=demo.block --name=demo --organizations Org
 kubectl hlf ca enroll --name=ord-ca --namespace=default --user=admin --secret=adminpw --mspid OrdererMSP \
         --ca-name tlsca  --output admin-tls-ordservice.yaml 
 
-kubectl hlf ordnode join --block=demo.block --name=ordservice --namespace=default --identity=admin-tls-ordservice.yaml
+kubectl hlf ordnode join --block=demo.block --name=ord-node1 --namespace=default --identity=admin-tls-ordservice.yaml
 
 ```
 
@@ -215,7 +215,7 @@ kubectl hlf chaincode approveformyorg --config=org1.yaml --user=admin --peer=org
 
 ## Commit chaincode
 ```bash
-kubectl hlf chaincode commit --config=org1.yaml --user=admin --peer=org1-peer0.default \
+kubectl hlf chaincode commit --config=org1.yaml --user=admin --mspid=Org1MSP \
     --version "1.0" --sequence 1 --name=fabcar \
     --policy="OR('Org1MSP.member')" --channel=demo
 ```
