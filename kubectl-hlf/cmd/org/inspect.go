@@ -102,7 +102,11 @@ func (c *inspectCmd) run(args []string) error {
 		return err
 	}
 	baseOutputPath := c.caOpts.OutputPath
-	peerOrgs, _, err := helpers.GetClusterPeers(oclient, "")
+	clientSet, err := helpers.GetKubeClient()
+	if err != nil {
+		return err
+	}
+	peerOrgs, _, err := helpers.GetClusterPeers(clientSet, oclient, "")
 	if err != nil {
 		return err
 	}

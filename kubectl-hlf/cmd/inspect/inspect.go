@@ -22,6 +22,7 @@ const (
 type inspectCmd struct {
 	fileOutput    string
 	organizations []string
+	internal      bool
 }
 
 func (c *inspectCmd) validate() error {
@@ -69,7 +70,11 @@ orderers:
 {{- range $ordService := .Orderers }}
 {{- range $orderer := $ordService.Orderers }}
   "{{$orderer.Name}}":
+{{if $.Internal }}
+    url: grpcs://{{ $orderer.PrivateURL }}
+{{ else }}
     url: grpcs://{{ $orderer.PublicURL }}
+{{ end }}
     grpcOptions:
       allow-insecure: false
     tlsCACerts:
@@ -81,7 +86,11 @@ orderers:
 peers:
   {{- range $peer := .Peers }}
   "{{$peer.Name}}":
-    url: grpcs://{{ $.K8SIP }}:{{ $peer.Status.NodePort }}
+{{if $.Internal }}
+    url: grpcs://{{ $peer.PrivateURL }}
+{{ else }}
+    url: grpcs://{{ $peer.PublicURL }}
+{{ end }}
     grpcOptions:
       hostnameOverride: ""
       ssl-target-name-override: ""
@@ -129,7 +138,7 @@ func (c *inspectCmd) run(out io.Writer) error {
 	if err != nil {
 		return err
 	}
-	peerOrgs, peers, err := helpers.GetClusterPeers(oclient, ns)
+	peerOrgs, peers, err := helpers.GetClusterPeers(clientSet, oclient, ns)
 	if err != nil {
 		return err
 	}
@@ -160,6 +169,7 @@ func (c *inspectCmd) run(out io.Writer) error {
 		"Orderers":      orderers,
 		"Organizations": orgMap,
 		"CertAuths":     certAuths,
+		"Internal":      c.internal,
 	})
 	if err != nil {
 		return err
@@ -196,6 +206,7 @@ func NewInspectHLFConfig(out io.Writer) *cobra.Command {
 
 	f := cmd.Flags()
 	f.StringVar(&c.fileOutput, "output", "", "output file")
+	f.BoolVar(&c.internal, "internal", false, "use kubernetes service names")
 	f.StringArrayVarP(&c.organizations, "organizations", "o", []string{}, "organizations to export")
 
 	return cmd

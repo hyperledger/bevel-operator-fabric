@@ -118,7 +118,7 @@ func (c generateChannelCmd) run() error {
 		))
 	}
 	var peerOrgs []testutils.PeerOrg
-	_, peers, err := helpers.GetClusterPeers(oclient, ns)
+	_, peers, err := helpers.GetClusterPeers(clientSet, oclient, ns)
 	if err != nil {
 		return err
 	}

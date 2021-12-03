@@ -52,7 +52,11 @@ func (c *addAnchorPeerCmd) run() error {
 	if err != nil {
 		return err
 	}
-	adminPeer, err := helpers.GetPeerByFullName(oclient, c.peer)
+	clientSet, err := helpers.GetKubeClient()
+	if err != nil {
+		return err
+	}
+	adminPeer, err := helpers.GetPeerByFullName(clientSet, oclient, c.peer)
 	if err != nil {
 		return err
 	}
@@ -76,10 +80,6 @@ func (c *addAnchorPeerCmd) run() error {
 	}
 	cftxGen := configtx.New(cfgBlock)
 	app := cftxGen.Application().Organization(mspID)
-	clientSet, err := helpers.GetKubeClient()
-	if err != nil {
-		return err
-	}
 	k8sIP, err := utils.GetPublicIPKubernetes(clientSet)
 	if err != nil {
 		return err

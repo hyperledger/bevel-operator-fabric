@@ -28,7 +28,11 @@ func (c *inspectChannelCmd) run(out io.Writer) error {
 	if err != nil {
 		return err
 	}
-	peer, err := helpers.GetPeerByFullName(oclient, c.peer)
+	clientSet, err := helpers.GetKubeClient()
+	if err != nil {
+		return err
+	}
+	peer, err := helpers.GetPeerByFullName(clientSet, oclient, c.peer)
 	if err != nil {
 		return err
 	}

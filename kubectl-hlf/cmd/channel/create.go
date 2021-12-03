@@ -49,7 +49,7 @@ func (c *createChannelCmd) run() error {
 	if err != nil {
 		return err
 	}
-	adminPeer, err := helpers.GetPeerByFullName(oclient, c.adminOrg)
+	adminPeer, err := helpers.GetPeerByFullName(clientSet, oclient, c.adminOrg)
 	if err != nil {
 		return err
 	}
@@ -62,7 +62,7 @@ func (c *createChannelCmd) run() error {
 		return err
 	}
 	ns := ""
-	_, peers, err := helpers.GetClusterPeers(oclient, ns)
+	_, peers, err := helpers.GetClusterPeers(clientSet, oclient, ns)
 	if err != nil {
 		return err
 	}
