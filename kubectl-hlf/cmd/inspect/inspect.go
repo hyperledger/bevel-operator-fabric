@@ -26,7 +26,6 @@ type inspectCmd struct {
 	fileOutput    string
 	organizations []string
 	internal      bool
-	format        string
 }
 
 func (c *inspectCmd) validate() error {
@@ -74,7 +73,11 @@ orderers:
 {{- range $ordService := .Orderers }}
 {{- range $orderer := $ordService.Orderers }}
   "{{$orderer.Name}}":
+{{if $.Internal }}
+    url: grpcs://{{ $orderer.PrivateURL }}
+{{ else }}
     url: grpcs://{{ $orderer.PublicURL }}
+{{ end }}
     grpcOptions:
       allow-insecure: false
     tlsCACerts:
@@ -85,7 +88,7 @@ orderers:
 
 peers:
   {{- range $peer := .Peers }}
-  {{$peer.Name}}:
+  "{{$peer.Name}}":
 {{if $.Internal }}
     url: grpcs://{{ $peer.PrivateURL }}
 {{ else }}
@@ -160,8 +163,7 @@ func (c *inspectCmd) run(out io.Writer) error {
 	if err != nil {
 		return err
 	}
-	peerOrgs, clusterPeers, err := helpers.GetClusterPeers(clientSet, oclient, ns)
-
+	peerOrgs, peers, err := helpers.GetClusterPeers(clientSet, oclient, ns)
 	if err != nil {
 		return err
 	}
