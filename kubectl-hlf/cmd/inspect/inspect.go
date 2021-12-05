@@ -100,6 +100,22 @@ peers:
 {{ $peer.Status.TlsCert | indent 8 }}
 {{- end }}
 
+certificateAuthorities:
+{{- range $ca := .CertAuths }}
+  
+  "{{ $ca.Name }}":
+{{if $.Internal }}
+    url: grpcs://{{ $ca.PrivateURL }}
+{{ else }}
+    url: grpcs://{{ $ca.PublicURL }}
+{{ end }}
+    caName: ca
+    tlsCACerts:
+      pem: |
+{{ $ca.Status.TlsCert | indent 8 }}
+
+{{- end }}
+
 channels:
   _default:
     orderers:
@@ -130,7 +146,7 @@ func (c *inspectCmd) run(out io.Writer) error {
 		return err
 	}
 	ns := ""
-	certAuths, err := helpers.GetClusterCAs(oclient, ns)
+	certAuths, err := helpers.GetClusterCAs(clientSet, oclient, ns)
 	if err != nil {
 		return err
 	}

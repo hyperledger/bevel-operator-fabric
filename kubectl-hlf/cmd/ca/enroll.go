@@ -44,7 +44,11 @@ func (c *enrollCmd) run(args []string) error {
 	if err != nil {
 		return err
 	}
-	certAuth, err := helpers.GetCertAuthByName(oclient, c.enrollOpts.Name, c.enrollOpts.NS)
+	clientSet, err := helpers.GetKubeClient()
+	if err != nil {
+		return err
+	}
+	certAuth, err := helpers.GetCertAuthByName(clientSet, oclient, c.enrollOpts.Name, c.enrollOpts.NS)
 	if err != nil {
 		return err
 	}

@@ -53,7 +53,6 @@ func (c *delConsenterCmd) run() error {
 	if err != nil {
 		return err
 	}
-
 	block, err := resClient.QueryConfigBlockFromOrderer(c.channelName)
 	if err != nil {
 		return err
@@ -69,6 +68,7 @@ func (c *delConsenterCmd) run() error {
 		return err
 	}
 	certAuth, err := helpers.GetCertAuthByURL(
+		clientSet,
 		oClient,
 		ordNode.Spec.Secret.Enrollment.Component.Cahost,
 		ordNode.Spec.Secret.Enrollment.Component.Caport,

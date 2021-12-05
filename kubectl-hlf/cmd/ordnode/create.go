@@ -48,11 +48,11 @@ func (c *createCmd) run(args []string) error {
 	if err != nil {
 		return err
 	}
-	certAuth, err := helpers.GetCertAuthByFullName(oclient, c.ordererOpts.CAName)
+	clientSet, err := helpers.GetKubeClient()
 	if err != nil {
 		return err
 	}
-	clientSet, err := helpers.GetKubeClient()
+	certAuth, err := helpers.GetCertAuthByFullName(clientSet, oclient, c.ordererOpts.CAName)
 	if err != nil {
 		return err
 	}

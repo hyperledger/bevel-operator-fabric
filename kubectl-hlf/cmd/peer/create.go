@@ -54,16 +54,16 @@ func (c *createCmd) run() error {
 	if err != nil {
 		return err
 	}
-	certAuth, err := helpers.GetCertAuthByFullName(oclient, c.peerOpts.CAName)
+	clientSet, err := helpers.GetKubeClient()
+	if err != nil {
+		return err
+	}
+	certAuth, err := helpers.GetCertAuthByFullName(clientSet, oclient, c.peerOpts.CAName)
 	if err != nil {
 		return err
 	}
 	if certAuth.Status.Status != v1alpha1.RunningStatus {
 		return errors.Errorf("ca %s is in %s status", certAuth.Name, certAuth.Status.Status)
-	}
-	clientSet, err := helpers.GetKubeClient()
-	if err != nil {
-		return err
 	}
 	k8sIPs, err := utils.GetPublicIPsKubernetes(clientSet)
 	if err != nil {

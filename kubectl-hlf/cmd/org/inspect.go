@@ -115,6 +115,7 @@ func (c *inspectCmd) run(args []string) error {
 		firstPeer := peerOrg.Peers[0]
 		caHost := strings.Split(firstPeer.Spec.Secret.Enrollment.Component.Cahost, ".")[0]
 		certAuth, err := helpers.GetCertAuthByURL(
+			clientSet,
 			oclient,
 			caHost,
 			firstPeer.Spec.Secret.Enrollment.Component.Caport,

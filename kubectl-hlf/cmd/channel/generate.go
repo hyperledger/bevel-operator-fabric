@@ -84,6 +84,7 @@ func (c generateChannelCmd) run() error {
 	for mspID, orderers := range ordererMap {
 		orderer := orderers[0]
 		certAuth, err := helpers.GetCertAuthByURL(
+			clientSet,
 			oclient,
 			orderer.Spec.Secret.Enrollment.Component.Cahost,
 			orderer.Spec.Secret.Enrollment.Component.Caport,
@@ -128,6 +129,7 @@ func (c generateChannelCmd) run() error {
 		}
 		caHost := strings.Split(peer.Spec.Secret.Enrollment.Component.Cahost, ".")[0]
 		certAuth, err := helpers.GetCertAuthByURL(
+			clientSet,
 			oclient,
 			caHost,
 			peer.Spec.Secret.Enrollment.Component.Caport,

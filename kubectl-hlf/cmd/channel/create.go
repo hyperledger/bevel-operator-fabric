@@ -72,6 +72,7 @@ func (c *createChannelCmd) run() error {
 			continue
 		}
 		certAuth, err := helpers.GetCertAuthByURL(
+			clientSet,
 			oclient,
 			peer.Spec.Secret.Enrollment.Component.Cahost,
 			peer.Spec.Secret.Enrollment.Component.Caport,
@@ -91,6 +92,7 @@ func (c *createChannelCmd) run() error {
 		return errors.Errorf("No peer orgs specified")
 	}
 	certAuth, err := helpers.GetCertAuthByURL(
+		clientSet,
 		oclient,
 		ordService.Spec.Enrollment.Component.Cahost,
 		ordService.Spec.Enrollment.Component.Caport,
