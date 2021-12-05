@@ -105,6 +105,8 @@ func (c *createCmd) run() error {
 	for _, k8sIP := range k8sIPs {
 		csrHosts = append(csrHosts, k8sIP)
 	}
+	csrHosts = append(csrHosts, c.peerOpts.Name)
+	csrHosts = append(csrHosts, fmt.Sprintf("%s.%s", c.peerOpts.Name, c.peerOpts.NS))
 	fabricPeer := &v1alpha1.FabricPeer{
 		TypeMeta: v1.TypeMeta{
 			Kind:       "FabricPeer",
