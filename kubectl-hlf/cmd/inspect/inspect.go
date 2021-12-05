@@ -125,6 +125,22 @@ certificateAuthorities:
 
 {{- end }}
 
+certificateAuthorities:
+{{- range $ca := .CertAuths }}
+  
+  "{{ $ca.Name }}":
+{{if $.Internal }}
+    url: grpcs://{{ $ca.PrivateURL }}
+{{ else }}
+    url: grpcs://{{ $ca.PublicURL }}
+{{ end }}
+    caName: ca
+    tlsCACerts:
+      pem: |
+{{ $ca.Status.TlsCert | indent 8 }}
+
+{{- end }}
+
 channels:
   _default:
     orderers:
