@@ -71,33 +71,7 @@ func (c *createCmd) run(args []string) error {
 	csrHosts = append(csrHosts, k8sIP)
 	csrHosts = append(csrHosts, c.ordererOpts.Name)
 	csrHosts = append(csrHosts, fmt.Sprintf("%s.%s", c.ordererOpts.Name, c.ordererOpts.NS))
-	ingressGateway := c.ordererOpts.IngressGateway
-	ingressPort := c.ordererOpts.IngressPort
-	istio := &v1alpha1.FabricIstio{
-		Port:           ingressPort,
-		Hosts:          []string{},
-		IngressGateway: ingressGateway,
-	}
-	if len(c.ordererOpts.Hosts) > 0 {
-		istio = &v1alpha1.FabricIstio{
-			Port:           ingressPort,
-			Hosts:          c.ordererOpts.Hosts,
-			IngressGateway: ingressGateway,
-		}
-		csrHosts = append(csrHosts, c.ordererOpts.Hosts...)
-	}
-	adminIstio := &v1alpha1.FabricIstio{
-		Port:           ingressPort,
-		Hosts:          []string{},
-		IngressGateway: ingressGateway,
-	}
-	if len(c.ordererOpts.AdminHosts) > 0 {
-		adminIstio = &v1alpha1.FabricIstio{
-			Port:           ingressPort,
-			Hosts:          c.ordererOpts.AdminHosts,
-			IngressGateway: ingressGateway,
-		}
-	}
+
 	fabricOrderer := &v1alpha1.FabricOrdererNode{
 		TypeMeta: v1.TypeMeta{
 			Kind:       "FabricOrdererNode",
