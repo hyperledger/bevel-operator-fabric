@@ -26,6 +26,7 @@ type inspectCmd struct {
 	fileOutput    string
 	organizations []string
 	internal      bool
+	format        string
 }
 
 func (c *inspectCmd) validate() error {
