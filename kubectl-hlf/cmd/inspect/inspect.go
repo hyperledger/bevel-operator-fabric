@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"sigs.k8s.io/yaml"
 	"text/template"
 
 	"github.com/Masterminds/sprig/v3"
@@ -17,12 +18,15 @@ const (
 	createDesc = `
 'inspect' command creates creates a configuration file ready to use for the go sdk`
 	createExample = `  kubectl hlf inspect --output hlf-cfg.yaml`
+	yamlFormat    = "yaml"
+	jsonFormat    = "json"
 )
 
 type inspectCmd struct {
 	fileOutput    string
 	organizations []string
 	internal      bool
+	format        string
 }
 
 func (c *inspectCmd) validate() error {
@@ -190,13 +194,29 @@ func (c *inspectCmd) run(out io.Writer) error {
 	if err != nil {
 		return err
 	}
-	if c.fileOutput != "" {
-		err = ioutil.WriteFile(c.fileOutput, buf.Bytes(), 0644)
+
+	var data []byte
+	if c.format != yamlFormat && c.format != jsonFormat {
+		fmt.Fprint(out, "Invalid output format... Default to yaml")
+		c.format = yamlFormat
+	}
+
+	if c.format == jsonFormat {
+		data, err = yaml.YAMLToJSON(buf.Bytes())
 		if err != nil {
 			return err
 		}
 	} else {
-		_, err = fmt.Fprint(out, buf.String())
+		data = buf.Bytes()
+	}
+
+	if c.fileOutput != "" {
+		err = ioutil.WriteFile(c.fileOutput, data, 0644)
+		if err != nil {
+			return err
+		}
+	} else {
+		_, err = fmt.Fprint(out, string(data))
 		if err != nil {
 			return err
 		}
@@ -224,6 +244,7 @@ func NewInspectHLFConfig(out io.Writer) *cobra.Command {
 	f.StringVar(&c.fileOutput, "output", "", "output file")
 	f.BoolVar(&c.internal, "internal", false, "use kubernetes service names")
 	f.StringArrayVarP(&c.organizations, "organizations", "o", []string{}, "organizations to export")
+	f.StringVar(&c.format, "format", yamlFormat, "connection profile output format (yaml/json)")
 
 	return cmd
 }
