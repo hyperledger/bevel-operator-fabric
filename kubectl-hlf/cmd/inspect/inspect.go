@@ -131,14 +131,20 @@ certificateAuthorities:
   
   "{{ $ca.Name }}":
 {{if $.Internal }}
-    url: grpcs://{{ $ca.PrivateURL }}
+    url: https://{{ $ca.PrivateURL }}
 {{ else }}
-    url: grpcs://{{ $ca.PublicURL }}
+    url: https://{{ $ca.PublicURL }}
+{{ end }}
+{{if $ca.EnrollID }}
+	registrar:
+		enrollId: {{ $ca.EnrollID }}
+		enrollSecret: {{ $ca.EnrollSecret }}
 {{ end }}
     caName: ca
     tlsCACerts:
-      pem: |
-{{ $ca.Status.TlsCert | indent 8 }}
+      pem: 
+		- |
+{{ $ca.Status.TlsCert | indent 12 }}
 
 {{- end }}
 
