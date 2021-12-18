@@ -61,6 +61,14 @@ func (c *createCmd) run(args []string) error {
 		return err
 	}
 
+	csrHosts := []string{
+		"127.0.0.1",
+		"localhost",
+	}
+	csrHosts = append(csrHosts, k8sIP)
+	csrHosts = append(csrHosts, c.ordererOpts.Name)
+	csrHosts = append(csrHosts, fmt.Sprintf("%s.%s", c.ordererOpts.Name, c.ordererOpts.NS))
+
 	fabricOrderer := &v1alpha1.FabricOrdererNode{
 		TypeMeta: v1.TypeMeta{
 			Kind:       "FabricOrdererNode",
@@ -110,12 +118,8 @@ func (c *createCmd) run(args []string) error {
 							Cacert: base64.StdEncoding.EncodeToString([]byte(certAuth.Status.TlsCert)),
 						},
 						Csr: v1alpha1.Csr{
-							Hosts: []string{
-								"127.0.0.1",
-								"localhost",
-								k8sIP,
-							},
-							CN: "",
+							Hosts: csrHosts,
+							CN:    "",
 						},
 						Enrollid:     c.ordererOpts.EnrollID,
 						Enrollsecret: c.ordererOpts.EnrollPW,
