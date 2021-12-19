@@ -424,6 +424,10 @@ type FabricOrdererNodeStatus struct {
 	// +optional
 	TlsCert string `json:"tlsCert"`
 	// +optional
+	SignCACert string `json:"signCaCert"`
+	// +optional
+	TlsCACert string `json:"tlsCaCert"`
+	// +optional
 	TlsAdminCert string `json:"tlsAdminCert"`
 	// +optional
 	OperationsPort int `json:"operationsPort"`

@@ -83,7 +83,7 @@ orderers:
       allow-insecure: false
     tlsCACerts:
       pem: |
-{{ $orderer.Status.TlsCert | indent 8 }}
+{{ or $orderer.Status.TlsCACert $orderer.Status.TlsCert | indent 8 }}
 {{- end }}
 {{- end }}
 
@@ -101,7 +101,7 @@ peers:
       allow-insecure: false
     tlsCACerts:
       pem: |
-{{ $peer.Status.TlsCert | indent 8 }}
+{{ $peer.Status.TlsCACert | indent 8 }}
 {{- end }}
 
 certificateAuthorities:
