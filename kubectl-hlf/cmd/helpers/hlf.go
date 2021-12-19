@@ -34,6 +34,8 @@ type ClusterCA struct {
 	Name       string
 	PublicURL  string
 	PrivateURL string
+	EnrollID   string
+	EnrollPWD  string
 	Item       hlfv1alpha1.FabricCA
 }
 
@@ -88,6 +90,13 @@ func GetClusterCAs(clientSet *kubernetes.Clientset, oclient *operatorv1.Clientse
 		if err != nil {
 			return nil, err
 		}
+		certAuthIdentities := certAuth.Spec.CA.Registry.Identities
+		var enrollId string
+		var enrollPwd string
+		if len(certAuthIdentities) > 0 {
+			enrollId = certAuthIdentities[0].Name
+			enrollPwd = certAuthIdentities[0].Pass
+		}
 		certAuths = append(certAuths, &ClusterCA{
 			Object:     certAuth,
 			Spec:       certAuth.Spec,
@@ -95,6 +104,8 @@ func GetClusterCAs(clientSet *kubernetes.Clientset, oclient *operatorv1.Clientse
 			Name:       certauthName,
 			PublicURL:  publicURL,
 			PrivateURL: privateURL,
+			EnrollID:   enrollId,
+			EnrollPWD:  enrollPwd,
 			Item:       certAuth,
 		})
 	}
@@ -311,7 +322,7 @@ func GetCAPublicURL(clientset *kubernetes.Clientset, node hlfv1alpha1.FabricCA) 
 	return fmt.Sprintf("%s:%d", hostPort.Host, hostPort.Port), nil
 }
 func GetCAPrivateURL(node hlfv1alpha1.FabricCA) string {
-	return fmt.Sprintf("%s.%s:%s", node.Name, node.Namespace, "7050")
+	return fmt.Sprintf("%s.%s:%s", node.Name, node.Namespace, "7054")
 }
 
 func GetPeerPublicURL(clientset *kubernetes.Clientset, node hlfv1alpha1.FabricPeer) (string, error) {
