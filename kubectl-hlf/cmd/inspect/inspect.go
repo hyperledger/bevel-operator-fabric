@@ -73,7 +73,7 @@ organizations:
 orderers:
 {{- range $ordService := .Orderers }}
 {{- range $orderer := $ordService.Orderers }}
-  "{{$orderer.Name}}":
+  {{$orderer.Name}}:
 {{if $.Internal }}
     url: grpcs://{{ $orderer.PrivateURL }}
 {{ else }}
@@ -164,7 +164,8 @@ func (c *inspectCmd) run(out io.Writer) error {
 	if err != nil {
 		return err
 	}
-	peerOrgs, peers, err := helpers.GetClusterPeers(clientSet, oclient, ns)
+	peerOrgs, _peers, err := helpers.GetClusterPeers(clientSet, oclient, ns)
+
 	if err != nil {
 		return err
 	}
@@ -180,7 +181,12 @@ func (c *inspectCmd) run(out io.Writer) error {
 			orgMap[v.MspID] = v
 		}
 	}
-
+	var peers []*helpers.ClusterPeer
+	for _, peer := range _peers {
+		if filterByOrgs && utils.Contains(c.organizations, peer.MSPID) {
+			peers = append(peers, peer)
+		}
+	}
 	tmpl, err := template.New("test").Funcs(sprig.HermeticTxtFuncMap()).Parse(tmplGoConfig)
 	if err != nil {
 		return err
