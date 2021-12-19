@@ -89,7 +89,7 @@ orderers:
 
 peers:
   {{- range $peer := .Peers }}
-  "{{$peer.Name}}":
+  {{$peer.Name}}:
 {{if $.Internal }}
     url: grpcs://{{ $peer.PrivateURL }}
 {{ else }}
@@ -129,21 +129,21 @@ certificateAuthorities:
 certificateAuthorities:
 {{- range $ca := .CertAuths }}
   
-  "{{ $ca.Name }}":
+  {{ $ca.Name }}:
 {{if $.Internal }}
     url: https://{{ $ca.PrivateURL }}
 {{ else }}
     url: https://{{ $ca.PublicURL }}
 {{ end }}
 {{if $ca.EnrollID }}
-	registrar:
-		enrollId: {{ $ca.EnrollID }}
-		enrollSecret: {{ $ca.EnrollSecret }}
+    registrar:
+        enrollId: {{ $ca.EnrollID }}
+        enrollSecret: {{ $ca.EnrollPWD }}
 {{ end }}
     caName: ca
     tlsCACerts:
       pem: 
-		- |
+       - |
 {{ $ca.Status.TlsCert | indent 12 }}
 
 {{- end }}
@@ -158,7 +158,7 @@ channels:
 {{- end }}
     peers:
 {{- range $peer := .Peers }}
-      "{{$peer.Name}}":
+       {{$peer.Name}}:
         discover: true
         endorsingPeer: true
         chaincodeQuery: true
@@ -202,12 +202,7 @@ func (c *inspectCmd) run(out io.Writer) error {
 			orgMap[v.MspID] = v
 		}
 	}
-	var peers []*helpers.ClusterPeer
-	for _, peer := range clusterPeers {
-		if filterByOrgs && utils.Contains(c.organizations, peer.MSPID) {
-			peers = append(peers, peer)
-		}
-	}
+
 	tmpl, err := template.New("test").Funcs(sprig.HermeticTxtFuncMap()).Parse(tmplGoConfig)
 	if err != nil {
 		return err
