@@ -164,7 +164,7 @@ func (c *inspectCmd) run(out io.Writer) error {
 	if err != nil {
 		return err
 	}
-	peerOrgs, _peers, err := helpers.GetClusterPeers(clientSet, oclient, ns)
+	peerOrgs, clusterPeers, err := helpers.GetClusterPeers(clientSet, oclient, ns)
 
 	if err != nil {
 		return err
@@ -182,7 +182,7 @@ func (c *inspectCmd) run(out io.Writer) error {
 		}
 	}
 	var peers []*helpers.ClusterPeer
-	for _, peer := range _peers {
+	for _, peer := range clusterPeers {
 		if filterByOrgs && utils.Contains(c.organizations, peer.MSPID) {
 			peers = append(peers, peer)
 		}
