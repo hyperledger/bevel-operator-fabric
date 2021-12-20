@@ -70,6 +70,7 @@ type ClusterPeer struct {
 	TLSCACert  string
 	RootCert   string
 	Identity   Identity
+	MSPID      string
 }
 type Identity struct {
 	Key  string
@@ -433,6 +434,7 @@ func GetClusterPeers(
 				Identity:   Identity{},
 				PublicURL:  publicURL,
 				PrivateURL: privateURL,
+				MSPID:      peer.Spec.MspID,
 			},
 		)
 	}
