@@ -16,5 +16,7 @@ func NewChaincodeCmd(stdOut io.Writer, stdErr io.Writer) *cobra.Command {
 	consortiumCmd.AddCommand(newChaincodeCommitCMD(stdOut, stdErr))
 	consortiumCmd.AddCommand(newQueryChaincodeCMD(stdOut, stdErr))
 	consortiumCmd.AddCommand(newInvokeChaincodeCMD(stdOut, stdErr))
+	consortiumCmd.AddCommand(newQueryCommittedCMD(stdOut, stdErr))
+	consortiumCmd.AddCommand(newQueryApprovedCMD(stdOut, stdErr))
 	return consortiumCmd
 }
