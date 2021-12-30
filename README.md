@@ -96,7 +96,8 @@ kubectl hlf ca register --name=org1-ca --user=peer --secret=peerpw --type=peer \
 ### Deploying a peer
 
 ```bash
-kubectl hlf peer create --image=$PEER_IMAGE --version=$PEER_VERSION --storage-class= --enroll-id=peer --mspid=Org1MSP \
+
+kubectl hlf peer create --image=$PEER_IMAGE --version=$PEER_VERSION --storage-class=standard --enroll-id=peer --mspid=Org1MSP \
         --enroll-pw=peerpw --capacity=5Gi --name=org1-peer0 --ca-name=org1-ca.default
 kubectl wait --timeout=180s --for=condition=Running fabricpeers.hlf.kungfusoftware.es --all
 ```
