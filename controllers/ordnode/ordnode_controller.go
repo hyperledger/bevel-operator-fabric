@@ -39,10 +39,6 @@ import (
 	"time"
 )
 
-
-
-
-
 // FabricOrdererNodeReconciler reconciles a FabricOrdererNode object
 type FabricOrdererNodeReconciler struct {
 	client.Client
@@ -202,6 +198,8 @@ func (r *FabricOrdererNodeReconciler) Reconcile(req ctrl.Request) (ctrl.Result, 
 		fOrderer.Status.NodePort = s.NodePort
 		fOrderer.Status.TlsCert = s.TlsCert
 		fOrderer.Status.SignCert = s.SignCert
+		fOrderer.Status.SignCACert = s.SignCACert
+		fOrderer.Status.TlsCACert = s.TlsCACert
 		fOrderer.Status.TlsAdminCert = s.TlsAdminCert
 		fOrderer.Status.AdminPort = s.AdminPort
 		fOrderer.Status.OperationsPort = s.OperationsPort
@@ -413,11 +411,15 @@ func (r *FabricOrdererNodeReconciler) upgradeChart(
 	}
 	settings := cli.New()
 	chartPath, err := cmd.LocateChart(r.ChartPath, settings)
+	if err != nil {
+		return err
+	}
 	ch, err := loader.Load(chartPath)
 	if err != nil {
 		return err
 	}
 	cmd.Wait = true
+	cmd.Timeout = time.Minute * 5
 	release, err := cmd.Run(releaseName, ch, inInterface)
 	if err != nil {
 		return err
@@ -425,7 +427,7 @@ func (r *FabricOrdererNodeReconciler) upgradeChart(
 	log.Infof("Chart upgraded %s", release.Name)
 	return nil
 }
-func GetOrdererDeployment(conf *action.Configuration, config *rest.Config, releaseName string, ns string, ) (*appsv1.Deployment, error, ) {
+func GetOrdererDeployment(conf *action.Configuration, config *rest.Config, releaseName string, ns string) (*appsv1.Deployment, error) {
 	ctx := context.Background()
 	cmd := action.NewGet(conf)
 	rel, err := cmd.Run(releaseName)
@@ -549,7 +551,6 @@ func getExistingSignCrypto(client *kubernetes.Clientset, chartName string, names
 	secretCrtName := fmt.Sprintf("%s-idcert", chartName)
 	secretKeyName := fmt.Sprintf("%s-idkey", chartName)
 	secretRootCrtName := fmt.Sprintf("%s-cacert", chartName)
-
 	secretCrt, err := client.CoreV1().Secrets(namespace).Get(context.Background(), secretCrtName, v1.GetOptions{})
 	if err != nil {
 		return nil, nil, nil, err
@@ -978,11 +979,12 @@ func GetOrdererState(conf *action.Configuration, config *rest.Config, releaseNam
 		Status:  hlfv1alpha1.RunningStatus,
 		Message: "",
 	}
-	tlsCrt, _, _, err := getExistingTLSCrypto(clientSet, releaseName, ns)
+	tlsCrt, _, rootTlsCrt, err := getExistingTLSCrypto(clientSet, releaseName, ns)
 	if err != nil {
 		return nil, err
 	}
 	r.TlsCert = string(utils.EncodeX509Certificate(tlsCrt))
+	r.TlsCACert = string(utils.EncodeX509Certificate(rootTlsCrt))
 	hlfmetrics.UpdateCertificateExpiry(
 		"orderer",
 		"tls",
@@ -1002,11 +1004,12 @@ func GetOrdererState(conf *action.Configuration, config *rest.Config, releaseNam
 		ordNode.Name,
 		ns,
 	)
-	signCrt, _, _, err := getExistingSignCrypto(clientSet, releaseName, ns)
+	signCrt, _, rootSignCrt, err := getExistingSignCrypto(clientSet, releaseName, ns)
 	if err != nil {
 		return nil, err
 	}
 	r.SignCert = string(utils.EncodeX509Certificate(signCrt))
+	r.SignCACert = string(utils.EncodeX509Certificate(rootSignCrt))
 	hlfmetrics.UpdateCertificateExpiry(
 		"orderer",
 		"sign",

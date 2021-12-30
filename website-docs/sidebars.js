@@ -22,6 +22,8 @@ module.exports = {
       "operator-guide/increase-resources",
       "operator-guide/increase-storage",
       "operator-guide/renew-certificates",
+      "operator-guide/istio",
+      "operator-guide/external-couchdb",
     ],
   },
 };

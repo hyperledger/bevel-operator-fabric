@@ -68,6 +68,12 @@ cacert: ""
 # TLS root CA certificate: as 'cert.pem'
 tlsrootcert: ""
 
+couchdb:
+  external:
+    enabled: true
+    host: ""
+    port: ""
+
 resources:
   peer:
     limits:

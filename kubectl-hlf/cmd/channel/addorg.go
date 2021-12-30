@@ -40,7 +40,11 @@ func (c *addOrgCmd) run(out io.Writer) error {
 	if err != nil {
 		return err
 	}
-	peer, err := helpers.GetPeerByFullName(oclient, c.peer)
+	clientSet, err := helpers.GetKubeClient()
+	if err != nil {
+		return err
+	}
+	peer, err := helpers.GetPeerByFullName(clientSet, oclient, c.peer)
 	if err != nil {
 		return err
 	}
@@ -58,9 +62,8 @@ func (c *addOrgCmd) run(out io.Writer) error {
 	if err != nil {
 		return err
 	}
-
 	channelID := c.channelName
-	channelConfig, err := GetCurrentConfigFromPeer(resClient, channelID)
+	channelConfig, err := helpers.GetCurrentConfigFromPeer(resClient, channelID)
 	if err != nil {
 		return err
 	}
@@ -85,11 +88,10 @@ func (c *addOrgCmd) run(out io.Writer) error {
 	var orgConfig *cb.ConfigGroup
 	for _, org := range topLevel.Organizations {
 		if org.Name == c.mspID {
-			orgConfig, err = encoder.NewOrdererOrgGroup(org)
+			orgConfig, err = encoder.NewApplicationOrgGroup(org)
 			if err != nil {
 				return err
 			}
-
 		}
 	}
 	if orgConfig == nil {
@@ -106,7 +108,7 @@ func (c *addOrgCmd) run(out io.Writer) error {
 			return err
 		}
 	} else {
-		configEnvelopeBytes, err := GetConfigEnvelopeBytes(confUpdate)
+		configEnvelopeBytes, err := helpers.GetConfigEnvelopeBytes(confUpdate)
 		if err != nil {
 			return err
 		}

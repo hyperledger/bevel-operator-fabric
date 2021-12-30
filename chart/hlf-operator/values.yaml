@@ -8,7 +8,7 @@ image:
   repository: quay.io/kfsoftware/hlf-operator
   pullPolicy: Always
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "v1.3.0"
+  tag: "v1.4.0-beta10"
 
 imagePullSecrets: []
 nameOverride: ""

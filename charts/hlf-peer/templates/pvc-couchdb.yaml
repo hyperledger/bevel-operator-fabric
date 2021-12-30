@@ -1,5 +1,5 @@
 {{- if eq .Values.peer.databaseType "CouchDB" }}
-{{- if and .Values.persistence.couchdb.enabled (not .Values.persistence.couchdb.existingClaim) }}
+{{- if and .Values.persistence.couchdb.enabled (not .Values.couchdb.external.enabled) (not .Values.persistence.couchdb.existingClaim) }}
 kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:

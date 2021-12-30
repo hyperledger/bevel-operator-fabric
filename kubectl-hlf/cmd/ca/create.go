@@ -11,19 +11,21 @@ import (
 	"github.com/spf13/cobra"
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"sigs.k8s.io/yaml"
 )
 
 type Options struct {
-	Name         string
-	StorageClass string
-	Capacity     string
-	NS           string
-	Image        string
-	Version      string
-	EnrollID     string
-	EnrollSecret string
-	Output       bool
+	Name           string
+	StorageClass   string
+	Capacity       string
+	NS             string
+	Image          string
+	Version        string
+	EnrollID       string
+	EnrollSecret   string
+	Output         bool
+	IngressGateway string
+	IngressPort    int
+	Hosts          []string
 }
 
 func (o Options) Validate() error {
@@ -62,6 +64,27 @@ func (c *createCmd) run(args []string) error {
 			},
 		},
 	}
+	ingressGateway := c.caOpts.IngressGateway
+	ingressPort := c.caOpts.IngressPort
+	istio := &v1alpha1.FabricIstio{
+		Port:           ingressPort,
+		Hosts:          []string{},
+		IngressGateway: ingressGateway,
+	}
+	if len(c.caOpts.Hosts) > 0 {
+		istio = &v1alpha1.FabricIstio{
+			Port:           ingressPort,
+			Hosts:          c.caOpts.Hosts,
+			IngressGateway: ingressGateway,
+		}
+	}
+
+	hosts := []string{
+		"localhost",
+		c.caOpts.Name,
+		fmt.Sprintf("%s.%s", c.caOpts.Name, c.caOpts.NS),
+	}
+	hosts = append(hosts, c.caOpts.Hosts...)
 	fabricCA := &v1alpha1.FabricCA{
 		TypeMeta: v1.TypeMeta{
 			Kind:       "FabricCA",
@@ -76,20 +99,14 @@ func (c *createCmd) run(args []string) error {
 				Type:       "sqlite3",
 				Datasource: "fabric-ca-server.db",
 			},
-			Hosts: []string{
-				"localhost",
-				c.caOpts.Name,
-				fmt.Sprintf("%s.%s", c.caOpts.Name, c.caOpts.NS),
-			},
+			Hosts: hosts,
 			Service: v1alpha1.FabricCASpecService{
 				ServiceType: "NodePort",
 			},
-			Image:   c.caOpts.Image,
-			Version: c.caOpts.Version,
-			Debug:   false,
-			Istio: &v1alpha1.FabricIstio{
-				Hosts: []string{},
-			},
+			Image:        c.caOpts.Image,
+			Version:      c.caOpts.Version,
+			Debug:        false,
+			Istio:        istio,
 			CLRSizeLimit: 512000,
 			TLS: v1alpha1.FabricCATLSConf{
 				Subject: v1alpha1.FabricCASubject{
@@ -227,7 +244,7 @@ func (c *createCmd) run(args []string) error {
 		},
 	}
 	if c.caOpts.Output {
-		ot, err := yaml.Marshal(&fabricCA)
+		ot, err := helpers.MarshallWithoutStatus(fabricCA)
 		if err != nil {
 			return err
 		}
@@ -247,6 +264,7 @@ func (c *createCmd) run(args []string) error {
 
 	return nil
 }
+
 func newCreateCACmd(out io.Writer, errOut io.Writer) *cobra.Command {
 	c := createCmd{out: out, errOut: errOut}
 	cmd := &cobra.Command{
@@ -268,6 +286,8 @@ func newCreateCACmd(out io.Writer, errOut io.Writer) *cobra.Command {
 	f.StringVarP(&c.caOpts.EnrollID, "enroll-id", "", "enroll", "username to register new users")
 	f.StringVarP(&c.caOpts.EnrollSecret, "enroll-pw", "", "enrollpw", "password to register new users")
 	f.BoolVarP(&c.caOpts.Output, "output", "o", false, "output in yaml")
-
+	f.StringArrayVarP(&c.caOpts.Hosts, "hosts", "", []string{}, "Hosts for Istio")
+	f.StringVarP(&c.caOpts.IngressGateway, "istio-ingressgateway", "", "ingressgateway", "Istio ingress gateway name")
+	f.IntVarP(&c.caOpts.IngressPort, "istio-port", "", 443, "Istio ingress port")
 	return cmd
 }

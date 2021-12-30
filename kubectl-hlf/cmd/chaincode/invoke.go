@@ -29,12 +29,15 @@ func (c *invokeChaincodeCmd) run(out io.Writer) error {
 	if err != nil {
 		return err
 	}
-	peer, err := helpers.GetPeerByFullName(oclient, c.peer)
+	clientSet, err := helpers.GetKubeClient()
+	if err != nil {
+		return err
+	}
+	peer, err := helpers.GetPeerByFullName(clientSet, oclient, c.peer)
 	if err != nil {
 		return err
 	}
 	mspID := peer.Spec.MspID
-	peerName := peer.Name
 	configBackend := config.FromFile(c.configPath)
 	sdk, err := fabsdk.New(configBackend)
 	if err != nil {
@@ -63,7 +66,6 @@ func (c *invokeChaincodeCmd) run(out io.Writer) error {
 			InvocationChain: nil,
 			IsInit:          false,
 		},
-		channel.WithTargetEndpoints(peerName),
 	)
 	if err != nil {
 		return err
