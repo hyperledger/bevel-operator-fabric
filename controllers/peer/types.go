@@ -3,6 +3,14 @@ package peer
 type RBAC struct {
 	Ns string `json:"ns"`
 }
+type CouchDB struct {
+	External CouchDBExternal `json:"external"`
+}
+type CouchDBExternal struct {
+	Enabled bool   `json:"enabled"`
+	Host    string `json:"host"`
+	Port    int    `json:"port"`
+}
 type FabricPeerChart struct {
 	Istio                    Istio             `json:"istio"`
 	Replicas                 int               `json:"replicas"`
@@ -10,6 +18,7 @@ type FabricPeerChart struct {
 	CouchdbUsername          string            `json:"couchdbUsername"`
 	CouchdbPassword          string            `json:"couchdbPassword"`
 	Image                    Image             `json:"image"`
+	CouchDB                  CouchDB           `json:"couchdb"`
 	Rbac                     RBAC              `json:"rbac"`
 	DockerSocketPath         string            `json:"dockerSocketPath"`
 	Peer                     Peer              `json:"peer"`
@@ -60,9 +69,9 @@ type Istio struct {
 	IngressGateway string   `json:"ingressGateway"`
 }
 type PeerResources struct {
-	Peer            Resources `json:"peer"`
-	CouchDB         Resources `json:"couchdb"`
-	Chaincode       Resources `json:"chaincode"`
+	Peer            Resources  `json:"peer"`
+	CouchDB         Resources  `json:"couchdb"`
+	Chaincode       Resources  `json:"chaincode"`
 	CouchDBExporter *Resources `json:"couchdbExporter,omitempty"`
 }
 type CouchDBExporter struct {

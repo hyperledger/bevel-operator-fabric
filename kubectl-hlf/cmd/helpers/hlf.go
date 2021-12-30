@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/kfsoftware/hlf-operator/controllers/utils"
-	log "github.com/sirupsen/logrus"
+	"k8s.io/client-go/kubernetes"
 
 	hlfv1alpha1 "github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
 	operatorv1 "github.com/kfsoftware/hlf-operator/pkg/client/clientset/versioned"
@@ -27,11 +27,15 @@ type Organization struct {
 }
 
 type ClusterCA struct {
-	Object hlfv1alpha1.FabricCA
-	Spec   hlfv1alpha1.FabricCASpec
-	Status hlfv1alpha1.FabricCAStatus
-	Name   string
-	Item   hlfv1alpha1.FabricCA
+	Object     hlfv1alpha1.FabricCA
+	Spec       hlfv1alpha1.FabricCASpec
+	Status     hlfv1alpha1.FabricCAStatus
+	Name       string
+	PublicURL  string
+	PrivateURL string
+	EnrollID   string
+	EnrollPWD  string
+	Item       hlfv1alpha1.FabricCA
 }
 
 func (c ClusterCA) GetFullName() string {
@@ -48,25 +52,31 @@ type ClusterOrderingService struct {
 }
 
 type ClusterOrdererNode struct {
-	Name   string
-	Spec   hlfv1alpha1.FabricOrdererNodeSpec
-	Status hlfv1alpha1.FabricOrdererNodeStatus
+	Name       string
+	PublicURL  string
+	PrivateURL string
+	Spec       hlfv1alpha1.FabricOrdererNodeSpec
+	Status     hlfv1alpha1.FabricOrdererNodeStatus
+	Item       hlfv1alpha1.FabricOrdererNode
 }
 
 type ClusterPeer struct {
-	Name      string
-	Spec      hlfv1alpha1.FabricPeerSpec
-	Status    hlfv1alpha1.FabricPeerStatus
-	TLSCACert string
-	RootCert  string
-	Identity  Identity
+	Name       string
+	Spec       hlfv1alpha1.FabricPeerSpec
+	Status     hlfv1alpha1.FabricPeerStatus
+	PublicURL  string
+	PrivateURL string
+	TLSCACert  string
+	RootCert   string
+	Identity   Identity
+	MSPID      string
 }
 type Identity struct {
 	Key  string
 	Cert string
 }
 
-func GetClusterCAs(oclient *operatorv1.Clientset, ns string) ([]*ClusterCA, error) {
+func GetClusterCAs(clientSet *kubernetes.Clientset, oclient *operatorv1.Clientset, ns string) ([]*ClusterCA, error) {
 	ctx := context.Background()
 	certAuthsRes, err := oclient.HlfV1alpha1().FabricCAs(ns).List(ctx, v1.ListOptions{})
 	if err != nil {
@@ -75,18 +85,35 @@ func GetClusterCAs(oclient *operatorv1.Clientset, ns string) ([]*ClusterCA, erro
 	var certAuths []*ClusterCA
 	for _, certAuth := range certAuthsRes.Items {
 		certauthName := fmt.Sprintf("%s.%s", certAuth.Name, certAuth.Namespace)
+		privateURL := GetCAPrivateURL(certAuth)
+		publicURL, err := GetCAPublicURL(clientSet, certAuth)
+		if err != nil {
+			return nil, err
+		}
+		certAuthIdentities := certAuth.Spec.CA.Registry.Identities
+		var enrollId string
+		var enrollPwd string
+		if len(certAuthIdentities) > 0 {
+			enrollId = certAuthIdentities[0].Name
+			enrollPwd = certAuthIdentities[0].Pass
+		}
 		certAuths = append(certAuths, &ClusterCA{
-			Object: certAuth,
-			Spec:   certAuth.Spec,
-			Status: certAuth.Status,
-			Name:   certauthName,
-			Item:   certAuth,
+			Object:     certAuth,
+			Spec:       certAuth.Spec,
+			Status:     certAuth.Status,
+			Name:       certauthName,
+			PublicURL:  publicURL,
+			PrivateURL: privateURL,
+			EnrollID:   enrollId,
+			EnrollPWD:  enrollPwd,
+			Item:       certAuth,
 		})
 	}
 	return certAuths, nil
 }
 
 func GetClusterOrderers(
+	clientSet *kubernetes.Clientset,
 	oclient *operatorv1.Clientset,
 	ns string,
 ) ([]*Organization, []*ClusterOrderingService, error) {
@@ -103,20 +130,25 @@ func GetClusterOrderers(
 	var orderers []*ClusterOrderingService
 	if len(ordererNodes.Items) > 0 {
 		orderingService := &ClusterOrderingService{
-			Name: ordererNodes.Items[0].FullName(),
-			//Object:   ordService,
-			MSPID: ordererNodes.Items[0].Spec.MspID,
-			//Status:   ordService.Status,
+			Name:     ordererNodes.Items[0].FullName(),
+			MSPID:    ordererNodes.Items[0].Spec.MspID,
 			Orderers: []*ClusterOrdererNode{},
 		}
 		orderers = append(orderers, orderingService)
 		for _, ordNode := range ordererNodes.Items {
+			publicURL, err := GetOrdererPublicURL(clientSet, ordNode)
+			if err != nil {
+				return nil, nil, err
+			}
+			privateURL := GetOrdererPrivateURL(ordNode)
 			orderingService.Orderers = append(
 				orderingService.Orderers,
 				&ClusterOrdererNode{
-					Name:   ordNode.FullName(),
-					Spec:   ordNode.Spec,
-					Status: ordNode.Status,
+					Name:       ordNode.FullName(),
+					Spec:       ordNode.Spec,
+					Status:     ordNode.Status,
+					PublicURL:  publicURL,
+					PrivateURL: privateURL,
 				},
 			)
 		}
@@ -185,14 +217,14 @@ func GetClusterOrdererNodes(
 				Name:   ordNode.FullName(),
 				Spec:   ordNode.Spec,
 				Status: ordNode.Status,
+				Item:   ordNode,
 			},
 		)
 	}
-	log.Printf("Nodes=%v", ordererNodes)
 	return ordererNodes, nil
 }
-func GetCertAuthByURL(oclient *operatorv1.Clientset, host string, port int) (*ClusterCA, error) {
-	certAuths, err := GetClusterCAs(oclient, "")
+func GetCertAuthByURL(clientSet *kubernetes.Clientset, oclient *operatorv1.Clientset, host string, port int) (*ClusterCA, error) {
+	certAuths, err := GetClusterCAs(clientSet, oclient, "")
 	if err != nil {
 		return nil, err
 	}
@@ -224,8 +256,8 @@ func GetURLForCA(certAuth *ClusterCA) (string, error) {
 	}
 	return fmt.Sprintf("https://%s:%d", host, port), nil
 }
-func GetCertAuthByName(oclient *operatorv1.Clientset, name string, ns string) (*ClusterCA, error) {
-	certAuths, err := GetClusterCAs(oclient, "")
+func GetCertAuthByName(clientSet *kubernetes.Clientset, oclient *operatorv1.Clientset, name string, ns string) (*ClusterCA, error) {
+	certAuths, err := GetClusterCAs(clientSet, oclient, "")
 	if err != nil {
 		return nil, err
 	}
@@ -238,8 +270,8 @@ func GetCertAuthByName(oclient *operatorv1.Clientset, name string, ns string) (*
 	return nil, errors.Errorf("CA with name=%s not found", name)
 }
 
-func GetOrderingServiceByFullName(oclient *operatorv1.Clientset, name string) (*ClusterOrderingService, error) {
-	_, ordServices, err := GetClusterOrderers(oclient, "")
+func GetOrderingServiceByFullName(clientSet *kubernetes.Clientset, oclient *operatorv1.Clientset, name string) (*ClusterOrderingService, error) {
+	_, ordServices, err := GetClusterOrderers(clientSet, oclient, "")
 	if err != nil {
 		return nil, err
 	}
@@ -251,8 +283,8 @@ func GetOrderingServiceByFullName(oclient *operatorv1.Clientset, name string) (*
 	}
 	return nil, errors.Errorf("Ordering Service with name=%s not found", name)
 }
-func GetPeerByFullName(oclient *operatorv1.Clientset, name string) (*ClusterPeer, error) {
-	_, peers, err := GetClusterPeers(oclient, "")
+func GetPeerByFullName(clientSet *kubernetes.Clientset, oclient *operatorv1.Clientset, name string) (*ClusterPeer, error) {
+	_, peers, err := GetClusterPeers(clientSet, oclient, "")
 	if err != nil {
 		return nil, err
 	}
@@ -264,6 +296,93 @@ func GetPeerByFullName(oclient *operatorv1.Clientset, name string) (*ClusterPeer
 	}
 	return nil, errors.Errorf("Peer with name=%s not found", name)
 }
+
+type HostPort struct {
+	Host string
+	Port int
+}
+
+func GetOrdererPublicURL(clientset *kubernetes.Clientset, node hlfv1alpha1.FabricOrdererNode) (string, error) {
+	hostPort, err := GetOrdererHostPort(clientset, node)
+	if err != nil {
+		return "", err
+	}
+	return fmt.Sprintf("%s:%d", hostPort.Host, hostPort.Port), nil
+}
+func GetOrdererPrivateURL(node hlfv1alpha1.FabricOrdererNode) string {
+	return fmt.Sprintf("%s.%s:%s", node.Name, node.Namespace, "7050")
+}
+
+func GetCAPublicURL(clientset *kubernetes.Clientset, node hlfv1alpha1.FabricCA) (string, error) {
+	hostPort, err := GetCAHostPort(clientset, node)
+	if err != nil {
+		return "", err
+	}
+	return fmt.Sprintf("%s:%d", hostPort.Host, hostPort.Port), nil
+}
+func GetCAPrivateURL(node hlfv1alpha1.FabricCA) string {
+	return fmt.Sprintf("%s.%s:%s", node.Name, node.Namespace, "7054")
+}
+
+func GetPeerPublicURL(clientset *kubernetes.Clientset, node hlfv1alpha1.FabricPeer) (string, error) {
+	hostPort, err := GetPeerHostPort(clientset, node)
+	if err != nil {
+		return "", err
+	}
+	return fmt.Sprintf("%s:%d", hostPort.Host, hostPort.Port), nil
+}
+func GetPeerHostPort(clientset *kubernetes.Clientset, node hlfv1alpha1.FabricPeer) (*HostPort, error) {
+	k8sIP, err := utils.GetPublicIPKubernetes(clientset)
+	if err != nil {
+		return nil, err
+	}
+	if node.Spec.Istio != nil && len(node.Spec.Istio.Hosts) > 0 {
+		return &HostPort{
+			Host: node.Spec.Istio.Hosts[0],
+			Port: node.Spec.Istio.Port,
+		}, nil
+	}
+	return &HostPort{
+		Host: k8sIP,
+		Port: node.Status.NodePort,
+	}, nil
+}
+func GetPeerPrivateURL(node hlfv1alpha1.FabricPeer) string {
+	return fmt.Sprintf("%s.%s:%s", node.Name, node.Namespace, "7051")
+}
+func GetOrdererHostPort(clientset *kubernetes.Clientset, node hlfv1alpha1.FabricOrdererNode) (*HostPort, error) {
+	k8sIP, err := utils.GetPublicIPKubernetes(clientset)
+	if err != nil {
+		return nil, err
+	}
+	if node.Spec.Istio != nil && len(node.Spec.Istio.Hosts) > 0 {
+		return &HostPort{
+			Host: node.Spec.Istio.Hosts[0],
+			Port: node.Spec.Istio.Port,
+		}, nil
+	}
+	return &HostPort{
+		Host: k8sIP,
+		Port: node.Status.NodePort,
+	}, nil
+}
+
+func GetCAHostPort(clientset *kubernetes.Clientset, node hlfv1alpha1.FabricCA) (*HostPort, error) {
+	k8sIP, err := utils.GetPublicIPKubernetes(clientset)
+	if err != nil {
+		return nil, err
+	}
+	if node.Spec.Istio != nil && len(node.Spec.Istio.Hosts) > 0 {
+		return &HostPort{
+			Host: node.Spec.Istio.Hosts[0],
+			Port: node.Spec.Istio.Port,
+		}, nil
+	}
+	return &HostPort{
+		Host: k8sIP,
+		Port: node.Status.NodePort,
+	}, nil
+}
 func GetOrdererNodeByFullName(oclient *operatorv1.Clientset, name string) (*ClusterOrdererNode, error) {
 	ordererNodes, err := GetClusterOrdererNodes(oclient, "")
 	if err != nil {
@@ -273,12 +392,11 @@ func GetOrdererNodeByFullName(oclient *operatorv1.Clientset, name string) (*Clus
 		if ordNode.Name == name {
 			return ordNode, nil
 		}
-
 	}
 	return nil, errors.Errorf("Orderer Node with name=%s not found", name)
 }
-func GetCertAuthByFullName(oclient *operatorv1.Clientset, name string) (*ClusterCA, error) {
-	certAuths, err := GetClusterCAs(oclient, "")
+func GetCertAuthByFullName(clientSet *kubernetes.Clientset, oclient *operatorv1.Clientset, name string) (*ClusterCA, error) {
+	certAuths, err := GetClusterCAs(clientSet, oclient, "")
 	if err != nil {
 		return nil, err
 	}
@@ -290,7 +408,9 @@ func GetCertAuthByFullName(oclient *operatorv1.Clientset, name string) (*Cluster
 	}
 	return nil, errors.Errorf("CA with name=%s not found", name)
 }
-func GetClusterPeers(oclient *operatorv1.Clientset, ns string) ([]*Organization, []*ClusterPeer, error) {
+func GetClusterPeers(
+	clientSet *kubernetes.Clientset,
+	oclient *operatorv1.Clientset, ns string) ([]*Organization, []*ClusterPeer, error) {
 	ctx := context.Background()
 
 	peerResponse, err := oclient.HlfV1alpha1().FabricPeers(ns).List(ctx, v1.ListOptions{})
@@ -299,14 +419,21 @@ func GetClusterPeers(oclient *operatorv1.Clientset, ns string) ([]*Organization,
 	}
 	var peers []*ClusterPeer
 	for _, peer := range peerResponse.Items {
-
+		publicURL, err := GetPeerPublicURL(clientSet, peer)
+		if err != nil {
+			return nil, nil, err
+		}
+		privateURL := GetPeerPrivateURL(peer)
 		peers = append(
 			peers,
 			&ClusterPeer{
-				Name:     peer.FullName(),
-				Spec:     peer.Spec,
-				Status:   peer.Status,
-				Identity: Identity{},
+				Name:       peer.FullName(),
+				Spec:       peer.Spec,
+				Status:     peer.Status,
+				Identity:   Identity{},
+				PublicURL:  publicURL,
+				PrivateURL: privateURL,
+				MSPID:      peer.Spec.MspID,
 			},
 		)
 	}

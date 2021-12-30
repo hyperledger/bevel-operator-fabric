@@ -17,7 +17,6 @@ import (
 
 type commitChaincodeCmd struct {
 	configPath        string
-	peer              string
 	userName          string
 	channelName       string
 	version           string
@@ -26,22 +25,14 @@ type commitChaincodeCmd struct {
 	policy            string
 	initRequired      bool
 	collectionsConfig string
+	mspID string
 }
 
 func (c *commitChaincodeCmd) validate() error {
 	return nil
 }
 func (c *commitChaincodeCmd) run() error {
-	oclient, err := helpers.GetKubeOperatorClient()
-	if err != nil {
-		return err
-	}
-	peer, err := helpers.GetPeerByFullName(oclient, c.peer)
-	if err != nil {
-		return err
-	}
-	mspID := peer.Spec.MspID
-	peerName := peer.Name
+
 	configBackend := config.FromFile(c.configPath)
 	sdk, err := fabsdk.New(configBackend)
 	if err != nil {
@@ -49,7 +40,7 @@ func (c *commitChaincodeCmd) run() error {
 	}
 	org1AdminClientContext := sdk.Context(
 		fabsdk.WithUser(c.userName),
-		fabsdk.WithOrg(mspID),
+		fabsdk.WithOrg(c.mspID),
 	)
 	resClient, err := resmgmt.New(org1AdminClientContext)
 	if err != nil {
@@ -83,7 +74,6 @@ func (c *commitChaincodeCmd) run() error {
 			CollectionConfig:  collectionConfigs,
 			InitRequired:      c.initRequired,
 		},
-		resmgmt.WithTargetEndpoints(peerName),
 		resmgmt.WithTimeout(fab.ResMgmt, 20*time.Minute),
 		resmgmt.WithTimeout(fab.PeerResponse, 20*time.Minute),
 	)
@@ -106,18 +96,18 @@ func newChaincodeCommitCMD(out io.Writer, errOut io.Writer) *cobra.Command {
 	}
 	persistentFlags := cmd.PersistentFlags()
 	persistentFlags.StringVarP(&c.configPath, "config", "", "", "Configuration file for the SDK")
-	persistentFlags.StringVarP(&c.peer, "peer", "p", "", "Peer org to invoke the updates")
 	persistentFlags.StringVarP(&c.userName, "user", "", "", "User")
 	persistentFlags.StringVarP(&c.channelName, "channel", "", "", "Channel name")
 	persistentFlags.StringVarP(&c.version, "version", "", "1.0", "Version")
 	persistentFlags.StringVarP(&c.name, "name", "", "", "Chaincode name")
+	persistentFlags.StringVarP(&c.mspID, "mspid", "", "", "MPSID for the user")
 	persistentFlags.Int64VarP(&c.sequence, "sequence", "", 1, "Sequence name")
 	persistentFlags.StringVarP(&c.policy, "policy", "", "", "Policy")
 	persistentFlags.BoolVarP(&c.initRequired, "init-required", "", false, "Init required")
 	persistentFlags.StringVarP(&c.collectionsConfig, "collections-config", "", "", "Private data collections")
 
 	cmd.MarkPersistentFlagRequired("user")
-	cmd.MarkPersistentFlagRequired("peer")
+	cmd.MarkPersistentFlagRequired("mspid")
 	cmd.MarkPersistentFlagRequired("config")
 	cmd.MarkPersistentFlagRequired("channelName")
 	cmd.MarkPersistentFlagRequired("name")

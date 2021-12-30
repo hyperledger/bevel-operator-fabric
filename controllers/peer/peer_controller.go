@@ -104,7 +104,7 @@ func restartDeployment(config *rest.Config, deployment *appsv1.Deployment) error
 	}
 	return nil
 }
-func GetPeerDeployment(conf *action.Configuration, config *rest.Config, releaseName string, ns string, ) (*appsv1.Deployment, error, ) {
+func GetPeerDeployment(conf *action.Configuration, config *rest.Config, releaseName string, ns string) (*appsv1.Deployment, error) {
 	ctx := context.Background()
 	cmd := action.NewGet(conf)
 	rel, err := cmd.Run(releaseName)
@@ -581,6 +581,7 @@ func (r *FabricPeerReconciler) upgradeChart(
 		return err
 	}
 	cmd.Wait = true
+	cmd.Timeout = time.Minute * 5
 	release, err := cmd.Run(releaseName, ch, inInterface)
 	if err != nil {
 		return err
@@ -1085,6 +1086,14 @@ func GetConfig(
 		}
 	}
 
+	couchDB := CouchDB{}
+	if spec.CouchDB.ExternalCouchDB != nil && spec.CouchDB.ExternalCouchDB.Enabled {
+		couchDB.External = CouchDBExternal{
+			Enabled: true,
+			Host:    spec.CouchDB.ExternalCouchDB.Host,
+			Port:    spec.CouchDB.ExternalCouchDB.Port,
+		}
+	}
 	var c = FabricPeerChart{
 		Replicas: spec.Replicas,
 		Istio:    istio,
@@ -1097,6 +1106,7 @@ func GetConfig(
 		ExternalBuilders: externalBuilders,
 		DockerSocketPath: spec.DockerSocketPath,
 		CouchDBExporter:  exporter,
+		CouchDB:          couchDB,
 		Peer: Peer{
 			DatabaseType: stateDb,
 			MspID:        spec.MspID,

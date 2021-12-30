@@ -37,7 +37,11 @@ func (c *registerCmd) run(args []string) error {
 	if err != nil {
 		return err
 	}
-	certAuth, err := helpers.GetCertAuthByName(oclient, c.caOpts.Name, c.caOpts.NS)
+	clientSet, err := helpers.GetKubeClient()
+	if err != nil {
+		return err
+	}
+	certAuth, err := helpers.GetCertAuthByName(clientSet, oclient, c.caOpts.Name, c.caOpts.NS)
 	if err != nil {
 		return err
 	}

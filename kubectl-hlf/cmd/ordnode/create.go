@@ -12,22 +12,24 @@ import (
 	"io"
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"sigs.k8s.io/yaml"
 )
 
 type OrdererOptions struct {
-	Name         string
-	StorageClass string
-	Capacity     string
-	NS           string
-	Image        string
-	Version      string
-	MspID        string
-	EnrollID     string
-	EnrollPW     string
-	CAName       string
-	Hosts        []string
-	Output       bool
+	Name           string
+	StorageClass   string
+	Capacity       string
+	NS             string
+	Image          string
+	Version        string
+	MspID          string
+	EnrollID       string
+	EnrollPW       string
+	CAName         string
+	Hosts          []string
+	Output         bool
+	IngressGateway string
+	IngressPort    int
+	AdminHosts     []string
 }
 
 func (o OrdererOptions) Validate() error {
@@ -49,11 +51,11 @@ func (c *createCmd) run(args []string) error {
 	if err != nil {
 		return err
 	}
-	certAuth, err := helpers.GetCertAuthByFullName(oclient, c.ordererOpts.CAName)
+	clientSet, err := helpers.GetKubeClient()
 	if err != nil {
 		return err
 	}
-	clientSet, err := helpers.GetKubeClient()
+	certAuth, err := helpers.GetCertAuthByFullName(clientSet, oclient, c.ordererOpts.CAName)
 	if err != nil {
 		return err
 	}
@@ -62,9 +64,43 @@ func (c *createCmd) run(args []string) error {
 		return err
 	}
 
+	csrHosts := []string{
+		"127.0.0.1",
+		"localhost",
+	}
+	csrHosts = append(csrHosts, k8sIP)
+	csrHosts = append(csrHosts, c.ordererOpts.Name)
+	csrHosts = append(csrHosts, fmt.Sprintf("%s.%s", c.ordererOpts.Name, c.ordererOpts.NS))
+	ingressGateway := c.ordererOpts.IngressGateway
+	ingressPort := c.ordererOpts.IngressPort
+	istio := &v1alpha1.FabricIstio{
+		Port:           ingressPort,
+		Hosts:          []string{},
+		IngressGateway: ingressGateway,
+	}
+	if len(c.ordererOpts.Hosts) > 0 {
+		istio = &v1alpha1.FabricIstio{
+			Port:           ingressPort,
+			Hosts:          c.ordererOpts.Hosts,
+			IngressGateway: ingressGateway,
+		}
+		csrHosts = append(csrHosts, c.ordererOpts.Hosts...)
+	}
+	adminIstio := &v1alpha1.FabricIstio{
+		Port:           ingressPort,
+		Hosts:          []string{},
+		IngressGateway: ingressGateway,
+	}
+	if len(c.ordererOpts.AdminHosts) > 0 {
+		adminIstio = &v1alpha1.FabricIstio{
+			Port:           ingressPort,
+			Hosts:          c.ordererOpts.AdminHosts,
+			IngressGateway: ingressGateway,
+		}
+	}
 	fabricOrderer := &v1alpha1.FabricOrdererNode{
 		TypeMeta: v1.TypeMeta{
-			Kind:       "FabricOrderingService",
+			Kind:       "FabricOrdererNode",
 			APIVersion: v1alpha1.GroupVersion.String(),
 		},
 		ObjectMeta: v1.ObjectMeta{
@@ -111,24 +147,20 @@ func (c *createCmd) run(args []string) error {
 							Cacert: base64.StdEncoding.EncodeToString([]byte(certAuth.Status.TlsCert)),
 						},
 						Csr: v1alpha1.Csr{
-							Hosts: []string{
-								"127.0.0.1",
-								"localhost",
-								k8sIP,
-							},
-							CN: "",
+							Hosts: csrHosts,
+							CN:    "",
 						},
 						Enrollid:     c.ordererOpts.EnrollID,
 						Enrollsecret: c.ordererOpts.EnrollPW,
 					},
 				},
 			},
-			Istio:      nil,
-			AdminIstio: nil,
+			Istio:      istio,
+			AdminIstio: adminIstio,
 		},
 	}
 	if c.ordererOpts.Output {
-		ot, err := yaml.Marshal(&fabricOrderer)
+		ot, err := helpers.MarshallWithoutStatus(&fabricOrderer)
 		if err != nil {
 			return err
 		}
@@ -169,8 +201,11 @@ func newCreateOrdererNodeCmd(out io.Writer, errOut io.Writer) *cobra.Command {
 	f.StringVarP(&c.ordererOpts.StorageClass, "storage-class", "s", helpers.DefaultStorageclass, "storage class for this Fabric Orderer")
 	f.StringVarP(&c.ordererOpts.Image, "image", "", helpers.DefaultOrdererImage, "version of the Fabric Orderer")
 	f.StringVarP(&c.ordererOpts.Version, "version", "", helpers.DefaultOrdererVersion, "version of the Fabric Orderer")
+	f.StringVarP(&c.ordererOpts.IngressGateway, "istio-ingressgateway", "", "ingressgateway", "Istio ingress gateway name")
+	f.IntVarP(&c.ordererOpts.IngressPort, "istio-port", "", 443, "Istio ingress port")
 	f.StringVarP(&c.ordererOpts.MspID, "mspid", "", "", "MSP ID of the organization")
 	f.StringArrayVarP(&c.ordererOpts.Hosts, "hosts", "", []string{}, "Hosts")
+	f.StringArrayVarP(&c.ordererOpts.AdminHosts, "admin-hosts", "", []string{}, "Hosts for the admin API(introduced in v2.3)")
 	f.BoolVarP(&c.ordererOpts.Output, "output", "o", false, "output in yaml")
 	return cmd
 }

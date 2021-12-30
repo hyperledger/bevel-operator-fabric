@@ -776,6 +776,7 @@ func Reconcile(
 		}
 		cmd := action.NewUpgrade(cfg)
 		cmd.MaxHistory = 5
+		cmd.Timeout = 5 * time.Minute
 		settings := cli.New()
 		chartPath, err := cmd.LocateChart(r.ChartPath, settings)
 		ch, err := loader.Load(chartPath)
