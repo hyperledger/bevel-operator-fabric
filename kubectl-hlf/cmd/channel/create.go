@@ -36,16 +36,20 @@ func (c *createChannelCmd) run() error {
 	if err != nil {
 		return err
 	}
+	clientSet, err := helpers.GetKubeClient()
+	if err != nil {
+		return err
+	}
 	configBackend := config.FromFile(c.configPath)
 	sdk, err := fabsdk.New(configBackend)
 	if err != nil {
 		return err
 	}
-	ordService, err := helpers.GetOrderingServiceByFullName(oclient, c.ordererOrg)
+	ordService, err := helpers.GetOrderingServiceByFullName(clientSet, oclient, c.ordererOrg)
 	if err != nil {
 		return err
 	}
-	adminPeer, err := helpers.GetPeerByFullName(oclient, c.adminOrg)
+	adminPeer, err := helpers.GetPeerByFullName(clientSet, oclient, c.adminOrg)
 	if err != nil {
 		return err
 	}
@@ -58,7 +62,7 @@ func (c *createChannelCmd) run() error {
 		return err
 	}
 	ns := ""
-	_, peers, err := helpers.GetClusterPeers(oclient, ns)
+	_, peers, err := helpers.GetClusterPeers(clientSet, oclient, ns)
 	if err != nil {
 		return err
 	}
@@ -68,6 +72,7 @@ func (c *createChannelCmd) run() error {
 			continue
 		}
 		certAuth, err := helpers.GetCertAuthByURL(
+			clientSet,
 			oclient,
 			peer.Spec.Secret.Enrollment.Component.Cahost,
 			peer.Spec.Secret.Enrollment.Component.Caport,
@@ -87,6 +92,7 @@ func (c *createChannelCmd) run() error {
 		return errors.Errorf("No peer orgs specified")
 	}
 	certAuth, err := helpers.GetCertAuthByURL(
+		clientSet,
 		oclient,
 		ordService.Spec.Enrollment.Component.Cahost,
 		ordService.Spec.Enrollment.Component.Caport,

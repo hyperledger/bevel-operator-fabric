@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"sigs.k8s.io/yaml"
 	"text/template"
 
 	"github.com/Masterminds/sprig/v3"
@@ -17,11 +18,15 @@ const (
 	createDesc = `
 'inspect' command creates creates a configuration file ready to use for the go sdk`
 	createExample = `  kubectl hlf inspect --output hlf-cfg.yaml`
+	yamlFormat    = "yaml"
+	jsonFormat    = "json"
 )
 
 type inspectCmd struct {
 	fileOutput    string
 	organizations []string
+	internal      bool
+	format        string
 }
 
 func (c *inspectCmd) validate() error {
@@ -68,27 +73,57 @@ organizations:
 orderers:
 {{- range $ordService := .Orderers }}
 {{- range $orderer := $ordService.Orderers }}
-  "{{$orderer.Name}}":
-    url: grpcs://{{ $.K8SIP }}:{{ $orderer.Status.NodePort }}
+  {{$orderer.Name}}:
+{{if $.Internal }}
+    url: grpcs://{{ $orderer.PrivateURL }}
+{{ else }}
+    url: grpcs://{{ $orderer.PublicURL }}
+{{ end }}
     grpcOptions:
       allow-insecure: false
     tlsCACerts:
       pem: |
-{{ $orderer.Status.TlsCert | indent 8 }}
+{{ or $orderer.Status.TlsCACert $orderer.Status.TlsCert | indent 8 }}
 {{- end }}
 {{- end }}
 
 peers:
   {{- range $peer := .Peers }}
-  "{{$peer.Name}}":
-    url: grpcs://{{ $.K8SIP }}:{{ $peer.Status.NodePort }}
+  {{$peer.Name}}:
+{{if $.Internal }}
+    url: grpcs://{{ $peer.PrivateURL }}
+{{ else }}
+    url: grpcs://{{ $peer.PublicURL }}
+{{ end }}
     grpcOptions:
       hostnameOverride: ""
       ssl-target-name-override: ""
       allow-insecure: false
     tlsCACerts:
       pem: |
-{{ $peer.Status.TlsCert | indent 8 }}
+{{ $peer.Status.TlsCACert | indent 8 }}
+{{- end }}
+
+certificateAuthorities:
+{{- range $ca := .CertAuths }}
+  
+  {{ $ca.Name }}:
+{{if $.Internal }}
+    url: https://{{ $ca.PrivateURL }}
+{{ else }}
+    url: https://{{ $ca.PublicURL }}
+{{ end }}
+{{if $ca.EnrollID }}
+    registrar:
+        enrollId: {{ $ca.EnrollID }}
+        enrollSecret: {{ $ca.EnrollPWD }}
+{{ end }}
+    caName: ca
+    tlsCACerts:
+      pem: 
+       - |
+{{ $ca.Status.TlsCert | indent 12 }}
+
 {{- end }}
 
 channels:
@@ -96,12 +131,13 @@ channels:
     orderers:
 {{- range $ordService := .Orderers }}
 {{- range $orderer := $ordService.Orderers }}
-      - "{{$orderer.Name}}"
+      - {{$orderer.Name}}
 {{- end }}
 {{- end }}
     peers:
 {{- range $peer := .Peers }}
-      "{{$peer.Name}}":
+       {{$peer.Name}}:
+        discover: true
         endorsingPeer: true
         chaincodeQuery: true
         ledgerQuery: true
@@ -120,15 +156,16 @@ func (c *inspectCmd) run(out io.Writer) error {
 		return err
 	}
 	ns := ""
-	certAuths, err := helpers.GetClusterCAs(oclient, ns)
+	certAuths, err := helpers.GetClusterCAs(clientSet, oclient, ns)
 	if err != nil {
 		return err
 	}
-	ordOrgs, orderers, err := helpers.GetClusterOrderers(oclient, ns)
+	ordOrgs, orderers, err := helpers.GetClusterOrderers(clientSet, oclient, ns)
 	if err != nil {
 		return err
 	}
-	peerOrgs, peers, err := helpers.GetClusterPeers(oclient, ns)
+	peerOrgs, clusterPeers, err := helpers.GetClusterPeers(clientSet, oclient, ns)
+
 	if err != nil {
 		return err
 	}
@@ -142,6 +179,12 @@ func (c *inspectCmd) run(out io.Writer) error {
 	for _, v := range peerOrgs {
 		if filterByOrgs && utils.Contains(c.organizations, v.MspID) {
 			orgMap[v.MspID] = v
+		}
+	}
+	var peers []*helpers.ClusterPeer
+	for _, peer := range clusterPeers {
+		if filterByOrgs && utils.Contains(c.organizations, peer.MSPID) {
+			peers = append(peers, peer)
 		}
 	}
 	tmpl, err := template.New("test").Funcs(sprig.HermeticTxtFuncMap()).Parse(tmplGoConfig)
@@ -159,17 +202,34 @@ func (c *inspectCmd) run(out io.Writer) error {
 		"Orderers":      orderers,
 		"Organizations": orgMap,
 		"CertAuths":     certAuths,
+		"Internal":      c.internal,
 	})
 	if err != nil {
 		return err
 	}
-	if c.fileOutput != "" {
-		err = ioutil.WriteFile(c.fileOutput, buf.Bytes(), 0644)
+
+	var data []byte
+	if c.format != yamlFormat && c.format != jsonFormat {
+		fmt.Fprint(out, "Invalid output format... Default to yaml")
+		c.format = yamlFormat
+	}
+
+	if c.format == jsonFormat {
+		data, err = yaml.YAMLToJSON(buf.Bytes())
 		if err != nil {
 			return err
 		}
 	} else {
-		_, err = fmt.Fprint(out, buf.String())
+		data = buf.Bytes()
+	}
+
+	if c.fileOutput != "" {
+		err = ioutil.WriteFile(c.fileOutput, data, 0644)
+		if err != nil {
+			return err
+		}
+	} else {
+		_, err = fmt.Fprint(out, string(data))
 		if err != nil {
 			return err
 		}
@@ -195,7 +255,9 @@ func NewInspectHLFConfig(out io.Writer) *cobra.Command {
 
 	f := cmd.Flags()
 	f.StringVar(&c.fileOutput, "output", "", "output file")
+	f.BoolVar(&c.internal, "internal", false, "use kubernetes service names")
 	f.StringArrayVarP(&c.organizations, "organizations", "o", []string{}, "organizations to export")
+	f.StringVar(&c.format, "format", yamlFormat, "connection profile output format (yaml/json)")
 
 	return cmd
 }

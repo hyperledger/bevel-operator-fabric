@@ -3,7 +3,7 @@ package channel
 import (
 	"bytes"
 	"fmt"
-	"github.com/hyperledger/fabric-sdk-go/pkg/client/ledger"
+	"github.com/hyperledger/fabric-sdk-go/pkg/client/resmgmt"
 	"github.com/hyperledger/fabric-sdk-go/pkg/core/config"
 	"github.com/hyperledger/fabric-sdk-go/pkg/fab/resource"
 	"github.com/hyperledger/fabric-sdk-go/pkg/fabsdk"
@@ -28,30 +28,30 @@ func (c *inspectChannelCmd) run(out io.Writer) error {
 	if err != nil {
 		return err
 	}
-	peer, err := helpers.GetPeerByFullName(oclient, c.peer)
+	clientSet, err := helpers.GetKubeClient()
+	if err != nil {
+		return err
+	}
+	peer, err := helpers.GetPeerByFullName(clientSet, oclient, c.peer)
 	if err != nil {
 		return err
 	}
 	mspID := peer.Spec.MspID
-	peerName := peer.Name
 	configBackend := config.FromFile(c.configPath)
 	sdk, err := fabsdk.New(configBackend)
 	if err != nil {
 		return err
 	}
-	channelCtx := sdk.ChannelContext(
-		c.channelName,
+	org1AdminClientContext := sdk.Context(
 		fabsdk.WithUser(c.userName),
 		fabsdk.WithOrg(mspID),
 	)
-	ledgerClient, err := ledger.New(
-		channelCtx,
-	)
+	resClient, err := resmgmt.New(org1AdminClientContext)
 	if err != nil {
 		return err
 	}
-	block, err := ledgerClient.QueryConfigBlock(
-		ledger.WithTargetEndpoints(peerName),
+	block, err := resClient.QueryConfigBlockFromOrderer(
+		c.channelName,
 	)
 	if err != nil {
 		return err

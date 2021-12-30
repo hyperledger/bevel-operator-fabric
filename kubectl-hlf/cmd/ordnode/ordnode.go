@@ -15,6 +15,7 @@ func NewOrdNodeCmd(out io.Writer, errOut io.Writer) *cobra.Command {
 		newCreateOrdererNodeCmd(out, errOut),
 		newOrdererNodeDeleteCmd(out, errOut),
 		newJoinChannelCMD(out, errOut),
+		newRenewChannelCMD(out, errOut),
 	)
 	return cmd
 }

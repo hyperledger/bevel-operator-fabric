@@ -243,7 +243,6 @@ func ReEnrollUser(params EnrollUserRequest) (*x509.Certificate, *ecdsa.PrivateKe
 	}
 	err = caClient.Reenroll(&api.ReenrollmentRequest{
 		Name:     params.User,
-		//Secret:   params.Secret,
 		CAName:   params.Name,
 		AttrReqs: params.Attributes,
 		Profile:  params.Profile,
