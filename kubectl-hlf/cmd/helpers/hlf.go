@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"github.com/kfsoftware/hlf-operator/controllers/utils"
-	log "github.com/sirupsen/logrus"
 	"k8s.io/client-go/kubernetes"
 
 	hlfv1alpha1 "github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
