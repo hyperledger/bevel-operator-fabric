@@ -43,7 +43,7 @@ PORT=$(kubectl get svc istio-ingressgateway -n istio-system -o jsonpath='{.spec.
 ### Running with load balancer IP
 
 ```bash
-PUBLIC_IP=$(kubectl get svc istio-ingressgateway -n istio-system -o json | jq -r '.status.loadBalancer.ingress[0].hostname')
+PUBLIC_IP=$(kubectl get svc istio-ingressgateway -n istio-system -o json | jq -r '.status.loadBalancer.ingress[0].ip')
 PORT=443
 ```
 
