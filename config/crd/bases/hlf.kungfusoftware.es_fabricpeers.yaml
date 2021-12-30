@@ -70,6 +70,20 @@ spec:
                 type: object
               couchdb:
                 properties:
+                  externalCouchDB:
+                    nullable: true
+                    properties:
+                      enabled:
+                        type: boolean
+                      host:
+                        type: string
+                      port:
+                        type: integer
+                    required:
+                    - enabled
+                    - host
+                    - port
+                    type: object
                   password:
                     type: string
                   user:

@@ -3,9 +3,8 @@ package channel
 import (
 	"bytes"
 	"fmt"
-	"github.com/gogo/protobuf/proto"
+	"github.com/golang/protobuf/proto"
 	"github.com/hyperledger/fabric-config/configtx"
-	"github.com/hyperledger/fabric-config/protolator"
 	"github.com/hyperledger/fabric-protos-go/common"
 	"github.com/hyperledger/fabric-protos-go/peer"
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/resmgmt"
@@ -31,49 +30,6 @@ func (c *addAnchorPeerCmd) validate() error {
 	return nil
 }
 
-func GetConfigEnvelopeBytes(configUpdate *common.ConfigUpdate) ([]byte, error) {
-	var buf bytes.Buffer
-	if err := protolator.DeepMarshalJSON(&buf, configUpdate); err != nil {
-		return nil, err
-	}
-
-	channelConfigBytes, err := proto.Marshal(configUpdate)
-	if err != nil {
-		return nil, err
-	}
-	configUpdateEnvelope := &common.ConfigUpdateEnvelope{
-		ConfigUpdate: channelConfigBytes,
-		Signatures:   nil,
-	}
-	configUpdateEnvelopeBytes, err := proto.Marshal(configUpdateEnvelope)
-	if err != nil {
-		return nil, err
-	}
-	payload := &common.Payload{
-		Data: configUpdateEnvelopeBytes,
-	}
-	payloadBytes, err := proto.Marshal(payload)
-	if err != nil {
-		return nil, err
-	}
-	configEnvelope := &common.Envelope{
-		Payload: payloadBytes,
-	}
-
-	return proto.Marshal(configEnvelope)
-}
-
-func GetCurrentConfigFromPeer(resClient *resmgmt.Client, channelID string) (*common.Config, error) {
-	block, err := resClient.QueryConfigBlockFromOrderer(channelID)
-	if err != nil {
-		return nil, err
-	}
-	channelConfig, err := resource.ExtractConfigFromBlock(block)
-	if err != nil {
-		return nil, err
-	}
-	return channelConfig, nil
-}
 func uniqueAnchorPeers(anchorPeers []*peer.AnchorPeer) []*peer.AnchorPeer {
 	keys := make(map[string]bool)
 	var list []*peer.AnchorPeer
@@ -96,7 +52,11 @@ func (c *addAnchorPeerCmd) run() error {
 	if err != nil {
 		return err
 	}
-	adminPeer, err := helpers.GetPeerByFullName(oclient, c.peer)
+	clientSet, err := helpers.GetKubeClient()
+	if err != nil {
+		return err
+	}
+	adminPeer, err := helpers.GetPeerByFullName(clientSet, oclient, c.peer)
 	if err != nil {
 		return err
 	}
@@ -120,10 +80,6 @@ func (c *addAnchorPeerCmd) run() error {
 	}
 	cftxGen := configtx.New(cfgBlock)
 	app := cftxGen.Application().Organization(mspID)
-	clientSet, err := helpers.GetKubeClient()
-	if err != nil {
-		return err
-	}
 	k8sIP, err := utils.GetPublicIPKubernetes(clientSet)
 	if err != nil {
 		return err
@@ -163,80 +119,6 @@ func (c *addAnchorPeerCmd) run() error {
 		return err
 	}
 	log.Infof("anchor anchorPeers added: %s", chResponse.TransactionID)
-	//
-	//channelID := c.channelName
-	//channelConfig, err := GetCurrentConfigFromPeer(resClient, channelID)
-	//if err != nil {
-	//	return err
-	//}
-	//modifiedConfig := &common.Config{}
-	//modifiedConfigBytes, err := proto.Marshal(channelConfig)
-	//if err != nil {
-	//	return err
-	//}
-	//err = proto.Unmarshal(modifiedConfigBytes, modifiedConfig)
-	//if err != nil {
-	//	return err
-	//}
-	//configValues := modifiedConfig.ChannelGroup.Groups[channelconfig.ApplicationGroupKey].Groups[mspID].Values
-	//anchorPeersBytes, ok := configValues[channelconfig.AnchorPeersKey]
-	//anchorPeers := &peer.AnchorPeers{}
-	//u, err := url.Parse(adminPeer.Status.Message)
-	//if err != nil {
-	//	return err
-	//}
-
-	//if err != nil {
-	//	return err
-	//}
-	//if ok {
-	//	if err := proto.Unmarshal(anchorPeersBytes.Value, anchorPeers); err != nil {
-	//		return err
-	//	}
-	//	anchorPeers.AnchorPeers = append(anchorPeers.AnchorPeers, &peer.AnchorPeer{
-	//		Host: peerHost,
-	//		Port: int32(peerPort),
-	//	})
-	//	anchorPeers.AnchorPeers = uniqueAnchorPeers(anchorPeers.AnchorPeers)
-	//	newAnchorPeerBytes, err := proto.Marshal(anchorPeers)
-	//	if err != nil {
-	//		return err
-	//	}
-	//	configValues[channelconfig.AnchorPeersKey].Value = newAnchorPeerBytes
-	//} else {
-	//	anchorPeers.AnchorPeers = []*peer.AnchorPeer{
-	//		{
-	//			Host: peerHost,
-	//			Port: int32(peerPort),
-	//		},
-	//	}
-	//	newAnchorPeerBytes, err := proto.Marshal(anchorPeers)
-	//	if err != nil {
-	//		return err
-	//	}
-	//	configValues[channelconfig.AnchorPeersKey] = &common.ConfigValue{
-	//		Version:   0,
-	//		Value:     newAnchorPeerBytes,
-	//		ModPolicy: "Admins",
-	//	}
-	//}
-	//confUpdate, err := resmgmt.CalculateConfigUpdate(channelID, channelConfig, modifiedConfig)
-	//if err != nil {
-	//	return err
-	//}
-	//configEnvelopeBytes, err := GetConfigEnvelopeBytes(confUpdate)
-	//if err != nil {
-	//	return err
-	//}
-	//configReader := bytes.NewReader(configEnvelopeBytes)
-	//txID, err := resClient.SaveChannel(resmgmt.SaveChannelRequest{
-	//	ChannelID:     channelID,
-	//	ChannelConfig: configReader,
-	//})
-	//if err != nil {
-	//	return err
-	//}
-	//log.Infof("Anchor peer updated, txID=%s", string(txID.TransactionID))
 	return nil
 }
 func newAddAnchorPeerCMD(io.Writer, io.Writer) *cobra.Command {

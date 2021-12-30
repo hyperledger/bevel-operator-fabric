@@ -345,11 +345,15 @@ spec:
                 type: integer
               port:
                 type: integer
+              signCaCert:
+                type: string
               signCert:
                 type: string
               status:
                 type: string
               tlsAdminCert:
+                type: string
+              tlsCaCert:
                 type: string
               tlsCert:
                 type: string

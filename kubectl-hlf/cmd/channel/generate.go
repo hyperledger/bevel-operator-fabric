@@ -2,7 +2,6 @@ package channel
 
 import (
 	"context"
-	"fmt"
 	"github.com/golang/protobuf/proto"
 	"github.com/kfsoftware/hlf-operator/controllers/testutils"
 	"github.com/kfsoftware/hlf-operator/controllers/utils"
@@ -85,6 +84,7 @@ func (c generateChannelCmd) run() error {
 	for mspID, orderers := range ordererMap {
 		orderer := orderers[0]
 		certAuth, err := helpers.GetCertAuthByURL(
+			clientSet,
 			oclient,
 			orderer.Spec.Secret.Enrollment.Component.Cahost,
 			orderer.Spec.Secret.Enrollment.Component.Caport,
@@ -102,9 +102,13 @@ func (c generateChannelCmd) run() error {
 		}
 		var ordererUrls []string
 		for _, node := range orderers {
+			ordererURL, err := helpers.GetOrdererPublicURL(clientSet, node.Item)
+			if err != nil {
+				return err
+			}
 			ordererUrls = append(
 				ordererUrls,
-				fmt.Sprintf("%s:%d", k8sIP, node.Status.NodePort),
+				ordererURL,
 			)
 		}
 		ordererOrgs = append(ordererOrgs, testutils.CreateOrdererOrg(
@@ -115,7 +119,7 @@ func (c generateChannelCmd) run() error {
 		))
 	}
 	var peerOrgs []testutils.PeerOrg
-	_, peers, err := helpers.GetClusterPeers(oclient, ns)
+	_, peers, err := helpers.GetClusterPeers(clientSet, oclient, ns)
 	if err != nil {
 		return err
 	}
@@ -125,6 +129,7 @@ func (c generateChannelCmd) run() error {
 		}
 		caHost := strings.Split(peer.Spec.Secret.Enrollment.Component.Cahost, ".")[0]
 		certAuth, err := helpers.GetCertAuthByURL(
+			clientSet,
 			oclient,
 			caHost,
 			peer.Spec.Secret.Enrollment.Component.Caport,
