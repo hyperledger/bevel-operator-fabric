@@ -3,11 +3,13 @@ package consenter
 import (
 	"github.com/gogo/protobuf/proto"
 	"github.com/hyperledger/fabric-config/configtx"
+	"github.com/hyperledger/fabric-config/configtx/orderer"
 	"github.com/hyperledger/fabric-protos-go/common"
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/resmgmt"
 	"github.com/hyperledger/fabric-sdk-go/pkg/core/config"
 	"github.com/hyperledger/fabric-sdk-go/pkg/fab/resource"
 	"github.com/hyperledger/fabric-sdk-go/pkg/fabsdk"
+	"github.com/kfsoftware/hlf-operator/controllers/utils"
 	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/helpers"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -15,7 +17,7 @@ import (
 	"io/ioutil"
 )
 
-type delConsenterCmd struct {
+type replaceonsenterCmd struct {
 	configPath  string
 	channelName string
 	userName    string
@@ -24,11 +26,11 @@ type delConsenterCmd struct {
 	output      string
 }
 
-func (c *delConsenterCmd) validate() error {
+func (c *replaceonsenterCmd) validate() error {
 	return nil
 }
 
-func (c *delConsenterCmd) run() error {
+func (c *replaceonsenterCmd) run() error {
 	oClient, err := helpers.GetKubeOperatorClient()
 	if err != nil {
 		return err
@@ -61,7 +63,12 @@ func (c *delConsenterCmd) run() error {
 	}
 	cftxGen := configtx.New(cfgBlock)
 	cfgOrd := cftxGen.Orderer()
+	ordConf, err := cftxGen.Orderer().Configuration()
 	ordNode, err := helpers.GetOrdererNodeByFullName(oClient, c.ordNodeName)
+	if err != nil {
+		return err
+	}
+	tlsCert, err := utils.ParseX509Certificate([]byte(ordNode.Status.TlsCert))
 	if err != nil {
 		return err
 	}
@@ -69,19 +76,25 @@ func (c *delConsenterCmd) run() error {
 	if err != nil {
 		return err
 	}
-	ordererConf,err := cftxGen.Orderer().Configuration()
-	if err != nil {
-		return err
-	}
-	log.Infof("Consenters=%v", ordererConf.EtcdRaft.Consenters)
-	for _, consenter := range ordererConf.EtcdRaft.Consenters {
+	log.Infof("Orderer host=%s port=%d", ordererHostPort.Host, ordererHostPort.Port)
+	for _, consenter := range ordConf.EtcdRaft.Consenters {
 		if consenter.Address.Host == ordererHostPort.Host && consenter.Address.Port == ordererHostPort.Port {
-			log.Infof("removing consenter %v", consenter)
-			err = cfgOrd.RemoveConsenter(consenter)
+			err = cftxGen.Orderer().RemoveConsenter(consenter)
 			if err != nil {
 				return err
 			}
-            break
+			err = cfgOrd.AddConsenter(orderer.Consenter{
+				Address: orderer.EtcdAddress{
+					Host: ordererHostPort.Host,
+					Port: ordererHostPort.Port,
+				},
+				ClientTLSCert: tlsCert,
+				ServerTLSCert: tlsCert,
+			})
+			if err != nil {
+				return err
+			}
+			break
 		}
 	}
 	configUpdateBytes, err := cftxGen.ComputeMarshaledUpdate(c.channelName)
@@ -104,10 +117,10 @@ func (c *delConsenterCmd) run() error {
 	log.Infof("output file: %s", c.output)
 	return nil
 }
-func newDelConsenterCMD(io.Writer, io.Writer) *cobra.Command {
-	c := &delConsenterCmd{}
+func newReplaceConsenterCMD(io.Writer, io.Writer) *cobra.Command {
+	c := &replaceonsenterCmd{}
 	cmd := &cobra.Command{
-		Use: "del",
+		Use: "replace",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := c.validate(); err != nil {
 				return err
