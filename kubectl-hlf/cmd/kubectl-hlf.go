@@ -4,10 +4,8 @@ import (
 	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/ca"
 	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/chaincode"
 	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/channel"
-	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/consortium"
 	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/inspect"
 	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/ordnode"
-	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/ordservice"
 	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/org"
 	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/peer"
 	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/utils"
@@ -30,11 +28,9 @@ func NewCmdHLF() *cobra.Command {
 		SilenceUsage: true,
 	}
 	cmd.AddCommand(inspect.NewInspectHLFConfig(cmd.OutOrStdout()))
-	cmd.AddCommand(consortium.NewConsortiumCmd(cmd.OutOrStdout(), cmd.ErrOrStderr()))
 	cmd.AddCommand(channel.NewChannelCmd(cmd.OutOrStdout(), cmd.ErrOrStderr()))
 	cmd.AddCommand(ca.NewCACmd(cmd.OutOrStdout(), cmd.ErrOrStderr()))
 	cmd.AddCommand(peer.NewPeerCmd(cmd.OutOrStdout(), cmd.ErrOrStderr()))
-	cmd.AddCommand(ordservice.NewOrdServiceCmd(cmd.OutOrStdout(), cmd.ErrOrStderr()))
 	cmd.AddCommand(ordnode.NewOrdNodeCmd(cmd.OutOrStdout(), cmd.ErrOrStderr()))
 	cmd.AddCommand(chaincode.NewChaincodeCmd(cmd.OutOrStdout(), cmd.ErrOrStderr()))
 	cmd.AddCommand(org.NewOrgCmd(cmd.OutOrStdout(), cmd.ErrOrStderr()))

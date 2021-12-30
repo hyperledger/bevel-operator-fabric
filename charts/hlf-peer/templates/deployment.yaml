@@ -22,9 +22,9 @@ spec:
       hostAliases:
 {{ toYaml .Values.hostAliases | indent 10 }}
       volumes:
+        {{- if eq .Values.peer.databaseType "CouchDB" }}
         - name: couchdb
-          {{- if eq .Values.peer.databaseType "CouchDB" }}
-          {{- if .Values.persistence.couchdb.enabled }}
+          {{- if and .Values.persistence.couchdb.enabled ( not .Values.couchdb.external.enabled) }}
           persistentVolumeClaim:
             claimName: {{ include "hlf-peer.fullname" . }}--couchdb
           {{- else }}
@@ -155,17 +155,15 @@ spec:
 
 {{- if $.Values.externalChaincodeBuilder }}
           env:
-            - name: FILE_SERVER_BASE_IP
-              value: {{ include "hlf-peer.fullname" . }}-fs
-{{/*            - name: EXTERNAL_BUILDER_PEER_URL*/}}
-{{/*              value: {{ include "hlf-peer.fullname" . }}:7052*/}}
             - name: K8SCC_CFGFILE
               value: "/builders/golang/bin/k8scc.yaml"
+            - name: FILE_SERVER_BASE_IP
+              value: {{ include "hlf-peer.fullname" . }}-fs
             - name: FILE_SERVER_ENDPOINT
               value: '127.0.0.1:8080'
 {{- end }}
           envFrom:
-            {{- if eq .Values.peer.databaseType "CouchDB" }}
+            {{- if and (eq .Values.peer.databaseType "CouchDB") }}
             - secretRef:
                 name: {{ include "hlf-peer.fullname" . }}--couchdb
             {{- end }}
@@ -242,8 +240,8 @@ spec:
                   apiVersion: v1
                   fieldPath: status.podIP
 {{- end }}
-      {{- if eq $.Values.peer.databaseType "CouchDB" }}
-  {{- if .Values.couchdbExporter.enabled}}
+      {{- if and (eq $.Values.peer.databaseType "CouchDB") (not .Values.couchdb.external.enabled) }}
+  {{- if and .Values.couchdbExporter.enabled (not .Values.couchdb.external.enabled) }}
         - name: couchdb-exporter
           image: "{{.Values.couchdbExporter.image }}:{{.Values.couchdbExporter.tag}}"
           imagePullPolicy: {{.Values.couchdbExporter.pullPolicy}}
