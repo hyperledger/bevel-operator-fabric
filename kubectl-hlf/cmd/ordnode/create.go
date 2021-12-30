@@ -15,18 +15,21 @@ import (
 )
 
 type OrdererOptions struct {
-	Name         string
-	StorageClass string
-	Capacity     string
-	NS           string
-	Image        string
-	Version      string
-	MspID        string
-	EnrollID     string
-	EnrollPW     string
-	CAName       string
-	Hosts        []string
-	Output       bool
+	Name           string
+	StorageClass   string
+	Capacity       string
+	NS             string
+	Image          string
+	Version        string
+	MspID          string
+	EnrollID       string
+	EnrollPW       string
+	CAName         string
+	Hosts          []string
+	Output         bool
+	IngressGateway string
+	IngressPort    int
+	AdminHosts     []string
 }
 
 func (o OrdererOptions) Validate() error {
@@ -68,7 +71,33 @@ func (c *createCmd) run(args []string) error {
 	csrHosts = append(csrHosts, k8sIP)
 	csrHosts = append(csrHosts, c.ordererOpts.Name)
 	csrHosts = append(csrHosts, fmt.Sprintf("%s.%s", c.ordererOpts.Name, c.ordererOpts.NS))
-
+	ingressGateway := c.ordererOpts.IngressGateway
+	ingressPort := c.ordererOpts.IngressPort
+	istio := &v1alpha1.FabricIstio{
+		Port:           ingressPort,
+		Hosts:          []string{},
+		IngressGateway: ingressGateway,
+	}
+	if len(c.ordererOpts.Hosts) > 0 {
+		istio = &v1alpha1.FabricIstio{
+			Port:           ingressPort,
+			Hosts:          c.ordererOpts.Hosts,
+			IngressGateway: ingressGateway,
+		}
+		csrHosts = append(csrHosts, c.ordererOpts.Hosts...)
+	}
+	adminIstio := &v1alpha1.FabricIstio{
+		Port:           ingressPort,
+		Hosts:          []string{},
+		IngressGateway: ingressGateway,
+	}
+	if len(c.ordererOpts.AdminHosts) > 0 {
+		adminIstio = &v1alpha1.FabricIstio{
+			Port:           ingressPort,
+			Hosts:          c.ordererOpts.AdminHosts,
+			IngressGateway: ingressGateway,
+		}
+	}
 	fabricOrderer := &v1alpha1.FabricOrdererNode{
 		TypeMeta: v1.TypeMeta{
 			Kind:       "FabricOrdererNode",
@@ -126,8 +155,8 @@ func (c *createCmd) run(args []string) error {
 					},
 				},
 			},
-			Istio:      nil,
-			AdminIstio: nil,
+			Istio:      istio,
+			AdminIstio: adminIstio,
 		},
 	}
 	if c.ordererOpts.Output {
@@ -172,8 +201,11 @@ func newCreateOrdererNodeCmd(out io.Writer, errOut io.Writer) *cobra.Command {
 	f.StringVarP(&c.ordererOpts.StorageClass, "storage-class", "s", helpers.DefaultStorageclass, "storage class for this Fabric Orderer")
 	f.StringVarP(&c.ordererOpts.Image, "image", "", helpers.DefaultOrdererImage, "version of the Fabric Orderer")
 	f.StringVarP(&c.ordererOpts.Version, "version", "", helpers.DefaultOrdererVersion, "version of the Fabric Orderer")
+	f.StringVarP(&c.ordererOpts.IngressGateway, "istio-ingressgateway", "", "ingressgateway", "Istio ingress gateway name")
+	f.IntVarP(&c.ordererOpts.IngressPort, "istio-port", "", 443, "Istio ingress port")
 	f.StringVarP(&c.ordererOpts.MspID, "mspid", "", "", "MSP ID of the organization")
 	f.StringArrayVarP(&c.ordererOpts.Hosts, "hosts", "", []string{}, "Hosts")
+	f.StringArrayVarP(&c.ordererOpts.AdminHosts, "admin-hosts", "", []string{}, "Hosts for the admin API(introduced in v2.3)")
 	f.BoolVarP(&c.ordererOpts.Output, "output", "o", false, "output in yaml")
 	return cmd
 }

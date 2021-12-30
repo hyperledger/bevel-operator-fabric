@@ -26,6 +26,8 @@ type Options struct {
 	Version        string
 	MspID          string
 	StateDB        string
+	IngressGateway string
+	IngressPort    int
 	EnrollPW       string
 	CAName         string
 	EnrollID       string
@@ -71,20 +73,24 @@ func (c *createCmd) run() error {
 	}
 	externalEndpoint := ""
 	if len(c.peerOpts.Hosts) > 0 {
-		externalEndpoint = fmt.Sprintf("%s:443", c.peerOpts.Hosts[0])
+		externalEndpoint = fmt.Sprintf("%s:%d", c.peerOpts.Hosts[0], c.peerOpts.IngressPort)
 	}
-	ingressGateway := "ingressgateway"
+	ingressGateway := c.peerOpts.IngressGateway
 	istio := &v1alpha1.FabricIstio{
-		Port:           443,
+		Port:           c.peerOpts.IngressPort,
 		Hosts:          []string{},
 		IngressGateway: ingressGateway,
 	}
 	if len(c.peerOpts.Hosts) > 0 {
 		istio = &v1alpha1.FabricIstio{
-			Port:           443,
+			Port:           c.peerOpts.IngressPort,
 			Hosts:          c.peerOpts.Hosts,
 			IngressGateway: ingressGateway,
 		}
+	}
+	k8sIP, err := utils.GetPublicIPKubernetes(clientSet)
+	if err != nil {
+		return err
 	}
 	peerRequirements, err := getPeerResourceRequirements()
 	if err != nil {
@@ -143,9 +149,9 @@ func (c *createCmd) run() error {
 			Secret: v1alpha1.Secret{
 				Enrollment: v1alpha1.Enrollment{
 					Component: v1alpha1.Component{
-						Cahost: fmt.Sprintf("%s.%s", certAuth.Object.Name, certAuth.Object.Namespace),
+						Cahost: k8sIP,
 						Caname: certAuth.Spec.CA.Name,
-						Caport: 7054,
+						Caport: certAuth.Status.NodePort,
 						Catls: v1alpha1.Catls{
 							Cacert: base64.StdEncoding.EncodeToString([]byte(certAuth.Status.TlsCert)),
 						},
@@ -153,9 +159,9 @@ func (c *createCmd) run() error {
 						Enrollsecret: c.peerOpts.EnrollPW,
 					},
 					TLS: v1alpha1.TLS{
-						Cahost: fmt.Sprintf("%s.%s", certAuth.Object.Name, certAuth.Object.Namespace),
+						Cahost: k8sIP,
 						Caname: certAuth.Spec.TLSCA.Name,
-						Caport: 7054,
+						Caport: certAuth.Status.NodePort,
 						Catls: v1alpha1.Catls{
 							Cacert: base64.StdEncoding.EncodeToString([]byte(certAuth.Status.TlsCert)),
 						},
@@ -343,6 +349,8 @@ func newCreatePeerCmd(out io.Writer, errOut io.Writer) *cobra.Command {
 	f.StringVarP(&c.peerOpts.Version, "version", "", helpers.DefaultPeerVersion, "version of the Fabric Peer")
 	f.StringVarP(&c.peerOpts.MspID, "mspid", "", "", "MSP ID of the organization")
 	f.StringVarP(&c.peerOpts.StateDB, "statedb", "", "leveldb", "State database")
+	f.StringVarP(&c.peerOpts.IngressGateway, "istio-ingressgateway", "", "ingressgateway", "Istio ingress gateway name")
+	f.IntVarP(&c.peerOpts.IngressPort, "istio-port", "", 443, "Istio ingress port")
 	f.BoolVarP(&c.peerOpts.Leader, "leader", "", false, "Force peer to be leader")
 	f.StringArrayVarP(&c.peerOpts.BootstrapPeers, "bootstrap-peer", "", []string{}, "Bootstrap peers")
 	f.StringArrayVarP(&c.peerOpts.Hosts, "hosts", "", []string{}, "External hosts")

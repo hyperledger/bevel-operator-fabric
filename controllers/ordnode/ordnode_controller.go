@@ -551,7 +551,6 @@ func getExistingSignCrypto(client *kubernetes.Clientset, chartName string, names
 	secretCrtName := fmt.Sprintf("%s-idcert", chartName)
 	secretKeyName := fmt.Sprintf("%s-idkey", chartName)
 	secretRootCrtName := fmt.Sprintf("%s-cacert", chartName)
-
 	secretCrt, err := client.CoreV1().Secrets(namespace).Get(context.Background(), secretCrtName, v1.GetOptions{})
 	if err != nil {
 		return nil, nil, nil, err
