@@ -21,7 +21,7 @@ title: Getting started
 
 ## Stay Up-to-Date
 
-`hlf-operator` is currently in beta. Watch **releases** of this repository to be notified for future updates:
+`hlf-operator` is currently in stable. Watch **releases** of this repository to be notified for future updates:
 
 ![hlf-operator-star-github](https://user-images.githubusercontent.com/6862893/123808402-022aa800-d8f1-11eb-8df4-8a9552f126a2.gif)
 
