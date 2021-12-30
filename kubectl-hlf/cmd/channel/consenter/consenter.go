@@ -13,6 +13,7 @@ func NewConsenterCmd(stdOut io.Writer, stdErr io.Writer) *cobra.Command {
 	consenterCmd.AddCommand(
 		newAddConsenterCMD(stdOut, stdErr),
 		newDelConsenterCMD(stdOut, stdErr),
+		newReplaceConsenterCMD(stdOut, stdErr),
 	)
 	return consenterCmd
 }

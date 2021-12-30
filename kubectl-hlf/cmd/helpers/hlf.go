@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"github.com/kfsoftware/hlf-operator/controllers/utils"
-	log "github.com/sirupsen/logrus"
 	"k8s.io/client-go/kubernetes"
 
 	hlfv1alpha1 "github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
@@ -222,7 +221,6 @@ func GetClusterOrdererNodes(
 			},
 		)
 	}
-	log.Printf("Nodes=%v", ordererNodes)
 	return ordererNodes, nil
 }
 func GetCertAuthByURL(clientSet *kubernetes.Clientset, oclient *operatorv1.Clientset, host string, port int) (*ClusterCA, error) {
