@@ -3,13 +3,11 @@ package consenter
 import (
 	"github.com/gogo/protobuf/proto"
 	"github.com/hyperledger/fabric-config/configtx"
-	"github.com/hyperledger/fabric-config/configtx/orderer"
 	"github.com/hyperledger/fabric-protos-go/common"
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/resmgmt"
 	"github.com/hyperledger/fabric-sdk-go/pkg/core/config"
 	"github.com/hyperledger/fabric-sdk-go/pkg/fab/resource"
 	"github.com/hyperledger/fabric-sdk-go/pkg/fabsdk"
-	"github.com/kfsoftware/hlf-operator/controllers/utils"
 	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/helpers"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -67,33 +65,24 @@ func (c *delConsenterCmd) run() error {
 	if err != nil {
 		return err
 	}
-	certAuth, err := helpers.GetCertAuthByURL(
-		clientSet,
-		oClient,
-		ordNode.Spec.Secret.Enrollment.Component.Cahost,
-		ordNode.Spec.Secret.Enrollment.Component.Caport,
-	)
-	if err != nil {
-		return err
-	}
-	tlsCert, err := utils.ParseX509Certificate([]byte(certAuth.Status.TLSCACert))
-	if err != nil {
-		return err
-	}
 	ordererHostPort, err := helpers.GetOrdererHostPort(clientSet, ordNode.Item)
 	if err != nil {
 		return err
 	}
-	err = cfgOrd.RemoveConsenter(orderer.Consenter{
-		Address: orderer.EtcdAddress{
-			Host: ordererHostPort.Host,
-			Port: ordererHostPort.Port,
-		},
-		ClientTLSCert: tlsCert,
-		ServerTLSCert: tlsCert,
-	})
+	ordererConf,err := cftxGen.Orderer().Configuration()
 	if err != nil {
 		return err
+	}
+	log.Infof("Consenters=%v", ordererConf.EtcdRaft.Consenters)
+	for _, consenter := range ordererConf.EtcdRaft.Consenters {
+		if consenter.Address.Host == ordererHostPort.Host && consenter.Address.Port == ordererHostPort.Port {
+			log.Infof("removing consenter %v", consenter)
+			err = cfgOrd.RemoveConsenter(consenter)
+			if err != nil {
+				return err
+			}
+            break
+		}
 	}
 	configUpdateBytes, err := cftxGen.ComputeMarshaledUpdate(c.channelName)
 	if err != nil {
