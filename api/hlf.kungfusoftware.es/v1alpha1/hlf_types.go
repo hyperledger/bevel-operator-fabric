@@ -822,9 +822,51 @@ type FabricCAList struct {
 	Items           []FabricCA `json:"items"`
 }
 
+// FabricExplorerSpec defines the desired state of FabricExplorer
+type FabricExplorerSpec struct {
+	Resources corev1.ResourceRequirements `json:"resources"`
+}
+
+// FabricExplorerStatus defines the observed state of FabricExplorer
+type FabricExplorerStatus struct {
+	Conditions status.Conditions `json:"conditions"`
+	Message    string            `json:"message"`
+	// Status of the FabricCA
+	Status DeploymentStatus `json:"status"`
+}
+
+// +genclient
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+// +k8s:defaulter-gen=true
+// +kubebuilder:subresource:status
+// +kubebuilder:resource:scope=Namespaced,shortName=explorer,singular=explorer
+// +kubebuilder:printcolumn:name="State",type="string",JSONPath=".status.status"
+// +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
+// +kubebuilder:object:root=true
+// +kubebuilder:subresource:status
+// +k8s:openapi-gen=true
+
+// FabricExplorer is the Schema for the hlfs API
+type FabricExplorer struct {
+	metav1.TypeMeta   `json:",inline"`
+	metav1.ObjectMeta `json:"metadata,omitempty"`
+	Spec              FabricExplorerSpec   `json:"spec,omitempty"`
+	Status            FabricExplorerStatus `json:"status,omitempty"`
+}
+
+// +kubebuilder:object:root=true
+
+// FabricExplorerList contains a list of FabricExplorer
+type FabricExplorerList struct {
+	metav1.TypeMeta `json:",inline"`
+	metav1.ListMeta `json:"metadata,omitempty"`
+	Items           []FabricExplorer `json:"items"`
+}
+
 func init() {
 	SchemeBuilder.Register(&FabricPeer{}, &FabricPeerList{})
 	SchemeBuilder.Register(&FabricOrderingService{}, &FabricOrderingServiceList{})
 	SchemeBuilder.Register(&FabricCA{}, &FabricCAList{})
 	SchemeBuilder.Register(&FabricOrdererNode{}, &FabricOrdererNodeList{})
+	SchemeBuilder.Register(&FabricExplorer{}, &FabricExplorerList{})
 }

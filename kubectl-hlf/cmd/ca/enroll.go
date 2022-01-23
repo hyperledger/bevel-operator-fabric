@@ -1,6 +1,7 @@
 package ca
 
 import (
+	"github.com/hyperledger/fabric-sdk-go/pkg/gateway"
 	log "github.com/kfsoftware/hlf-operator/internal/github.com/hyperledger/fabric-ca/sdkpatch/logbridge"
 	"io"
 	"io/ioutil"
@@ -13,16 +14,18 @@ import (
 )
 
 type EnrollOptions struct {
-	Name    string
-	NS      string
-	User    string
-	Secret  string
-	Type    string
-	MspID   string
-	CAName  string
-	Profile string
-	Hosts   []string
-	CN      string
+	Name       string
+	NS         string
+	User       string
+	Secret     string
+	Type       string
+	MspID      string
+	CAName     string
+	Profile    string
+	Hosts      []string
+	CN         string
+	WalletPath string
+	WalletUser string
 }
 
 func (o EnrollOptions) Validate() error {
@@ -92,6 +95,21 @@ func (c *enrollCmd) run(args []string) error {
 	if err != nil {
 		return err
 	}
+	if c.enrollOpts.WalletPath != "" {
+		wallet, err := gateway.NewFileSystemWallet(c.enrollOpts.WalletPath)
+		if err != nil {
+			return err
+		}
+		id := gateway.NewX509Identity(c.enrollOpts.MspID, string(crtPem), string(pkPem))
+		walletUserName := c.enrollOpts.WalletUser
+		if walletUserName == "" {
+			walletUserName = c.enrollOpts.WalletUser
+		}
+		err = wallet.Put(walletUserName, id)
+		if err != nil {
+			return err
+		}
+	}
 
 	return nil
 }
@@ -117,6 +135,8 @@ func newCAEnrollCmd(out io.Writer, errOut io.Writer) *cobra.Command {
 	f.StringVarP(&c.enrollOpts.MspID, "mspid", "", "", "namespace scope for this request")
 	f.StringVarP(&c.enrollOpts.Profile, "profile", "", "", "profile")
 	f.StringVarP(&c.enrollOpts.CN, "cn", "", "", "cn")
+	f.StringVarP(&c.enrollOpts.WalletPath, "wallet-path", "", "", "Wallet path to store the user in")
+	f.StringVarP(&c.enrollOpts.WalletUser, "wallet-user", "", "", "Wallet user name for the identity stored in the wallet")
 	f.StringSliceVarP(&c.enrollOpts.Hosts, "hosts", "", []string{}, "hosts")
 
 	f.StringVar(&c.fileOutput, "output", "", "output file")
