@@ -125,6 +125,11 @@ type FabricPeerSpec struct {
 	ImagePullPolicy          corev1.PullPolicy `json:"imagePullPolicy,omitempty"`
 	ExternalChaincodeBuilder bool              `json:"external_chaincode_builder"`
 	CouchDB                  FabricPeerCouchDB `json:"couchdb"`
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +nullable
+	FSServer *FabricFSServer `json:"fsServer"`
+
 	// +kubebuilder:validation:MinLength=3
 	MspID     string              `json:"mspID"`
 	Secret    Secret              `json:"secret"`
@@ -163,9 +168,25 @@ type FabricPeerStorage struct {
 	Peer      Storage `json:"peer"`
 	Chaincode Storage `json:"chaincode"`
 }
+type FabricFSServer struct {
+	// +kubebuilder:default:="quay.io/kfsoftware/fs-peer"
+	Image string `json:"image"`
+	// +kubebuilder:default:="amd64-2.2.0"
+	Tag string `json:"tag"`
+	// +kubebuilder:default:="IfNotPresent"
+	PullPolicy corev1.PullPolicy `json:"pullPolicy"`
+}
 type FabricPeerCouchDB struct {
 	User     string `json:"user"`
 	Password string `json:"password"`
+
+	// +kubebuilder:default:="couchdb"
+	Image string `json:"image"`
+	// +kubebuilder:default:="3.1.1"
+	Tag string `json:"tag"`
+	// +kubebuilder:default:="IfNotPresent"
+	PullPolicy corev1.PullPolicy `json:"pullPolicy"`
+
 	// +optional
 	// +nullable
 	ExternalCouchDB *FabricPeerExternalCouchDB `json:"externalCouchDB"`
