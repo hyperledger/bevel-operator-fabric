@@ -10,14 +10,17 @@ func NewChaincodeCmd(stdOut io.Writer, stdErr io.Writer) *cobra.Command {
 		Use: "chaincode",
 	}
 
-	consortiumCmd.AddCommand(newChaincodeInstallCMD(stdOut, stdErr))
-	consortiumCmd.AddCommand(newChaincodeQueryInstalledCMD(stdOut, stdErr))
-	consortiumCmd.AddCommand(newChaincodeApproveCMD(stdOut, stdErr))
-	consortiumCmd.AddCommand(newChaincodeCommitCMD(stdOut, stdErr))
-	consortiumCmd.AddCommand(newQueryChaincodeCMD(stdOut, stdErr))
-	consortiumCmd.AddCommand(newInvokeChaincodeCMD(stdOut, stdErr))
-	consortiumCmd.AddCommand(newQueryCommittedCMD(stdOut, stdErr))
-	consortiumCmd.AddCommand(newQueryApprovedCMD(stdOut, stdErr))
-	consortiumCmd.AddCommand(newCalculatePackageIDCMD(stdOut, stdErr))
+	consortiumCmd.AddCommand(
+		newChaincodeInstallCMD(stdOut, stdErr),
+		newChaincodeQueryInstalledCMD(stdOut, stdErr),
+		newChaincodeApproveCMD(stdOut, stdErr),
+		newChaincodeCommitCMD(stdOut, stdErr),
+		newQueryChaincodeCMD(stdOut, stdErr),
+		newInvokeChaincodeCMD(stdOut, stdErr),
+		newQueryCommittedCMD(stdOut, stdErr),
+		newQueryApprovedCMD(stdOut, stdErr),
+		newCalculatePackageIDCMD(stdOut, stdErr),
+		newGetLatestInfoCMD(stdOut, stdErr),
+	)
 	return consortiumCmd
 }
