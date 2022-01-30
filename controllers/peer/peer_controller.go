@@ -1113,10 +1113,14 @@ func GetConfig(
 		PullPolicy: string(hlfv1alpha1.DefaultImagePullPolicy),
 	}
 	if spec.FSServer != nil && spec.FSServer.Image != "" && spec.FSServer.Tag != "" {
-        fsServer.Image = spec.FSServer.Image
+		fsServer.Image = spec.FSServer.Image
 		fsServer.Tag = spec.FSServer.Tag
 		fsServer.PullPolicy = string(spec.FSServer.PullPolicy)
-    }
+	} else {
+		fsServer.Image = helpers.DefaultFSServerImage
+		fsServer.Tag = helpers.DefaultFSServerVersion
+		fsServer.PullPolicy = string(hlfv1alpha1.DefaultImagePullPolicy)
+	}
 
 	var c = FabricPeerChart{
 		Replicas: spec.Replicas,
@@ -1131,6 +1135,7 @@ func GetConfig(
 		DockerSocketPath: spec.DockerSocketPath,
 		CouchDBExporter:  exporter,
 		CouchDB:          couchDB,
+		FSServer:         fsServer,
 		Peer: Peer{
 			DatabaseType: stateDb,
 			MspID:        spec.MspID,
