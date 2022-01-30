@@ -191,6 +191,7 @@ type FabricPeerCouchDB struct {
 	// +nullable
 	ExternalCouchDB *FabricPeerExternalCouchDB `json:"externalCouchDB"`
 }
+
 type FabricPeerExternalCouchDB struct {
 	Enabled bool   `json:"enabled"`
 	Host    string `json:"host"`
@@ -884,10 +885,55 @@ type FabricExplorerList struct {
 	Items           []FabricExplorer `json:"items"`
 }
 
+// FabricNetworkConfigSpec defines the desired state of FabricNetworkConfig
+type FabricNetworkConfigSpec struct {
+	Organization  string   `json:"organization"`
+	Internal      bool     `json:"internal"`
+	Organizations []string `json:"organizations"`
+	SecretName    string   `json:"secretName"`
+}
+
+// FabricNetworkConfigStatus defines the observed state of FabricNetworkConfig
+type FabricNetworkConfigStatus struct {
+	Conditions status.Conditions `json:"conditions"`
+	Message    string            `json:"message"`
+	// Status of the FabricNetworkConfig
+	Status DeploymentStatus `json:"status"`
+}
+
+// +genclient
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+// +k8s:defaulter-gen=true
+// +kubebuilder:subresource:status
+// +kubebuilder:resource:scope=Namespaced,shortName=networkconfig,singular=networkconfig
+// +kubebuilder:printcolumn:name="State",type="string",JSONPath=".status.status"
+// +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
+// +kubebuilder:object:root=true
+// +kubebuilder:subresource:status
+// +k8s:openapi-gen=true
+
+// FabricNetworkConfig is the Schema for the hlfs API
+type FabricNetworkConfig struct {
+	metav1.TypeMeta   `json:",inline"`
+	metav1.ObjectMeta `json:"metadata,omitempty"`
+	Spec              FabricNetworkConfigSpec   `json:"spec,omitempty"`
+	Status            FabricNetworkConfigStatus `json:"status,omitempty"`
+}
+
+// +kubebuilder:object:root=true
+
+// FabricNetworkConfigList contains a list of FabricNetworkConfig
+type FabricNetworkConfigList struct {
+	metav1.TypeMeta `json:",inline"`
+	metav1.ListMeta `json:"metadata,omitempty"`
+	Items           []FabricNetworkConfig `json:"items"`
+}
+
 func init() {
 	SchemeBuilder.Register(&FabricPeer{}, &FabricPeerList{})
 	SchemeBuilder.Register(&FabricOrderingService{}, &FabricOrderingServiceList{})
 	SchemeBuilder.Register(&FabricCA{}, &FabricCAList{})
 	SchemeBuilder.Register(&FabricOrdererNode{}, &FabricOrdererNodeList{})
 	SchemeBuilder.Register(&FabricExplorer{}, &FabricExplorerList{})
+	SchemeBuilder.Register(&FabricNetworkConfig{}, &FabricNetworkConfigList{})
 }
