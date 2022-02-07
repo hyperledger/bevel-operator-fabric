@@ -46,21 +46,32 @@ type Peer struct {
 	TLSCert string
 }
 
+
 const tmplGoConfig = `
 name: hlf-network
 version: 1.0.0
 client:
-  organization: ""
+  organization: "{{ .Organization }}"
+{{- if not .Organizations }}
+organizations: {}
+{{- else }}
 organizations:
   {{ range $mspID, $org := .Organizations }}
   {{$mspID}}:
     mspid: {{$mspID}}
     cryptoPath: /tmp/cryptopath
     users: {}
+{{- if not $org.Peers }}
+	peers: []
+{{- else }}
     peers:
       {{- range $peer := $org.Peers }}
       - {{ $peer.Name }}
  	  {{- end }}
+{{- end }}
+{{- if not $org.OrderingServices }}
+	orderers: []
+{{- else }}
     orderers:
       {{- range $ordService := $org.OrderingServices }}
       {{- range $orderer := $ordService.Orderers }}
@@ -69,7 +80,12 @@ organizations:
  	  {{- end }}
 
     {{- end }}
+{{- end }}
+{{- end }}
 
+{{- if not .Orderers }}
+orderers: []
+{{- else }}
 orderers:
 {{- range $ordService := .Orderers }}
 {{- range $orderer := $ordService.Orderers }}
@@ -86,7 +102,11 @@ orderers:
 {{ or $orderer.Status.TlsCACert $orderer.Status.TlsCert | indent 8 }}
 {{- end }}
 {{- end }}
+{{- end }}
 
+{{- if not .Peers }}
+peers: []
+{{- else }}
 peers:
   {{- range $peer := .Peers }}
   {{$peer.Name}}:
@@ -103,7 +123,11 @@ peers:
       pem: |
 {{ $peer.Status.TlsCACert | indent 8 }}
 {{- end }}
+{{- end }}
 
+{{- if not .CertAuths }}
+certificateAuthorities: []
+{{- else }}
 certificateAuthorities:
 {{- range $ca := .CertAuths }}
   
@@ -125,15 +149,23 @@ certificateAuthorities:
 {{ $ca.Status.TlsCert | indent 12 }}
 
 {{- end }}
+{{- end }}
 
 channels:
   _default:
+{{- if not .Orderers }}
+    orderers: []
+{{- else }}
     orderers:
 {{- range $ordService := .Orderers }}
 {{- range $orderer := $ordService.Orderers }}
       - {{$orderer.Name}}
 {{- end }}
 {{- end }}
+{{- end }}
+{{- if not .Peers }}
+    peers: {}
+{{- else }}
     peers:
 {{- range $peer := .Peers }}
        {{$peer.Name}}:
@@ -142,6 +174,7 @@ channels:
         chaincodeQuery: true
         ledgerQuery: true
         eventSource: true
+{{- end }}
 {{- end }}
 
 `
@@ -192,12 +225,7 @@ func (c *inspectCmd) run(out io.Writer) error {
 		return err
 	}
 	var buf bytes.Buffer
-	k8sIP, err := utils.GetPublicIPKubernetes(clientSet)
-	if err != nil {
-		return err
-	}
 	err = tmpl.Execute(&buf, map[string]interface{}{
-		"K8SIP":         k8sIP,
 		"Peers":         peers,
 		"Orderers":      orderers,
 		"Organizations": orgMap,

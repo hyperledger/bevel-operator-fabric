@@ -9,6 +9,7 @@ import (
 	"encoding/pem"
 	"fmt"
 	"github.com/kfsoftware/hlf-operator/controllers/hlfmetrics"
+	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/helpers"
 	"k8s.io/apimachinery/pkg/types"
 	"os"
 	"reflect"
@@ -1094,6 +1095,33 @@ func GetConfig(
 			Port:    spec.CouchDB.ExternalCouchDB.Port,
 		}
 	}
+	if spec.CouchDB.Image != "" && spec.CouchDB.Tag != "" {
+		couchDB.Image = spec.CouchDB.Image
+	} else {
+		couchDB.Image = helpers.DefaultCouchDBImage
+		couchDB.Tag = helpers.DefaultCouchDBVersion
+	}
+	if spec.CouchDB.PullPolicy != "" {
+		couchDB.PullPolicy = string(spec.CouchDB.PullPolicy)
+	} else {
+		couchDB.PullPolicy = string(hlfv1alpha1.DefaultImagePullPolicy)
+	}
+
+	fsServer := FSServer{
+		Image:      helpers.DefaultFSServerImage,
+		Tag:        helpers.DefaultFSServerVersion,
+		PullPolicy: string(hlfv1alpha1.DefaultImagePullPolicy),
+	}
+	if spec.FSServer != nil && spec.FSServer.Image != "" && spec.FSServer.Tag != "" {
+		fsServer.Image = spec.FSServer.Image
+		fsServer.Tag = spec.FSServer.Tag
+		fsServer.PullPolicy = string(spec.FSServer.PullPolicy)
+	} else {
+		fsServer.Image = helpers.DefaultFSServerImage
+		fsServer.Tag = helpers.DefaultFSServerVersion
+		fsServer.PullPolicy = string(hlfv1alpha1.DefaultImagePullPolicy)
+	}
+
 	var c = FabricPeerChart{
 		Replicas: spec.Replicas,
 		Istio:    istio,
@@ -1107,6 +1135,7 @@ func GetConfig(
 		DockerSocketPath: spec.DockerSocketPath,
 		CouchDBExporter:  exporter,
 		CouchDB:          couchDB,
+		FSServer:         fsServer,
 		Peer: Peer{
 			DatabaseType: stateDb,
 			MspID:        spec.MspID,

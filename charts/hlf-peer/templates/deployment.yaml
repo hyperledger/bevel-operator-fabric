@@ -218,8 +218,8 @@ spec:
 {{ toYaml .Values.resources.peer | indent 12 }}
 {{- if .Values.externalChaincodeBuilder }}
         - name: fs-server
-          image: "quay.io/kfsoftware/fs-peer:amd64-2.2.0"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          image: "{{.Values.fsServer.image}}:{{ .Values.fsServer.tag }}"
+          imagePullPolicy: {{ .Values.fsServer.pullPolicy }}
           ports:
             - name: server
               containerPort: 8080
@@ -269,8 +269,8 @@ spec:
                 -couchdb.password=$COUCHDB_PASSWORD
         {{- end }}
         - name: couchdb
-          image: "couchdb:3.1.1"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          image: "{{ .Values.couchdb.image }}:{{ .Values.couchdb.tag }}"
+          imagePullPolicy: {{ .Values.couchdb.pullPolicy }}
           ports:
             - name: couchdb
               containerPort: 5984

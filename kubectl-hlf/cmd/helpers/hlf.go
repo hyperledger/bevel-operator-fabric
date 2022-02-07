@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/kfsoftware/hlf-operator/controllers/utils"
 	"k8s.io/client-go/kubernetes"
+	"strings"
 
 	hlfv1alpha1 "github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
 	operatorv1 "github.com/kfsoftware/hlf-operator/pkg/client/clientset/versioned"
@@ -224,13 +225,20 @@ func GetClusterOrdererNodes(
 	return ordererNodes, nil
 }
 func GetCertAuthByURL(clientSet *kubernetes.Clientset, oclient *operatorv1.Clientset, host string, port int) (*ClusterCA, error) {
-	certAuths, err := GetClusterCAs(clientSet, oclient, "")
+	cahost := host
+	ns := ""
+	if strings.Contains(cahost, ".") && len(strings.Split(cahost, ".")) == 2 {
+		chunks := strings.Split(cahost, ".")
+		cahost = chunks[0]
+		ns = chunks[1]
+	}
+	certAuths, err := GetClusterCAs(clientSet, oclient, ns)
 	if err != nil {
 		return nil, err
 	}
 	for _, certAuth := range certAuths {
 		if // if host and port is specified by kubernetes DNS
-		certAuth.Item.Name == host || (certAuth.Status.NodePort != 7054 && certAuth.Status.NodePort == port) {
+		certAuth.Item.Name == cahost || (certAuth.Status.NodePort != 7054 && certAuth.Status.NodePort == port) {
 			return certAuth, nil
 		}
 
@@ -308,6 +316,42 @@ func GetOrdererPublicURL(clientset *kubernetes.Clientset, node hlfv1alpha1.Fabri
 		return "", err
 	}
 	return fmt.Sprintf("%s:%d", hostPort.Host, hostPort.Port), nil
+}
+func GetOrdererHostAndPort(clientset *kubernetes.Clientset, nodeSpec hlfv1alpha1.FabricOrdererNodeSpec, nodeStatus hlfv1alpha1.FabricOrdererNodeStatus) (string, int, error) {
+	hostName, err := utils.GetPublicIPKubernetes(clientset)
+	if err != nil {
+		return "", 0, err
+	}
+	ordererPort := nodeStatus.NodePort
+	if len(nodeSpec.Istio.Hosts) > 0 {
+		hostName = nodeSpec.Istio.Hosts[0]
+        ordererPort = nodeSpec.Istio.Port
+	}
+	return hostName, ordererPort, nil
+}
+func GetPeerHostAndPort(clientset *kubernetes.Clientset, nodeSpec hlfv1alpha1.FabricPeerSpec, nodeStatus hlfv1alpha1.FabricPeerStatus) (string, int, error) {
+	hostName, err := utils.GetPublicIPKubernetes(clientset)
+	if err != nil {
+		return "", 0, err
+	}
+	ordererPort := nodeStatus.NodePort
+	if len(nodeSpec.Istio.Hosts) > 0 {
+		hostName = nodeSpec.Istio.Hosts[0]
+		ordererPort = nodeSpec.Istio.Port
+	}
+	return hostName, ordererPort, nil
+}
+func GetOrdererAdminHostAndPort(clientset *kubernetes.Clientset, nodeSpec hlfv1alpha1.FabricOrdererNodeSpec, nodeStatus hlfv1alpha1.FabricOrdererNodeStatus) (string, int, error) {
+	hostName, err := utils.GetPublicIPKubernetes(clientset)
+	if err != nil {
+		return "", 0, err
+	}
+	ordererPort := nodeStatus.AdminPort
+	if len(nodeSpec.AdminIstio.Hosts) > 0 {
+		hostName = nodeSpec.AdminIstio.Hosts[0]
+		ordererPort = nodeSpec.AdminIstio.Port
+	}
+	return hostName, ordererPort, nil
 }
 func GetOrdererPrivateURL(node hlfv1alpha1.FabricOrdererNode) string {
 	return fmt.Sprintf("%s.%s:%s", node.Name, node.Namespace, "7050")
