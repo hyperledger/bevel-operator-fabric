@@ -1,6 +1,7 @@
 package chaincode
 
 import (
+	"github.com/hyperledger/fabric-protos-go/common"
 	pb "github.com/hyperledger/fabric-protos-go/peer"
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/resmgmt"
 	"github.com/hyperledger/fabric-sdk-go/pkg/common/providers/fab"
@@ -60,9 +61,12 @@ func (c *approveChaincodeCmd) run() error {
 	if err != nil {
 		return err
 	}
-	sp, err := policydsl.FromString(c.policy)
-	if err != nil {
-		return err
+	var sp *common.SignaturePolicyEnvelope
+	if c.policy != "" {
+		sp, err = policydsl.FromString(c.policy)
+		if err != nil {
+			return err
+		}
 	}
 	var collectionConfigs []*pb.CollectionConfig
 
