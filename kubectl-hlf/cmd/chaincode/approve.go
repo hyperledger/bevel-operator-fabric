@@ -133,6 +133,5 @@ func newChaincodeApproveCMD(out io.Writer, errOut io.Writer) *cobra.Command {
 	cmd.MarkPersistentFlagRequired("channelName")
 	cmd.MarkPersistentFlagRequired("package-id")
 	cmd.MarkPersistentFlagRequired("name")
-	cmd.MarkPersistentFlagRequired("policy")
 	return cmd
 }
