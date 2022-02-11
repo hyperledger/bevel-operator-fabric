@@ -17,6 +17,7 @@ module.exports = {
     ],
     "Kubectl Plugin": ["kubectl-plugin/installation"],
     "Operator Guide": [
+      "operator-guide/state-db",
       "operator-guide/monitoring",
       "operator-guide/migrate-network",
       "operator-guide/increase-resources",
