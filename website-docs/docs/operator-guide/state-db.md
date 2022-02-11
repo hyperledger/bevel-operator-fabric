@@ -2,6 +2,12 @@
 id: state-db
 title: LevelDB / CouchDB
 ---
+:::caution
+
+Once you set the state database of the peer, you cannot change it since the structure is different between using **LevelDB** and **CouchDB** you can find more information in [the official HLF docs](https://hyperledger-fabric.readthedocs.io/en/release-2.3/couchdb_as_state_database.html)
+
+:::
+
 
 ## Configuring LevelDB
 
@@ -12,7 +18,7 @@ stateDb: leveldb
 
 ## Configuring CouchDB
 
-You can configure couchdb by setting the following property in the yaml:
+You can configure the world state to be CouchDB by setting the property `stateDb` in the CRD of the peer:
 
 ```yaml
 stateDb: couchdb
@@ -36,3 +42,4 @@ couchdb:
     password: couchdb
 ```
 If you wish to use an external CouchDB instance, [check this page](./external-couchdb)
+
