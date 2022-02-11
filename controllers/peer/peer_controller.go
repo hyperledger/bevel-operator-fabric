@@ -1097,6 +1097,7 @@ func GetConfig(
 	}
 	if spec.CouchDB.Image != "" && spec.CouchDB.Tag != "" {
 		couchDB.Image = spec.CouchDB.Image
+		couchDB.Tag = spec.CouchDB.Tag
 	} else {
 		couchDB.Image = helpers.DefaultCouchDBImage
 		couchDB.Tag = helpers.DefaultCouchDBVersion
