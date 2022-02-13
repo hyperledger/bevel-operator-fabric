@@ -18,7 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Kubectl plugin
 - Allow passing empty signature policy to the `approve` and `commit` chaincode command takes the default signature policy of the channel.
-- Add `networkconfig` commands to create and update the network config CRD that generates secret in Kubernetes so application can use it.
+- Add `networkconfig` commands to create and update the network config CRD that generates secret in Kubernetes so the application can use it.
 
 ## [1.4.0]
 

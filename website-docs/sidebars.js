@@ -10,6 +10,7 @@ module.exports = {
     ],
     "User Guide": [
       "user-guide/network-config",
+      "user-guide/network-config-kubernetes",
       "user-guide/create-channel",
       "user-guide/install-chaincode",
       "user-guide/enroll-users",

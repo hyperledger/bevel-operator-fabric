@@ -264,18 +264,18 @@ func (r *FabricNetworkConfigReconciler) Reconcile(req ctrl.Request) (ctrl.Result
 	orgMap := map[string]*helpers.Organization{}
 	filterByOrgs := len(fabricNetworkConfig.Spec.Organizations) > 0
 	for _, v := range ordOrgs {
-		if filterByOrgs && utils.Contains(fabricNetworkConfig.Spec.Organizations, v.MspID) {
+		if (filterByOrgs && utils.Contains(fabricNetworkConfig.Spec.Organizations, v.MspID)) || !filterByOrgs {
 			orgMap[v.MspID] = v
 		}
 	}
 	for _, v := range peerOrgs {
-		if filterByOrgs && utils.Contains(fabricNetworkConfig.Spec.Organizations, v.MspID) {
+		if (filterByOrgs && utils.Contains(fabricNetworkConfig.Spec.Organizations, v.MspID)) || !filterByOrgs {
 			orgMap[v.MspID] = v
 		}
 	}
 	var peers []*helpers.ClusterPeer
 	for _, peer := range clusterPeers {
-		if filterByOrgs && utils.Contains(fabricNetworkConfig.Spec.Organizations, peer.MSPID) {
+		if (filterByOrgs && utils.Contains(fabricNetworkConfig.Spec.Organizations, peer.MSPID)) || !filterByOrgs {
 			peers = append(peers, peer)
 		}
 	}

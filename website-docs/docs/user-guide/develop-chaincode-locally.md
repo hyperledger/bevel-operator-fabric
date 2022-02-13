@@ -4,7 +4,7 @@ title: Develop chaincode locally
 ---
 
 
-Develop the chaincode locally has the following benefits, you can:
+Developing the chaincode locally has the following benefits; for example you can:
 
 - Develop the chaincode locally and test it locally.
 - Debug the chaincode locally.
