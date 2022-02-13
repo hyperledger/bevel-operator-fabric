@@ -12,7 +12,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Improved documentation for how to choose the World State database.
 - Create network config in the cluster using a CRD
 - Add an example client application for Node.JS
-- Add Operator Interface to view the current state of the network, peers, orderers, and CAs
 - Configure the `image`, `tag`, and `pullPolicy` for the CouchDB container
 - Configure the `image`, `tag`, and `pullPolicy` File Server container (used to build chaincodes in Kubernetes).
 
