@@ -1,6 +1,7 @@
 package chaincode
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/resmgmt"
 	"github.com/hyperledger/fabric-sdk-go/pkg/core/config"
@@ -58,10 +59,14 @@ func (c *queryApprovedCmd) run(out io.Writer) error {
 		},
 		resmgmt.WithTargetEndpoints(peerName),
 	)
+	signaturePolicyBytes,err := json.Marshal(chaincode.SignaturePolicy)
+	if err != nil {
+        return err
+    }
 	data := [][]string{
-		{chaincode.Name, chaincode.PackageID, chaincode.Version, fmt.Sprint(chaincode.Sequence)}}
+		{chaincode.Name, chaincode.PackageID, chaincode.Version, fmt.Sprint(chaincode.Sequence), string(signaturePolicyBytes)}}
 	table := tablewriter.NewWriter(out)
-	table.SetHeader([]string{"Chaincode", "Package ID", "Version", "Sequence"})
+	table.SetHeader([]string{"Chaincode", "Package ID", "Version", "Sequence", "Signature Policy"})
 	table.SetAutoWrapText(false)
 	table.SetAutoFormatHeaders(true)
 	table.SetHeaderAlignment(tablewriter.ALIGN_LEFT)

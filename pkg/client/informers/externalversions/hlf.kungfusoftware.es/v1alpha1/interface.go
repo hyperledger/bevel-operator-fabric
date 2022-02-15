@@ -26,6 +26,10 @@ import (
 type Interface interface {
 	// FabricCAs returns a FabricCAInformer.
 	FabricCAs() FabricCAInformer
+	// FabricExplorers returns a FabricExplorerInformer.
+	FabricExplorers() FabricExplorerInformer
+	// FabricNetworkConfigs returns a FabricNetworkConfigInformer.
+	FabricNetworkConfigs() FabricNetworkConfigInformer
 	// FabricOrdererNodes returns a FabricOrdererNodeInformer.
 	FabricOrdererNodes() FabricOrdererNodeInformer
 	// FabricOrderingServices returns a FabricOrderingServiceInformer.
@@ -48,6 +52,16 @@ func New(f internalinterfaces.SharedInformerFactory, namespace string, tweakList
 // FabricCAs returns a FabricCAInformer.
 func (v *version) FabricCAs() FabricCAInformer {
 	return &fabricCAInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
+}
+
+// FabricExplorers returns a FabricExplorerInformer.
+func (v *version) FabricExplorers() FabricExplorerInformer {
+	return &fabricExplorerInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
+}
+
+// FabricNetworkConfigs returns a FabricNetworkConfigInformer.
+func (v *version) FabricNetworkConfigs() FabricNetworkConfigInformer {
+	return &fabricNetworkConfigInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
 }
 
 // FabricOrdererNodes returns a FabricOrdererNodeInformer.
