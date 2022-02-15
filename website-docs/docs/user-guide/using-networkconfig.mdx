@@ -1,0 +1,56 @@
+---
+id: network-config-kubernetes
+title: Using network config in the kubernetes cluster
+---
+
+## Network config as secrets
+
+Network Config is a CRD that lets you define the organizations that you want to use in your client application.
+
+### Create network config for all organizations
+
+To create a network config for all organizations, you can use the following command:
+
+```bash
+kubectl hlf networkconfig create --name=test-nc -n=default --secret=org1-nc
+```
+
+This command will create a secret `org1-nc` in the namespace `default` with all the peers, orderer nodes and CAs that are in the current cluster.
+
+### Refresh network config
+
+If you add a new peer/orderer/CA to the cluster, you can use the following command to refresh the contents network config:
+
+```bash
+kubectl hlf networkconfig refresh --name=test-nc -n=default
+```
+
+The secret contents will be updated to include the new peer/orderer/CA.
+
+## Create network config for specific organizations
+
+If you want to create a network config for specific organizations, you can use the following command:
+
+```bash
+kubectl hlf networkconfig create --name=test-nc -n=default -o Org1MSP -o OrdererMSP --secret=org1-nc
+```
+
+The secret will contain only the peers and orderer nodes of the specified organizations.
+
+## Update network config
+
+If you want a different configuration for the same network config, you can use the following command:
+
+```bash
+kubectl hlf networkconfig update --name=test-nc -n=default -o Org1MSP -o Org2MSP -o OrdererMSP --secret=org1-nc
+```
+
+The secret contents will be updated to include the new peer/orderer/CA, or create a new secret with the name specified.
+
+### Delete network config
+
+If you no longer need a network config, you can use the following command to delete it:
+
+```bash
+kubectl hlf networkconfig delete --name=test-nc -n=default
+```

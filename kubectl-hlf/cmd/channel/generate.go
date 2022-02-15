@@ -54,10 +54,6 @@ func (c generateChannelCmd) run() error {
 	if err != nil {
 		return err
 	}
-	k8sIP, err := utils.GetPublicIPKubernetes(clientSet)
-	if err != nil {
-		return err
-	}
 	ordererMap := map[string][]*helpers.ClusterOrdererNode{}
 	for _, consenter := range orderers {
 		if !utils.Contains(c.ordererOrganizations, consenter.Spec.MspID) {
@@ -67,9 +63,17 @@ func (c generateChannelCmd) run() error {
 		if err != nil {
 			return err
 		}
+		consenterHost, consenterPort, err := helpers.GetOrdererHostAndPort(
+			clientSet,
+			consenter.Spec,
+			consenter.Status,
+		)
+		if err != nil {
+			return err
+		}
 		createConsenter := testutils.CreateConsenter(
-			k8sIP,
-			consenter.Status.NodePort,
+			consenterHost,
+			consenterPort,
 			tlsCert,
 		)
 		consenters = append(consenters, createConsenter)
@@ -83,10 +87,11 @@ func (c generateChannelCmd) run() error {
 	var ordererOrgs []testutils.OrdererOrg
 	for mspID, orderers := range ordererMap {
 		orderer := orderers[0]
+		cahost := orderer.Spec.Secret.Enrollment.Component.Cahost
 		certAuth, err := helpers.GetCertAuthByURL(
 			clientSet,
 			oclient,
-			orderer.Spec.Secret.Enrollment.Component.Cahost,
+			cahost,
 			orderer.Spec.Secret.Enrollment.Component.Caport,
 		)
 		if err != nil {
