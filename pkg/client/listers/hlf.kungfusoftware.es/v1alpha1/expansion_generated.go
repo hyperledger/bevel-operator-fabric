@@ -26,6 +26,22 @@ type FabricCAListerExpansion interface{}
 // FabricCANamespaceLister.
 type FabricCANamespaceListerExpansion interface{}
 
+// FabricExplorerListerExpansion allows custom methods to be added to
+// FabricExplorerLister.
+type FabricExplorerListerExpansion interface{}
+
+// FabricExplorerNamespaceListerExpansion allows custom methods to be added to
+// FabricExplorerNamespaceLister.
+type FabricExplorerNamespaceListerExpansion interface{}
+
+// FabricNetworkConfigListerExpansion allows custom methods to be added to
+// FabricNetworkConfigLister.
+type FabricNetworkConfigListerExpansion interface{}
+
+// FabricNetworkConfigNamespaceListerExpansion allows custom methods to be added to
+// FabricNetworkConfigNamespaceLister.
+type FabricNetworkConfigNamespaceListerExpansion interface{}
+
 // FabricOrdererNodeListerExpansion allows custom methods to be added to
 // FabricOrdererNodeLister.
 type FabricOrdererNodeListerExpansion interface{}

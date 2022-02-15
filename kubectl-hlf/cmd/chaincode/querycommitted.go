@@ -73,12 +73,22 @@ func (c *queryCommittedCmd) run(out io.Writer) error {
 		if err != nil {
 			return err
 		}
+		signaturePolicyJSON, err := json.Marshal(chaincode.SignaturePolicy)
+		if err != nil {
+			return err
+		}
 		data = append(data, []string{
-			chaincode.Name, chaincode.Version, fmt.Sprint(chaincode.Sequence), string(approvalJson), chaincode.EndorsementPlugin, chaincode.ValidationPlugin,
+			chaincode.Name,
+			chaincode.Version,
+			fmt.Sprint(chaincode.Sequence),
+			string(approvalJson),
+			chaincode.EndorsementPlugin,
+			chaincode.ValidationPlugin,
+			string(signaturePolicyJSON),
 		})
 	}
 	table := tablewriter.NewWriter(out)
-	table.SetHeader([]string{"Chaincode", "Version", "Sequence", "Approval", "Endorsement Plugin", "Validation Plugin"})
+	table.SetHeader([]string{"Chaincode", "Version", "Sequence", "Approval", "Endorsement Plugin", "Validation Plugin", "Signature Policy"})
 	table.SetAutoWrapText(false)
 	table.SetAutoFormatHeaders(true)
 	table.SetHeaderAlignment(tablewriter.ALIGN_LEFT)

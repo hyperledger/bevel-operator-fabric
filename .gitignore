@@ -32,3 +32,4 @@ kubectl-hlf/kubectl-hlf
 dist/
 /hlf-operator
 /kubectl-hlf/hlf-operator
+node_modules
