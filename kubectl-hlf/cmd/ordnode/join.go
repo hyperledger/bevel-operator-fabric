@@ -5,7 +5,6 @@ import (
 	"crypto/x509"
 	"encoding/json"
 	"fmt"
-	"github.com/kfsoftware/hlf-operator/controllers/utils"
 	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/helpers"
 	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/helpers/osnadmin"
 	"github.com/pkg/errors"
@@ -55,12 +54,7 @@ func (c *joinChannelCmd) run() error {
 		return err
 	}
 	log.Printf("name=%s namespace=%s", c.name, c.namespace)
-
 	ordererNode, err := helpers.GetOrdererNodeByFullName(hlfClient, fmt.Sprintf("%s.%s", c.name, c.namespace))
-	if err != nil {
-		return err
-	}
-	k8sIP, err := utils.GetPublicIPKubernetes(clientSet)
 	if err != nil {
 		return err
 	}
@@ -90,7 +84,13 @@ func (c *joinChannelCmd) run() error {
 	if err != nil {
 		return err
 	}
-	osnUrl := fmt.Sprintf("https://%s:%d", k8sIP, ordererNode.Status.AdminPort)
+
+	ordererHostName, adminPort, err := helpers.GetOrdererAdminHostAndPort(clientSet, ordererNode.Spec, ordererNode.Status)
+	if err != nil {
+		return err
+	}
+
+	osnUrl := fmt.Sprintf("https://%s:%d", ordererHostName, adminPort)
 	blockBytes, err := ioutil.ReadFile(c.block)
 	if err != nil {
 		return err

@@ -4,14 +4,24 @@ type RBAC struct {
 	Ns string `json:"ns"`
 }
 type CouchDB struct {
-	External CouchDBExternal `json:"external"`
+	External   CouchDBExternal `json:"external"`
+	Image      string          `json:"image"`
+	Tag        string          `json:"tag"`
+	PullPolicy string          `json:"pullPolicy"`
 }
 type CouchDBExternal struct {
 	Enabled bool   `json:"enabled"`
 	Host    string `json:"host"`
 	Port    int    `json:"port"`
 }
+type FSServer struct {
+	Image      string `json:"image"`
+	Tag        string `json:"tag"`
+	PullPolicy string `json:"pullPolicy"`
+}
+
 type FabricPeerChart struct {
+	FSServer                 FSServer          `json:"fsServer"`
 	Istio                    Istio             `json:"istio"`
 	Replicas                 int               `json:"replicas"`
 	ExternalChaincodeBuilder bool              `json:"externalChaincodeBuilder"`

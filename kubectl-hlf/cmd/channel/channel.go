@@ -24,6 +24,7 @@ func NewChannelCmd(stdOut io.Writer, stdErr io.Writer) *cobra.Command {
 		newAddOrgToChannelCMD(stdOut, stdErr),
 		ordorg.NewOrdOrgCmd(stdOut, stdErr),
 		consenter.NewConsenterCmd(stdOut, stdErr),
+		newDelAnchorPeerCMD(stdOut, stdErr),
 	)
 	return channelCmd
 }
