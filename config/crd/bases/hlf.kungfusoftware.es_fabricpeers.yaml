@@ -84,12 +84,26 @@ spec:
                     - host
                     - port
                     type: object
+                  image:
+                    default: couchdb
+                    type: string
                   password:
+                    type: string
+                  pullPolicy:
+                    default: IfNotPresent
+                    description: PullPolicy describes a policy for if/when to pull
+                      a container image
+                    type: string
+                  tag:
+                    default: 3.1.1
                     type: string
                   user:
                     type: string
                 required:
+                - image
                 - password
+                - pullPolicy
+                - tag
                 - user
                 type: object
               discovery:
@@ -127,6 +141,25 @@ spec:
                 type: array
               externalEndpoint:
                 type: string
+              fsServer:
+                nullable: true
+                properties:
+                  image:
+                    default: quay.io/kfsoftware/fs-peer
+                    type: string
+                  pullPolicy:
+                    default: IfNotPresent
+                    description: PullPolicy describes a policy for if/when to pull
+                      a container image
+                    type: string
+                  tag:
+                    default: amd64-2.2.0
+                    type: string
+                required:
+                - image
+                - pullPolicy
+                - tag
+                type: object
               gossip:
                 properties:
                   bootstrap:

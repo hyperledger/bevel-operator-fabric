@@ -16,6 +16,11 @@ couchdbExporter:
   tag: "v30.0.0"
   pullPolicy: IfNotPresent
 
+fsServer:
+  image: "quay.io/kfsoftware/fs-peer"
+  tag: "amd64-2.2.0"
+  pullPolicy: IfNotPresent
+
 ingress:
   enabled: false
   annotations: { }
@@ -73,6 +78,9 @@ couchdb:
     enabled: true
     host: ""
     port: ""
+  image: "couchdb"
+  tag: "3.1.1"
+  pullPolicy: IfNotPresent
 
 resources:
   peer:

@@ -12,7 +12,6 @@ import (
 	"github.com/hyperledger/fabric-sdk-go/pkg/fab/resource"
 	"github.com/hyperledger/fabric-sdk-go/pkg/fabsdk"
 	"github.com/hyperledger/fabric/protoutil"
-	"github.com/kfsoftware/hlf-operator/controllers/utils"
 	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/helpers"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -69,7 +68,6 @@ func (c *addAnchorPeerCmd) run() error {
 	if err != nil {
 		return err
 	}
-
 	block, err := resClient.QueryConfigBlockFromOrderer(c.channelName)
 	if err != nil {
 		return err
@@ -80,7 +78,7 @@ func (c *addAnchorPeerCmd) run() error {
 	}
 	cftxGen := configtx.New(cfgBlock)
 	app := cftxGen.Application().Organization(mspID)
-	k8sIP, err := utils.GetPublicIPKubernetes(clientSet)
+	peerHostName, peerPort , err := helpers.GetPeerHostAndPort(clientSet, adminPeer.Spec, adminPeer.Status)
 	if err != nil {
 		return err
 	}
@@ -88,11 +86,11 @@ func (c *addAnchorPeerCmd) run() error {
 	if err != nil {
 		return err
 	}
-	anchorPeers = []configtx.Address{}
 	log.Printf("Anchor peers %v", anchorPeers)
+	anchorPeers = []configtx.Address{}
 	err = app.AddAnchorPeer(configtx.Address{
-		Host: k8sIP,
-		Port: adminPeer.Status.NodePort,
+		Host: peerHostName,
+		Port: peerPort,
 	})
 	if err != nil {
 		return err

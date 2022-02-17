@@ -125,6 +125,11 @@ type FabricPeerSpec struct {
 	ImagePullPolicy          corev1.PullPolicy `json:"imagePullPolicy,omitempty"`
 	ExternalChaincodeBuilder bool              `json:"external_chaincode_builder"`
 	CouchDB                  FabricPeerCouchDB `json:"couchdb"`
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +nullable
+	FSServer *FabricFSServer `json:"fsServer"`
+
 	// +kubebuilder:validation:MinLength=3
 	MspID     string              `json:"mspID"`
 	Secret    Secret              `json:"secret"`
@@ -163,13 +168,30 @@ type FabricPeerStorage struct {
 	Peer      Storage `json:"peer"`
 	Chaincode Storage `json:"chaincode"`
 }
+type FabricFSServer struct {
+	// +kubebuilder:default:="quay.io/kfsoftware/fs-peer"
+	Image string `json:"image"`
+	// +kubebuilder:default:="amd64-2.2.0"
+	Tag string `json:"tag"`
+	// +kubebuilder:default:="IfNotPresent"
+	PullPolicy corev1.PullPolicy `json:"pullPolicy"`
+}
 type FabricPeerCouchDB struct {
 	User     string `json:"user"`
 	Password string `json:"password"`
+
+	// +kubebuilder:default:="couchdb"
+	Image string `json:"image"`
+	// +kubebuilder:default:="3.1.1"
+	Tag string `json:"tag"`
+	// +kubebuilder:default:="IfNotPresent"
+	PullPolicy corev1.PullPolicy `json:"pullPolicy"`
+
 	// +optional
 	// +nullable
 	ExternalCouchDB *FabricPeerExternalCouchDB `json:"externalCouchDB"`
 }
+
 type FabricPeerExternalCouchDB struct {
 	Enabled bool   `json:"enabled"`
 	Host    string `json:"host"`
@@ -822,9 +844,96 @@ type FabricCAList struct {
 	Items           []FabricCA `json:"items"`
 }
 
+// FabricExplorerSpec defines the desired state of FabricExplorer
+type FabricExplorerSpec struct {
+	Resources corev1.ResourceRequirements `json:"resources"`
+}
+
+// FabricExplorerStatus defines the observed state of FabricExplorer
+type FabricExplorerStatus struct {
+	Conditions status.Conditions `json:"conditions"`
+	Message    string            `json:"message"`
+	// Status of the FabricCA
+	Status DeploymentStatus `json:"status"`
+}
+
+// +genclient
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+// +k8s:defaulter-gen=true
+// +kubebuilder:subresource:status
+// +kubebuilder:resource:scope=Namespaced,shortName=explorer,singular=explorer
+// +kubebuilder:printcolumn:name="State",type="string",JSONPath=".status.status"
+// +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
+// +kubebuilder:object:root=true
+// +kubebuilder:subresource:status
+// +k8s:openapi-gen=true
+
+// FabricExplorer is the Schema for the hlfs API
+type FabricExplorer struct {
+	metav1.TypeMeta   `json:",inline"`
+	metav1.ObjectMeta `json:"metadata,omitempty"`
+	Spec              FabricExplorerSpec   `json:"spec,omitempty"`
+	Status            FabricExplorerStatus `json:"status,omitempty"`
+}
+
+// +kubebuilder:object:root=true
+
+// FabricExplorerList contains a list of FabricExplorer
+type FabricExplorerList struct {
+	metav1.TypeMeta `json:",inline"`
+	metav1.ListMeta `json:"metadata,omitempty"`
+	Items           []FabricExplorer `json:"items"`
+}
+
+// FabricNetworkConfigSpec defines the desired state of FabricNetworkConfig
+type FabricNetworkConfigSpec struct {
+	Organization  string   `json:"organization"`
+	Internal      bool     `json:"internal"`
+	Organizations []string `json:"organizations"`
+	SecretName    string   `json:"secretName"`
+}
+
+// FabricNetworkConfigStatus defines the observed state of FabricNetworkConfig
+type FabricNetworkConfigStatus struct {
+	Conditions status.Conditions `json:"conditions"`
+	Message    string            `json:"message"`
+	// Status of the FabricNetworkConfig
+	Status DeploymentStatus `json:"status"`
+}
+
+// +genclient
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+// +k8s:defaulter-gen=true
+// +kubebuilder:subresource:status
+// +kubebuilder:resource:scope=Namespaced,shortName=networkconfig,singular=networkconfig
+// +kubebuilder:printcolumn:name="State",type="string",JSONPath=".status.status"
+// +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
+// +kubebuilder:object:root=true
+// +kubebuilder:subresource:status
+// +k8s:openapi-gen=true
+
+// FabricNetworkConfig is the Schema for the hlfs API
+type FabricNetworkConfig struct {
+	metav1.TypeMeta   `json:",inline"`
+	metav1.ObjectMeta `json:"metadata,omitempty"`
+	Spec              FabricNetworkConfigSpec   `json:"spec,omitempty"`
+	Status            FabricNetworkConfigStatus `json:"status,omitempty"`
+}
+
+// +kubebuilder:object:root=true
+
+// FabricNetworkConfigList contains a list of FabricNetworkConfig
+type FabricNetworkConfigList struct {
+	metav1.TypeMeta `json:",inline"`
+	metav1.ListMeta `json:"metadata,omitempty"`
+	Items           []FabricNetworkConfig `json:"items"`
+}
+
 func init() {
 	SchemeBuilder.Register(&FabricPeer{}, &FabricPeerList{})
 	SchemeBuilder.Register(&FabricOrderingService{}, &FabricOrderingServiceList{})
 	SchemeBuilder.Register(&FabricCA{}, &FabricCAList{})
 	SchemeBuilder.Register(&FabricOrdererNode{}, &FabricOrdererNodeList{})
+	SchemeBuilder.Register(&FabricExplorer{}, &FabricExplorerList{})
+	SchemeBuilder.Register(&FabricNetworkConfig{}, &FabricNetworkConfigList{})
 }
