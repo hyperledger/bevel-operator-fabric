@@ -5,8 +5,9 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"sigs.k8s.io/yaml"
 	"text/template"
+
+	"sigs.k8s.io/yaml"
 
 	"github.com/Masterminds/sprig/v3"
 	"github.com/kfsoftware/hlf-operator/controllers/utils"
@@ -46,7 +47,6 @@ type Peer struct {
 	TLSCert string
 }
 
-
 const tmplGoConfig = `
 name: hlf-network
 version: 1.0.0
@@ -62,7 +62,7 @@ organizations:
     cryptoPath: /tmp/cryptopath
     users: {}
 {{- if not $org.Peers }}
-	peers: []
+    peers: []
 {{- else }}
     peers:
       {{- range $peer := $org.Peers }}
@@ -70,7 +70,7 @@ organizations:
  	  {{- end }}
 {{- end }}
 {{- if not $org.OrderingServices }}
-	orderers: []
+    orderers: []
 {{- else }}
     orderers:
       {{- range $ordService := $org.OrderingServices }}
