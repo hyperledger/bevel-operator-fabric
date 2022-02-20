@@ -57,7 +57,7 @@ organizations:
  	  {{- end }}
 {{- end }}
 {{- if not $org.OrderingServices }}
-	orderers: []
+    orderers: []
 {{- else }}
     orderers:
       {{- range $ordService := $org.OrderingServices }}
