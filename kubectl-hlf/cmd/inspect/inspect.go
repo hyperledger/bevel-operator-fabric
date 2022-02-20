@@ -62,7 +62,7 @@ organizations:
     cryptoPath: /tmp/cryptopath
     users: {}
 {{- if not $org.Peers }}
-	peers: []
+    peers: []
 {{- else }}
     peers:
       {{- range $peer := $org.Peers }}
@@ -130,7 +130,7 @@ certificateAuthorities: []
 {{- else }}
 certificateAuthorities:
 {{- range $ca := .CertAuths }}
-  
+
   {{ $ca.Name }}:
 {{if $.Internal }}
     url: https://{{ $ca.PrivateURL }}
@@ -144,7 +144,7 @@ certificateAuthorities:
 {{ end }}
     caName: ca
     tlsCACerts:
-      pem: 
+      pem:
        - |
 {{ $ca.Status.TlsCert | indent 12 }}
 
