@@ -505,7 +505,7 @@ func GetConfig(conf *hlfv1alpha1.FabricCA, client *kubernetes.Clientset, chartNa
 			},
 		},
 		NodeSelector: NodeSelector{},
-		Tolerations:  nil,
+		Tolerations:  spec.Tolerations,
 		Affinity:     Affinity{},
 		Debug:        spec.Debug,
 		CLRSizeLimit: spec.CLRSizeLimit,
