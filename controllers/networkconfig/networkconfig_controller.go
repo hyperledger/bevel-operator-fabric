@@ -49,7 +49,7 @@ organizations:
     cryptoPath: /tmp/cryptopath
     users: {}
 {{- if not $org.Peers }}
-	peers: []
+    peers: []
 {{- else }}
     peers:
       {{- range $peer := $org.Peers }}
@@ -57,7 +57,7 @@ organizations:
  	  {{- end }}
 {{- end }}
 {{- if not $org.OrderingServices }}
-	orderers: []
+    orderers: []
 {{- else }}
     orderers:
       {{- range $ordService := $org.OrderingServices }}
