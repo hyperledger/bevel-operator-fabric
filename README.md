@@ -258,10 +258,27 @@ At this point, you should have:
 
 If something went wrong or didn't work, please, open an issue.
 
-### Cleanup the environment
+## Cleanup the environment
 
 ```bash
 kubectl delete fabricorderernodes.hlf.kungfusoftware.es --all-namespaces --all
 kubectl delete fabricpeers.hlf.kungfusoftware.es --all-namespaces --all
 kubectl delete fabriccas.hlf.kungfusoftware.es --all-namespaces --all
 ```
+
+## Troubleshooting
+
+### Chaincode installation/build error
+Chaincode installation/build can fail due to unsupported local kubertenes version such as [minikube](https://github.com/kubernetes/minikube).
+
+```shell
+$ kubectl hlf chaincode install --path=./fixtures/chaincodes/fabcar/go \
+        --config=org1.yaml --language=golang --label=fabcar --user=admin --peer=org1-peer0.default
+        
+Error: Transaction processing for endorser [192.168.49.2:31278]: Chaincode status Code: (500) UNKNOWN. 
+Description: failed to invoke backing implementation of 'InstallChaincode': could not build chaincode: 
+external builder failed: external builder failed to build: external builder 'my-golang-builder' failed:
+exit status 1
+```
+
+If your purpose is to test the hlf-operator please consider to switch to [kind](https://github.com/kubernetes-sigs/kind) that is tested and supported.
