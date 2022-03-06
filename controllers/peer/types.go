@@ -1,5 +1,7 @@
 package peer
 
+import corev1 "k8s.io/api/core/v1"
+
 type RBAC struct {
 	Ns string `json:"ns"`
 }
@@ -21,38 +23,38 @@ type FSServer struct {
 }
 
 type FabricPeerChart struct {
-	FSServer                 FSServer          `json:"fsServer"`
-	Istio                    Istio             `json:"istio"`
-	Replicas                 int               `json:"replicas"`
-	ExternalChaincodeBuilder bool              `json:"externalChaincodeBuilder"`
-	CouchdbUsername          string            `json:"couchdbUsername"`
-	CouchdbPassword          string            `json:"couchdbPassword"`
-	Image                    Image             `json:"image"`
-	CouchDB                  CouchDB           `json:"couchdb"`
-	Rbac                     RBAC              `json:"rbac"`
-	DockerSocketPath         string            `json:"dockerSocketPath"`
-	Peer                     Peer              `json:"peer"`
-	Cert                     string            `json:"cert"`
-	Key                      string            `json:"key"`
-	Hosts                    []string          `json:"hosts"`
-	TLS                      TLS               `json:"tls"`
-	OPSTLS                   TLS               `json:"opsTLS"`
-	Cacert                   string            `json:"cacert"`
-	IntCacert                string            `json:"intCAcert"`
-	Tlsrootcert              string            `json:"tlsrootcert"`
-	Resources                PeerResources     `json:"resources,omitempty"`
-	NodeSelector             NodeSelector      `json:"nodeSelector,omitempty"`
-	Tolerations              []interface{}     `json:"tolerations"`
-	Affinity                 Affinity          `json:"affinity,omitempty"`
-	ExternalHost             string            `json:"externalHost"`
-	FullnameOverride         string            `json:"fullnameOverride"`
-	CouchDBExporter          CouchDBExporter   `json:"couchdbExporter"`
-	HostAliases              []HostAlias       `json:"hostAliases"`
-	Service                  Service           `json:"service"`
-	Persistence              PeerPersistence   `json:"persistence"`
-	Logging                  Logging           `json:"logging"`
-	ExternalBuilders         []ExternalBuilder `json:"externalBuilders"`
-	ServiceMonitor           ServiceMonitor    `json:"serviceMonitor"`
+	FSServer                 FSServer            `json:"fsServer"`
+	Istio                    Istio               `json:"istio"`
+	Replicas                 int                 `json:"replicas"`
+	ExternalChaincodeBuilder bool                `json:"externalChaincodeBuilder"`
+	CouchdbUsername          string              `json:"couchdbUsername"`
+	CouchdbPassword          string              `json:"couchdbPassword"`
+	Image                    Image               `json:"image"`
+	CouchDB                  CouchDB             `json:"couchdb"`
+	Rbac                     RBAC                `json:"rbac"`
+	DockerSocketPath         string              `json:"dockerSocketPath"`
+	Peer                     Peer                `json:"peer"`
+	Cert                     string              `json:"cert"`
+	Key                      string              `json:"key"`
+	Hosts                    []string            `json:"hosts"`
+	TLS                      TLS                 `json:"tls"`
+	OPSTLS                   TLS                 `json:"opsTLS"`
+	Cacert                   string              `json:"cacert"`
+	IntCacert                string              `json:"intCAcert"`
+	Tlsrootcert              string              `json:"tlsrootcert"`
+	Resources                PeerResources       `json:"resources,omitempty"`
+	NodeSelector             NodeSelector        `json:"nodeSelector,omitempty"`
+	Tolerations              []corev1.Toleration `json:"tolerations,omitempty"`
+	Affinity                 Affinity            `json:"affinity,omitempty"`
+	ExternalHost             string              `json:"externalHost"`
+	FullnameOverride         string              `json:"fullnameOverride"`
+	CouchDBExporter          CouchDBExporter     `json:"couchdbExporter"`
+	HostAliases              []HostAlias         `json:"hostAliases"`
+	Service                  Service             `json:"service"`
+	Persistence              PeerPersistence     `json:"persistence"`
+	Logging                  Logging             `json:"logging"`
+	ExternalBuilders         []ExternalBuilder   `json:"externalBuilders"`
+	ServiceMonitor           ServiceMonitor      `json:"serviceMonitor"`
 }
 
 type ServiceMonitor struct {

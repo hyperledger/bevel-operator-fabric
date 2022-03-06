@@ -1204,7 +1204,7 @@ func GetConfig(
 			CouchDBExporter: couchDBExporterResources,
 		},
 		NodeSelector:     NodeSelector{},
-		Tolerations:      nil,
+		Tolerations:      spec.Tolerations,
 		Affinity:         Affinity{},
 		ExternalHost:     externalEndpoint,
 		FullnameOverride: conf.Name,
