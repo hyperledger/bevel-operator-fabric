@@ -58,23 +58,32 @@ kubectl apply -n istio-system -f ./hack/istio-operator.yaml
 
 ### Installing the operator
 
+
+Add the helm chartrepository: 
 ```bash
-helm install hlf-operator ./chart/hlf-operator
+helm repo add kfs https://kfsoftware.github.io/hlf-helm-charts --force-update 
+```
+```bash
+helm install hlf-operator --version=1.5.0 kfs/hlf-operator
 ```
 
 ### Installing the Kubectl HLF Plugin
 
-
+To install the Kubectl HLF Plugin, run the following command:
 ```bash
 kubectl krew install hlf
+```
+To update the Kubectl HLF Plugin to the latest version, run the following command:
+```bash
+ kubectl krew upgrade hlf 
 ```
 
 ## Deploy a Peer Organization
 
 ### Setup versions
 ```bash
-export PEER_IMAGE=quay.io/kfsoftware/fabric-peer
-export PEER_VERSION=2.4.1-v0.0.3
+export PEER_IMAGE=hyperledger/fabric-peer
+export PEER_VERSION=2.4.1
 
 export ORDERER_IMAGE=hyperledger/fabric-orderer
 export ORDERER_VERSION=2.4.1
@@ -204,10 +213,52 @@ kubectl hlf channel top --channel=demo --config=org1.yaml \
 
 ## Install a chaincode
 ```bash
-kubectl hlf chaincode install --path=./fixtures/chaincodes/fabcar/go \
-    --config=org1.yaml --language=golang --label=fabcar --user=admin --peer=org1-peer0.default
+rm code.tar.gz asset-transfer-basic-external.tgz
+export CHAINCODE_NAME=asset
+export CHAINCODE_LABEL=asset
+cat << METADATA-EOF > "metadata.json"
+{
+    "type": "ccaas",
+    "label": "${CHAINCODE_LABEL}"
+}
+METADATA-EOF
+
+cat > "connection.json" <<CONN_EOF
+{
+  "address": "${CHAINCODE_NAME}:7052",
+  "dial_timeout": "10s",
+  "tls_required": false
+}
+CONN_EOF
+
+tar cfz code.tar.gz connection.json
+tar cfz asset-transfer-basic-external.tgz metadata.json code.tar.gz
+export PACKAGE_ID=$(kubectl hlf chaincode calculatepackageid --path=asset-transfer-basic-external.tgz --language=node --label=$CHAINCODE_LABEL)
+echo "PACKAGE_ID=$PACKAGE_ID"
+
+kubectl hlf chaincode install --path=./asset-transfer-basic-external.tgz \
+    --config=org1.yaml --language=golang --label=$CHAINCODE_LABEL --user=admin --peer=org1-peer0.default
 
 # this can take 3-4 minutes
+```
+
+## Deploy chaincode
+If it's the first time you deploy the chaincode, you need to create the externalchaincode CRD
+```bash
+kubectl hlf externalchaincode create --image=kfsoftware/chaincode-external:latest \
+    --name=$CHAINCODE_NAME \
+    --namespace=default \
+    --package-id=$PACKAGE_ID \
+    --tls-required=false
+
+```
+Otherwise, you can just update the externalchaincode CRD:
+```bash
+kubectl hlf externalchaincode update --image=kfsoftware/chaincode-external:latest \
+    --name=$CHAINCODE_NAME \
+    --namespace=default \
+    --package-id=$PACKAGE_ID \
+    --tls-required=false
 ```
 
 ## Query chaincodes installed
@@ -217,17 +268,18 @@ kubectl hlf chaincode queryinstalled --config=org1.yaml --user=admin --peer=org1
 
 ## Approve chaincode
 ```bash
-PACKAGE_ID=fabcar:0c616be7eebace4b3c2aa0890944875f695653dbf80bef7d95f3eed6667b5f40 # replace it with the package id of your 
+export SEQUENCE=5
+export VERSION="1.0"
 kubectl hlf chaincode approveformyorg --config=org1.yaml --user=admin --peer=org1-peer0.default \
     --package-id=$PACKAGE_ID \
-    --version "1.0" --sequence 1 --name=fabcar \
+    --version "$VERSION" --sequence "$SEQUENCE" --name=asset \
     --policy="OR('Org1MSP.member')" --channel=demo
 ```
 
 ## Commit chaincode
 ```bash
 kubectl hlf chaincode commit --config=org1.yaml --user=admin --mspid=Org1MSP \
-    --version "1.0" --sequence 1 --name=fabcar \
+    --version "$VERSION" --sequence "$SEQUENCE" --name=asset \
     --policy="OR('Org1MSP.member')" --channel=demo
 ```
 
@@ -236,7 +288,7 @@ kubectl hlf chaincode commit --config=org1.yaml --user=admin --mspid=Org1MSP \
 ```bash
 kubectl hlf chaincode invoke --config=org1.yaml \
     --user=admin --peer=org1-peer0.default \
-    --chaincode=fabcar --channel=demo \
+    --chaincode=asset --channel=demo \
     --fcn=initLedger -a '[]'
 ```
 
@@ -244,13 +296,13 @@ kubectl hlf chaincode invoke --config=org1.yaml \
 ```bash
 kubectl hlf chaincode query --config=org1.yaml \
     --user=admin --peer=org1-peer0.default \
-    --chaincode=fabcar --channel=demo \
-    --fcn=QueryAllCars -a '[]'
+    --chaincode=asset --channel=demo \
+    --fcn=GetAllAssets -a '[]'
 ```
 
 At this point, you should have:
 
-- Ordering service with 3 nodes and a CA
+- Ordering service with 1 nodes and a CA
 - Peer organization with a peer and a CA
 - A channel **demo**
 - A chaincode install in peer0

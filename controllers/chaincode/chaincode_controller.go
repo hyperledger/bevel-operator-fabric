@@ -38,6 +38,8 @@ type FabricChaincodeReconciler struct {
 const chaincodeFinalizer = "finalizer.chaincode.hlf.kungfusoftware.es"
 
 type SecretChaincodeData struct {
+	Updated     bool
+	Enabled     bool
 	Certificate []byte
 	PrivateKey  []byte
 	RootCert    []byte
@@ -135,6 +137,122 @@ const (
 	RootCertSecretKey    = "tlsroot.crt"
 )
 
+func (r FabricChaincodeReconciler) getCryptoMaterial(ctx context.Context, labels map[string]string, ns string, fabricChaincode *hlfv1alpha1.FabricChaincode) (*SecretChaincodeData, error) {
+	secretChaincodeData := &SecretChaincodeData{
+		Enabled: true,
+		Updated: false,
+	}
+	if fabricChaincode.Spec.Credentials == nil {
+		secretChaincodeData.Enabled = false
+		return secretChaincodeData, nil
+	}
+	secretName := r.getSecretName(fabricChaincode)
+	tlsCAUrl := fmt.Sprintf("https://%s:%d", fabricChaincode.Spec.Credentials.Cahost, fabricChaincode.Spec.Credentials.Caport)
+
+	kubeClientset, err := kubernetes.NewForConfig(r.Config)
+	if err != nil {
+		return nil, err
+	}
+
+	updateSecretData := false
+	secret, err := kubeClientset.CoreV1().Secrets(ns).Get(ctx, secretName, metav1.GetOptions{})
+	if err != nil {
+		updateSecretData = true
+	} else {
+		x509Cert, err := utils.ParseX509Certificate(secret.Data[CertificateSecretKey])
+		// renew certificates data if certificate is about to expire (7 days before expiration)
+		if err != nil || x509Cert.NotAfter.Before(time.Now().Add(time.Hour*24*7)) {
+			updateSecretData = true
+		}
+		if secret.Data[CertificateSecretKey] != nil &&
+			len(secret.Data[CertificateSecretKey]) > 0 &&
+			secret.Data[PrivateKeySecretKey] != nil &&
+			len(secret.Data[PrivateKeySecretKey]) > 0 &&
+			secret.Data[RootCertSecretKey] != nil &&
+			len(secret.Data[RootCertSecretKey]) > 0 {
+			updateSecretData = false
+		} else {
+			updateSecretData = true
+		}
+	}
+	secretChaincodeData.Updated = updateSecretData
+	if updateSecretData {
+		cacert, err := base64.StdEncoding.DecodeString(fabricChaincode.Spec.Credentials.Catls.Cacert)
+		if err != nil {
+			return nil, err
+		}
+		tlsCert, tlsKey, tlsRootCert, err := CreateChaincodeCryptoMaterial(
+			fabricChaincode,
+			fabricChaincode.Spec.Credentials.Caname,
+			tlsCAUrl,
+			fabricChaincode.Spec.Credentials.Enrollid,
+			fabricChaincode.Spec.Credentials.Enrollsecret,
+			string(cacert),
+			fabricChaincode.Spec.Credentials.Csr.Hosts,
+		)
+		if err != nil {
+			err = errors.New("Failed to create chaincode crypto material")
+			return nil, err
+		}
+		key, err := utils.EncodePrivateKey(tlsKey)
+		if err != nil {
+			return nil, err
+		}
+		secretChaincodeData.Certificate = utils.EncodeX509Certificate(tlsCert)
+		secretChaincodeData.RootCert = utils.EncodeX509Certificate(tlsRootCert)
+		secretChaincodeData.PrivateKey = key
+	} else {
+		secretChaincodeData.Certificate = secret.Data[CertificateSecretKey]
+		secretChaincodeData.PrivateKey = secret.Data[PrivateKeySecretKey]
+		secretChaincodeData.RootCert = secret.Data[RootCertSecretKey]
+	}
+
+	if err != nil {
+		if apierrors.IsNotFound(err) {
+			// creating secret
+			secretData := map[string][]byte{
+				"tls.crt":     secretChaincodeData.Certificate,
+				"tlsroot.crt": secretChaincodeData.RootCert,
+				"tls.key":     secretChaincodeData.PrivateKey,
+			}
+			secret, err = kubeClientset.CoreV1().Secrets(ns).Create(
+				ctx,
+				&corev1.Secret{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      secretName,
+						Namespace: ns,
+						Labels:    labels,
+					},
+
+					Data: secretData,
+				},
+				metav1.CreateOptions{},
+			)
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			return nil, err
+		}
+	} else {
+		secretData := map[string][]byte{
+			"tls.crt":     secretChaincodeData.Certificate,
+			"tlsroot.crt": secretChaincodeData.RootCert,
+			"tls.key":     secretChaincodeData.PrivateKey,
+		}
+		secret.Data = secretData
+		secret, err = kubeClientset.CoreV1().Secrets(ns).Update(
+			ctx,
+			secret,
+			metav1.UpdateOptions{},
+		)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return secretChaincodeData, nil
+}
+
 // +kubebuilder:rbac:groups=hlf.kungfusoftware.es,resources=fabricchaincodes,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=hlf.kungfusoftware.es,resources=fabricchaincodes/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=hlf.kungfusoftware.es,resources=fabricchaincodes/finalizers,verbs=get;update;patch
@@ -174,20 +292,10 @@ func (r *FabricChaincodeReconciler) Reconcile(req ctrl.Request) (ctrl.Result, er
 		}
 	}
 	log.Infof("Chaincode %s reconciled", req.NamespacedName)
-	tlsCAUrl := fmt.Sprintf("https://%s:%d", fabricChaincode.Spec.Credentials.Cahost, fabricChaincode.Spec.Credentials.Caport)
 	ns := req.Namespace
 	if ns == "" {
 		ns = "default"
 	}
-	cacert, err := base64.StdEncoding.DecodeString(fabricChaincode.Spec.Credentials.Catls.Cacert)
-	if err != nil {
-		r.setConditionStatus(ctx, fabricChaincode, hlfv1alpha1.FailedStatus, false, err, false)
-		return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricChaincode)
-	}
-
-	deploymentName := fmt.Sprintf("%s", fabricChaincode.Name)
-	secretName := fmt.Sprintf("%s-certs", fabricChaincode.Name)
-	serviceName := fmt.Sprintf("%s", fabricChaincode.Name)
 	labels := map[string]string{
 		"app":       "fabric-chaincode",
 		"chaincode": fabricChaincode.Name,
@@ -198,102 +306,86 @@ func (r *FabricChaincodeReconciler) Reconcile(req ctrl.Request) (ctrl.Result, er
 		return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricChaincode)
 	}
 
-	updateSecretData := false
-	secret, err := kubeClientset.CoreV1().Secrets(ns).Get(ctx, secretName, metav1.GetOptions{})
+	cryptoData, err := r.getCryptoMaterial(ctx, labels, ns, fabricChaincode)
 	if err != nil {
-		updateSecretData = true
-	} else {
-		x509Cert, err := utils.ParseX509Certificate(secret.Data[CertificateSecretKey])
-		// renew certificates data if certificate is about to expire (7 days before expiration)
-		if err != nil || x509Cert.NotAfter.Before(time.Now().Add(time.Hour*24*7)) {
-			updateSecretData = true
-		}
-		if secret.Data[CertificateSecretKey] != nil &&
-			len(secret.Data[CertificateSecretKey]) > 0 &&
-			secret.Data[PrivateKeySecretKey] != nil &&
-			len(secret.Data[PrivateKeySecretKey]) > 0 &&
-			secret.Data[RootCertSecretKey] != nil &&
-			len(secret.Data[RootCertSecretKey]) > 0 {
-			updateSecretData = false
-		} else {
-			updateSecretData = true
-		}
+		r.setConditionStatus(ctx, fabricChaincode, hlfv1alpha1.FailedStatus, false, err, false)
+		return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricChaincode)
 	}
-	secretChaincodeData := SecretChaincodeData{}
-	if updateSecretData {
-		tlsCert, tlsKey, tlsRootCert, err := CreateChaincodeCryptoMaterial(
-			fabricChaincode,
-			fabricChaincode.Spec.Credentials.Caname,
-			tlsCAUrl,
-			fabricChaincode.Spec.Credentials.Enrollid,
-			fabricChaincode.Spec.Credentials.Enrollsecret,
-			string(cacert),
-			fabricChaincode.Spec.Credentials.Csr.Hosts,
-		)
-		if err != nil {
-			err = errors.New("Failed to create chaincode crypto material")
-			r.setConditionStatus(ctx, fabricChaincode, hlfv1alpha1.FailedStatus, false, err, false)
-			return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricChaincode)
-		}
-		key, err := utils.EncodePrivateKey(tlsKey)
-		if err != nil {
-			r.setConditionStatus(ctx, fabricChaincode, hlfv1alpha1.FailedStatus, false, err, false)
-			return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricChaincode)
-		}
-		secretChaincodeData.Certificate = utils.EncodeX509Certificate(tlsCert)
-		secretChaincodeData.RootCert = utils.EncodeX509Certificate(tlsRootCert)
-		secretChaincodeData.PrivateKey = key
-	} else {
-		secretChaincodeData.Certificate = secret.Data[CertificateSecretKey]
-		secretChaincodeData.PrivateKey = secret.Data[PrivateKeySecretKey]
-		secretChaincodeData.RootCert = secret.Data[RootCertSecretKey]
+	deploymentName := fmt.Sprintf("%s", fabricChaincode.Name)
+	serviceName := fmt.Sprintf("%s", fabricChaincode.Name)
+
+	envVars := []corev1.EnvVar{
+		{
+			Name:  "CHAINCODE_ID",
+			Value: fabricChaincode.Spec.PackageID,
+		},
+		{
+			Name:  "CHAINCODE_SERVER_ADDRESS",
+			Value: "0.0.0.0:7052",
+		},
 	}
-
-	if err != nil {
-		if apierrors.IsNotFound(err) {
-			// creating secret
-			secretData := map[string][]byte{
-				"tls.crt":     secretChaincodeData.Certificate,
-				"tlsroot.crt": secretChaincodeData.RootCert,
-				"tls.key":     secretChaincodeData.PrivateKey,
-			}
-			secret, err = kubeClientset.CoreV1().Secrets(ns).Create(
-				ctx,
-				&corev1.Secret{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      secretName,
-						Namespace: ns,
-						Labels:    labels,
-					},
-
-					Data: secretData,
+	var volumes []corev1.Volume
+	secretName := r.getSecretName(fabricChaincode)
+	var volumeMounts []corev1.VolumeMount
+	if cryptoData.Enabled {
+		volumeMounts = append(volumeMounts, corev1.VolumeMount{
+			Name:      secretName,
+			ReadOnly:  true,
+			MountPath: "/config/certs",
+		})
+		volumes = append(volumes, corev1.Volume{
+			Name: secretName,
+			VolumeSource: corev1.VolumeSource{
+				Secret: &corev1.SecretVolumeSource{
+					SecretName: secretName,
 				},
-				metav1.CreateOptions{},
-			)
-			if err != nil {
-				r.setConditionStatus(ctx, fabricChaincode, hlfv1alpha1.FailedStatus, false, err, false)
-				return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricChaincode)
-			}
-		} else {
-			r.setConditionStatus(ctx, fabricChaincode, hlfv1alpha1.FailedStatus, false, err, false)
-			return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricChaincode)
-		}
+			},
+		})
+		envVars = append(envVars, []corev1.EnvVar{
+			{
+				Name:  "CHAINCODE_TLS_DISABLED",
+				Value: "false",
+			},
+			{
+				Name:  "CHAINCODE_TLS_KEY",
+				Value: "/config/certs/tls.key",
+			},
+			{
+				Name:  "CHAINCODE_TLS_CERT",
+				Value: "/config/certs/tls.crt",
+			},
+			{
+				Name:  "CHAINCODE_CLIENT_CA_CERT",
+				Value: "/config/certs/tlsroot.crt",
+			},
+		}...)
 	} else {
-		secretData := map[string][]byte{
-			"tls.crt":     secretChaincodeData.Certificate,
-			"tlsroot.crt": secretChaincodeData.RootCert,
-			"tls.key":     secretChaincodeData.PrivateKey,
-		}
-		secret.Data = secretData
-		secret, err = kubeClientset.CoreV1().Secrets(ns).Update(
-			ctx,
-			secret,
-			metav1.UpdateOptions{},
-		)
-		if err != nil {
-			r.setConditionStatus(ctx, fabricChaincode, hlfv1alpha1.FailedStatus, false, err, false)
-			return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricChaincode)
-		}
+		envVars = append(envVars, []corev1.EnvVar{
+			{
+				Name:  "CHAINCODE_TLS_DISABLED",
+				Value: "true",
+			},
+		}...)
+	}
+
+	podSpec := corev1.PodSpec{
+		Volumes:        volumes,
+		InitContainers: nil,
+		Containers: []corev1.Container{
+			{
+
+				Env:             envVars,
+				Name:            "chaincode",
+				Image:           fabricChaincode.Spec.Image,
+				ImagePullPolicy: fabricChaincode.Spec.ImagePullPolicy,
+				VolumeMounts:    volumeMounts,
+			},
+		},
+		EphemeralContainers: nil,
+		RestartPolicy:       corev1.RestartPolicyAlways,
+		ImagePullSecrets:    fabricChaincode.Spec.ImagePullSecrets,
+		Affinity:            fabricChaincode.Spec.Affinity,
+		Tolerations:         fabricChaincode.Spec.Tolerations,
 	}
 	appv1Deployment := &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
@@ -311,92 +403,7 @@ func (r *FabricChaincodeReconciler) Reconcile(req ctrl.Request) (ctrl.Result, er
 					Labels: labels,
 				},
 
-				Spec: corev1.PodSpec{
-					Volumes: []corev1.Volume{
-						{
-							Name: secret.Name,
-							VolumeSource: corev1.VolumeSource{
-								Secret: &corev1.SecretVolumeSource{
-									SecretName: secret.Name,
-								},
-							},
-						},
-					},
-					InitContainers: nil,
-
-					Containers: []corev1.Container{
-						{
-
-							Env: []corev1.EnvVar{
-								{
-									Name:  "CHAINCODE_ID",
-									Value: fabricChaincode.Spec.PackageID,
-								},
-								{
-									Name:  "CHAINCODE_SERVER_ADDRESS",
-									Value: "0.0.0.0:7052",
-								},
-								{
-									Name:  "CHAINCODE_TLS_DISABLED",
-									Value: "false",
-								},
-								{
-									Name:  "CHAINCODE_TLS_KEY",
-									Value: "/config/certs/tls.key",
-								},
-								{
-									Name:  "CHAINCODE_TLS_CERT",
-									Value: "/config/certs/tls.crt",
-								},
-								{
-									Name:  "CHAINCODE_CLIENT_CA_CERT",
-									Value: "/config/certs/tlsroot.crt",
-								},
-							},
-							Name:            "chaincode",
-							Image:           fabricChaincode.Spec.Image,
-							ImagePullPolicy: fabricChaincode.Spec.ImagePullPolicy,
-							VolumeMounts: []corev1.VolumeMount{
-								{
-									Name:      secret.Name,
-									ReadOnly:  true,
-									MountPath: "/config/certs",
-								},
-							},
-						},
-					},
-					EphemeralContainers: nil,
-					RestartPolicy:       corev1.RestartPolicyAlways,
-					ImagePullSecrets:    fabricChaincode.Spec.ImagePullSecrets,
-					Affinity:            fabricChaincode.Spec.Affinity,
-					Tolerations:         fabricChaincode.Spec.Tolerations,
-					//TerminationGracePeriodSeconds: nil,
-					//ActiveDeadlineSeconds:         nil,
-					//DNSPolicy:                     "",
-					//NodeSelector:                  nil,
-					//ServiceAccountName:            "",
-					//DeprecatedServiceAccount:      "",
-					//AutomountServiceAccountToken:  nil,
-					//NodeName:                      "",
-					//HostNetwork:                   false,
-					//HostPID:                       false,
-					//HostIPC:                       false,
-					//ShareProcessNamespace:         nil,
-					//SecurityContext:               nil,
-					//Hostname:                  "",
-					//Subdomain:                 "",
-					//SchedulerName:             "",
-					//HostAliases:               nil,
-					//PriorityClassName:         "",
-					//Priority:                  nil,
-					//DNSConfig:                 nil,
-					//ReadinessGates:            nil,
-					//RuntimeClassName:          nil,
-					//EnableServiceLinks:        nil,
-					//PreemptionPolicy:          nil,
-					//Overhead:                  nil,
-					//TopologySpreadConstraints: nil,
-				},
+				Spec: podSpec,
 			},
 			Strategy: appsv1.DeploymentStrategy{
 				Type:          appsv1.RollingUpdateDeploymentStrategyType,
@@ -424,7 +431,7 @@ func (r *FabricChaincodeReconciler) Reconcile(req ctrl.Request) (ctrl.Result, er
 		return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricChaincode)
 	} else {
 		deployment.Spec = appv1Deployment.Spec
-		if updateSecretData {
+		if cryptoData.Updated {
 			if deployment.Spec.Template.ObjectMeta.Annotations == nil {
 				deployment.Spec.Template.ObjectMeta.Annotations = make(map[string]string)
 			}

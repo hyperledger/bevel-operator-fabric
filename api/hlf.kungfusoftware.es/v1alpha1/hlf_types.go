@@ -955,7 +955,10 @@ type FabricChaincodeSpec struct {
 	// +optional
 	Resources *corev1.ResourceRequirements `json:"resources"`
 
-	Credentials TLS `json:"credentials"`
+	// +nullable
+	// +kubebuilder:validation:Optional
+	// +optional
+	Credentials *TLS `json:"credentials"`
 }
 
 // FabricChaincodeStatus defines the observed state of FabricChaincode

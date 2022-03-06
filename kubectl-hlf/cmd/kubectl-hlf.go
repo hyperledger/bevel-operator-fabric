@@ -11,6 +11,7 @@ import (
 	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/org"
 	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/peer"
 	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/utils"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	// Workaround for authentication plugins https://krew.sigs.k8s.io/docs/developer-guide/develop/best-practices/#auth-plugins
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
@@ -29,6 +30,7 @@ func NewCmdHLF() *cobra.Command {
 		Long:         hlfDesc,
 		SilenceUsage: true,
 	}
+	logrus.SetLevel(logrus.DebugLevel)
 	cmd.AddCommand(
 		inspect.NewInspectHLFConfig(cmd.OutOrStdout()),
 		channel.NewChannelCmd(cmd.OutOrStdout(), cmd.ErrOrStderr()),

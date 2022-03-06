@@ -21,6 +21,8 @@ type createExternalChaincodeCmd struct {
 
 	enrollId     string
 	enrollSecret string
+
+	tlsRequired bool
 }
 
 func (c *createExternalChaincodeCmd) validate() error {
@@ -36,17 +38,19 @@ func (c *createExternalChaincodeCmd) validate() error {
 	if c.packageID == "" {
 		return fmt.Errorf("--package-id is required")
 	}
-	if c.caName == "" {
-		return fmt.Errorf("--ca-name is required")
-	}
-	if c.caNamespace == "" {
-		return fmt.Errorf("--ca-namespace is required")
-	}
-	if c.enrollId == "" {
-		return fmt.Errorf("--enroll-id is required")
-	}
-	if c.enrollSecret == "" {
-		return fmt.Errorf("--enroll-secret is required")
+	if c.tlsRequired {
+		if c.caName == "" {
+			return fmt.Errorf("--ca-name is required")
+		}
+		if c.caNamespace == "" {
+			return fmt.Errorf("--ca-namespace is required")
+		}
+		if c.enrollId == "" {
+			return fmt.Errorf("--enroll-id is required")
+		}
+		if c.enrollSecret == "" {
+			return fmt.Errorf("--enroll-secret is required")
+		}
 	}
 	return nil
 }
@@ -56,41 +60,42 @@ func (c *createExternalChaincodeCmd) run() error {
 		return err
 	}
 	ctx := context.Background()
-	fabricCA, err := oclient.HlfV1alpha1().FabricCAs(c.caNamespace).Get(ctx, c.caName, v1.GetOptions{})
-	if err != nil {
-		return err
+	fabricChaincodeSpec := v1alpha1.FabricChaincodeSpec{
+		Image:            c.image,
+		ImagePullPolicy:  corev1.PullAlways,
+		PackageID:        c.packageID,
+		ImagePullSecrets: []corev1.LocalObjectReference{},
+		Credentials:      nil,
+	}
+	if c.tlsRequired {
+		fabricCA, err := oclient.HlfV1alpha1().FabricCAs(c.caNamespace).Get(ctx, c.caName, v1.GetOptions{})
+		if err != nil {
+			return err
+		}
+		fabricChaincodeSpec.Credentials = &v1alpha1.TLS{
+			Cahost: fmt.Sprintf("%s.%s", fabricCA.Name, fabricCA.Namespace),
+			Caname: "tlsca",
+			Caport: 7054,
+			Catls: v1alpha1.Catls{
+				Cacert: base64.StdEncoding.EncodeToString([]byte(fabricCA.Status.TlsCert)),
+			},
+			Csr: v1alpha1.Csr{
+				Hosts: []string{
+					c.name,
+					fmt.Sprintf("%s.%s", c.name, c.namespace),
+				},
+				CN: c.name,
+			},
+			Enrollid:     c.enrollId,
+			Enrollsecret: c.enrollSecret,
+		}
 	}
 	fabricChaincode := &v1alpha1.FabricChaincode{
 		ObjectMeta: v1.ObjectMeta{
 			Name:      c.name,
 			Namespace: c.namespace,
 		},
-		Spec: v1alpha1.FabricChaincodeSpec{
-			Image:            c.image,
-			ImagePullPolicy:  corev1.PullAlways,
-			PackageID:        c.packageID,
-			ImagePullSecrets: []corev1.LocalObjectReference{},
-			//Affinity:         nil,
-			//Tolerations:      []corev1.Toleration{},
-			//Resources:        nil,
-			Credentials: v1alpha1.TLS{
-				Cahost: fmt.Sprintf("%s.%s", fabricCA.Name, fabricCA.Namespace),
-				Caname: "tlsca",
-				Caport: 7054,
-				Catls: v1alpha1.Catls{
-					Cacert: base64.StdEncoding.EncodeToString([]byte(fabricCA.Status.TlsCert)),
-				},
-				Csr: v1alpha1.Csr{
-					Hosts: []string{
-						c.name,
-						fmt.Sprintf("%s.%s", c.name, c.namespace),
-					},
-					CN: c.name,
-				},
-				Enrollid:     c.enrollId,
-				Enrollsecret: c.enrollSecret,
-			},
-		},
+		Spec: fabricChaincodeSpec,
 	}
 	fabricChaincode, err = oclient.HlfV1alpha1().FabricChaincodes(c.namespace).Create(
 		ctx,
@@ -123,5 +128,6 @@ func newExternalChaincodeCreateCmd() *cobra.Command {
 	f.StringVar(&c.caNamespace, "ca-namespace", "", "Namespace of the CA")
 	f.StringVar(&c.enrollId, "enroll-id", "", "Enroll ID of the CA")
 	f.StringVar(&c.enrollSecret, "enroll-secret", "", "Enroll secret of the CA")
+	f.BoolVar(&c.tlsRequired, "tls-required", false, "Whether the chaincode requires TLS or not")
 	return cmd
 }

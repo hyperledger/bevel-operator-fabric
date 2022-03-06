@@ -198,7 +198,6 @@ func (c *inspectCmd) run(out io.Writer) error {
 		return err
 	}
 	peerOrgs, clusterPeers, err := helpers.GetClusterPeers(clientSet, oclient, ns)
-
 	if err != nil {
 		return err
 	}

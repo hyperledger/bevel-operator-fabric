@@ -638,6 +638,7 @@ spec:
                     type: object
                 type: object
               credentials:
+                nullable: true
                 properties:
                   cahost:
                     type: string
@@ -762,7 +763,6 @@ spec:
                 nullable: true
                 type: array
             required:
-            - credentials
             - image
             - imagePullPolicy
             - imagePullSecrets
