@@ -37,6 +37,12 @@ type FabricChaincodeReconciler struct {
 
 const chaincodeFinalizer = "finalizer.chaincode.hlf.kungfusoftware.es"
 
+type SecretChaincodeData struct {
+	Certificate []byte
+	PrivateKey  []byte
+	RootCert    []byte
+}
+
 func CreateChaincodeCryptoMaterial(conf *hlfv1alpha1.FabricChaincode, caName string, caurl string, enrollID string, enrollSecret string, tlsCertString string, hosts []string) (*x509.Certificate, *ecdsa.PrivateKey, *x509.Certificate, error) {
 	tlsCert, tlsKey, tlsRootCert, err := certs.EnrollUser(certs.EnrollUserRequest{
 		TLSCert:    tlsCertString,
@@ -123,6 +129,12 @@ func (r *FabricChaincodeReconciler) addFinalizer(reqLogger logr.Logger, m *hlfv1
 	return nil
 }
 
+const (
+	CertificateSecretKey = "tls.crt"
+	PrivateKeySecretKey  = "tls.key"
+	RootCertSecretKey    = "tlsroot.crt"
+)
+
 // +kubebuilder:rbac:groups=hlf.kungfusoftware.es,resources=fabricchaincodes,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=hlf.kungfusoftware.es,resources=fabricchaincodes/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=hlf.kungfusoftware.es,resources=fabricchaincodes/finalizers,verbs=get;update;patch
@@ -172,20 +184,7 @@ func (r *FabricChaincodeReconciler) Reconcile(req ctrl.Request) (ctrl.Result, er
 		r.setConditionStatus(ctx, fabricChaincode, hlfv1alpha1.FailedStatus, false, err, false)
 		return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricChaincode)
 	}
-	tlsCert, tlsKey, tlsRootCert, err := CreateChaincodeCryptoMaterial(
-		fabricChaincode,
-		fabricChaincode.Spec.Credentials.Caname,
-		tlsCAUrl,
-		fabricChaincode.Spec.Credentials.Enrollid,
-		fabricChaincode.Spec.Credentials.Enrollsecret,
-		string(cacert),
-		fabricChaincode.Spec.Credentials.Csr.Hosts,
-	)
-	if err != nil {
-		err = errors.New("Failed to create chaincode crypto material")
-		r.setConditionStatus(ctx, fabricChaincode, hlfv1alpha1.FailedStatus, false, err, false)
-		return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricChaincode)
-	}
+
 	deploymentName := fmt.Sprintf("%s", fabricChaincode.Name)
 	secretName := fmt.Sprintf("%s-certs", fabricChaincode.Name)
 	serviceName := fmt.Sprintf("%s", fabricChaincode.Name)
@@ -198,20 +197,66 @@ func (r *FabricChaincodeReconciler) Reconcile(req ctrl.Request) (ctrl.Result, er
 		r.setConditionStatus(ctx, fabricChaincode, hlfv1alpha1.FailedStatus, false, err, false)
 		return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricChaincode)
 	}
-	key, err := utils.EncodePrivateKey(tlsKey)
-	if err != nil {
-		r.setConditionStatus(ctx, fabricChaincode, hlfv1alpha1.FailedStatus, false, err, false)
-		return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricChaincode)
-	}
-	secretData := map[string][]byte{
-		"tls.crt":     utils.EncodeX509Certificate(tlsCert),
-		"tlsroot.crt": utils.EncodeX509Certificate(tlsRootCert),
-		"tls.key":     key,
-	}
+
+	updateSecretData := false
 	secret, err := kubeClientset.CoreV1().Secrets(ns).Get(ctx, secretName, metav1.GetOptions{})
+	if err != nil {
+		updateSecretData = true
+	} else {
+		x509Cert, err := utils.ParseX509Certificate(secret.Data[CertificateSecretKey])
+		// renew certificates data if certificate is about to expire (7 days before expiration)
+		if err != nil || x509Cert.NotAfter.Before(time.Now().Add(time.Hour*24*7)) {
+			updateSecretData = true
+		}
+		if secret.Data[CertificateSecretKey] != nil &&
+			len(secret.Data[CertificateSecretKey]) > 0 &&
+			secret.Data[PrivateKeySecretKey] != nil &&
+			len(secret.Data[PrivateKeySecretKey]) > 0 &&
+			secret.Data[RootCertSecretKey] != nil &&
+			len(secret.Data[RootCertSecretKey]) > 0 {
+			updateSecretData = false
+		} else {
+			updateSecretData = true
+		}
+	}
+	secretChaincodeData := SecretChaincodeData{}
+	if updateSecretData {
+		tlsCert, tlsKey, tlsRootCert, err := CreateChaincodeCryptoMaterial(
+			fabricChaincode,
+			fabricChaincode.Spec.Credentials.Caname,
+			tlsCAUrl,
+			fabricChaincode.Spec.Credentials.Enrollid,
+			fabricChaincode.Spec.Credentials.Enrollsecret,
+			string(cacert),
+			fabricChaincode.Spec.Credentials.Csr.Hosts,
+		)
+		if err != nil {
+			err = errors.New("Failed to create chaincode crypto material")
+			r.setConditionStatus(ctx, fabricChaincode, hlfv1alpha1.FailedStatus, false, err, false)
+			return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricChaincode)
+		}
+		key, err := utils.EncodePrivateKey(tlsKey)
+		if err != nil {
+			r.setConditionStatus(ctx, fabricChaincode, hlfv1alpha1.FailedStatus, false, err, false)
+			return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricChaincode)
+		}
+		secretChaincodeData.Certificate = utils.EncodeX509Certificate(tlsCert)
+		secretChaincodeData.RootCert = utils.EncodeX509Certificate(tlsRootCert)
+		secretChaincodeData.PrivateKey = key
+	} else {
+		secretChaincodeData.Certificate = secret.Data[CertificateSecretKey]
+		secretChaincodeData.PrivateKey = secret.Data[PrivateKeySecretKey]
+		secretChaincodeData.RootCert = secret.Data[RootCertSecretKey]
+	}
+
 	if err != nil {
 		if apierrors.IsNotFound(err) {
 			// creating secret
+			secretData := map[string][]byte{
+				"tls.crt":     secretChaincodeData.Certificate,
+				"tlsroot.crt": secretChaincodeData.RootCert,
+				"tls.key":     secretChaincodeData.PrivateKey,
+			}
 			secret, err = kubeClientset.CoreV1().Secrets(ns).Create(
 				ctx,
 				&corev1.Secret{
@@ -234,6 +279,11 @@ func (r *FabricChaincodeReconciler) Reconcile(req ctrl.Request) (ctrl.Result, er
 			return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricChaincode)
 		}
 	} else {
+		secretData := map[string][]byte{
+			"tls.crt":     secretChaincodeData.Certificate,
+			"tlsroot.crt": secretChaincodeData.RootCert,
+			"tls.key":     secretChaincodeData.PrivateKey,
+		}
 		secret.Data = secretData
 		secret, err = kubeClientset.CoreV1().Secrets(ns).Update(
 			ctx,
@@ -374,10 +424,6 @@ func (r *FabricChaincodeReconciler) Reconcile(req ctrl.Request) (ctrl.Result, er
 		return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricChaincode)
 	} else {
 		deployment.Spec = appv1Deployment.Spec
-		if deployment.Spec.Template.ObjectMeta.Annotations == nil {
-			deployment.Spec.Template.ObjectMeta.Annotations = map[string]string{}
-		}
-		deployment.Spec.Template.ObjectMeta.Annotations["hlf.kungfusoftware.es/updatedtime"] = time.Now().UTC().Format(time.RFC3339)
 		deployment, err = kubeClientset.AppsV1().Deployments(ns).Update(
 			ctx,
 			deployment,
