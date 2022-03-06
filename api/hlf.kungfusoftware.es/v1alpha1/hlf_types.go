@@ -131,15 +131,20 @@ type FabricPeerSpec struct {
 	FSServer *FabricFSServer `json:"fsServer"`
 
 	// +kubebuilder:validation:MinLength=3
-	MspID     string              `json:"mspID"`
-	Secret    Secret              `json:"secret"`
-	Service   PeerService         `json:"service"`
-	StateDb   StateDB             `json:"stateDb"`
-	Storage   FabricPeerStorage   `json:"storage"`
-	Discovery FabricPeerDiscovery `json:"discovery"`
-	Logging   FabricPeerLogging   `json:"logging"`
-	Resources FabricPeerResources `json:"resources"`
-	Hosts     []string            `json:"hosts"`
+	MspID       string              `json:"mspID"`
+	Secret      Secret              `json:"secret"`
+	Service     PeerService         `json:"service"`
+	StateDb     StateDB             `json:"stateDb"`
+	Storage     FabricPeerStorage   `json:"storage"`
+	Discovery   FabricPeerDiscovery `json:"discovery"`
+	Logging     FabricPeerLogging   `json:"logging"`
+	Resources   FabricPeerResources `json:"resources"`
+	Hosts       []string            `json:"hosts"`
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +nullable
+	// +kubebuilder:validation:Default={}
+	Tolerations []corev1.Toleration `json:"tolerations"`
 }
 type FabricPeerResources struct {
 	Peer      corev1.ResourceRequirements `json:"peer"`
@@ -356,6 +361,12 @@ const (
 // FabricOrdererNodeSpec defines the desired state of FabricOrdererNode
 type FabricOrdererNodeSpec struct {
 	// +optional
+	// +kubebuilder:validation:Optional
+	// +nullable
+	// +kubebuilder:validation:Default={}
+	Tolerations []corev1.Toleration `json:"tolerations"`
+
+	// +optional
 	// +nullable
 	UpdateCertificateTime *metav1.Time `json:"updateCertificateTime"`
 	// +optional
@@ -473,6 +484,12 @@ type FabricCADatabase struct {
 
 // FabricCASpec defines the desired state of FabricCA
 type FabricCASpec struct {
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +nullable
+	// +kubebuilder:validation:Default={}
+	Tolerations []corev1.Toleration `json:"tolerations"`
+
 	// +optional
 	// +nullable
 	ServiceMonitor *ServiceMonitor `json:"serviceMonitor"`

@@ -896,6 +896,7 @@ func getConfig(
 		AdminCert:   "",
 		Cert:        string(signCRTEncoded),
 		Key:         string(signEncodedPK),
+		Tolerations: spec.Tolerations,
 		TLS: tls{
 			Cert: string(tlsCRTEncoded),
 			Key:  string(tlsEncodedPK),
