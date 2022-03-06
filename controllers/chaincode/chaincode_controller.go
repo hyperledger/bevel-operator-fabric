@@ -5,13 +5,13 @@ import (
 	"crypto/ecdsa"
 	"crypto/x509"
 	"encoding/base64"
-	"errors"
 	"fmt"
 	"github.com/go-logr/logr"
 	hlfv1alpha1 "github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
 	"github.com/kfsoftware/hlf-operator/controllers/certs"
 	"github.com/kfsoftware/hlf-operator/controllers/utils"
 	"github.com/operator-framework/operator-lib/status"
+	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -24,6 +24,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
+	"time"
 )
 
 // FabricChaincodeReconciler reconciles a FabricChaincode object
@@ -54,6 +55,15 @@ func CreateChaincodeCryptoMaterial(conf *hlfv1alpha1.FabricChaincode, caName str
 	}
 	return tlsCert, tlsKey, tlsRootCert, nil
 }
+func (r *FabricChaincodeReconciler) getDeploymentName(fabricChaincode *hlfv1alpha1.FabricChaincode) string {
+	return fmt.Sprintf("%s", fabricChaincode.Name)
+}
+func (r *FabricChaincodeReconciler) getServiceName(fabricChaincode *hlfv1alpha1.FabricChaincode) string {
+	return fmt.Sprintf("%s", fabricChaincode.Name)
+}
+func (r *FabricChaincodeReconciler) getSecretName(fabricChaincode *hlfv1alpha1.FabricChaincode) string {
+	return fmt.Sprintf("%s-certs", fabricChaincode.Name)
+}
 
 func (r *FabricChaincodeReconciler) finalizeChaincode(reqLogger logr.Logger, m *hlfv1alpha1.FabricChaincode) error {
 	ns := m.Namespace
@@ -62,7 +72,41 @@ func (r *FabricChaincodeReconciler) finalizeChaincode(reqLogger logr.Logger, m *
 	}
 	//releaseName := m.Name
 	reqLogger.Info("Successfully finalized chaincode")
-
+	kubeClientset, err := kubernetes.NewForConfig(r.Config)
+	if err != nil {
+		return err
+	}
+	deploymentName := r.getDeploymentName(m)
+	ctx := context.Background()
+	err = kubeClientset.AppsV1().Deployments(ns).Delete(ctx, deploymentName, metav1.DeleteOptions{})
+	if err != nil {
+		if apierrors.IsNotFound(err) {
+			reqLogger.Info(fmt.Sprintf("Deployment %s not found", deploymentName))
+		} else {
+			reqLogger.Error(err, "Failed to delete deployment")
+			return err
+		}
+	}
+	serviceName := r.getServiceName(m)
+	err = kubeClientset.CoreV1().Services(ns).Delete(ctx, serviceName, metav1.DeleteOptions{})
+	if err != nil {
+		if apierrors.IsNotFound(err) {
+			reqLogger.Info(fmt.Sprintf("Service %s not found", serviceName))
+		} else {
+			reqLogger.Error(err, "Failed to delete service")
+			return err
+		}
+	}
+	secretName := r.getSecretName(m)
+	err = kubeClientset.CoreV1().Secrets(ns).Delete(ctx, secretName, metav1.DeleteOptions{})
+	if err != nil {
+		if apierrors.IsNotFound(err) {
+			reqLogger.Info(fmt.Sprintf("Secret %s not found", secretName))
+		} else {
+			reqLogger.Error(err, "Failed to delete secret")
+			return err
+		}
+	}
 	return nil
 }
 
@@ -138,7 +182,8 @@ func (r *FabricChaincodeReconciler) Reconcile(req ctrl.Request) (ctrl.Result, er
 		fabricChaincode.Spec.Credentials.Csr.Hosts,
 	)
 	if err != nil {
-		r.setConditionStatus(ctx, fabricChaincode, hlfv1alpha1.FailedStatus, true, err, false)
+		err = errors.New("Failed to create chaincode crypto material")
+		r.setConditionStatus(ctx, fabricChaincode, hlfv1alpha1.FailedStatus, false, err, false)
 		return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricChaincode)
 	}
 	deploymentName := fmt.Sprintf("%s", fabricChaincode.Name)
@@ -329,13 +374,17 @@ func (r *FabricChaincodeReconciler) Reconcile(req ctrl.Request) (ctrl.Result, er
 		return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricChaincode)
 	} else {
 		deployment.Spec = appv1Deployment.Spec
-
+		if deployment.Spec.Template.ObjectMeta.Annotations == nil {
+			deployment.Spec.Template.ObjectMeta.Annotations = map[string]string{}
+		}
+		deployment.Spec.Template.ObjectMeta.Annotations["hlf.kungfusoftware.es/updatedtime"] = time.Now().UTC().Format(time.RFC3339)
 		deployment, err = kubeClientset.AppsV1().Deployments(ns).Update(
 			ctx,
 			deployment,
 			metav1.UpdateOptions{},
 		)
 		if err != nil {
+			err = errors.New("failed to update the deployment")
 			r.setConditionStatus(ctx, fabricChaincode, hlfv1alpha1.FailedStatus, false, err, false)
 			return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricChaincode)
 		}
@@ -406,9 +455,9 @@ func (r *FabricChaincodeReconciler) updateCRStatusOrFailReconcile(ctx context.Co
 	ctrl.Result, error) {
 	if err := r.Status().Update(ctx, p); err != nil {
 		log.Error(err, fmt.Sprintf("%v failed to update the application status", ErrClientK8s))
-		return ctrl.Result{Requeue: false}, err
+		return ctrl.Result{Requeue: false, RequeueAfter: 0}, err
 	}
-	return ctrl.Result{Requeue: false}, nil
+	return ctrl.Result{Requeue: false, RequeueAfter: 0}, nil
 }
 
 func (r *FabricChaincodeReconciler) setConditionStatus(ctx context.Context, p *hlfv1alpha1.FabricChaincode, conditionType hlfv1alpha1.DeploymentStatus, statusFlag bool, err error, statusUnknown bool) (update bool) {
@@ -449,6 +498,7 @@ func (r *FabricChaincodeReconciler) setConditionStatus(ctx context.Context, p *h
 			Status: statusStr(),
 		}
 	}
+
 	return p.Status.Conditions.SetCondition(condition())
 }
 
