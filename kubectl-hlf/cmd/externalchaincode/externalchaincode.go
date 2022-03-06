@@ -14,6 +14,7 @@ func NewExternalChaincodeCmd(stdOut io.Writer, stdErr io.Writer) *cobra.Command 
 		newExternalChaincodeCreateCmd(),
 		newExternalChaincodeUpdateCmd(),
 		newExternalChaincodeDeleteCmd(),
+		newExternalChaincodeSyncCmd(),
 	)
 	return externalChaincodeCmd
 }
