@@ -314,14 +314,23 @@ func (r *FabricChaincodeReconciler) Reconcile(req ctrl.Request) (ctrl.Result, er
 	deploymentName := fmt.Sprintf("%s", fabricChaincode.Name)
 	serviceName := fmt.Sprintf("%s", fabricChaincode.Name)
 
+	chaincodeAddress := "0.0.0.0:7052"
 	envVars := []corev1.EnvVar{
 		{
 			Name:  "CHAINCODE_ID",
 			Value: fabricChaincode.Spec.PackageID,
 		},
 		{
+			Name:  "CORE_CHAINCODE_ID",
+			Value: fabricChaincode.Spec.PackageID,
+		},
+		{
 			Name:  "CHAINCODE_SERVER_ADDRESS",
-			Value: "0.0.0.0:7052",
+			Value: chaincodeAddress,
+		},
+		{
+			Name:  "CORE_CHAINCODE_ADDRESS",
+			Value: chaincodeAddress,
 		},
 	}
 	var volumes []corev1.Volume
@@ -351,11 +360,23 @@ func (r *FabricChaincodeReconciler) Reconcile(req ctrl.Request) (ctrl.Result, er
 				Value: "/config/certs/tls.key",
 			},
 			{
+				Name:  "CORE_CHAINCODE_TLS_KEY_FILE",
+				Value: "/config/certs/tls.key",
+			},
+			{
 				Name:  "CHAINCODE_TLS_CERT",
 				Value: "/config/certs/tls.crt",
 			},
 			{
+				Name:  "CORE_CHAINCODE_TLS_CERT_FILE",
+				Value: "/config/certs/tls.crt",
+			},
+			{
 				Name:  "CHAINCODE_CLIENT_CA_CERT",
+				Value: "/config/certs/tlsroot.crt",
+			},
+			{
+				Name:  "CORE_CHAINCODE_TLS_CLIENT_CACERT_FILE",
 				Value: "/config/certs/tlsroot.crt",
 			},
 		}...)
