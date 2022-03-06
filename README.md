@@ -268,7 +268,7 @@ kubectl hlf chaincode queryinstalled --config=org1.yaml --user=admin --peer=org1
 
 ## Approve chaincode
 ```bash
-export SEQUENCE=5
+export SEQUENCE=1
 export VERSION="1.0"
 kubectl hlf chaincode approveformyorg --config=org1.yaml --user=admin --peer=org1-peer0.default \
     --package-id=$PACKAGE_ID \
