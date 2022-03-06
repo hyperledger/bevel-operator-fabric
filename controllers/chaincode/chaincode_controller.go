@@ -424,6 +424,12 @@ func (r *FabricChaincodeReconciler) Reconcile(req ctrl.Request) (ctrl.Result, er
 		return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricChaincode)
 	} else {
 		deployment.Spec = appv1Deployment.Spec
+		if updateSecretData {
+			if deployment.Spec.Template.ObjectMeta.Annotations == nil {
+				deployment.Spec.Template.ObjectMeta.Annotations = make(map[string]string)
+			}
+			deployment.Spec.Template.ObjectMeta.Annotations["hlf.kungfusoftware.es/updatedsecrettime"] = time.Now().UTC().Format(time.RFC3339)
+		}
 		deployment, err = kubeClientset.AppsV1().Deployments(ns).Update(
 			ctx,
 			deployment,
