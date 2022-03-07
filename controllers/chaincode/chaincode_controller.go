@@ -408,6 +408,7 @@ func (r *FabricChaincodeReconciler) Reconcile(req ctrl.Request) (ctrl.Result, er
 		Affinity:            fabricChaincode.Spec.Affinity,
 		Tolerations:         fabricChaincode.Spec.Tolerations,
 	}
+	replicas := fabricChaincode.Spec.Replicas
 	appv1Deployment := &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      deploymentName,
@@ -415,7 +416,7 @@ func (r *FabricChaincodeReconciler) Reconcile(req ctrl.Request) (ctrl.Result, er
 			Labels:    labels,
 		},
 		Spec: appsv1.DeploymentSpec{
-			Replicas: func(i int32) *int32 { return &i }(1),
+			Replicas: func(i int32) *int32 { return &i }(int32(replicas)),
 			Selector: &metav1.LabelSelector{
 				MatchLabels: labels,
 			},

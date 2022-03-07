@@ -23,6 +23,8 @@ type syncExternalChaincodeCmd struct {
 	enrollSecret string
 	force        bool
 
+	replicas int
+
 	tlsRequired bool
 }
 
@@ -62,6 +64,7 @@ func (c syncExternalChaincodeCmd) getFabricChaincodeSpec(ctx context.Context) (v
 		PackageID:        c.packageID,
 		ImagePullSecrets: []corev1.LocalObjectReference{},
 		Credentials:      nil,
+		Replicas:         c.replicas,
 	}
 	oclient, err := helpers.GetKubeOperatorClient()
 	if err != nil {
@@ -209,5 +212,6 @@ func newExternalChaincodeSyncCmd() *cobra.Command {
 	f.StringVar(&c.enrollSecret, "enroll-secret", "", "Enroll secret of the CA")
 	f.BoolVarP(&c.force, "force", "", false, "Force restart of chaincode")
 	f.BoolVar(&c.tlsRequired, "tls-required", false, "Require TLS for chaincode")
+	f.IntVarP(&c.replicas, "replicas", "", 1, "Number of replicas of the chaincode")
 	return cmd
 }

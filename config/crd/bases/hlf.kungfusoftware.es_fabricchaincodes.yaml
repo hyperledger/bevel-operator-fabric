@@ -695,6 +695,8 @@ spec:
               packageId:
                 minLength: 1
                 type: string
+              replicas:
+                type: integer
               resources:
                 description: ResourceRequirements describes the compute resource requirements.
                 nullable: true
@@ -767,6 +769,7 @@ spec:
             - imagePullPolicy
             - imagePullSecrets
             - packageId
+            - replicas
             type: object
           status:
             description: FabricChaincodeStatus defines the observed state of FabricChaincode

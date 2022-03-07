@@ -22,6 +22,8 @@ type createExternalChaincodeCmd struct {
 	enrollId     string
 	enrollSecret string
 
+	replicas int
+
 	tlsRequired bool
 }
 
@@ -52,6 +54,9 @@ func (c *createExternalChaincodeCmd) validate() error {
 			return fmt.Errorf("--enroll-secret is required")
 		}
 	}
+	if c.replicas < 0 {
+		return fmt.Errorf("--replicas must be >= 0")
+	}
 	return nil
 }
 func (c *createExternalChaincodeCmd) run() error {
@@ -66,6 +71,7 @@ func (c *createExternalChaincodeCmd) run() error {
 		PackageID:        c.packageID,
 		ImagePullSecrets: []corev1.LocalObjectReference{},
 		Credentials:      nil,
+		Replicas:         c.replicas,
 	}
 	if c.tlsRequired {
 		fabricCA, err := oclient.HlfV1alpha1().FabricCAs(c.caNamespace).Get(ctx, c.caName, v1.GetOptions{})
@@ -128,6 +134,7 @@ func newExternalChaincodeCreateCmd() *cobra.Command {
 	f.StringVar(&c.caNamespace, "ca-namespace", "", "Namespace of the CA")
 	f.StringVar(&c.enrollId, "enroll-id", "", "Enroll ID of the CA")
 	f.StringVar(&c.enrollSecret, "enroll-secret", "", "Enroll secret of the CA")
+	f.IntVar(&c.replicas, "replicas", 1, "Replicas of the external chaincode")
 	f.BoolVar(&c.tlsRequired, "tls-required", false, "Whether the chaincode requires TLS or not")
 	return cmd
 }

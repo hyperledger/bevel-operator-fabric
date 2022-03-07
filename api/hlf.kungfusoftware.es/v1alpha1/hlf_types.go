@@ -131,15 +131,15 @@ type FabricPeerSpec struct {
 	FSServer *FabricFSServer `json:"fsServer"`
 
 	// +kubebuilder:validation:MinLength=3
-	MspID       string              `json:"mspID"`
-	Secret      Secret              `json:"secret"`
-	Service     PeerService         `json:"service"`
-	StateDb     StateDB             `json:"stateDb"`
-	Storage     FabricPeerStorage   `json:"storage"`
-	Discovery   FabricPeerDiscovery `json:"discovery"`
-	Logging     FabricPeerLogging   `json:"logging"`
-	Resources   FabricPeerResources `json:"resources"`
-	Hosts       []string            `json:"hosts"`
+	MspID     string              `json:"mspID"`
+	Secret    Secret              `json:"secret"`
+	Service   PeerService         `json:"service"`
+	StateDb   StateDB             `json:"stateDb"`
+	Storage   FabricPeerStorage   `json:"storage"`
+	Discovery FabricPeerDiscovery `json:"discovery"`
+	Logging   FabricPeerLogging   `json:"logging"`
+	Resources FabricPeerResources `json:"resources"`
+	Hosts     []string            `json:"hosts"`
 	// +optional
 	// +kubebuilder:validation:Optional
 	// +nullable
@@ -976,6 +976,9 @@ type FabricChaincodeSpec struct {
 	// +kubebuilder:validation:Optional
 	// +optional
 	Credentials *TLS `json:"credentials"`
+
+	// +kubebuilder:validation:Default=1
+	Replicas int `json:"replicas"`
 }
 
 // FabricChaincodeStatus defines the observed state of FabricChaincode

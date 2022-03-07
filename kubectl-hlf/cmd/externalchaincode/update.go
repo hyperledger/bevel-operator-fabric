@@ -24,6 +24,8 @@ type updateExternalChaincodeCmd struct {
 	enrollSecret string
 	force        bool
 
+	replicas int
+
 	tlsRequired bool
 }
 
@@ -54,6 +56,9 @@ func (c *updateExternalChaincodeCmd) validate() error {
 			return fmt.Errorf("--enroll-secret is required")
 		}
 	}
+	if c.replicas < 0 {
+		return fmt.Errorf("--replicas must be >= 0")
+	}
 	return nil
 }
 func (c *updateExternalChaincodeCmd) run() error {
@@ -76,6 +81,7 @@ func (c *updateExternalChaincodeCmd) run() error {
 	fabricChaincode.Spec.ImagePullPolicy = corev1.PullAlways
 	fabricChaincode.Spec.PackageID = c.packageID
 	fabricChaincode.Spec.ImagePullSecrets = []corev1.LocalObjectReference{}
+	fabricChaincode.Spec.Replicas = c.replicas
 	if c.tlsRequired {
 		fabricCA, err := oclient.HlfV1alpha1().FabricCAs(c.caNamespace).Get(ctx, c.caName, v1.GetOptions{})
 		if err != nil {
@@ -133,6 +139,7 @@ func newExternalChaincodeUpdateCmd() *cobra.Command {
 	f.StringVar(&c.enrollId, "enroll-id", "", "Enroll ID of the CA")
 	f.StringVar(&c.enrollSecret, "enroll-secret", "", "Enroll secret of the CA")
 	f.BoolVarP(&c.force, "force", "", false, "Force restart of chaincode")
+	f.IntVar(&c.replicas, "replicas", 1, "Replicas of the chaincode")
 	f.BoolVar(&c.tlsRequired, "tls-required", false, "Require TLS for chaincode")
 	return cmd
 }

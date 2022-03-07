@@ -106,7 +106,7 @@ kubectl hlf ca register --name=org1-ca --user=peer --secret=peerpw --type=peer \
 
 ```bash
 
-kubectl hlf peer create --image=$PEER_IMAGE --version=$PEER_VERSION --storage-class=standard --enroll-id=peer --mspid=Org1MSP \
+kubectl hlf peer create --statedb=couchdb --image=$PEER_IMAGE --version=$PEER_VERSION --storage-class=standard --enroll-id=peer --mspid=Org1MSP \
         --enroll-pw=peerpw --capacity=5Gi --name=org1-peer0 --ca-name=org1-ca.default
 kubectl wait --timeout=180s --for=condition=Running fabricpeers.hlf.kungfusoftware.es --all
 ```
@@ -243,23 +243,16 @@ kubectl hlf chaincode install --path=./asset-transfer-basic-external.tgz \
 ```
 
 ## Deploy chaincode
-If it's the first time you deploy the chaincode, you need to create the externalchaincode CRD
+The following command will create or update the CRD based on the packageID, chaincode name and image.
 ```bash
-kubectl hlf externalchaincode create --image=kfsoftware/chaincode-external:latest \
+kubectl hlf externalchaincode sync --image=kfsoftware/chaincode-external:latest \
     --name=$CHAINCODE_NAME \
     --namespace=default \
     --package-id=$PACKAGE_ID \
-    --tls-required=false
+    --tls-required=false \
+    --replicas=1
+```
 
-```
-Otherwise, you can just update the externalchaincode CRD:
-```bash
-kubectl hlf externalchaincode update --image=kfsoftware/chaincode-external:latest \
-    --name=$CHAINCODE_NAME \
-    --namespace=default \
-    --package-id=$PACKAGE_ID \
-    --tls-required=false
-```
 
 ## Query chaincodes installed
 ```bash
