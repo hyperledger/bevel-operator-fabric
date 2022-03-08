@@ -47,9 +47,6 @@ const StateDBLevelDB StateDB = "leveldb"
 // Use CouchDB database
 const StateDBCouchDB StateDB = "couchdb"
 
-// +kubebuilder:validation:Enum="2.1.1";"2.2.0"
-type FabricVersion string
-
 type ExternalBuilder struct {
 	Name string `json:"name"`
 	Path string `json:"path"`

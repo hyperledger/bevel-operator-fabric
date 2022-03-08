@@ -356,6 +356,10 @@ func (r *FabricChaincodeReconciler) Reconcile(req ctrl.Request) (ctrl.Result, er
 				Value: "false",
 			},
 			{
+				Name: "CORE_PEER_TLS_ENABLED",
+				Value: "true",
+			},
+			{
 				Name:  "CHAINCODE_TLS_KEY",
 				Value: "/config/certs/tls.key",
 			},
@@ -385,6 +389,10 @@ func (r *FabricChaincodeReconciler) Reconcile(req ctrl.Request) (ctrl.Result, er
 			{
 				Name:  "CHAINCODE_TLS_DISABLED",
 				Value: "true",
+			},
+			{
+				Name: "CORE_PEER_TLS_ENABLED",
+				Value: "false",
 			},
 		}...)
 	}
