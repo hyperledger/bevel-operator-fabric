@@ -356,7 +356,7 @@ func (r *FabricChaincodeReconciler) Reconcile(req ctrl.Request) (ctrl.Result, er
 				Value: "false",
 			},
 			{
-				Name: "CORE_PEER_TLS_ENABLED",
+				Name:  "CORE_PEER_TLS_ENABLED",
 				Value: "true",
 			},
 			{
@@ -391,10 +391,13 @@ func (r *FabricChaincodeReconciler) Reconcile(req ctrl.Request) (ctrl.Result, er
 				Value: "true",
 			},
 			{
-				Name: "CORE_PEER_TLS_ENABLED",
+				Name:  "CORE_PEER_TLS_ENABLED",
 				Value: "false",
 			},
 		}...)
+	}
+	if len(fabricChaincode.Spec.Env) > 0 {
+		envVars = append(envVars, fabricChaincode.Spec.Env...)
 	}
 
 	podSpec := corev1.PodSpec{

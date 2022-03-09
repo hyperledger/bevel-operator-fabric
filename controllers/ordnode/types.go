@@ -28,6 +28,7 @@ type fabricOrdChart struct {
 	Hosts                       []string            `json:"hosts"`
 	Logging                     Logging             `json:"logging"`
 	ServiceMonitor              ServiceMonitor      `json:"serviceMonitor"`
+	EnvVars                     []corev1.EnvVar     `json:"envVars"`
 }
 type Resources struct {
 	Limits   Limits   `json:"limits"`

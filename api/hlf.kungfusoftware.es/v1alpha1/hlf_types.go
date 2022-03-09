@@ -142,6 +142,12 @@ type FabricPeerSpec struct {
 	// +nullable
 	// +kubebuilder:validation:Default={}
 	Tolerations []corev1.Toleration `json:"tolerations"`
+
+	// +nullable
+	// +kubebuilder:validation:Optional
+	// +optional
+	// +kubebuilder:validation:Default={}
+	Env []corev1.EnvVar `json:"env"`
 }
 type FabricPeerResources struct {
 	Peer      corev1.ResourceRequirements `json:"peer"`
@@ -403,6 +409,12 @@ type FabricOrdererNodeSpec struct {
 	// +kubebuilder:validation:Optional
 	// +nullable
 	AdminIstio *FabricIstio `json:"adminIstio"`
+
+	// +nullable
+	// +kubebuilder:validation:Optional
+	// +optional
+	// +kubebuilder:validation:Default={}
+	Env []corev1.EnvVar `json:"env"`
 }
 
 type OrdererSystemChannel struct {
@@ -515,6 +527,12 @@ type FabricCASpec struct {
 	Resources corev1.ResourceRequirements `json:"resources"`
 	Storage   Storage                     `json:"storage"`
 	Metrics   FabricCAMetrics             `json:"metrics"`
+
+	// +nullable
+	// +kubebuilder:validation:Optional
+	// +optional
+	// +kubebuilder:validation:Default={}
+	Env []corev1.EnvVar `json:"env"`
 }
 
 type FabricCATLSConf struct {
@@ -976,6 +994,12 @@ type FabricChaincodeSpec struct {
 
 	// +kubebuilder:validation:Default=1
 	Replicas int `json:"replicas"`
+
+	// +nullable
+	// +kubebuilder:validation:Optional
+	// +optional
+	// +kubebuilder:validation:Default={}
+	Env []corev1.EnvVar `json:"env"`
 }
 
 // FabricChaincodeStatus defines the observed state of FabricChaincode
