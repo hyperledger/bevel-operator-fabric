@@ -3,6 +3,8 @@ package org
 import (
 	"bytes"
 	"github.com/Masterminds/sprig/v3"
+	"github.com/kfsoftware/hlf-operator/controllers/utils"
+	log "github.com/kfsoftware/hlf-operator/internal/github.com/hyperledger/fabric-ca/sdkpatch/logbridge"
 	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/helpers"
 	"github.com/spf13/cobra"
 	"io"
@@ -113,6 +115,10 @@ func (c *inspectCmd) run(args []string) error {
 	orgMap := map[string]OrganizationItem{}
 	for _, peerOrg := range peerOrgs {
 		firstPeer := peerOrg.Peers[0]
+		if !utils.Contains(c.caOpts.Orgs, firstPeer.MSPID) {
+			continue
+		}
+		log.Infof("Found peer org %s", peerOrg.MspID)
 		caHost := strings.Split(firstPeer.Spec.Secret.Enrollment.Component.Cahost, ".")[0]
 		certAuth, err := helpers.GetCertAuthByURL(
 			clientSet,

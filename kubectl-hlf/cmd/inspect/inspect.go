@@ -2,6 +2,7 @@ package inspect
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -46,7 +47,6 @@ type Peer struct {
 	TLSCert string
 }
 
-
 const tmplGoConfig = `
 name: hlf-network
 version: 1.0.0
@@ -69,14 +69,12 @@ organizations:
       - {{ $peer.Name }}
  	  {{- end }}
 {{- end }}
-{{- if not $org.OrderingServices }}
+{{- if not $org.OrdererNodes }}
     orderers: []
 {{- else }}
     orderers:
-      {{- range $ordService := $org.OrderingServices }}
-      {{- range $orderer := $ordService.Orderers }}
+      {{- range $orderer := $org.OrdererNodes }}
       - {{ $orderer.Name }}
- 	  {{- end }}
  	  {{- end }}
 
     {{- end }}
@@ -87,8 +85,7 @@ organizations:
 orderers: []
 {{- else }}
 orderers:
-{{- range $ordService := .Orderers }}
-{{- range $orderer := $ordService.Orderers }}
+{{- range $orderer := .Orderers }}
   {{$orderer.Name}}:
 {{if $.Internal }}
     url: grpcs://{{ $orderer.PrivateURL }}
@@ -100,7 +97,6 @@ orderers:
     tlsCACerts:
       pem: |
 {{ or $orderer.Status.TlsCACert $orderer.Status.TlsCert | indent 8 }}
-{{- end }}
 {{- end }}
 {{- end }}
 
@@ -157,10 +153,8 @@ channels:
     orderers: []
 {{- else }}
     orderers:
-{{- range $ordService := .Orderers }}
-{{- range $orderer := $ordService.Orderers }}
+{{- range $orderer := .Orderers }}
       - {{$orderer.Name}}
-{{- end }}
 {{- end }}
 {{- end }}
 {{- if not .Peers }}
@@ -193,7 +187,7 @@ func (c *inspectCmd) run(out io.Writer) error {
 	if err != nil {
 		return err
 	}
-	ordOrgs, orderers, err := helpers.GetClusterOrderers(clientSet, oclient, ns)
+	clusterOrderersNodes, err := helpers.GetClusterOrdererNodes(clientSet, oclient, "")
 	if err != nil {
 		return err
 	}
@@ -203,9 +197,19 @@ func (c *inspectCmd) run(out io.Writer) error {
 	}
 	filterByOrgs := len(c.organizations) > 0
 	orgMap := map[string]*helpers.Organization{}
-	for _, v := range ordOrgs {
-		if filterByOrgs && utils.Contains(c.organizations, v.MspID) {
-			orgMap[v.MspID] = v
+	for _, ordererNode := range clusterOrderersNodes {
+		if (filterByOrgs && utils.Contains(c.organizations, ordererNode.Spec.MspID)) || !filterByOrgs {
+			org, ok := orgMap[ordererNode.Spec.MspID]
+			if ok {
+				org.OrdererNodes = append(org.OrdererNodes, ordererNode)
+			} else {
+				orgMap[ordererNode.Spec.MspID] = &helpers.Organization{
+					Type:         helpers.OrdererType,
+					MspID:        ordererNode.Spec.MspID,
+					OrdererNodes: []*helpers.ClusterOrdererNode{ordererNode},
+					Peers:        []*helpers.ClusterPeer{},
+				}
+			}
 		}
 	}
 	for _, v := range peerOrgs {
@@ -219,6 +223,20 @@ func (c *inspectCmd) run(out io.Writer) error {
 			peers = append(peers, peer)
 		}
 	}
+
+	var orderers []*helpers.ClusterOrdererNode
+	for _, orderer := range clusterOrderersNodes {
+		if !filterByOrgs {
+			orderers = append(orderers, orderer)
+		} else if filterByOrgs && utils.Contains(c.organizations, orderer.Item.Spec.MspID) {
+			orderers = append(orderers, orderer)
+		}
+	}
+	//log.Infof("Filter by orgs %ordererNode", marshallOrPanic(filterByOrgs))
+	//log.Infof("Cluster orderers for %ordererNode", marshallOrPanic(orderers))
+	//log.Infof("Cluster peers for %ordererNode", marshallOrPanic(peers))
+	//log.Infof("Ord orgs for %ordererNode", marshallOrPanic(ordOrgs))
+	//log.Infof("Peer orgs for %ordererNode", marshallOrPanic(peerOrgs))
 	tmpl, err := template.New("test").Funcs(sprig.HermeticTxtFuncMap()).Parse(tmplGoConfig)
 	if err != nil {
 		return err
@@ -287,4 +305,12 @@ func NewInspectHLFConfig(out io.Writer) *cobra.Command {
 	f.StringVar(&c.format, "format", yamlFormat, "connection profile output format (yaml/json)")
 
 	return cmd
+}
+
+func marshallOrPanic(d interface{}) string {
+	data, err := json.MarshalIndent(d, "", "  ")
+	if err != nil {
+		panic(err)
+	}
+	return string(data)
 }
