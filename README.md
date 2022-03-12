@@ -25,6 +25,11 @@ title: Getting started
 
 ![hlf-operator-star-github](https://user-images.githubusercontent.com/6862893/123808402-022aa800-d8f1-11eb-8df4-8a9552f126a2.gif)
 
+## Hyperledger Meetup
+
+You can watch this video in order to see how to use it to deploy your own network:
+
+[![Hyperledger Fabric on Kubernetes](http://img.youtube.com/vi/namKDeJf5QI/0.jpg)](http://www.youtube.com/watch?v=namKDeJf5QI "Hyperledger Fabric on Kubernetes")
 ## Sponsor
 
 |||
