@@ -20,7 +20,6 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"time"
-
 	// +kubebuilder:scaffold:imports
 )
 
@@ -71,8 +70,15 @@ func createPeer(releaseName string, namespace string, params createPeerParams, c
 			Namespace: namespace,
 		},
 		Spec: hlfv1alpha1.FabricPeerSpec{
-			ServiceMonitor:   nil,
-			HostAliases:      nil,
+			UpdateCertificateTime: nil,
+			ServiceMonitor:        nil,
+			HostAliases:           nil,
+			CouchDBExporter: &hlfv1alpha1.FabricPeerCouchdbExporter{
+				Enabled:         false,
+				Image:           "gesellix/couchdb-prometheus-exporter",
+				Tag:             "v30.0.0",
+				ImagePullPolicy: corev1.PullAlways,
+			},
 			Replicas:         1,
 			DockerSocketPath: "",
 			Image:            "quay.io/kfsoftware/fabric-peer",
@@ -95,6 +101,11 @@ func createPeer(releaseName string, namespace string, params createPeerParams, c
 			CouchDB: hlfv1alpha1.FabricPeerCouchDB{
 				User:     "couchdb",
 				Password: "couchdb",
+			},
+			FSServer: &hlfv1alpha1.FabricFSServer{
+				Image:      "quay.io/kfsoftware/fs-peer",
+				Tag:        "amd64-2.2.0",
+				PullPolicy: corev1.PullAlways,
 			},
 			MspID: mspID,
 			Secret: hlfv1alpha1.Secret{
@@ -161,11 +172,13 @@ func createPeer(releaseName string, namespace string, params createPeerParams, c
 				Policies: "info",
 			},
 			Resources: hlfv1alpha1.FabricPeerResources{
-				Peer: resources,
-				CouchDB: resources,
+				Peer:      resources,
+				CouchDB:   resources,
 				Chaincode: resources,
 			},
-			Hosts: []string{},
+			Hosts:       []string{},
+			Tolerations: nil,
+			Env:         nil,
 		},
 	}
 	Expect(K8sClient.Create(context.Background(), fabricPeer)).Should(Succeed())
