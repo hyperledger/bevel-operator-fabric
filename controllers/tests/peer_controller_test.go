@@ -84,8 +84,9 @@ func createPeer(releaseName string, namespace string, params createPeerParams, c
 			Image:            "quay.io/kfsoftware/fabric-peer",
 			ExternalBuilders: []hlfv1alpha1.ExternalBuilder{},
 			Istio: &hlfv1alpha1.FabricIstio{
-				Port:  443,
-				Hosts: []string{},
+				Port:           443,
+				IngressGateway: "",
+				Hosts:          []string{},
 			},
 			Gossip: hlfv1alpha1.FabricPeerSpecGossip{
 				ExternalEndpoint:  "",
@@ -99,8 +100,12 @@ func createPeer(releaseName string, namespace string, params createPeerParams, c
 			ImagePullPolicy:          "Always",
 			ExternalChaincodeBuilder: true,
 			CouchDB: hlfv1alpha1.FabricPeerCouchDB{
-				User:     "couchdb",
-				Password: "couchdb",
+				User:            "couchdb",
+				Password:        "couchdb",
+				Image:           "couchdb",
+				Tag:             "3.1.1",
+				PullPolicy:      corev1.PullAlways,
+				ExternalCouchDB: nil,
 			},
 			FSServer: &hlfv1alpha1.FabricFSServer{
 				Image:      "quay.io/kfsoftware/fs-peer",
@@ -172,13 +177,14 @@ func createPeer(releaseName string, namespace string, params createPeerParams, c
 				Policies: "info",
 			},
 			Resources: hlfv1alpha1.FabricPeerResources{
-				Peer:      resources,
-				CouchDB:   resources,
-				Chaincode: resources,
+				Peer:            resources,
+				CouchDB:         resources,
+				Chaincode:       resources,
+				CouchDBExporter: &resources,
 			},
 			Hosts:       []string{},
-			Tolerations: nil,
-			Env:         nil,
+			Tolerations: []corev1.Toleration{},
+			Env:         []corev1.EnvVar{},
 		},
 	}
 	Expect(K8sClient.Create(context.Background(), fabricPeer)).Should(Succeed())
