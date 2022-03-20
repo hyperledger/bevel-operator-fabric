@@ -160,10 +160,15 @@ spec:
               value: {{ include "hlf-peer.fullname" . }}-fs
             - name: FILE_SERVER_ENDPOINT
               value: '127.0.0.1:8080'
+{{ if .Values.envVars -}}
 {{- toYaml .Values.envVars | nindent 12 }}
+{{- end }}
 {{ else }}
+{{ if .Values.envVars }}
           env:
 {{- toYaml .Values.envVars | nindent 12 }}
+
+{{- end }}
 {{- end }}
           envFrom:
             {{- if and (eq .Values.peer.databaseType "CouchDB") }}
