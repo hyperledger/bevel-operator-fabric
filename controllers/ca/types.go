@@ -21,6 +21,7 @@ type FabricCAChart struct {
 	TLSCA            FabricCAChartItemConf `json:"tlsCA"`
 	Cors             Cors                  `json:"cors"`
 	ServiceMonitor   ServiceMonitor        `json:"serviceMonitor"`
+	EnvVars          []corev1.EnvVar       `json:"envVars"`
 }
 type ServiceMonitor struct {
 	Enabled           bool              `json:"enabled"`

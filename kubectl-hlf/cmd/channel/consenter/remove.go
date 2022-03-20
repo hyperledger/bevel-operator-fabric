@@ -61,7 +61,7 @@ func (c *delConsenterCmd) run() error {
 	}
 	cftxGen := configtx.New(cfgBlock)
 	cfgOrd := cftxGen.Orderer()
-	ordNode, err := helpers.GetOrdererNodeByFullName(oClient, c.ordNodeName)
+	ordNode, err := helpers.GetOrdererNodeByFullName(clientSet,oClient, c.ordNodeName)
 	if err != nil {
 		return err
 	}

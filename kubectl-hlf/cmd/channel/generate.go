@@ -50,14 +50,16 @@ func (c generateChannelCmd) run() error {
 	chStore := testutils.NewChannelStore()
 	ctx := context.Background()
 	var consenters []testutils.Consenter
-	orderers, err := helpers.GetClusterOrdererNodes(oclient, ns)
+	orderers, err := helpers.GetClusterOrdererNodes(clientSet, oclient, ns)
 	if err != nil {
 		return err
 	}
 	ordererMap := map[string][]*helpers.ClusterOrdererNode{}
+	log.Debugf("orderers: %v", orderers)
 	for _, consenter := range orderers {
+		log.Debugf("orderer: %v", consenter.Spec.MspID)
 		if !utils.Contains(c.ordererOrganizations, consenter.Spec.MspID) {
-			break
+			continue
 		}
 		tlsCert, err := utils.ParseX509Certificate([]byte(consenter.Status.TlsCert))
 		if err != nil {

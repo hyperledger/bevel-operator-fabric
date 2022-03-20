@@ -27,6 +27,7 @@ import (
 type HlfV1alpha1Interface interface {
 	RESTClient() rest.Interface
 	FabricCAsGetter
+	FabricChaincodesGetter
 	FabricExplorersGetter
 	FabricNetworkConfigsGetter
 	FabricOrdererNodesGetter
@@ -41,6 +42,10 @@ type HlfV1alpha1Client struct {
 
 func (c *HlfV1alpha1Client) FabricCAs(namespace string) FabricCAInterface {
 	return newFabricCAs(c, namespace)
+}
+
+func (c *HlfV1alpha1Client) FabricChaincodes(namespace string) FabricChaincodeInterface {
+	return newFabricChaincodes(c, namespace)
 }
 
 func (c *HlfV1alpha1Client) FabricExplorers(namespace string) FabricExplorerInterface {

@@ -26,6 +26,14 @@ type FabricCAListerExpansion interface{}
 // FabricCANamespaceLister.
 type FabricCANamespaceListerExpansion interface{}
 
+// FabricChaincodeListerExpansion allows custom methods to be added to
+// FabricChaincodeLister.
+type FabricChaincodeListerExpansion interface{}
+
+// FabricChaincodeNamespaceListerExpansion allows custom methods to be added to
+// FabricChaincodeNamespaceLister.
+type FabricChaincodeNamespaceListerExpansion interface{}
+
 // FabricExplorerListerExpansion allows custom methods to be added to
 // FabricExplorerLister.
 type FabricExplorerListerExpansion interface{}

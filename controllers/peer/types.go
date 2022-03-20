@@ -55,6 +55,7 @@ type FabricPeerChart struct {
 	Logging                  Logging             `json:"logging"`
 	ExternalBuilders         []ExternalBuilder   `json:"externalBuilders"`
 	ServiceMonitor           ServiceMonitor      `json:"serviceMonitor"`
+	EnvVars                  []corev1.EnvVar     `json:"envVars"`
 }
 
 type ServiceMonitor struct {

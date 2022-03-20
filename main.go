@@ -18,6 +18,7 @@ package main
 
 import (
 	"flag"
+	"github.com/kfsoftware/hlf-operator/controllers/chaincode"
 	"github.com/kfsoftware/hlf-operator/controllers/hlfmetrics"
 	"github.com/kfsoftware/hlf-operator/controllers/networkconfig"
 	"github.com/kfsoftware/hlf-operator/controllers/ordnode"
@@ -161,6 +162,16 @@ func main() {
 	if err = (&networkconfig.FabricNetworkConfigReconciler{
 		Client:    mgr.GetClient(),
 		Log:       ctrl.Log.WithName("controllers").WithName("FabricNetworkConfig"),
+		Scheme:    mgr.GetScheme(),
+		Config:    mgr.GetConfig(),
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "FabricNetworkConfig")
+		os.Exit(1)
+	}
+
+	if err = (&chaincode.FabricChaincodeReconciler{
+		Client:    mgr.GetClient(),
+		Log:       ctrl.Log.WithName("controllers").WithName("FabricChaincode"),
 		Scheme:    mgr.GetScheme(),
 		Config:    mgr.GetConfig(),
 	}).SetupWithManager(mgr); err != nil {
