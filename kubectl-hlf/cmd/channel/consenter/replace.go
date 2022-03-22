@@ -64,7 +64,7 @@ func (c *replaceonsenterCmd) run() error {
 	cftxGen := configtx.New(cfgBlock)
 	cfgOrd := cftxGen.Orderer()
 	ordConf, err := cftxGen.Orderer().Configuration()
-	ordNode, err := helpers.GetOrdererNodeByFullName(oClient, c.ordNodeName)
+	ordNode, err := helpers.GetOrdererNodeByFullName(clientSet, oClient, c.ordNodeName)
 	if err != nil {
 		return err
 	}

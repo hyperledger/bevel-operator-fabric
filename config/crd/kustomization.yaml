@@ -7,6 +7,7 @@ resources:
   - bases/hlf.kungfusoftware.es_fabricorderernodes.yaml
   - bases/hlf.kungfusoftware.es_fabriccas.yaml
   - bases/hlf.kungfusoftware.es_fabricnetworkconfigs.yaml
+  - bases/hlf.kungfusoftware.es_fabricchaincodes.yaml
 # +kubebuilder:scaffold:crdkustomizeresource
 
 patchesStrategicMerge:

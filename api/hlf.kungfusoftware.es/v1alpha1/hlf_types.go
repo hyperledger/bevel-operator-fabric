@@ -47,9 +47,6 @@ const StateDBLevelDB StateDB = "leveldb"
 // Use CouchDB database
 const StateDBCouchDB StateDB = "couchdb"
 
-// +kubebuilder:validation:Enum="2.1.1";"2.2.0"
-type FabricVersion string
-
 type ExternalBuilder struct {
 	Name string `json:"name"`
 	Path string `json:"path"`
@@ -131,20 +128,26 @@ type FabricPeerSpec struct {
 	FSServer *FabricFSServer `json:"fsServer"`
 
 	// +kubebuilder:validation:MinLength=3
-	MspID       string              `json:"mspID"`
-	Secret      Secret              `json:"secret"`
-	Service     PeerService         `json:"service"`
-	StateDb     StateDB             `json:"stateDb"`
-	Storage     FabricPeerStorage   `json:"storage"`
-	Discovery   FabricPeerDiscovery `json:"discovery"`
-	Logging     FabricPeerLogging   `json:"logging"`
-	Resources   FabricPeerResources `json:"resources"`
-	Hosts       []string            `json:"hosts"`
+	MspID     string              `json:"mspID"`
+	Secret    Secret              `json:"secret"`
+	Service   PeerService         `json:"service"`
+	StateDb   StateDB             `json:"stateDb"`
+	Storage   FabricPeerStorage   `json:"storage"`
+	Discovery FabricPeerDiscovery `json:"discovery"`
+	Logging   FabricPeerLogging   `json:"logging"`
+	Resources FabricPeerResources `json:"resources"`
+	Hosts     []string            `json:"hosts"`
 	// +optional
 	// +kubebuilder:validation:Optional
 	// +nullable
 	// +kubebuilder:validation:Default={}
 	Tolerations []corev1.Toleration `json:"tolerations"`
+
+	// +nullable
+	// +kubebuilder:validation:Optional
+	// +optional
+	// +kubebuilder:validation:Default={}
+	Env []corev1.EnvVar `json:"env"`
 }
 type FabricPeerResources struct {
 	Peer      corev1.ResourceRequirements `json:"peer"`
@@ -406,6 +409,12 @@ type FabricOrdererNodeSpec struct {
 	// +kubebuilder:validation:Optional
 	// +nullable
 	AdminIstio *FabricIstio `json:"adminIstio"`
+
+	// +nullable
+	// +kubebuilder:validation:Optional
+	// +optional
+	// +kubebuilder:validation:Default={}
+	Env []corev1.EnvVar `json:"env"`
 }
 
 type OrdererSystemChannel struct {
@@ -518,6 +527,12 @@ type FabricCASpec struct {
 	Resources corev1.ResourceRequirements `json:"resources"`
 	Storage   Storage                     `json:"storage"`
 	Metrics   FabricCAMetrics             `json:"metrics"`
+
+	// +nullable
+	// +kubebuilder:validation:Optional
+	// +optional
+	// +kubebuilder:validation:Default={}
+	Env []corev1.EnvVar `json:"env"`
 }
 
 type FabricCATLSConf struct {
@@ -946,6 +961,83 @@ type FabricNetworkConfigList struct {
 	Items           []FabricNetworkConfig `json:"items"`
 }
 
+// FabricChaincodeSpec defines the desired state of FabricChaincode
+type FabricChaincodeSpec struct {
+	Image string `json:"image"`
+	// +kubebuilder:default:="IfNotPresent"
+	ImagePullPolicy corev1.PullPolicy `json:"imagePullPolicy"`
+	// +kubebuilder:validation:MinLength=1
+	PackageID string `json:"packageId"`
+	// +kubebuilder:validation:Default={}
+	ImagePullSecrets []corev1.LocalObjectReference `json:"imagePullSecrets"`
+
+	// +nullable
+	// +kubebuilder:validation:Optional
+	// +optional
+	Affinity *corev1.Affinity `json:"affinity"`
+
+	// +nullable
+	// +kubebuilder:validation:Optional
+	// +optional
+	// +kubebuilder:validation:Default={}
+	Tolerations []corev1.Toleration `json:"tolerations"`
+
+	// +nullable
+	// +kubebuilder:validation:Optional
+	// +optional
+	Resources *corev1.ResourceRequirements `json:"resources"`
+
+	// +nullable
+	// +kubebuilder:validation:Optional
+	// +optional
+	Credentials *TLS `json:"credentials"`
+
+	// +kubebuilder:validation:Default=1
+	Replicas int `json:"replicas"`
+
+	// +nullable
+	// +kubebuilder:validation:Optional
+	// +optional
+	// +kubebuilder:validation:Default={}
+	Env []corev1.EnvVar `json:"env"`
+}
+
+// FabricChaincodeStatus defines the observed state of FabricChaincode
+type FabricChaincodeStatus struct {
+	Conditions status.Conditions `json:"conditions"`
+	Message    string            `json:"message"`
+	// Status of the FabricChaincode
+	Status DeploymentStatus `json:"status"`
+}
+
+// +genclient
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+// +k8s:defaulter-gen=true
+// +kubebuilder:subresource:status
+// +kubebuilder:resource:scope=Namespaced,shortName=fabricchaincode,singular=fabricchaincode
+// +kubebuilder:printcolumn:name="State",type="string",JSONPath=".status.status"
+// +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
+// +kubebuilder:object:root=true
+// +kubebuilder:subresource:status
+// +k8s:openapi-gen=true
+
+// FabricChaincode is the Schema for the hlfs API
+type FabricChaincode struct {
+	metav1.TypeMeta   `json:",inline"`
+	metav1.ObjectMeta `json:"metadata,omitempty"`
+	Spec              FabricChaincodeSpec   `json:"spec,omitempty"`
+	Status            FabricChaincodeStatus `json:"status,omitempty"`
+}
+
+// +kubebuilder:object:root=true
+
+// FabricChaincodeList contains a list of FabricChaincode
+type FabricChaincodeList struct {
+	metav1.TypeMeta `json:",inline"`
+	metav1.ListMeta `json:"metadata,omitempty"`
+	Items           []FabricChaincode `json:"items"`
+}
+
 func init() {
 	SchemeBuilder.Register(&FabricPeer{}, &FabricPeerList{})
 	SchemeBuilder.Register(&FabricOrderingService{}, &FabricOrderingServiceList{})
@@ -953,4 +1045,5 @@ func init() {
 	SchemeBuilder.Register(&FabricOrdererNode{}, &FabricOrdererNodeList{})
 	SchemeBuilder.Register(&FabricExplorer{}, &FabricExplorerList{})
 	SchemeBuilder.Register(&FabricNetworkConfig{}, &FabricNetworkConfigList{})
+	SchemeBuilder.Register(&FabricChaincode{}, &FabricChaincodeList{})
 }

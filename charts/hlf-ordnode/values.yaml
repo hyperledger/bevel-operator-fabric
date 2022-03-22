@@ -48,3 +48,4 @@ serviceMonitor:
   sampleLimit: 0
 
 
+envVars: []

@@ -32,6 +32,10 @@ func (c *FakeHlfV1alpha1) FabricCAs(namespace string) v1alpha1.FabricCAInterface
 	return &FakeFabricCAs{c, namespace}
 }
 
+func (c *FakeHlfV1alpha1) FabricChaincodes(namespace string) v1alpha1.FabricChaincodeInterface {
+	return &FakeFabricChaincodes{c, namespace}
+}
+
 func (c *FakeHlfV1alpha1) FabricExplorers(namespace string) v1alpha1.FabricExplorerInterface {
 	return &FakeFabricExplorers{c, namespace}
 }
