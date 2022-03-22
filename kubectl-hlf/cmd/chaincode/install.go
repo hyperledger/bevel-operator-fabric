@@ -77,6 +77,7 @@ func (c *installChaincodeCmd) run() error {
 			return err
 		}
 	}
+	packageID := lifecycle.ComputePackageID(c.chaincodeLabel, pkg)
 	responses, err := resClient.LifecycleInstallCC(
 		resmgmt.LifecycleInstallCCRequest{
 			Label:   c.chaincodeLabel,
@@ -92,7 +93,7 @@ func (c *installChaincodeCmd) run() error {
 	for _, res := range responses {
 		log.Infof("Package id=%s Status=%d", res.PackageID, res.Status)
 	}
-	log.Infof("Chaincode installed")
+	log.Infof("Chaincode installed %s", packageID)
 	return nil
 }
 func newChaincodeInstallCMD(io.Writer, io.Writer) *cobra.Command {

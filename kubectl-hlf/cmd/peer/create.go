@@ -18,23 +18,25 @@ import (
 )
 
 type Options struct {
-	Name           string
-	StorageClass   string
-	Capacity       string
-	NS             string
-	Image          string
-	Version        string
-	MspID          string
-	StateDB        string
-	IngressGateway string
-	IngressPort    int
-	EnrollPW       string
-	CAName         string
-	EnrollID       string
-	Hosts          []string
-	BootstrapPeers []string
-	Leader         bool
-	Output         bool
+	Name                            string
+	StorageClass                    string
+	Capacity                        string
+	NS                              string
+	Image                           string
+	Version                         string
+	MspID                           string
+	StateDB                         string
+	IngressGateway                  string
+	IngressPort                     int
+	EnrollPW                        string
+	CAName                          string
+	EnrollID                        string
+	Hosts                           []string
+	BootstrapPeers                  []string
+	Leader                          bool
+	Output                          bool
+	KubernetesBuilder               bool
+	ExternalChaincodeServiceBuilder bool
 }
 
 func (o Options) Validate() error {
@@ -113,6 +115,17 @@ func (c *createCmd) run() error {
 	}
 	csrHosts = append(csrHosts, c.peerOpts.Name)
 	csrHosts = append(csrHosts, fmt.Sprintf("%s.%s", c.peerOpts.Name, c.peerOpts.NS))
+	var externalBuilders []v1alpha1.ExternalBuilder
+	if c.peerOpts.ExternalChaincodeServiceBuilder {
+		externalBuilders = append(externalBuilders, v1alpha1.ExternalBuilder{
+			Name: "ccaas_builder",
+			Path: "/opt/hyperledger/ccaas_builder",
+			PropagateEnvironment: []string{
+				"CHAINCODE_AS_A_SERVICE_BUILDER_CONFIG",
+			},
+		})
+	}
+	kubernetesBuilder := c.peerOpts.KubernetesBuilder
 	fabricPeer := &v1alpha1.FabricPeer{
 		TypeMeta: v1.TypeMeta{
 			Kind:       "FabricPeer",
@@ -123,13 +136,14 @@ func (c *createCmd) run() error {
 			Namespace: c.peerOpts.NS,
 		},
 		Spec: v1alpha1.FabricPeerSpec{
-			ServiceMonitor:   nil,
-			HostAliases:      nil,
-			Replicas:         1,
-			DockerSocketPath: "",
-			Image:            c.peerOpts.Image,
-			ExternalBuilders: nil,
-			Istio:            istio,
+			ServiceMonitor:           nil,
+			HostAliases:              nil,
+			Replicas:                 1,
+			DockerSocketPath:         "",
+			Image:                    c.peerOpts.Image,
+			ExternalChaincodeBuilder: kubernetesBuilder,
+			ExternalBuilders:         externalBuilders,
+			Istio:                    istio,
 			Gossip: v1alpha1.FabricPeerSpecGossip{
 				ExternalEndpoint:  externalEndpoint,
 				Bootstrap:         "",
@@ -137,10 +151,9 @@ func (c *createCmd) run() error {
 				UseLeaderElection: !c.peerOpts.Leader,
 				OrgLeader:         c.peerOpts.Leader,
 			},
-			ExternalEndpoint:         externalEndpoint,
-			Tag:                      c.peerOpts.Version,
-			ImagePullPolicy:          "Always",
-			ExternalChaincodeBuilder: true,
+			ExternalEndpoint: externalEndpoint,
+			Tag:              c.peerOpts.Version,
+			ImagePullPolicy:  "Always",
 			CouchDB: v1alpha1.FabricPeerCouchDB{
 				User:     "couchdb",
 				Password: "couchdb",
@@ -355,5 +368,7 @@ func newCreatePeerCmd(out io.Writer, errOut io.Writer) *cobra.Command {
 	f.StringArrayVarP(&c.peerOpts.BootstrapPeers, "bootstrap-peer", "", []string{}, "Bootstrap peers")
 	f.StringArrayVarP(&c.peerOpts.Hosts, "hosts", "", []string{}, "External hosts")
 	f.BoolVarP(&c.peerOpts.Output, "output", "o", false, "output in yaml")
+	f.BoolVarP(&c.peerOpts.KubernetesBuilder, "k8s-builder", "", false, "Enable kubernetes builder (deprecated)")
+	f.BoolVarP(&c.peerOpts.ExternalChaincodeServiceBuilder, "external-service-builder", "", true, "external chaincode service builder enabled(only use in 2.4.1+)")
 	return cmd
 }

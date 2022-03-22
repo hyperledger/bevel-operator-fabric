@@ -55,6 +55,8 @@ func (f *sharedInformerFactory) ForResource(resource schema.GroupVersionResource
 	// Group=hlf.kungfusoftware.es, Version=v1alpha1
 	case v1alpha1.SchemeGroupVersion.WithResource("fabriccas"):
 		return &genericInformer{resource: resource.GroupResource(), informer: f.Hlf().V1alpha1().FabricCAs().Informer()}, nil
+	case v1alpha1.SchemeGroupVersion.WithResource("fabricchaincodes"):
+		return &genericInformer{resource: resource.GroupResource(), informer: f.Hlf().V1alpha1().FabricChaincodes().Informer()}, nil
 	case v1alpha1.SchemeGroupVersion.WithResource("fabricexplorers"):
 		return &genericInformer{resource: resource.GroupResource(), informer: f.Hlf().V1alpha1().FabricExplorers().Informer()}, nil
 	case v1alpha1.SchemeGroupVersion.WithResource("fabricnetworkconfigs"):

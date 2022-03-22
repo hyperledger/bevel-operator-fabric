@@ -21,10 +21,10 @@ const (
 )
 
 type Organization struct {
-	Type             OrganizationType
-	MspID            string
-	OrderingServices []*ClusterOrderingService
-	Peers            []*ClusterPeer
+	Type         OrganizationType
+	MspID        string
+	OrdererNodes []*ClusterOrdererNode
+	Peers        []*ClusterPeer
 }
 
 type ClusterCA struct {
@@ -123,7 +123,6 @@ func GetClusterOrderers(
 	if err != nil {
 		return nil, nil, err
 	}
-
 	orderingServices, err := oclient.HlfV1alpha1().FabricOrderingServices(ns).List(ctx, v1.ListOptions{})
 	if err != nil {
 		return nil, nil, err
@@ -190,10 +189,10 @@ func GetClusterOrderers(
 	var organizations []*Organization
 	for _, ord := range orderers {
 		org := &Organization{
-			Type:             OrdererType,
-			MspID:            ord.MSPID,
-			OrderingServices: []*ClusterOrderingService{ord},
-			Peers:            []*ClusterPeer{},
+			Type:         OrdererType,
+			MspID:        ord.MSPID,
+			OrdererNodes: []*ClusterOrdererNode{},
+			Peers:        []*ClusterPeer{},
 		}
 		organizations = append(organizations, org)
 	}
@@ -201,6 +200,7 @@ func GetClusterOrderers(
 }
 
 func GetClusterOrdererNodes(
+	clientSet *kubernetes.Clientset,
 	oclient *operatorv1.Clientset,
 	ns string,
 ) ([]*ClusterOrdererNode, error) {
@@ -212,13 +212,21 @@ func GetClusterOrdererNodes(
 	var ordererNodes []*ClusterOrdererNode
 
 	for _, ordNode := range ordererNodeList.Items {
+		publicURL, err := GetOrdererPublicURL(clientSet, ordNode)
+		if err != nil {
+			return nil, err
+		}
+		privateURL := GetOrdererPrivateURL(ordNode)
+
 		ordererNodes = append(
 			ordererNodes,
 			&ClusterOrdererNode{
-				Name:   ordNode.FullName(),
-				Spec:   ordNode.Spec,
-				Status: ordNode.Status,
-				Item:   ordNode,
+				Name:       ordNode.FullName(),
+				PublicURL:  publicURL,
+				PrivateURL: privateURL,
+				Spec:       ordNode.Spec,
+				Status:     ordNode.Status,
+				Item:       ordNode,
 			},
 		)
 	}
@@ -238,7 +246,7 @@ func GetCertAuthByURL(clientSet *kubernetes.Clientset, oclient *operatorv1.Clien
 	}
 	for _, certAuth := range certAuths {
 		if // if host and port is specified by kubernetes DNS
-		certAuth.Item.Name == cahost || (certAuth.Status.NodePort != 7054 && certAuth.Status.NodePort == port) {
+		utils.Contains(certAuth.Spec.Hosts, host) || certAuth.Item.Name == cahost || (certAuth.Status.NodePort != 7054 && certAuth.Status.NodePort == port) {
 			return certAuth, nil
 		}
 
@@ -325,7 +333,7 @@ func GetOrdererHostAndPort(clientset *kubernetes.Clientset, nodeSpec hlfv1alpha1
 	ordererPort := nodeStatus.NodePort
 	if len(nodeSpec.Istio.Hosts) > 0 {
 		hostName = nodeSpec.Istio.Hosts[0]
-        ordererPort = nodeSpec.Istio.Port
+		ordererPort = nodeSpec.Istio.Port
 	}
 	return hostName, ordererPort, nil
 }
@@ -427,8 +435,8 @@ func GetCAHostPort(clientset *kubernetes.Clientset, node hlfv1alpha1.FabricCA) (
 		Port: node.Status.NodePort,
 	}, nil
 }
-func GetOrdererNodeByFullName(oclient *operatorv1.Clientset, name string) (*ClusterOrdererNode, error) {
-	ordererNodes, err := GetClusterOrdererNodes(oclient, "")
+func GetOrdererNodeByFullName(clientSet *kubernetes.Clientset, oclient *operatorv1.Clientset, name string) (*ClusterOrdererNode, error) {
+	ordererNodes, err := GetClusterOrdererNodes(clientSet, oclient, "")
 	if err != nil {
 		return nil, err
 	}
@@ -487,10 +495,10 @@ func GetClusterPeers(
 		org, ok := orgMap[mspID]
 		if !ok {
 			orgMap[mspID] = &Organization{
-				Type:             PeerType,
-				MspID:            mspID,
-				OrderingServices: []*ClusterOrderingService{},
-				Peers:            []*ClusterPeer{},
+				Type:         PeerType,
+				MspID:        mspID,
+				OrdererNodes: []*ClusterOrdererNode{},
+				Peers:        []*ClusterPeer{},
 			}
 			org = orgMap[mspID]
 		}
