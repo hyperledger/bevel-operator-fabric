@@ -878,6 +878,7 @@ func getConfig(
 		},
 	}
 	fabricOrdChart := fabricOrdChart{
+		EnvVars:                     spec.Env,
 		Resources:                   resources,
 		Istio:                       istio,
 		AdminIstio:                  adminIstio,

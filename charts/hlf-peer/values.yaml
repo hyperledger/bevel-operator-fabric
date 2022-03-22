@@ -10,6 +10,8 @@ istio:
 
 dockerSocketPath: /var/run/docker.sock
 
+envVars: []
+
 couchdbExporter:
   enabled: false
   image: "gesellix/couchdb-prometheus-exporter"
@@ -179,3 +181,7 @@ serviceMonitor:
 
 couchdbUsername: "couchdb"
 couchdbPassword: "couchdb"
+opsTLS:
+  key: ""
+  cert: ""
+

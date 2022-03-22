@@ -112,9 +112,11 @@ spec:
 
               echo ">\033[0;35m orderer \033[0m"
               orderer
-              # disable in prod:
-              echo "orderer terminated with return value $?"
-              sleep 999999999
+
+          {{- if $.Values.envVars }}
+          env:
+          {{ toYaml .Values.envVars | indent 12 }}
+          {{- end }}
           envFrom:
             - configMapRef:
                 name: {{ include "hlf-ordnode.fullname" . }}--ord
