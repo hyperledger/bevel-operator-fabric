@@ -50,7 +50,6 @@ type createCmd struct {
 }
 
 func (c *createCmd) validate() error {
-	c.peerOpts.Image = helpers.DefaultPeerImage
 	return c.peerOpts.Validate()
 }
 func (c *createCmd) run() error {
