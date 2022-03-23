@@ -43,7 +43,6 @@ type createCmd struct {
 }
 
 func (c *createCmd) validate() error {
-	c.ordererOpts.Image = helpers.DefaultOrdererImage
 	return c.ordererOpts.Validate()
 }
 func (c *createCmd) run(args []string) error {

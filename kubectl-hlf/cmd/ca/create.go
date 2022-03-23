@@ -39,7 +39,6 @@ type createCmd struct {
 }
 
 func (c *createCmd) validate() error {
-	c.caOpts.Image = helpers.DefaultCAImage
 	return c.caOpts.Validate()
 }
 func (c *createCmd) run(args []string) error {
