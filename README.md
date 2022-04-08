@@ -88,10 +88,10 @@ To update the Kubectl HLF Plugin to the latest version, run the following comman
 ### Setup versions
 ```bash
 export PEER_IMAGE=hyperledger/fabric-peer
-export PEER_VERSION=2.4.1
+export PEER_VERSION=2.4.3
 
 export ORDERER_IMAGE=hyperledger/fabric-orderer
-export ORDERER_VERSION=2.4.1
+export ORDERER_VERSION=2.4.3
 
 ```
 
