@@ -218,6 +218,7 @@ kubectl hlf channel top --channel=demo --config=org1.yaml \
 
 ## Install a chaincode
 ```bash
+# remove the code.tar.gz asset-transfer-basic-external.tgz if they exist
 rm code.tar.gz asset-transfer-basic-external.tgz
 export CHAINCODE_NAME=asset
 export CHAINCODE_LABEL=asset
