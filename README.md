@@ -69,7 +69,7 @@ Add the helm chartrepository:
 helm repo add kfs https://kfsoftware.github.io/hlf-helm-charts --force-update 
 ```
 ```bash
-helm install hlf-operator --version=1.5.0 kfs/hlf-operator
+helm install hlf-operator --version=1.6.0 kfs/hlf-operator
 ```
 
 ### Installing the Kubectl HLF Plugin
