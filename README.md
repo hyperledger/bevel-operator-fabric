@@ -4,6 +4,9 @@ title: Getting started
 ---
 [![Build Status](https://img.shields.io/travis/kfsoftware/hlf-operator/main.svg?label=E2E%20testing)](https://travis-ci.org/kfsoftware/hlf-operator)
 
+> :info: **This repository will be transferred to hyperledger-labs on 24th of April**
+
+
 # Hyperledger Fabric Operator
 
 ## Features
