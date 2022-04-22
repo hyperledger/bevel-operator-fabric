@@ -28,6 +28,11 @@ title: Getting started
 
 ![hlf-operator-star-github](https://user-images.githubusercontent.com/6862893/123808402-022aa800-d8f1-11eb-8df4-8a9552f126a2.gif)
 
+## Tutorial Videos
+Step by step video tutorials to setup hlf-opertor in kubernetes
+
+[![Hyperledger Fabric on Kubernetes](https://img.youtube.com/vi/e04TcJHUI5M/0.jpg)](https://www.youtube.com/playlist?list=PLuAZTZDgj0csRQuNMY8wbYqOCpzggAuMo "Hyperledger Fabric on Kubernetes")
+
 ## Hyperledger Meetup
 
 You can watch this video in order to see how to use it to deploy your own network:
