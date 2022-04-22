@@ -134,7 +134,6 @@ spec:
               # To avoid having separate secrets for CouchDB and HLF
               export CORE_LEDGER_STATE_COUCHDBCONFIG_USERNAME=$COUCHDB_USER
               export CORE_LEDGER_STATE_COUCHDBCONFIG_PASSWORD=$COUCHDB_PASSWORD
-              env
 
               while [ ! -d ${CORE_PEER_MSPCONFIGPATH}/signcerts ];
               do
@@ -161,6 +160,15 @@ spec:
               value: {{ include "hlf-peer.fullname" . }}-fs
             - name: FILE_SERVER_ENDPOINT
               value: '127.0.0.1:8080'
+{{ if .Values.envVars -}}
+{{- toYaml .Values.envVars | nindent 12 }}
+{{- end }}
+{{ else }}
+{{ if .Values.envVars }}
+          env:
+{{- toYaml .Values.envVars | nindent 12 }}
+
+{{- end }}
 {{- end }}
           envFrom:
             {{- if and (eq .Values.peer.databaseType "CouchDB") }}

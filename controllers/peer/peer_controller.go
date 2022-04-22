@@ -1124,6 +1124,7 @@ func GetConfig(
 	}
 
 	var c = FabricPeerChart{
+		EnvVars:  spec.Env,
 		Replicas: spec.Replicas,
 		Istio:    istio,
 		Image: Image{
@@ -1204,7 +1205,7 @@ func GetConfig(
 			CouchDBExporter: couchDBExporterResources,
 		},
 		NodeSelector:     NodeSelector{},
-		Tolerations:      nil,
+		Tolerations:      spec.Tolerations,
 		Affinity:         Affinity{},
 		ExternalHost:     externalEndpoint,
 		FullnameOverride: conf.Name,

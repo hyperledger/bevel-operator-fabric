@@ -1,30 +1,34 @@
 package ordnode
 
+import corev1 "k8s.io/api/core/v1"
+
 type fabricOrdChart struct {
-	Istio                       Istio          `json:"istio"`
-	AdminIstio                  Istio          `json:"adminIstio"`
-	Replicas                    int            `json:"replicas"`
-	Genesis                     string         `json:"genesis"`
-	ChannelParticipationEnabled bool           `json:"channelParticipationEnabled"`
-	BootstrapMethod             string         `json:"bootstrapMethod"`
-	Admin                       admin          `json:"admin"`
-	Cacert                      string         `json:"cacert"`
-	Tlsrootcert                 string         `json:"tlsrootcert"`
-	AdminCert                   string         `json:"adminCert"`
-	Cert                        string         `json:"cert"`
-	Key                         string         `json:"key"`
-	TLS                         tls            `json:"tls"`
-	Resources                   Resources      `json:"resources,omitempty"`
-	FullnameOverride            string         `json:"fullnameOverride"`
-	HostAliases                 []HostAlias    `json:"hostAliases"`
-	Service                     service        `json:"service"`
-	Image                       image          `json:"image"`
-	Persistence                 persistence    `json:"persistence"`
-	Ord                         ord            `json:"ord"`
-	Clientcerts                 clientcerts    `json:"clientcerts"`
-	Hosts                       []string       `json:"hosts"`
-	Logging                     Logging        `json:"logging"`
-	ServiceMonitor              ServiceMonitor `json:"serviceMonitor"`
+	Istio                       Istio               `json:"istio"`
+	AdminIstio                  Istio               `json:"adminIstio"`
+	Replicas                    int                 `json:"replicas"`
+	Genesis                     string              `json:"genesis"`
+	ChannelParticipationEnabled bool                `json:"channelParticipationEnabled"`
+	BootstrapMethod             string              `json:"bootstrapMethod"`
+	Admin                       admin               `json:"admin"`
+	Cacert                      string              `json:"cacert"`
+	Tlsrootcert                 string              `json:"tlsrootcert"`
+	AdminCert                   string              `json:"adminCert"`
+	Cert                        string              `json:"cert"`
+	Key                         string              `json:"key"`
+	TLS                         tls                 `json:"tls"`
+	Tolerations                 []corev1.Toleration `json:"tolerations,omitempty"`
+	Resources                   Resources           `json:"resources,omitempty"`
+	FullnameOverride            string              `json:"fullnameOverride"`
+	HostAliases                 []HostAlias         `json:"hostAliases"`
+	Service                     service             `json:"service"`
+	Image                       image               `json:"image"`
+	Persistence                 persistence         `json:"persistence"`
+	Ord                         ord                 `json:"ord"`
+	Clientcerts                 clientcerts         `json:"clientcerts"`
+	Hosts                       []string            `json:"hosts"`
+	Logging                     Logging             `json:"logging"`
+	ServiceMonitor              ServiceMonitor      `json:"serviceMonitor"`
+	EnvVars                     []corev1.EnvVar     `json:"envVars"`
 }
 type Resources struct {
 	Limits   Limits   `json:"limits"`

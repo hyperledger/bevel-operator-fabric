@@ -39,7 +39,6 @@ type createCmd struct {
 }
 
 func (c *createCmd) validate() error {
-	c.caOpts.Image = helpers.DefaultCAImage
 	return c.caOpts.Validate()
 }
 func (c *createCmd) run(args []string) error {
@@ -283,6 +282,7 @@ func newCreateCACmd(out io.Writer, errOut io.Writer) *cobra.Command {
 	f.StringVarP(&c.caOpts.NS, "namespace", "n", helpers.DefaultNamespace, "namespace scope for this request")
 	f.StringVarP(&c.caOpts.StorageClass, "storage-class", "s", helpers.DefaultStorageclass, "storage class for this Certificate Authority tenant")
 	f.StringVarP(&c.caOpts.Version, "version", "v", helpers.DefaultCAVersion, "version of the Fabric CA")
+	f.StringVarP(&c.caOpts.Image, "image", "i", helpers.DefaultCAImage, "image of the Fabric CA")
 	f.StringVarP(&c.caOpts.EnrollID, "enroll-id", "", "enroll", "username to register new users")
 	f.StringVarP(&c.caOpts.EnrollSecret, "enroll-pw", "", "enrollpw", "password to register new users")
 	f.BoolVarP(&c.caOpts.Output, "output", "o", false, "output in yaml")
