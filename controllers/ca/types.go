@@ -1,5 +1,7 @@
 package ca
 
+import corev1 "k8s.io/api/core/v1"
+
 type FabricCAChart struct {
 	Istio            Istio                 `json:"istio"`
 	FullNameOverride string                `json:"fullnameOverride"`
@@ -10,7 +12,7 @@ type FabricCAChart struct {
 	Database         Database              `json:"db"`
 	Resources        Resources             `json:"resources"`
 	NodeSelector     NodeSelector          `json:"nodeSelector"`
-	Tolerations      []interface{}         `json:"tolerations"`
+	Tolerations      []corev1.Toleration   `json:"tolerations"`
 	Affinity         Affinity              `json:"affinity"`
 	Metrics          FabricCAChartMetrics  `json:"metrics"`
 	Debug            bool                  `json:"debug"`
@@ -19,6 +21,7 @@ type FabricCAChart struct {
 	TLSCA            FabricCAChartItemConf `json:"tlsCA"`
 	Cors             Cors                  `json:"cors"`
 	ServiceMonitor   ServiceMonitor        `json:"serviceMonitor"`
+	EnvVars          []corev1.EnvVar       `json:"envVars"`
 }
 type ServiceMonitor struct {
 	Enabled           bool              `json:"enabled"`

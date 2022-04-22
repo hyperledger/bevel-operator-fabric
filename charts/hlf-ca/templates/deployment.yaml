@@ -61,6 +61,10 @@ spec:
                 name: {{ include "hlf-ca.fullname" . }}--ca
             - configMapRef:
                 name: {{ include "hlf-ca.fullname" . }}--ca
+{{- if $.Values.envVars }}
+          env:
+{{ toYaml .Values.envVars | indent 12 }}
+{{- end }}
           ports:
             - name: ca-port
               containerPort: 7054

@@ -64,7 +64,7 @@ func (c *addConsenterCmd) run() error {
 	cftxGen := configtx.New(cfgBlock)
 	cfgOrd := cftxGen.Orderer()
 	for _, ordNodeName := range c.ordNodeNames {
-		ordNode, err := helpers.GetOrdererNodeByFullName(oClient, ordNodeName)
+		ordNode, err := helpers.GetOrdererNodeByFullName(clientSet,oClient, ordNodeName)
 		if err != nil {
 			return err
 		}

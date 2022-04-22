@@ -20,6 +20,8 @@ package v1alpha1
 
 type FabricCAExpansion interface{}
 
+type FabricChaincodeExpansion interface{}
+
 type FabricExplorerExpansion interface{}
 
 type FabricNetworkConfigExpansion interface{}

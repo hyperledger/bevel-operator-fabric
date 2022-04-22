@@ -3,7 +3,7 @@ kind: Plugin
 metadata:
   name: hlf
 spec:
-  version: "v1.2.1"
+  version: "v1.5.1"
   homepage: https://github.com/kfsoftware/hlf-operator
   shortDescription: "Deploy and manage Hyperledger Fabric Peers, Orderers and Certificate authorities"
   description: |
@@ -18,20 +18,27 @@ spec:
         matchLabels:
           os: darwin
           arch: amd64
-      uri: https://github.com/kfsoftware/hlf-operator/releases/download/v1.2.1/kubectl-hlf_1.2.1_darwin_amd64.zip
-      sha256: 35025e0e41e66e50ad5356ba1547f374dd20988763fb5247ad315f4c1ddbb9eb
+      uri: https://github.com/kfsoftware/hlf-operator/releases/download/v1.5.1/kubectl-hlf_1.5.1_darwin_amd64.zip
+      sha256: 814af545e60b7f28f283666e0bd1b5af1c6513b7d8045e12d4d8e15e88465595
       bin: kubectl-hlf
     - selector:
         matchLabels:
           os: linux
           arch: amd64
-      uri: https://github.com/kfsoftware/hlf-operator/releases/download/v1.2.1/kubectl-hlf_1.2.1_linux_amd64.zip
-      sha256: 0bfa8a09aa4abf726b7dc4999fe78f4ff20e11aa253dfb2a3156040f7b8e4748
+      uri: https://github.com/kfsoftware/hlf-operator/releases/download/v1.5.1/kubectl-hlf_1.5.1_linux_amd64.zip
+      sha256: 80b8f1ff873fe1363a75ccf31236867252d61c2f2ff3ca0f68859c944401824e
       bin: kubectl-hlf
     - selector:
         matchLabels:
           os: windows
           arch: amd64
-      uri: https://github.com/kfsoftware/hlf-operator/releases/download/v1.2.1/kubectl-hlf_1.2.1_windows_amd64.zip
-      sha256: 861d9bcd3b45e0aaad01e7d6a79a91bf95be1f4830447ac38121730caa26e708
+      uri: https://github.com/kfsoftware/hlf-operator/releases/download/v1.5.1/kubectl-hlf_1.5.1_windows_amd64.zip
+      sha256: d35ae9c9be11c12f049074694eccfb4ef40a986eb509efacd4d8a70a72f24b65
+      bin: kubectl-hlf
+    - selector:
+        matchLabels:
+          os: freebsd
+          arch: amd64
+      uri: https://github.com/kfsoftware/hlf-operator/releases/download/v1.5.1/kubectl-hlf_1.5.1_linux_amd64.zip
+      sha256: 69846ea653fc8ffc74971fa3689ac9a95a3aff3e840c59bb49ae7f653e4f9f11
       bin: kubectl-hlf
