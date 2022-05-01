@@ -25,6 +25,7 @@ type createExternalChaincodeCmd struct {
 	replicas int
 
 	tlsRequired bool
+	ImagePullSecret []string
 }
 
 func (c *createExternalChaincodeCmd) validate() error {
@@ -72,6 +73,15 @@ func (c *createExternalChaincodeCmd) run() error {
 		ImagePullSecrets: []corev1.LocalObjectReference{},
 		Credentials:      nil,
 		Replicas:         c.replicas,
+	}
+	if len(c.ImagePullSecret)>0{
+		imagePullSecret :=[]corev1.LocalObjectReference{}
+		for _, v := range c.ImagePullSecret {
+			imagePullSecret = append(imagePullSecret, corev1.LocalObjectReference{
+				Name: v,
+			})
+		}
+			fabricChaincodeSpec.ImagePullSecrets=imagePullSecret
 	}
 	if c.tlsRequired {
 		fabricCA, err := oclient.HlfV1alpha1().FabricCAs(c.caNamespace).Get(ctx, c.caName, v1.GetOptions{})
@@ -136,5 +146,6 @@ func newExternalChaincodeCreateCmd() *cobra.Command {
 	f.StringVar(&c.enrollSecret, "enroll-secret", "", "Enroll secret of the CA")
 	f.IntVar(&c.replicas, "replicas", 1, "Replicas of the external chaincode")
 	f.BoolVar(&c.tlsRequired, "tls-required", false, "Whether the chaincode requires TLS or not")
+	f.StringArrayVarP(&c.ImagePullSecret, "image-pull-secret", "ps", []string{}, "Image Pull Secret for the Chaincode Image")
 	return cmd
 }

@@ -26,6 +26,7 @@ type syncExternalChaincodeCmd struct {
 	replicas int
 
 	tlsRequired bool
+	ImagePullSecret []string
 }
 
 func (c *syncExternalChaincodeCmd) validate() error {
@@ -65,6 +66,16 @@ func (c syncExternalChaincodeCmd) getFabricChaincodeSpec(ctx context.Context) (v
 		ImagePullSecrets: []corev1.LocalObjectReference{},
 		Credentials:      nil,
 		Replicas:         c.replicas,
+	}
+
+	if len(c.ImagePullSecret)>0{
+		imagePullSecret :=[]corev1.LocalObjectReference{}
+		for _, v := range c.ImagePullSecret {
+			imagePullSecret = append(imagePullSecret, corev1.LocalObjectReference{
+				Name: v,
+			})
+		}
+			fabricChaincodeSpec.ImagePullSecrets=imagePullSecret
 	}
 	oclient, err := helpers.GetKubeOperatorClient()
 	if err != nil {
@@ -213,5 +224,6 @@ func newExternalChaincodeSyncCmd() *cobra.Command {
 	f.BoolVarP(&c.force, "force", "", false, "Force restart of chaincode")
 	f.BoolVar(&c.tlsRequired, "tls-required", false, "Require TLS for chaincode")
 	f.IntVarP(&c.replicas, "replicas", "", 1, "Number of replicas of the chaincode")
+	f.StringArrayVarP(&c.ImagePullSecret, "image-pull-secret", "ps", []string{}, "Image Pull Secret for the Chaincode Image")
 	return cmd
 }
