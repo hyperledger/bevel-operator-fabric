@@ -146,6 +146,6 @@ func newExternalChaincodeCreateCmd() *cobra.Command {
 	f.StringVar(&c.enrollSecret, "enroll-secret", "", "Enroll secret of the CA")
 	f.IntVar(&c.replicas, "replicas", 1, "Replicas of the external chaincode")
 	f.BoolVar(&c.tlsRequired, "tls-required", false, "Whether the chaincode requires TLS or not")
-	f.StringArrayVarP(&c.ImagePullSecret, "image-pull-secret", "ps", []string{}, "Image Pull Secret for the Chaincode Image")
+	f.StringArrayVarP(&c.ImagePullSecret, "image-pull-secret", "s", []string{}, "Image Pull Secret for the Chaincode Image")
 	return cmd
 }
