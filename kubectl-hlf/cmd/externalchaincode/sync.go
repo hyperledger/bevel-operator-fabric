@@ -224,6 +224,6 @@ func newExternalChaincodeSyncCmd() *cobra.Command {
 	f.BoolVarP(&c.force, "force", "", false, "Force restart of chaincode")
 	f.BoolVar(&c.tlsRequired, "tls-required", false, "Require TLS for chaincode")
 	f.IntVarP(&c.replicas, "replicas", "", 1, "Number of replicas of the chaincode")
-	f.StringArrayVarP(&c.ImagePullSecret, "image-pull-secret", "ps", []string{}, "Image Pull Secret for the Chaincode Image")
+	f.StringArrayVarP(&c.ImagePullSecret, "image-pull-secret", "s", []string{}, "Image Pull Secret for the Chaincode Image")
 	return cmd
 }
