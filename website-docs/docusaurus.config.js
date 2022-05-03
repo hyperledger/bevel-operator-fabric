@@ -2,12 +2,12 @@ module.exports = {
   title: "Hyperledger Fabric Operator",
   tagline:
     "Make easier and more secure deployments of Hyperledger Fabric on Kubernetes",
-  url: "https://kfsoftware.github.io",
+  url: "https://labs.hyperledger.org",
   baseUrl: "/hlf-operator/",
   onBrokenLinks: "throw",
   onBrokenMarkdownLinks: "warn",
   favicon: "img/favicon.png",
-  organizationName: "kfsoftware", // Usually your GitHub org/user name.
+  organizationName: "hyperledger-labs", // Usually your GitHub org/user name.
   projectName: "hlf-operator", // Usually your repo name.
   themeConfig: {
     colorMode: {
@@ -57,7 +57,7 @@ module.exports = {
           position: "left",
         },
         {
-          href: "https://github.com/kfsoftware/hlf-operator",
+          href: "https://github.com/hyperledger-labs/hlf-operator",
           label: "GitHub",
           position: "right",
         },
@@ -100,7 +100,7 @@ module.exports = {
             },
             {
               label: "Github Issues",
-              href: "https://github.com/kfsoftware/hlf-operator/issues",
+              href: "https://github.com/hyperledger-labs/hlf-operator/issues",
             },
           ],
         },
@@ -109,7 +109,7 @@ module.exports = {
           items: [
             {
               label: "GitHub",
-              href: "https://github.com/kfsoftware/hlf-operator",
+              href: "https://github.com/hyperledger-labs/hlf-operator",
             },
           ],
         },
@@ -126,13 +126,13 @@ module.exports = {
           sidebarPath: require.resolve("./sidebars.js"),
           // Please change this to your repo.
           editUrl:
-            "https://github.com/kfsoftware/hlf-operator/edit/master/website/",
+            "https://github.com/hyperledger-labs/hlf-operator/edit/master/website/",
         },
         blog: {
           showReadingTime: true,
           // Please change this to your repo.
           editUrl:
-            "https://github.com/kfsoftware/hlf-operator/edit/master/website/blog/",
+            "https://github.com/hyperledger-labs/hlf-operator/edit/master/website/blog/",
         },
         theme: {
           customCss: require.resolve("./src/css/custom.css"),
