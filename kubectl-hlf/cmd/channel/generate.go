@@ -18,6 +18,7 @@ type generateChannelCmd struct {
 	channelName          string
 	organizations        []string
 	ordererOrganizations []string
+	consenterNodes       []string
 	output               string
 }
 
@@ -60,6 +61,18 @@ func (c generateChannelCmd) run() error {
 		log.Debugf("orderer: %v", consenter.Spec.MspID)
 		if !utils.Contains(c.ordererOrganizations, consenter.Spec.MspID) {
 			continue
+		}
+		if len(c.consenterNodes) > 0 {
+			// check if the orderer is in the list of consenter nodes specified
+			found := false
+			for _, consenterNode := range c.consenterNodes {
+				if consenterNode == consenter.Item.Name {
+					found = true
+				}
+			}
+			if !found {
+				continue
+			}
 		}
 		tlsCert, err := utils.ParseX509Certificate([]byte(consenter.Status.TlsCert))
 		if err != nil {
@@ -193,11 +206,11 @@ func newGenerateChannelCMD(io.Writer, io.Writer) *cobra.Command {
 		},
 	}
 	persistentFlags := cmd.PersistentFlags()
-	//persistentFlags.StringVarP(&c.adminOrg, "admin-org", "", "", "Admin org to invoke the updates")
 	persistentFlags.StringVarP(&c.channelName, "name", "", "", "Channel name")
 	persistentFlags.StringVarP(&c.output, "output", "o", "", "Output block")
 	persistentFlags.StringSliceVarP(&c.organizations, "organizations", "p", nil, "Organizations belonging to the channel")
 	persistentFlags.StringSliceVarP(&c.ordererOrganizations, "ordererOrganizations", "", nil, "Orderer organizations belonging to the channel")
+	persistentFlags.StringSliceVarP(&c.consenterNodes, "consenterNodes", "c", []string{}, "Consenter nodes belonging to the channel")
 	cmd.MarkPersistentFlagRequired("name")
 	cmd.MarkPersistentFlagRequired("organizations")
 	cmd.MarkPersistentFlagRequired("ordererOrganizations")
