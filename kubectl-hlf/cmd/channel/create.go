@@ -26,6 +26,7 @@ type createChannelCmd struct {
 	channelName    string
 	consortiumName string
 	userName       string
+	ordererNodes   []string
 }
 
 func (c *createChannelCmd) validate() error {
@@ -113,6 +114,9 @@ func (c *createChannelCmd) run() error {
 		c.consortiumName,
 		fmt.Sprintf(`OR('%s.admin')`, adminPeer.Spec.MspID),
 	)
+	if err != nil {
+		return err
+	}
 	var baseProfile *genesisconfig.Profile
 	channelTx, err := resource.CreateChannelCreateTx(
 		profileConfig,
@@ -151,7 +155,8 @@ func newCreateChannelCMD(io.Writer, io.Writer) *cobra.Command {
 	persistentFlags.StringVarP(&c.configPath, "config", "", "", "Configuration file for the SDK")
 	persistentFlags.StringVarP(&c.userName, "user", "", "", "User name for the transaction")
 	persistentFlags.StringVarP(&c.consortiumName, "consortium", "", "", "Consortium name")
-	persistentFlags.StringSliceVarP(&c.organizations, "organizations", "p", nil, "Organizations belonging to the consortium")
+	persistentFlags.StringSliceVarP(&c.organizations, "organizations", "p", []string{}, "Organizations belonging to the consortium")
+	persistentFlags.StringSliceVarP(&c.ordererNodes, "orderer-nodes", "o", []string{}, "Consenter orderer nodes")
 	cmd.MarkPersistentFlagRequired("channel-id")
 	cmd.MarkPersistentFlagRequired("organizations")
 	cmd.MarkPersistentFlagRequired("config")
