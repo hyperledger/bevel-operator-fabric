@@ -28,6 +28,7 @@ type inspectCmd struct {
 	organizations []string
 	internal      bool
 	format        string
+	namespaces    []string
 }
 
 func (c *inspectCmd) validate() error {
@@ -196,8 +197,12 @@ func (c *inspectCmd) run(out io.Writer) error {
 		return err
 	}
 	filterByOrgs := len(c.organizations) > 0
+	filterByNS := len(c.namespaces) > 0
 	orgMap := map[string]*helpers.Organization{}
 	for _, ordererNode := range clusterOrderersNodes {
+		if filterByNS && !utils.Contains(c.namespaces, ordererNode.ObjectMeta.Namespace) {
+			continue
+		}
 		if (filterByOrgs && utils.Contains(c.organizations, ordererNode.Spec.MspID)) || !filterByOrgs {
 			org, ok := orgMap[ordererNode.Spec.MspID]
 			if ok {
@@ -219,6 +224,9 @@ func (c *inspectCmd) run(out io.Writer) error {
 	}
 	var peers []*helpers.ClusterPeer
 	for _, peer := range clusterPeers {
+		if filterByNS && !utils.Contains(c.namespaces, peer.ObjectMeta.Namespace) {
+			continue
+		}
 		if filterByOrgs && utils.Contains(c.organizations, peer.MSPID) {
 			peers = append(peers, peer)
 		}
@@ -226,6 +234,9 @@ func (c *inspectCmd) run(out io.Writer) error {
 
 	var orderers []*helpers.ClusterOrdererNode
 	for _, orderer := range clusterOrderersNodes {
+		if filterByNS && !utils.Contains(c.namespaces, orderer.ObjectMeta.Namespace) {
+			continue
+		}
 		if !filterByOrgs {
 			orderers = append(orderers, orderer)
 		} else if filterByOrgs && utils.Contains(c.organizations, orderer.Item.Spec.MspID) {
@@ -303,6 +314,7 @@ func NewInspectHLFConfig(out io.Writer) *cobra.Command {
 	f.BoolVar(&c.internal, "internal", false, "use kubernetes service names")
 	f.StringArrayVarP(&c.organizations, "organizations", "o", []string{}, "organizations to export")
 	f.StringVar(&c.format, "format", yamlFormat, "connection profile output format (yaml/json)")
+	f.StringArrayVarP(&c.namespaces, "namespace", "n", []string{}, "filter the namespaces to inspect")
 
 	return cmd
 }
