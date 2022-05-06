@@ -53,6 +53,7 @@ type ClusterOrderingService struct {
 }
 
 type ClusterOrdererNode struct {
+	ObjectMeta v1.ObjectMeta
 	Name       string
 	PublicURL  string
 	PrivateURL string
@@ -71,6 +72,7 @@ type ClusterPeer struct {
 	RootCert   string
 	Identity   Identity
 	MSPID      string
+	ObjectMeta v1.ObjectMeta
 }
 type Identity struct {
 	Key  string
@@ -145,6 +147,7 @@ func GetClusterOrderers(
 				orderingService.Orderers,
 				&ClusterOrdererNode{
 					Name:       ordNode.FullName(),
+					ObjectMeta: ordNode.ObjectMeta,
 					Spec:       ordNode.Spec,
 					Status:     ordNode.Status,
 					PublicURL:  publicURL,
@@ -480,6 +483,7 @@ func GetClusterPeers(
 			peers,
 			&ClusterPeer{
 				Name:       peer.FullName(),
+				ObjectMeta: peer.ObjectMeta,
 				Spec:       peer.Spec,
 				Status:     peer.Status,
 				Identity:   Identity{},
