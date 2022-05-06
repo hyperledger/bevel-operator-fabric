@@ -5,7 +5,7 @@ project_name: hlf-operator
 release:
   name_template: "Version {{.Version}}"
   github:
-    owner: kfsoftware
+    owner: hyperledger-labs
     name: hlf-operator
   extra_files:
     - glob: "*.minisig"
