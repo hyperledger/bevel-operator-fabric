@@ -136,7 +136,7 @@ func newAddOrgToChannelCMD(out io.Writer, errOut io.Writer) *cobra.Command {
 		},
 	}
 	persistentFlags := cmd.PersistentFlags()
-	persistentFlags.StringVarP(&c.peer, "peer", "", "", "Admin org to invoke the updates")
+	persistentFlags.StringVarP(&c.peer, "peer", "", "", "Name of the peer to invoke the updates")
 	persistentFlags.StringVarP(&c.channelName, "name", "", "", "Channel name")
 	persistentFlags.StringVarP(&c.configPath, "config", "", "", "Configuration file for the SDK")
 	persistentFlags.StringVarP(&c.userName, "user", "", "", "User name for the transaction")

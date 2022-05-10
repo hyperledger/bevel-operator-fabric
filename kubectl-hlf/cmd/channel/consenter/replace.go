@@ -131,7 +131,7 @@ func newReplaceConsenterCMD(io.Writer, io.Writer) *cobra.Command {
 	persistentFlags := cmd.PersistentFlags()
 	persistentFlags.StringVarP(&c.channelName, "channel", "", "", "Channel name")
 	persistentFlags.StringVarP(&c.configPath, "config", "", "", "Configuration file for the SDK")
-	persistentFlags.StringVarP(&c.mspID, "mspid", "", "", "MSP ID")
+	persistentFlags.StringVarP(&c.mspID, "mspid", "", "", "MSP ID of the organization")
 	persistentFlags.StringVarP(&c.ordNodeName, "orderer", "", "", "Orderer name")
 	persistentFlags.StringVarP(&c.userName, "user", "", "", "User name for the transaction")
 	persistentFlags.StringVarP(&c.output, "output", "o", "", "Output block")

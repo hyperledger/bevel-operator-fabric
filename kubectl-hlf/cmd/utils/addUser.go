@@ -85,9 +85,9 @@ func newAddUserCmd(out io.Writer, errOut io.Writer) *cobra.Command {
 		},
 	}
 	f := cmd.Flags()
-	f.StringVar(&c.opts.userPath, "userPath", "", "the output of enrolling a user")
-	f.StringVar(&c.opts.userName, "username", "", "the username")
-	f.StringVar(&c.opts.config, "config", "", "networkconfig, you can use inspect to get the networkconfig")
-	f.StringVar(&c.opts.mspID, "mspid", "", "the organization where the user will be added")
+	f.StringVar(&c.opts.userPath, "userPath", "", "Output of enrolling a user")
+	f.StringVar(&c.opts.userName, "username", "", "Username")
+	f.StringVar(&c.opts.config, "config", "", "Networkconfig, you can use inspect to get the networkconfig")
+	f.StringVar(&c.opts.mspID, "mspid", "", "MSP ID of organization where the user will be added")
 	return cmd
 }

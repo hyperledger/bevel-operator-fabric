@@ -126,18 +126,18 @@ func newCAEnrollCmd(out io.Writer, errOut io.Writer) *cobra.Command {
 		},
 	}
 	f := cmd.Flags()
-	f.StringVar(&c.enrollOpts.Name, "name", "", "name of the Certificate Authority in the cluster, e.g ca.default")
-	f.StringVarP(&c.enrollOpts.NS, "namespace", "n", helpers.DefaultNamespace, "namespace scope for this request")
-	f.StringVarP(&c.enrollOpts.CAName, "ca-name", "", "", "ca name to enroll this user")
-	f.StringVarP(&c.enrollOpts.User, "user", "", "", "namespace scope for this request")
-	f.StringVarP(&c.enrollOpts.Secret, "secret", "", "", "namespace scope for this request")
-	f.StringVarP(&c.enrollOpts.Type, "type", "", "", "namespace scope for this request")
-	f.StringVarP(&c.enrollOpts.MspID, "mspid", "", "", "namespace scope for this request")
-	f.StringVarP(&c.enrollOpts.Profile, "profile", "", "", "profile")
+	f.StringVar(&c.enrollOpts.Name, "name", "", "Name of the Certificate Authority in the cluster, e.g ca.default")
+	f.StringVarP(&c.enrollOpts.NS, "namespace", "n", helpers.DefaultNamespace, "Namespace scope for this request")
+	f.StringVarP(&c.enrollOpts.CAName, "ca-name", "", "", "CA name to enroll this user")
+	f.StringVarP(&c.enrollOpts.User, "user", "", "", "Name for the new user")
+	f.StringVarP(&c.enrollOpts.Secret, "secret", "", "", "Secret for the new user")
+	f.StringVarP(&c.enrollOpts.Type, "type", "", "", "Type of the identity to create (peer/client/orderer/admin)")
+	f.StringVarP(&c.enrollOpts.MspID, "mspid", "", "", "MSP ID of the organization")
+	f.StringVarP(&c.enrollOpts.Profile, "profile", "", "", "Profile")
 	f.StringVarP(&c.enrollOpts.CN, "cn", "", "", "cn")
 	f.StringVarP(&c.enrollOpts.WalletPath, "wallet-path", "", "", "Wallet path to store the user in")
 	f.StringVarP(&c.enrollOpts.WalletUser, "wallet-user", "", "", "Wallet user name for the identity stored in the wallet")
-	f.StringSliceVarP(&c.enrollOpts.Hosts, "hosts", "", []string{}, "hosts")
+	f.StringSliceVarP(&c.enrollOpts.Hosts, "hosts", "", []string{}, "Hosts")
 
 	f.StringVar(&c.fileOutput, "output", "", "output file")
 

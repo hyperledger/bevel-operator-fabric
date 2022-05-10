@@ -40,8 +40,8 @@ func newRefreshNetworkConfigCmd(out io.Writer, errOut io.Writer) *cobra.Command 
 	}
 
 	f := cmd.Flags()
-	f.StringVar(&c.name, "name", "", "name of the Network Config to refresh")
-	f.StringVarP(&c.ns, "namespace", "n", helpers.DefaultNamespace, "namespace scope for this request")
+	f.StringVar(&c.name, "name", "", "Name of the Network Config to refresh")
+	f.StringVarP(&c.ns, "namespace", "n", helpers.DefaultNamespace, "Namespace scope for this request")
 	return cmd
 }
 

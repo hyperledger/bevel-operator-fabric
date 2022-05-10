@@ -87,7 +87,7 @@ func newUpdateChannelCMD(io.Writer, io.Writer) *cobra.Command {
 		},
 	}
 	persistentFlags := cmd.PersistentFlags()
-	persistentFlags.StringVarP(&c.mspID, "mspid", "", "", "Organization to use to submit the channel update")
+	persistentFlags.StringVarP(&c.mspID, "mspid", "", "", "MSP ID of the organization")
 	persistentFlags.StringVarP(&c.channelName, "channel", "", "", "Channel name")
 	persistentFlags.StringVarP(&c.configPath, "config", "", "", "Configuration file for the SDK")
 	persistentFlags.StringVarP(&c.userName, "user", "", "", "User name for the transaction")
