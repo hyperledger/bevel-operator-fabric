@@ -83,8 +83,8 @@ func newInspectChannelCMD(out io.Writer, errOut io.Writer) *cobra.Command {
 		},
 	}
 	persistentFlags := cmd.PersistentFlags()
-	persistentFlags.StringVarP(&c.peer, "peer", "p", "", "Peer org to invoke the updates")
-	persistentFlags.StringVarP(&c.userName, "user", "u", "", "User")
+	persistentFlags.StringVarP(&c.peer, "peer", "p", "", "Name of the peer to invoke the updates")
+	persistentFlags.StringVarP(&c.userName, "user", "u", "", "User name for the transaction")
 	persistentFlags.StringVarP(&c.channelName, "channel", "c", "", "Channel name")
 	persistentFlags.StringVarP(&c.configPath, "config", "", "", "Configuration file for the SDK")
 	cmd.MarkPersistentFlagRequired("channel")

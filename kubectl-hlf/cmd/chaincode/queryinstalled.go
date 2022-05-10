@@ -100,7 +100,7 @@ func newChaincodeQueryInstalledCMD(out io.Writer, errOut io.Writer) *cobra.Comma
 	}
 	persistentFlags := cmd.PersistentFlags()
 	persistentFlags.StringVarP(&c.peer, "peer", "p", "", "Peer org to invoke the updates")
-	persistentFlags.StringVarP(&c.userName, "user", "", "", "User")
+	persistentFlags.StringVarP(&c.userName, "user", "", "", "User name for the transaction")
 	persistentFlags.StringVarP(&c.configPath, "config", "", "", "Configuration file for the SDK")
 	cmd.MarkPersistentFlagRequired("user")
 	cmd.MarkPersistentFlagRequired("peer")

@@ -80,14 +80,14 @@ func newCARegisterCmd(out io.Writer, errOut io.Writer) *cobra.Command {
 		},
 	}
 	f := cmd.Flags()
-	f.StringVar(&c.caOpts.Name, "name", "", "name of the Certificate Authority in the cluster, e.g ca.default")
-	f.StringVarP(&c.caOpts.NS, "namespace", "n", helpers.DefaultNamespace, "namespace scope for this request")
-	f.StringVarP(&c.caOpts.EnrollID, "enroll-id", "", "", "namespace scope for this request")
-	f.StringVarP(&c.caOpts.EnrollSecret, "enroll-secret", "", "", "namespace scope for this request")
-	f.StringVarP(&c.caOpts.User, "user", "", "", "namespace scope for this request")
-	f.StringVarP(&c.caOpts.Secret, "secret", "", "", "namespace scope for this request")
-	f.StringVarP(&c.caOpts.Type, "type", "", "", "namespace scope for this request")
-	f.StringVarP(&c.caOpts.MspID, "mspid", "", "", "namespace scope for this request")
+	f.StringVar(&c.caOpts.Name, "name", "", "Name of the Certificate Authority in the cluster, e.g ca.default")
+	f.StringVarP(&c.caOpts.NS, "namespace", "n", helpers.DefaultNamespace, "Namespace scope for this request")
+	f.StringVarP(&c.caOpts.EnrollID, "enroll-id", "", "", "Enroll ID to register new users")
+	f.StringVarP(&c.caOpts.EnrollSecret, "enroll-secret", "", "", "Enroll secret to register new users")
+	f.StringVarP(&c.caOpts.User, "user", "", "", "Username for the new user")
+	f.StringVarP(&c.caOpts.Secret, "secret", "", "", "Password for the new user")
+	f.StringVarP(&c.caOpts.Type, "type", "", "", "Type of the identity to create (peer/client/orderer/admin)")
+	f.StringVarP(&c.caOpts.MspID, "mspid", "", "", "MSP ID of the organization")
 
 	return cmd
 }

@@ -109,7 +109,7 @@ func newChaincodeInstallCMD(io.Writer, io.Writer) *cobra.Command {
 	}
 	persistentFlags := cmd.PersistentFlags()
 	persistentFlags.StringVarP(&c.peer, "peer", "p", "", "Peer org to invoke the updates")
-	persistentFlags.StringVarP(&c.userName, "user", "", "", "User")
+	persistentFlags.StringVarP(&c.userName, "user", "", "", "User name for the transaction")
 	persistentFlags.StringVarP(&c.chaincodeLanguage, "language", "l", "", "Chaincode language")
 	persistentFlags.StringVarP(&c.chaincodePath, "path", "", "", "Chaincode path")
 	persistentFlags.StringVarP(&c.chaincodeLabel, "label", "", "", "Chaincode label")

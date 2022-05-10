@@ -59,7 +59,7 @@ func newRenewChannelCMD(io.Writer, io.Writer) *cobra.Command {
 	}
 	persistentFlags := cmd.PersistentFlags()
 	persistentFlags.StringVarP(&c.name, "name", "", "", "Peer Service name")
-	persistentFlags.StringVarP(&c.namespace, "namespace", "", "default", "Peer Service name")
+	persistentFlags.StringVarP(&c.namespace, "namespace", "", "default", "Namespace scope for this request")
 	cmd.MarkPersistentFlagRequired("name")
 	cmd.MarkPersistentFlagRequired("namespace")
 	return cmd
