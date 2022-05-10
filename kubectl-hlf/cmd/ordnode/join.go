@@ -125,9 +125,9 @@ func newJoinChannelCMD(io.Writer, io.Writer) *cobra.Command {
 	}
 	persistentFlags := cmd.PersistentFlags()
 	persistentFlags.StringVarP(&c.identity, "identity", "", "", "Admin org to invoke the updates")
-	persistentFlags.StringVarP(&c.block, "block", "", "", "Orderer Service name")
+	persistentFlags.StringVarP(&c.block, "block", "", "", "Block")
 	persistentFlags.StringVarP(&c.name, "name", "", "", "Orderer Service name")
-	persistentFlags.StringVarP(&c.namespace, "namespace", "", "default", "Orderer Service name")
+	persistentFlags.StringVarP(&c.namespace, "namespace", "", "default", "Namespace scope for this request")
 	cmd.MarkPersistentFlagRequired("identity")
 	cmd.MarkPersistentFlagRequired("block")
 	cmd.MarkPersistentFlagRequired("name")

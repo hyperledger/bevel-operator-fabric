@@ -41,8 +41,8 @@ func newCADeleteCmd(out io.Writer, errOut io.Writer) *cobra.Command {
 	}
 
 	f := cmd.Flags()
-	f.StringVar(&c.name, "name", "", "name of the Certificate Authority to delete")
-	f.StringVarP(&c.ns, "namespace", "n", helpers.DefaultNamespace, "namespace scope for this request")
+	f.StringVar(&c.name, "name", "", "Name of the Certificate Authority to delete")
+	f.StringVarP(&c.ns, "namespace", "n", helpers.DefaultNamespace, "Namespace scope for this request")
 	return cmd
 }
 

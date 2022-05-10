@@ -115,7 +115,7 @@ func newAddOrgToChannelCMD(out io.Writer, errOut io.Writer) *cobra.Command {
 	persistentFlags.StringVarP(&c.channelName, "name", "", "", "Channel name")
 	persistentFlags.StringVarP(&c.configPath, "config", "", "", "Configuration file for the SDK")
 	persistentFlags.StringVarP(&c.userName, "user", "", "", "User name for the transaction")
-	persistentFlags.StringVarP(&c.signMSPID, "config-msp-id", "", "", "MSP ID for the new organization")
+	persistentFlags.StringVarP(&c.signMSPID, "config-msp-id", "", "", "MSP ID for the transaction")
 	persistentFlags.StringVarP(&c.mspID, "msp-id", "", "", "MSP ID for the new organization")
 	persistentFlags.StringVarP(&c.orgPath, "org-config", "", "", "JSON with the crypto material for the new org")
 	persistentFlags.StringVarP(&c.output, "output", "", "", "Output file")

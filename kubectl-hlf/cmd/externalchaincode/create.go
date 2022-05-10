@@ -140,7 +140,7 @@ func newExternalChaincodeCreateCmd() *cobra.Command {
 	f.StringVar(&c.namespace, "namespace", "", "Namespace of the external chaincode")
 	f.StringVar(&c.image, "image", "", "Image of the external chaincode")
 	f.StringVar(&c.packageID, "package-id", "", "Package ID of the external chaincode")
-	f.StringVar(&c.caName, "ca-name", "", "Name of the CA")
+	f.StringVar(&c.caName, "ca-name", "", "CA name to enroll this user")
 	f.StringVar(&c.caNamespace, "ca-namespace", "", "Namespace of the CA")
 	f.StringVar(&c.enrollId, "enroll-id", "", "Enroll ID of the CA")
 	f.StringVar(&c.enrollSecret, "enroll-secret", "", "Enroll secret of the CA")

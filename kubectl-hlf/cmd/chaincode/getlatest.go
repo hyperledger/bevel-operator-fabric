@@ -78,10 +78,10 @@ func newGetLatestInfoCMD(out io.Writer, errOut io.Writer) *cobra.Command {
 	}
 	persistentFlags := cmd.PersistentFlags()
 	persistentFlags.StringVarP(&c.configPath, "config", "", "", "Configuration file for the SDK")
-	persistentFlags.StringVarP(&c.userName, "user", "", "", "User")
+	persistentFlags.StringVarP(&c.userName, "user", "", "", "User name for the transaction")
 	persistentFlags.StringVarP(&c.channelName, "channel", "", "", "Channel name")
 	persistentFlags.StringVarP(&c.name, "name", "", "", "Chaincode name")
-	persistentFlags.StringVarP(&c.mspID, "msp-id", "", "", "MSP ID to use to get the data")
+	persistentFlags.StringVarP(&c.mspID, "msp-id", "", "", "MSP ID of the organization")
 	persistentFlags.StringVarP(&c.property, "property", "", "", "Property to get(\"version\" or \"sequence\")")
 	persistentFlags.StringVarP(&c.outFile, "out", "o", "", "File to write the property to")
 

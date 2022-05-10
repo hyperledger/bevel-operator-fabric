@@ -97,7 +97,7 @@ func newDelAnchorPeerCMD(io.Writer, io.Writer) *cobra.Command {
 	persistentFlags.StringVarP(&c.channelName, "channel", "", "", "Channel name")
 	persistentFlags.StringVarP(&c.configPath, "config", "", "", "Configuration file for the SDK")
 	persistentFlags.StringVarP(&c.userName, "user", "", "", "User name for the transaction")
-	persistentFlags.StringVarP(&c.mspID, "msp-id", "", "", "MSPID to remove the anchor peers from")
+	persistentFlags.StringVarP(&c.mspID, "msp-id", "", "", "MSP ID of organization to remove the anchor peers from")
 
 	cmd.MarkPersistentFlagRequired("channel")
 	cmd.MarkPersistentFlagRequired("config")

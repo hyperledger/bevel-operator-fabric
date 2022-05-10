@@ -86,9 +86,9 @@ func newCreateNetworkConfigCmd(out io.Writer, errOut io.Writer) *cobra.Command {
 	}
 	f := cmd.Flags()
 	f.StringSliceVarP(&c.opts.Orgs, "orgs", "o", []string{}, "Organizations to inspect")
-	f.StringVar(&c.opts.Name, "name", "", "name of the Network Config to create")
-	f.StringVar(&c.opts.SecretName, "secret", "", "secret name to store the network config")
-	f.StringVarP(&c.opts.NS, "namespace", "n", helpers.DefaultNamespace, "namespace scope for this request")
+	f.StringVar(&c.opts.Name, "name", "", "Name of the Network Config to create")
+	f.StringVar(&c.opts.SecretName, "secret", "", "Secret name to store the network config")
+	f.StringVarP(&c.opts.NS, "namespace", "n", helpers.DefaultNamespace, "Namespace scope for this request")
 	f.BoolVarP(&c.opts.Internal, "internal", "i", false, "Use internal or external endpoints")
 	f.StringVarP(&c.opts.OutputPath, "output-path", "", "", "Output path")
 

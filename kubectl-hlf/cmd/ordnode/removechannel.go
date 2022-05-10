@@ -108,7 +108,7 @@ func newRemoveChannelCMD(io.Writer, io.Writer) *cobra.Command {
 	persistentFlags.StringVarP(&c.identity, "identity", "", "", "Admin org to invoke the updates")
 	persistentFlags.StringVarP(&c.channel, "channel", "", "", "Channel name to remove from the OSN")
 	persistentFlags.StringVarP(&c.name, "name", "", "", "Orderer Service name")
-	persistentFlags.StringVarP(&c.namespace, "namespace", "", "default", "Orderer Service namespace")
+	persistentFlags.StringVarP(&c.namespace, "namespace", "", "default", "Namespace scope for this request")
 	cmd.MarkPersistentFlagRequired("identity")
 	cmd.MarkPersistentFlagRequired("channel")
 	cmd.MarkPersistentFlagRequired("name")
