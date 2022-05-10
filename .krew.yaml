@@ -3,7 +3,7 @@ kind: Plugin
 metadata:
   name: hlf
 spec:
-  version: "v{{ .TagName }}"
+  version: "{{ .TagName }}"
   homepage: https://github.com/hyperledger-labs/hlf-operator
   shortDescription: "Deploy and manage Hyperledger Fabric components"
   description: |
