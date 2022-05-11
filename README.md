@@ -323,6 +323,7 @@ If something went wrong or didn't work, please, open an issue.
 kubectl delete fabricorderernodes.hlf.kungfusoftware.es --all-namespaces --all
 kubectl delete fabricpeers.hlf.kungfusoftware.es --all-namespaces --all
 kubectl delete fabriccas.hlf.kungfusoftware.es --all-namespaces --all
+kubectl delete fabricchaincode.hlf.kungfusoftware.es --all-namespaces --all
 ```
 
 ## Troubleshooting
