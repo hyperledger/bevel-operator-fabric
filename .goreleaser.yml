@@ -4,6 +4,7 @@ project_name: hlf-operator
 
 release:
   name_template: "Version {{.Version}}"
+  prerelease: auto
   github:
     owner: hyperledger-labs
     name: hlf-operator
