@@ -14,10 +14,10 @@ import (
 	"fmt"
 
 	"github.com/golang/protobuf/proto"
+	"github.com/hyperledger-labs/hlf-operator/internal/github.com/hyperledger/fabric/msp"
+	"github.com/hyperledger-labs/hlf-operator/internal/github.com/hyperledger/fabric/msp/cache"
 	mspprotos "github.com/hyperledger/fabric-protos-go/msp"
 	"github.com/hyperledger/fabric-sdk-go/pkg/common/providers/core"
-	"github.com/kfsoftware/hlf-operator/internal/github.com/hyperledger/fabric/msp"
-	"github.com/kfsoftware/hlf-operator/internal/github.com/hyperledger/fabric/msp/cache"
 	"github.com/pkg/errors"
 )
 

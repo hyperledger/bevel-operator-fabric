@@ -21,10 +21,10 @@ import (
 	"sync"
 	"time"
 
+	"github.com/hyperledger-labs/hlf-operator/internal/github.com/hyperledger/fabric/sdkpatch/cachebridge"
 	sdkp11 "github.com/hyperledger/fabric-sdk-go/pkg/core/cryptosuite/common/pkcs11"
-	"github.com/kfsoftware/hlf-operator/internal/github.com/hyperledger/fabric/sdkpatch/cachebridge"
 
-	logging "github.com/kfsoftware/hlf-operator/internal/github.com/hyperledger/fabric/sdkpatch/logbridge"
+	logging "github.com/hyperledger-labs/hlf-operator/internal/github.com/hyperledger/fabric/sdkpatch/logbridge"
 	"github.com/miekg/pkcs11"
 )
 

@@ -16,11 +16,11 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/kfsoftware/hlf-operator/internal/github.com/hyperledger/fabric-ca/lib/client/credential"
-	"github.com/kfsoftware/hlf-operator/internal/github.com/hyperledger/fabric-ca/lib/client/credential/x509"
-	"github.com/kfsoftware/hlf-operator/internal/github.com/hyperledger/fabric-ca/sdkinternal/pkg/api"
-	"github.com/kfsoftware/hlf-operator/internal/github.com/hyperledger/fabric-ca/sdkinternal/pkg/util"
-	log "github.com/kfsoftware/hlf-operator/internal/github.com/hyperledger/fabric-ca/sdkpatch/logbridge"
+	"github.com/hyperledger-labs/hlf-operator/internal/github.com/hyperledger/fabric-ca/lib/client/credential"
+	"github.com/hyperledger-labs/hlf-operator/internal/github.com/hyperledger/fabric-ca/lib/client/credential/x509"
+	"github.com/hyperledger-labs/hlf-operator/internal/github.com/hyperledger/fabric-ca/sdkinternal/pkg/api"
+	"github.com/hyperledger-labs/hlf-operator/internal/github.com/hyperledger/fabric-ca/sdkinternal/pkg/util"
+	log "github.com/hyperledger-labs/hlf-operator/internal/github.com/hyperledger/fabric-ca/sdkpatch/logbridge"
 	"github.com/pkg/errors"
 )
 

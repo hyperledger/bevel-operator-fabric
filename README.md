@@ -2,7 +2,7 @@
 id: getting-started
 title: Getting started
 ---
-[![Build Status](https://img.shields.io/travis/kfsoftware/hlf-operator/main.svg?label=E2E%20testing)](https://travis-ci.org/kfsoftware/hlf-operator)
+[![Build Status](https://img.shields.io/travis/hyperledger-labs/hlf-operator/main.svg?label=E2E%20testing)](https://travis-ci.org/hyperledger-labs/hlf-operator)
 
 > :warning: **This repository was transferred to hyperledger-labs on 24th of April**
 

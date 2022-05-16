@@ -4,8 +4,8 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
-	"github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
-	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/helpers"
+	"github.com/hyperledger-labs/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
+	"github.com/hyperledger-labs/hlf-operator/kubectl-hlf/cmd/helpers"
 	"github.com/spf13/cobra"
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -25,7 +25,7 @@ type syncExternalChaincodeCmd struct {
 
 	replicas int
 
-	tlsRequired bool
+	tlsRequired     bool
 	ImagePullSecret []string
 }
 
@@ -68,14 +68,14 @@ func (c syncExternalChaincodeCmd) getFabricChaincodeSpec(ctx context.Context) (v
 		Replicas:         c.replicas,
 	}
 
-	if len(c.ImagePullSecret)>0{
-		imagePullSecret :=[]corev1.LocalObjectReference{}
+	if len(c.ImagePullSecret) > 0 {
+		imagePullSecret := []corev1.LocalObjectReference{}
 		for _, v := range c.ImagePullSecret {
 			imagePullSecret = append(imagePullSecret, corev1.LocalObjectReference{
 				Name: v,
 			})
 		}
-			fabricChaincodeSpec.ImagePullSecrets=imagePullSecret
+		fabricChaincodeSpec.ImagePullSecrets = imagePullSecret
 	}
 	oclient, err := helpers.GetKubeOperatorClient()
 	if err != nil {

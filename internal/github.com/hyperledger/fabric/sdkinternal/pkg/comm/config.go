@@ -15,8 +15,8 @@ import (
 	"crypto/x509"
 	"time"
 
-	"github.com/kfsoftware/hlf-operator/internal/github.com/hyperledger/fabric/common/metrics"
-	flogging "github.com/kfsoftware/hlf-operator/internal/github.com/hyperledger/fabric/sdkpatch/logbridge"
+	"github.com/hyperledger-labs/hlf-operator/internal/github.com/hyperledger/fabric/common/metrics"
+	flogging "github.com/hyperledger-labs/hlf-operator/internal/github.com/hyperledger/fabric/sdkpatch/logbridge"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/keepalive"
 )

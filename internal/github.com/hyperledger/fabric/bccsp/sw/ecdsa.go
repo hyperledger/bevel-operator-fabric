@@ -24,8 +24,8 @@ import (
 	"crypto/rand"
 	"fmt"
 
-	"github.com/kfsoftware/hlf-operator/internal/github.com/hyperledger/fabric/bccsp"
-	"github.com/kfsoftware/hlf-operator/internal/github.com/hyperledger/fabric/bccsp/utils"
+	"github.com/hyperledger-labs/hlf-operator/internal/github.com/hyperledger/fabric/bccsp"
+	"github.com/hyperledger-labs/hlf-operator/internal/github.com/hyperledger/fabric/bccsp/utils"
 )
 
 func signECDSA(k *ecdsa.PrivateKey, digest []byte, opts bccsp.SignerOpts) ([]byte, error) {

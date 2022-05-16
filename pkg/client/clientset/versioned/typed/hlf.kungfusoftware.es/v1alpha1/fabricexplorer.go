@@ -22,8 +22,8 @@ import (
 	"context"
 	"time"
 
-	v1alpha1 "github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
-	scheme "github.com/kfsoftware/hlf-operator/pkg/client/clientset/versioned/scheme"
+	v1alpha1 "github.com/hyperledger-labs/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
+	scheme "github.com/hyperledger-labs/hlf-operator/pkg/client/clientset/versioned/scheme"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	types "k8s.io/apimachinery/pkg/types"
 	watch "k8s.io/apimachinery/pkg/watch"

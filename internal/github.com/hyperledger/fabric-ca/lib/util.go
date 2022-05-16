@@ -17,7 +17,7 @@ import (
 	"encoding/pem"
 	"net/http"
 
-	"github.com/kfsoftware/hlf-operator/internal/github.com/hyperledger/fabric-ca/sdkinternal/pkg/util"
+	"github.com/hyperledger-labs/hlf-operator/internal/github.com/hyperledger/fabric-ca/sdkinternal/pkg/util"
 	"github.com/pkg/errors"
 )
 

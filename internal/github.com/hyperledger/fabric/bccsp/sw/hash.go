@@ -23,7 +23,7 @@ package sw
 import (
 	"hash"
 
-	"github.com/kfsoftware/hlf-operator/internal/github.com/hyperledger/fabric/bccsp"
+	"github.com/hyperledger-labs/hlf-operator/internal/github.com/hyperledger/fabric/bccsp"
 )
 
 type hasher struct {

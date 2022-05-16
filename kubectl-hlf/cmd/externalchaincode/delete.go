@@ -3,7 +3,7 @@ package externalchaincode
 import (
 	"context"
 	"fmt"
-	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/helpers"
+	"github.com/hyperledger-labs/hlf-operator/kubectl-hlf/cmd/helpers"
 	"github.com/spf13/cobra"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )

@@ -13,10 +13,10 @@ package packaging
 import (
 	"fmt"
 
-	"github.com/kfsoftware/hlf-operator/internal/github.com/hyperledger/fabric/core/chaincode/platforms/golang"
-	"github.com/kfsoftware/hlf-operator/internal/github.com/hyperledger/fabric/core/chaincode/platforms/java"
-	"github.com/kfsoftware/hlf-operator/internal/github.com/hyperledger/fabric/core/chaincode/platforms/node"
-	flogging "github.com/kfsoftware/hlf-operator/internal/github.com/hyperledger/fabric/sdkpatch/logbridge"
+	"github.com/hyperledger-labs/hlf-operator/internal/github.com/hyperledger/fabric/core/chaincode/platforms/golang"
+	"github.com/hyperledger-labs/hlf-operator/internal/github.com/hyperledger/fabric/core/chaincode/platforms/java"
+	"github.com/hyperledger-labs/hlf-operator/internal/github.com/hyperledger/fabric/core/chaincode/platforms/node"
+	flogging "github.com/hyperledger-labs/hlf-operator/internal/github.com/hyperledger/fabric/sdkpatch/logbridge"
 )
 
 // SupportedPlatforms is the canonical list of platforms Fabric supports

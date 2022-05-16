@@ -1,0 +1,170 @@
+
+name: hlf-network
+version: 1.0.0
+client:
+  organization: "<no value>"
+organizations: {}
+orderers: []
+peers: []
+certificateAuthorities:
+  
+  healthcare-ca.hlf:
+
+    url: https://ca-healthcare.hlf.mediiochain.lab.cs:443
+
+
+    registrar:
+        enrollId: enroll
+        enrollSecret: 8t77B0_3kneSrKzH
+
+    caName: ca
+    tlsCACerts:
+      pem: 
+       - |
+            -----BEGIN CERTIFICATE-----
+            MIIChzCCAiygAwIBAgIQL9kAA6m5G2g6srxRQWMhOTAKBggqhkjOPQQDAjBdMQsw
+            CQYDVQQGEwJDUjEPMA0GA1UEBxMGWmFncmViMQ8wDQYDVQQJEwZaYWdyZWIxFzAV
+            BgNVBAoTDkhlYWx0aGNhcmUgT3JnMRMwEQYDVQQLEwpCbG9ja2NoYWluMB4XDTIy
+            MDMxNjIwMjYyNVoXDTMyMDMxNzIwMjYyNVowXTELMAkGA1UEBhMCQ1IxDzANBgNV
+            BAcTBlphZ3JlYjEPMA0GA1UECRMGWmFncmViMRcwFQYDVQQKEw5IZWFsdGhjYXJl
+            IE9yZzETMBEGA1UECxMKQmxvY2tjaGFpbjBZMBMGByqGSM49AgEGCCqGSM49AwEH
+            A0IABA1w4rHYq1C+blZI0bgg9qAynyif8hSH/Ziq9Srze+gSUxBCAHdRt7npJDM1
+            btojFlSbw3bkBJnQTm7LEqSelqajgc0wgcowDgYDVR0PAQH/BAQDAgGmMB0GA1Ud
+            JQQWMBQGCCsGAQUFBwMCBggrBgEFBQcDATAPBgNVHRMBAf8EBTADAQH/MCkGA1Ud
+            DgQiBCDjd/j8x73x5TyN1bwdmfiq14iI+PrywYpKwx2rECTxxzBdBgNVHREEVjBU
+            giRjYS1oZWFsdGhjYXJlLmhsZi5tZWRpaW9jaGFpbi5sYWIuY3OCDWhlYWx0aGNh
+            cmUtY2GCEWhlYWx0aGNhcmUtY2EuaGxmhwR/AAABhwTAqAxwMAoGCCqGSM49BAMC
+            A0kAMEYCIQDNBQJtJP1gpeRcwcErsy8uPf3v95C2Q8j6SuBWYTPQugIhAKqfG4bZ
+            dRPm5Hqa8ooFBOngN0oIyhUwfMQVxWfEEyZ9
+            -----END CERTIFICATE-----
+            
+  
+  pharma-ca.hlf:
+
+    url: https://ca-pharma.hlf.mediiochain.lab.cs:443
+
+
+    registrar:
+        enrollId: enroll
+        enrollSecret: XhS5vCu8v8Qr@rUl
+
+    caName: ca
+    tlsCACerts:
+      pem: 
+       - |
+            -----BEGIN CERTIFICATE-----
+            MIICcjCCAhigAwIBAgIQIXDLdNVvcNCXeK9ji0ooUTAKBggqhkjOPQQDAjBZMQsw
+            CQYDVQQGEwJDUjEPMA0GA1UEBxMGWmFncmViMQ8wDQYDVQQJEwZaYWdyZWIxEzAR
+            BgNVBAoTClBoYXJtYSBPcmcxEzARBgNVBAsTCkJsb2NrY2hhaW4wHhcNMjIwMzE2
+            MjAxNDAyWhcNMzIwMzE3MjAxNDAyWjBZMQswCQYDVQQGEwJDUjEPMA0GA1UEBxMG
+            WmFncmViMQ8wDQYDVQQJEwZaYWdyZWIxEzARBgNVBAoTClBoYXJtYSBPcmcxEzAR
+            BgNVBAsTCkJsb2NrY2hhaW4wWTATBgcqhkjOPQIBBggqhkjOPQMBBwNCAAQc/cmi
+            ud7+an6hXBlC6RwGsLePUOAzAg3yUbonjLCa0ZaDyXgiLAuoXCg1ejNUHbBUYOw0
+            ++oXLFzS6efx9YI5o4HBMIG+MA4GA1UdDwEB/wQEAwIBpjAdBgNVHSUEFjAUBggr
+            BgEFBQcDAgYIKwYBBQUHAwEwDwYDVR0TAQH/BAUwAwEB/zApBgNVHQ4EIgQgDdQ/
+            1gvwlx+6myn8D4t8jSr+yXynoDWZvqY24fNK4QswUQYDVR0RBEowSIIgY2EtcGhh
+            cm1hLmhsZi5tZWRpaW9jaGFpbi5sYWIuY3OCCXBoYXJtYS1jYYINcGhhcm1hLWNh
+            LmhsZocEfwAAAYcEwKgMcDAKBggqhkjOPQQDAgNIADBFAiEAmIeqnbVD5aOmQIQS
+            VgOcPGQJh1uH8kbTijSW2FIW0twCIFIPaeWNxq/rAmTALt61lkDnl7L5+3uS27Uw
+            N41Wpz2U
+            -----END CERTIFICATE-----
+            
+  
+  research-ca.hlf:
+
+    url: https://ca-research.hlf.mediiochain.lab.cs:443
+
+
+    registrar:
+        enrollId: enroll
+        enrollSecret: 5KJlLEU_fUdEqBMr
+
+    caName: ca
+    tlsCACerts:
+      pem: 
+       - |
+            -----BEGIN CERTIFICATE-----
+            MIICfDCCAiKgAwIBAgIQTWEOUFZJ73pT1rfJwNhM+TAKBggqhkjOPQQDAjBbMQsw
+            CQYDVQQGEwJDUjEPMA0GA1UEBxMGWmFncmViMQ8wDQYDVQQJEwZaYWdyZWIxFTAT
+            BgNVBAoTDFJlc2VhcmNoIE9yZzETMBEGA1UECxMKQmxvY2tjaGFpbjAeFw0yMjAz
+            MTYyMDE0MDBaFw0zMjAzMTcyMDE0MDBaMFsxCzAJBgNVBAYTAkNSMQ8wDQYDVQQH
+            EwZaYWdyZWIxDzANBgNVBAkTBlphZ3JlYjEVMBMGA1UEChMMUmVzZWFyY2ggT3Jn
+            MRMwEQYDVQQLEwpCbG9ja2NoYWluMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE
+            1pdOB6gwbWzDiqEKapamCQ7x88P0afkrYmgIV8HFqOCNw4o62ZUqh/2AQzT7r2nI
+            eys3zbY22hFAes7EE9pyv6OBxzCBxDAOBgNVHQ8BAf8EBAMCAaYwHQYDVR0lBBYw
+            FAYIKwYBBQUHAwIGCCsGAQUFBwMBMA8GA1UdEwEB/wQFMAMBAf8wKQYDVR0OBCIE
+            ILjX7xm3TgMRt+XRaIW1AN8rWg3r4idipZgs3MlfySxqMFcGA1UdEQRQME6CImNh
+            LXJlc2VhcmNoLmhsZi5tZWRpaW9jaGFpbi5sYWIuY3OCC3Jlc2VhcmNoLWNhgg9y
+            ZXNlYXJjaC1jYS5obGaHBH8AAAGHBMCoDHAwCgYIKoZIzj0EAwIDSAAwRQIhANKq
+            aQYZwJLuJ7h7hxqhUInyfgsxaCsJkWAQ+hUXF8voAiBEWr5SGYguz2nwQFcmm8e3
+            agiLTyHFXfS18yFy/R4u/A==
+            -----END CERTIFICATE-----
+            
+  
+  mediiochain-ca.mediiochain:
+
+    url: https://ca-mc.hlf.mediiochain.lab.cs:443
+
+
+    registrar:
+        enrollId: enroll
+        enrollSecret: M3Nd20veozYfp60s
+
+    caName: ca
+    tlsCACerts:
+      pem: 
+       - |
+            -----BEGIN CERTIFICATE-----
+            MIICgjCCAiigAwIBAgIQKImRu1Ku2DIz/cEF3lC8GjAKBggqhkjOPQQDAjBaMQsw
+            CQYDVQQGEwJDUjEPMA0GA1UEBxMGWmFncmViMQ8wDQYDVQQJEwZaYWdyZWIxFDAS
+            BgNVBAoTC01lZGlpb2NoYWluMRMwEQYDVQQLEwpCbG9ja2NoYWluMB4XDTIyMDMx
+            NjIwMTM1OVoXDTMyMDMxNzIwMTM1OVowWjELMAkGA1UEBhMCQ1IxDzANBgNVBAcT
+            BlphZ3JlYjEPMA0GA1UECRMGWmFncmViMRQwEgYDVQQKEwtNZWRpaW9jaGFpbjET
+            MBEGA1UECxMKQmxvY2tjaGFpbjBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABD1d
+            FtNFz4Sx2Gnhc656HSNz71gkG8BhmIwELjXO/5UQoQERiqKXMiUUKanJt6wPWb3f
+            F6xBUYUvAcYHH/MvdUCjgc8wgcwwDgYDVR0PAQH/BAQDAgGmMB0GA1UdJQQWMBQG
+            CCsGAQUFBwMCBggrBgEFBQcDATAPBgNVHRMBAf8EBTADAQH/MCkGA1UdDgQiBCD4
+            75B4W1hkBA/z0zLNaDanDhL6JoOPvT9zjRuywuASrTBfBgNVHREEWDBWghxjYS1t
+            Yy5obGYubWVkaWlvY2hhaW4ubGFiLmNzgg5tZWRpaW9jaGFpbi1jYYIabWVkaWlv
+            Y2hhaW4tY2EubWVkaWlvY2hhaW6HBH8AAAGHBMCoDHAwCgYIKoZIzj0EAwIDSAAw
+            RQIhAMuggYjAT7shl86RsJMhv9n2SgMgq2tU39eVQQZeUQU0AiBAeaek0FLPYdc9
+            8gFk8mGmQVoTozfcGK9RkFzAeMy/rQ==
+            -----END CERTIFICATE-----
+            
+  
+  orderermsp-ca.orderingservice:
+
+    url: https://ca-orderermsp.hlf.mediiochain.lab.cs:443
+
+
+    registrar:
+        enrollId: enroll
+        enrollSecret: u_gGLx1Kh45e@I5O
+
+    caName: ca
+    tlsCACerts:
+      pem: 
+       - |
+            -----BEGIN CERTIFICATE-----
+            MIICizCCAjCgAwIBAgIQJpuuoqiW8KQCJYkVIMjZoDAKBggqhkjOPQQDAjBZMQsw
+            CQYDVQQGEwJDUjEPMA0GA1UEBxMGWmFncmViMQ8wDQYDVQQJEwZaYWdyZWIxEzAR
+            BgNVBAoTCk9SREVSRVJNU1AxEzARBgNVBAsTCkJsb2NrY2hhaW4wHhcNMjIwMzE2
+            MjAxNDAxWhcNMzIwMzE3MjAxNDAxWjBZMQswCQYDVQQGEwJDUjEPMA0GA1UEBxMG
+            WmFncmViMQ8wDQYDVQQJEwZaYWdyZWIxEzARBgNVBAoTCk9SREVSRVJNU1AxEzAR
+            BgNVBAsTCkJsb2NrY2hhaW4wWTATBgcqhkjOPQIBBggqhkjOPQMBBwNCAAQWx+59
+            mrZJ2zoFQJAZB7SVj+rO7V2z3TXiO6gimqMLxZX7HychcqRKLMWClKl5Tsbi3tom
+            0sqO1qxV7xqTtbBQo4HZMIHWMA4GA1UdDwEB/wQEAwIBpjAdBgNVHSUEFjAUBggr
+            BgEFBQcDAgYIKwYBBQUHAwEwDwYDVR0TAQH/BAUwAwEB/zApBgNVHQ4EIgQgQCJY
+            x9i8AXx/+tracZpscFs2DWXZ+PbIrtQIwyoe+nwwaQYDVR0RBGIwYIIkY2Etb3Jk
+            ZXJlcm1zcC5obGYubWVkaWlvY2hhaW4ubGFiLmNzgg1vcmRlcmVybXNwLWNhgh1v
+            cmRlcmVybXNwLWNhLm9yZGVyaW5nc2VydmljZYcEfwAAAYcEwKgMcDAKBggqhkjO
+            PQQDAgNJADBGAiEA9jEN3qD0j/OElR3KEVsm6Jyr9X9J98LJpSeUKDTj5IICIQDv
+            Taz0GlnW0uCfHX84p30y6DhkOp9EY8afu2835pN9pg==
+            -----END CERTIFICATE-----
+            
+
+channels:
+  _default:
+    orderers: []
+    peers: {}
+

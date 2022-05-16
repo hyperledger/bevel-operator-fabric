@@ -4,8 +4,8 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
-	"github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
-	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/helpers"
+	"github.com/hyperledger-labs/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
+	"github.com/hyperledger-labs/hlf-operator/kubectl-hlf/cmd/helpers"
 	"github.com/spf13/cobra"
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -24,7 +24,7 @@ type createExternalChaincodeCmd struct {
 
 	replicas int
 
-	tlsRequired bool
+	tlsRequired     bool
 	ImagePullSecret []string
 }
 
@@ -74,14 +74,14 @@ func (c *createExternalChaincodeCmd) run() error {
 		Credentials:      nil,
 		Replicas:         c.replicas,
 	}
-	if len(c.ImagePullSecret)>0{
-		imagePullSecret :=[]corev1.LocalObjectReference{}
+	if len(c.ImagePullSecret) > 0 {
+		imagePullSecret := []corev1.LocalObjectReference{}
 		for _, v := range c.ImagePullSecret {
 			imagePullSecret = append(imagePullSecret, corev1.LocalObjectReference{
 				Name: v,
 			})
 		}
-			fabricChaincodeSpec.ImagePullSecrets=imagePullSecret
+		fabricChaincodeSpec.ImagePullSecrets = imagePullSecret
 	}
 	if c.tlsRequired {
 		fabricCA, err := oclient.HlfV1alpha1().FabricCAs(c.caNamespace).Get(ctx, c.caName, v1.GetOptions{})

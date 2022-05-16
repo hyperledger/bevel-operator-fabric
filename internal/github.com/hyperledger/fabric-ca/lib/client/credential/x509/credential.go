@@ -16,12 +16,12 @@ import (
 
 	"github.com/hyperledger/fabric-sdk-go/pkg/common/providers/core"
 
-	factory "github.com/kfsoftware/hlf-operator/internal/github.com/hyperledger/fabric-ca/sdkpatch/cryptosuitebridge"
-	log "github.com/kfsoftware/hlf-operator/internal/github.com/hyperledger/fabric-ca/sdkpatch/logbridge"
+	factory "github.com/hyperledger-labs/hlf-operator/internal/github.com/hyperledger/fabric-ca/sdkpatch/cryptosuitebridge"
+	log "github.com/hyperledger-labs/hlf-operator/internal/github.com/hyperledger/fabric-ca/sdkpatch/logbridge"
 
-	"github.com/kfsoftware/hlf-operator/internal/github.com/hyperledger/fabric-ca/lib/client/credential"
-	"github.com/kfsoftware/hlf-operator/internal/github.com/hyperledger/fabric-ca/sdkinternal/pkg/api"
-	"github.com/kfsoftware/hlf-operator/internal/github.com/hyperledger/fabric-ca/sdkinternal/pkg/util"
+	"github.com/hyperledger-labs/hlf-operator/internal/github.com/hyperledger/fabric-ca/lib/client/credential"
+	"github.com/hyperledger-labs/hlf-operator/internal/github.com/hyperledger/fabric-ca/sdkinternal/pkg/api"
+	"github.com/hyperledger-labs/hlf-operator/internal/github.com/hyperledger/fabric-ca/sdkinternal/pkg/util"
 	"github.com/pkg/errors"
 )
 

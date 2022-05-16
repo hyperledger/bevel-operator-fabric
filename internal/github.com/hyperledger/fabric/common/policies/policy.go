@@ -12,10 +12,10 @@ package policies
 
 import (
 	"github.com/golang/protobuf/proto"
+	"github.com/hyperledger-labs/hlf-operator/internal/github.com/hyperledger/fabric/protoutil"
+	flogging "github.com/hyperledger-labs/hlf-operator/internal/github.com/hyperledger/fabric/sdkpatch/logbridge"
 	cb "github.com/hyperledger/fabric-protos-go/common"
 	"github.com/hyperledger/fabric-protos-go/msp"
-	"github.com/kfsoftware/hlf-operator/internal/github.com/hyperledger/fabric/protoutil"
-	flogging "github.com/kfsoftware/hlf-operator/internal/github.com/hyperledger/fabric/sdkpatch/logbridge"
 )
 
 const (

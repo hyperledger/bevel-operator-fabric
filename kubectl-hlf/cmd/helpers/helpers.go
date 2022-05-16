@@ -6,7 +6,7 @@ import (
 	"io"
 	"os/exec"
 
-	operatorv1 "github.com/kfsoftware/hlf-operator/pkg/client/clientset/versioned"
+	operatorv1 "github.com/hyperledger-labs/hlf-operator/pkg/client/clientset/versioned"
 	apiextension "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/yaml"

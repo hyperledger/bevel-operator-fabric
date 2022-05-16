@@ -2,13 +2,13 @@ package consenter
 
 import (
 	"github.com/gogo/protobuf/proto"
+	"github.com/hyperledger-labs/hlf-operator/kubectl-hlf/cmd/helpers"
 	"github.com/hyperledger/fabric-config/configtx"
 	"github.com/hyperledger/fabric-protos-go/common"
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/resmgmt"
 	"github.com/hyperledger/fabric-sdk-go/pkg/core/config"
 	"github.com/hyperledger/fabric-sdk-go/pkg/fab/resource"
 	"github.com/hyperledger/fabric-sdk-go/pkg/fabsdk"
-	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/helpers"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"io"
@@ -61,7 +61,7 @@ func (c *delConsenterCmd) run() error {
 	}
 	cftxGen := configtx.New(cfgBlock)
 	cfgOrd := cftxGen.Orderer()
-	ordNode, err := helpers.GetOrdererNodeByFullName(clientSet,oClient, c.ordNodeName)
+	ordNode, err := helpers.GetOrdererNodeByFullName(clientSet, oClient, c.ordNodeName)
 	if err != nil {
 		return err
 	}
@@ -69,7 +69,7 @@ func (c *delConsenterCmd) run() error {
 	if err != nil {
 		return err
 	}
-	ordererConf,err := cftxGen.Orderer().Configuration()
+	ordererConf, err := cftxGen.Orderer().Configuration()
 	if err != nil {
 		return err
 	}
@@ -81,7 +81,7 @@ func (c *delConsenterCmd) run() error {
 			if err != nil {
 				return err
 			}
-            break
+			break
 		}
 	}
 	configUpdateBytes, err := cftxGen.ComputeMarshaledUpdate(c.channelName)

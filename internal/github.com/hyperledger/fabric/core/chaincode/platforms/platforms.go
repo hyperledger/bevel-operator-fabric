@@ -14,9 +14,9 @@ import (
 	"archive/tar"
 	"fmt"
 
-	"github.com/kfsoftware/hlf-operator/internal/github.com/hyperledger/fabric/core/chaincode/platforms/golang"
-	"github.com/kfsoftware/hlf-operator/internal/github.com/hyperledger/fabric/core/chaincode/platforms/java"
-	"github.com/kfsoftware/hlf-operator/internal/github.com/hyperledger/fabric/core/chaincode/platforms/node"
+	"github.com/hyperledger-labs/hlf-operator/internal/github.com/hyperledger/fabric/core/chaincode/platforms/golang"
+	"github.com/hyperledger-labs/hlf-operator/internal/github.com/hyperledger/fabric/core/chaincode/platforms/java"
+	"github.com/hyperledger-labs/hlf-operator/internal/github.com/hyperledger/fabric/core/chaincode/platforms/node"
 )
 
 // SupportedPlatforms is the canonical list of platforms Fabric supports

@@ -20,8 +20,8 @@ Please review third_party pinning scripts and patches for more details.
 package sw
 
 import (
-	"github.com/kfsoftware/hlf-operator/internal/github.com/hyperledger/fabric/bccsp"
-	"github.com/kfsoftware/hlf-operator/internal/github.com/hyperledger/fabric/bccsp/sw"
+	"github.com/hyperledger-labs/hlf-operator/internal/github.com/hyperledger/fabric/bccsp"
+	"github.com/hyperledger-labs/hlf-operator/internal/github.com/hyperledger/fabric/bccsp/sw"
 	"github.com/pkg/errors"
 )
 

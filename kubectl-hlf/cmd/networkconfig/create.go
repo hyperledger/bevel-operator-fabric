@@ -3,8 +3,8 @@ package networkconfig
 import (
 	"context"
 	"fmt"
-	hlfv1alpha1 "github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
-	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/helpers"
+	hlfv1alpha1 "github.com/hyperledger-labs/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
+	"github.com/hyperledger-labs/hlf-operator/kubectl-hlf/cmd/helpers"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"io"

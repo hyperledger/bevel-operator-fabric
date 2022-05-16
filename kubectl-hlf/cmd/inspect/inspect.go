@@ -10,8 +10,8 @@ import (
 	"text/template"
 
 	"github.com/Masterminds/sprig/v3"
-	"github.com/kfsoftware/hlf-operator/controllers/utils"
-	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/helpers"
+	"github.com/hyperledger-labs/hlf-operator/controllers/utils"
+	"github.com/hyperledger-labs/hlf-operator/kubectl-hlf/cmd/helpers"
 	"github.com/spf13/cobra"
 )
 

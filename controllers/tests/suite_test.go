@@ -1,12 +1,11 @@
 package tests
 
-
 import (
-	hlfv1alpha1 "github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
-	"github.com/kfsoftware/hlf-operator/controllers/ca"
-	"github.com/kfsoftware/hlf-operator/controllers/ordnode"
-	"github.com/kfsoftware/hlf-operator/controllers/ordservice"
-	"github.com/kfsoftware/hlf-operator/controllers/peer"
+	hlfv1alpha1 "github.com/hyperledger-labs/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
+	"github.com/hyperledger-labs/hlf-operator/controllers/ca"
+	"github.com/hyperledger-labs/hlf-operator/controllers/ordnode"
+	"github.com/hyperledger-labs/hlf-operator/controllers/ordservice"
+	"github.com/hyperledger-labs/hlf-operator/controllers/peer"
 	ctrl "sigs.k8s.io/controller-runtime"
 	k8sconfig "sigs.k8s.io/controller-runtime/pkg/client/config"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
@@ -37,7 +36,6 @@ func TestAPIs(t *testing.T) {
 		[]Reporter{printer.NewlineReporter{}},
 	)
 }
-
 
 var cfg *rest.Config
 var K8sClient client.Client
@@ -156,4 +154,3 @@ var _ = AfterSuite(func() {
 	err := testEnv.Stop()
 	Expect(err).ToNot(HaveOccurred())
 })
-

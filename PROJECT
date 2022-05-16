@@ -1,6 +1,6 @@
 domain: kungfusoftware.es
 layout: go.kubebuilder.io/v2
-repo: github.com/kfsoftware/hlf-operator
+repo: github.com/hyperledger-labs/hlf-operator
 resources:
 - group: hlf
   kind: FabricPeer

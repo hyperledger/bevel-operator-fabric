@@ -13,7 +13,7 @@ package prometheus
 import (
 	kitmetrics "github.com/go-kit/kit/metrics"
 	"github.com/go-kit/kit/metrics/prometheus"
-	"github.com/kfsoftware/hlf-operator/internal/github.com/hyperledger/fabric/common/metrics"
+	"github.com/hyperledger-labs/hlf-operator/internal/github.com/hyperledger/fabric/common/metrics"
 	prom "github.com/prometheus/client_golang/prometheus"
 )
 

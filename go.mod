@@ -1,4 +1,4 @@
-module github.com/kfsoftware/hlf-operator
+module github.com/hyperledger-labs/hlf-operator
 
 go 1.16
 

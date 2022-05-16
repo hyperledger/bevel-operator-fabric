@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd"
+	"github.com/hyperledger-labs/hlf-operator/kubectl-hlf/cmd"
 	"github.com/sirupsen/logrus"
 	"os"
 )

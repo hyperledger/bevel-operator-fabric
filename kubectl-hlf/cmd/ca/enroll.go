@@ -2,14 +2,14 @@ package ca
 
 import (
 	"github.com/hyperledger/fabric-sdk-go/pkg/gateway"
-	log "github.com/kfsoftware/hlf-operator/internal/github.com/hyperledger/fabric-ca/sdkpatch/logbridge"
+	log "github.com/hyperledger-labs/hlf-operator/internal/github.com/hyperledger/fabric-ca/sdkpatch/logbridge"
 	"io"
 	"io/ioutil"
 
 	"github.com/ghodss/yaml"
-	"github.com/kfsoftware/hlf-operator/controllers/certs"
-	"github.com/kfsoftware/hlf-operator/controllers/utils"
-	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/helpers"
+	"github.com/hyperledger-labs/hlf-operator/controllers/certs"
+	"github.com/hyperledger-labs/hlf-operator/controllers/utils"
+	"github.com/hyperledger-labs/hlf-operator/kubectl-hlf/cmd/helpers"
 	"github.com/spf13/cobra"
 )
 

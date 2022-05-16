@@ -27,7 +27,7 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/kfsoftware/hlf-operator/internal/github.com/hyperledger/fabric/bccsp"
+	"github.com/hyperledger-labs/hlf-operator/internal/github.com/hyperledger/fabric/bccsp"
 )
 
 type ecdsaPublicKeyKeyDeriver struct{}

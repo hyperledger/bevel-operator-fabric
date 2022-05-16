@@ -11,9 +11,9 @@ Please review third_party pinning scripts and patches for more details.
 package channelconfig
 
 import (
+	"github.com/hyperledger-labs/hlf-operator/internal/github.com/hyperledger/fabric/common/capabilities"
 	cb "github.com/hyperledger/fabric-protos-go/common"
 	pb "github.com/hyperledger/fabric-protos-go/peer"
-	"github.com/kfsoftware/hlf-operator/internal/github.com/hyperledger/fabric/common/capabilities"
 	"github.com/pkg/errors"
 )
 

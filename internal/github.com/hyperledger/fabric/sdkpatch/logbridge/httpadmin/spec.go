@@ -15,7 +15,7 @@ import (
 	"fmt"
 	"net/http"
 
-	flogging "github.com/kfsoftware/hlf-operator/internal/github.com/hyperledger/fabric/sdkpatch/logbridge"
+	flogging "github.com/hyperledger-labs/hlf-operator/internal/github.com/hyperledger/fabric/sdkpatch/logbridge"
 )
 
 //go:generate counterfeiter -o fakes/logging.go -fake-name Logging . Logging

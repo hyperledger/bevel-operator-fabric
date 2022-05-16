@@ -22,8 +22,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/kfsoftware/hlf-operator/internal/github.com/hyperledger/fabric/sdkinternal/ccmetadata"
-	flogging "github.com/kfsoftware/hlf-operator/internal/github.com/hyperledger/fabric/sdkpatch/logbridge"
+	"github.com/hyperledger-labs/hlf-operator/internal/github.com/hyperledger/fabric/sdkinternal/ccmetadata"
+	flogging "github.com/hyperledger-labs/hlf-operator/internal/github.com/hyperledger/fabric/sdkpatch/logbridge"
 	"github.com/pkg/errors"
 )
 

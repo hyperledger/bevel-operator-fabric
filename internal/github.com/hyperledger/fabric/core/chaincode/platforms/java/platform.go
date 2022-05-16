@@ -21,8 +21,8 @@ import (
 	"regexp"
 
 	pb "github.com/hyperledger/fabric-protos-go/peer"
-	"github.com/kfsoftware/hlf-operator/internal/github.com/hyperledger/fabric/core/chaincode/platforms/util"
-	flogging "github.com/kfsoftware/hlf-operator/internal/github.com/hyperledger/fabric/sdkpatch/logbridge"
+	"github.com/hyperledger-labs/hlf-operator/internal/github.com/hyperledger/fabric/core/chaincode/platforms/util"
+	flogging "github.com/hyperledger-labs/hlf-operator/internal/github.com/hyperledger/fabric/sdkpatch/logbridge"
 )
 
 var logger = flogging.MustGetLogger("chaincode.platform.java")

@@ -12,8 +12,8 @@ package statsd
 
 import (
 	"github.com/go-kit/kit/metrics/statsd"
-	"github.com/kfsoftware/hlf-operator/internal/github.com/hyperledger/fabric/common/metrics"
-	"github.com/kfsoftware/hlf-operator/internal/github.com/hyperledger/fabric/common/metrics/internal/namer"
+	"github.com/hyperledger-labs/hlf-operator/internal/github.com/hyperledger/fabric/common/metrics"
+	"github.com/hyperledger-labs/hlf-operator/internal/github.com/hyperledger/fabric/common/metrics/internal/namer"
 )
 
 const defaultFormat = "%{#fqname}"

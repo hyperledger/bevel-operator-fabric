@@ -2,7 +2,7 @@ package networkconfig
 
 import (
 	"context"
-	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/helpers"
+	"github.com/hyperledger-labs/hlf-operator/kubectl-hlf/cmd/helpers"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"io"
@@ -61,29 +61,28 @@ func (d *networkConfigExportCmd) run(args []string) error {
 	}
 	clientSet, err := helpers.GetKubeClient()
 	if err != nil {
-        return err
-    }
+		return err
+	}
 	ctx := context.Background()
-	networkConfig ,err := oclient.HlfV1alpha1().FabricNetworkConfigs(d.ns).Get(ctx, d.name, metav1.GetOptions{})
+	networkConfig, err := oclient.HlfV1alpha1().FabricNetworkConfigs(d.ns).Get(ctx, d.name, metav1.GetOptions{})
 	if err != nil {
-        return err
-    }
+		return err
+	}
 	secret, err := clientSet.CoreV1().Secrets(d.ns).Get(ctx, networkConfig.Spec.SecretName, metav1.GetOptions{})
 	if err != nil {
-        return err
-    }
+		return err
+	}
 	networkConfigBytes := secret.Data["config.yaml"]
 	if d.output != "" {
-        err = ioutil.WriteFile(d.output, networkConfigBytes, 0777)
-        if err != nil {
-            return err
-        }
-    } else {
-        _, err = d.out.Write(networkConfigBytes)
-        if err != nil {
-            return err
-        }
-    }
+		err = ioutil.WriteFile(d.output, networkConfigBytes, 0777)
+		if err != nil {
+			return err
+		}
+	} else {
+		_, err = d.out.Write(networkConfigBytes)
+		if err != nil {
+			return err
+		}
+	}
 	return nil
 }
-

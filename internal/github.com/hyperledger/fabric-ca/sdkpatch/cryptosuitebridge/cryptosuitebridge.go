@@ -14,11 +14,11 @@ import (
 	"crypto"
 	"crypto/ecdsa"
 
+	"github.com/hyperledger-labs/hlf-operator/internal/github.com/hyperledger/fabric-ca/sdkpatch/keyutil"
+	"github.com/hyperledger-labs/hlf-operator/internal/github.com/hyperledger/fabric/bccsp"
+	cspsigner "github.com/hyperledger-labs/hlf-operator/internal/github.com/hyperledger/fabric/bccsp/signer"
 	"github.com/hyperledger/fabric-sdk-go/pkg/common/providers/core"
 	"github.com/hyperledger/fabric-sdk-go/pkg/core/cryptosuite"
-	"github.com/kfsoftware/hlf-operator/internal/github.com/hyperledger/fabric-ca/sdkpatch/keyutil"
-	"github.com/kfsoftware/hlf-operator/internal/github.com/hyperledger/fabric/bccsp"
-	cspsigner "github.com/kfsoftware/hlf-operator/internal/github.com/hyperledger/fabric/bccsp/signer"
 )
 
 const (

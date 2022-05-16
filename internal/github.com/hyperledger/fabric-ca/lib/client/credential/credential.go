@@ -13,7 +13,7 @@ package credential
 import (
 	"net/http"
 
-	"github.com/kfsoftware/hlf-operator/internal/github.com/hyperledger/fabric-ca/sdkinternal/pkg/api"
+	"github.com/hyperledger-labs/hlf-operator/internal/github.com/hyperledger/fabric-ca/sdkinternal/pkg/api"
 )
 
 // Credential represents an credential of an identity

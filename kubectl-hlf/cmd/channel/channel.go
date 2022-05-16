@@ -1,8 +1,8 @@
 package channel
 
 import (
-	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/channel/consenter"
-	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/channel/ordorg"
+	"github.com/hyperledger-labs/hlf-operator/kubectl-hlf/cmd/channel/consenter"
+	"github.com/hyperledger-labs/hlf-operator/kubectl-hlf/cmd/channel/ordorg"
 	"io"
 
 	"github.com/spf13/cobra"

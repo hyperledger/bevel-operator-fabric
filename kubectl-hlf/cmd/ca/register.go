@@ -3,8 +3,8 @@ package ca
 import (
 	"io"
 
-	"github.com/kfsoftware/hlf-operator/controllers/certs"
-	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/helpers"
+	"github.com/hyperledger-labs/hlf-operator/controllers/certs"
+	"github.com/hyperledger-labs/hlf-operator/kubectl-hlf/cmd/helpers"
 	"github.com/spf13/cobra"
 )
 

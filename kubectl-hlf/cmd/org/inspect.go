@@ -3,9 +3,9 @@ package org
 import (
 	"bytes"
 	"github.com/Masterminds/sprig/v3"
-	"github.com/kfsoftware/hlf-operator/controllers/utils"
-	log "github.com/kfsoftware/hlf-operator/internal/github.com/hyperledger/fabric-ca/sdkpatch/logbridge"
-	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/helpers"
+	"github.com/hyperledger-labs/hlf-operator/controllers/utils"
+	log "github.com/hyperledger-labs/hlf-operator/internal/github.com/hyperledger/fabric-ca/sdkpatch/logbridge"
+	"github.com/hyperledger-labs/hlf-operator/kubectl-hlf/cmd/helpers"
 	"github.com/spf13/cobra"
 	"io"
 	"io/ioutil"

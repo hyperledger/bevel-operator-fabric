@@ -14,7 +14,7 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/kfsoftware/hlf-operator/internal/github.com/hyperledger/fabric/common/metrics"
+	"github.com/hyperledger-labs/hlf-operator/internal/github.com/hyperledger/fabric/common/metrics"
 )
 
 type Collector struct {

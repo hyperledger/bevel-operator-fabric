@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/golang/protobuf/proto"
+	"github.com/hyperledger-labs/hlf-operator/kubectl-hlf/cmd/helpers"
 	"github.com/hyperledger/fabric-config/configtx"
 	"github.com/hyperledger/fabric-protos-go/common"
 	"github.com/hyperledger/fabric-protos-go/peer"
@@ -12,7 +13,6 @@ import (
 	"github.com/hyperledger/fabric-sdk-go/pkg/fab/resource"
 	"github.com/hyperledger/fabric-sdk-go/pkg/fabsdk"
 	"github.com/hyperledger/fabric/protoutil"
-	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/helpers"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"io"
@@ -78,7 +78,7 @@ func (c *addAnchorPeerCmd) run() error {
 	}
 	cftxGen := configtx.New(cfgBlock)
 	app := cftxGen.Application().Organization(mspID)
-	peerHostName, peerPort , err := helpers.GetPeerHostAndPort(clientSet, adminPeer.Spec, adminPeer.Status)
+	peerHostName, peerPort, err := helpers.GetPeerHostAndPort(clientSet, adminPeer.Spec, adminPeer.Status)
 	if err != nil {
 		return err
 	}

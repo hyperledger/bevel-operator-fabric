@@ -18,11 +18,11 @@ package main
 
 import (
 	"flag"
-	"github.com/kfsoftware/hlf-operator/controllers/chaincode"
-	"github.com/kfsoftware/hlf-operator/controllers/hlfmetrics"
-	"github.com/kfsoftware/hlf-operator/controllers/networkconfig"
-	"github.com/kfsoftware/hlf-operator/controllers/ordnode"
-	"github.com/kfsoftware/hlf-operator/controllers/utils"
+	"github.com/hyperledger-labs/hlf-operator/controllers/chaincode"
+	"github.com/hyperledger-labs/hlf-operator/controllers/hlfmetrics"
+	"github.com/hyperledger-labs/hlf-operator/controllers/networkconfig"
+	"github.com/hyperledger-labs/hlf-operator/controllers/ordnode"
+	"github.com/hyperledger-labs/hlf-operator/controllers/utils"
 	log "github.com/sirupsen/logrus"
 	"k8s.io/client-go/rest"
 	"os"
@@ -30,9 +30,9 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 	"sigs.k8s.io/controller-runtime/pkg/metrics"
 
-	"github.com/kfsoftware/hlf-operator/controllers/ca"
-	"github.com/kfsoftware/hlf-operator/controllers/ordservice"
-	"github.com/kfsoftware/hlf-operator/controllers/peer"
+	"github.com/hyperledger-labs/hlf-operator/controllers/ca"
+	"github.com/hyperledger-labs/hlf-operator/controllers/ordservice"
+	"github.com/hyperledger-labs/hlf-operator/controllers/peer"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
@@ -41,7 +41,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	hlfv1alpha1 "github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
+	hlfv1alpha1 "github.com/hyperledger-labs/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
 	// +kubebuilder:scaffold:imports
 )
 
@@ -160,20 +160,20 @@ func main() {
 	}
 
 	if err = (&networkconfig.FabricNetworkConfigReconciler{
-		Client:    mgr.GetClient(),
-		Log:       ctrl.Log.WithName("controllers").WithName("FabricNetworkConfig"),
-		Scheme:    mgr.GetScheme(),
-		Config:    mgr.GetConfig(),
+		Client: mgr.GetClient(),
+		Log:    ctrl.Log.WithName("controllers").WithName("FabricNetworkConfig"),
+		Scheme: mgr.GetScheme(),
+		Config: mgr.GetConfig(),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "FabricNetworkConfig")
 		os.Exit(1)
 	}
 
 	if err = (&chaincode.FabricChaincodeReconciler{
-		Client:    mgr.GetClient(),
-		Log:       ctrl.Log.WithName("controllers").WithName("FabricChaincode"),
-		Scheme:    mgr.GetScheme(),
-		Config:    mgr.GetConfig(),
+		Client: mgr.GetClient(),
+		Log:    ctrl.Log.WithName("controllers").WithName("FabricChaincode"),
+		Scheme: mgr.GetScheme(),
+		Config: mgr.GetConfig(),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "FabricNetworkConfig")
 		os.Exit(1)

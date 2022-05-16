@@ -4,8 +4,8 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
-	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/helpers"
-	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/helpers/osnadmin"
+	"github.com/hyperledger-labs/hlf-operator/kubectl-hlf/cmd/helpers"
+	"github.com/hyperledger-labs/hlf-operator/kubectl-hlf/cmd/helpers/osnadmin"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -46,7 +46,7 @@ func (c *removeChannelCmd) run() error {
 		return err
 	}
 	log.Printf("name=%s namespace=%s", c.name, c.namespace)
-	ordererNode, err := helpers.GetOrdererNodeByFullName(clientSet,hlfClient, fmt.Sprintf("%s.%s", c.name, c.namespace))
+	ordererNode, err := helpers.GetOrdererNodeByFullName(clientSet, hlfClient, fmt.Sprintf("%s.%s", c.name, c.namespace))
 	if err != nil {
 		return err
 	}

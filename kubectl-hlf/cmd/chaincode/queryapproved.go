@@ -6,7 +6,7 @@ import (
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/resmgmt"
 	"github.com/hyperledger/fabric-sdk-go/pkg/core/config"
 	"github.com/hyperledger/fabric-sdk-go/pkg/fabsdk"
-	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/helpers"
+	"github.com/hyperledger-labs/hlf-operator/kubectl-hlf/cmd/helpers"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
 	"io"
@@ -59,10 +59,10 @@ func (c *queryApprovedCmd) run(out io.Writer) error {
 		},
 		resmgmt.WithTargetEndpoints(peerName),
 	)
-	signaturePolicyBytes,err := json.Marshal(chaincode.SignaturePolicy)
+	signaturePolicyBytes, err := json.Marshal(chaincode.SignaturePolicy)
 	if err != nil {
-        return err
-    }
+		return err
+	}
 	data := [][]string{
 		{chaincode.Name, chaincode.PackageID, chaincode.Version, fmt.Sprint(chaincode.Sequence), string(signaturePolicyBytes)}}
 	table := tablewriter.NewWriter(out)

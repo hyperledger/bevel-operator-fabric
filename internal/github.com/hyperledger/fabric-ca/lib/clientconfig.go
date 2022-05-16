@@ -23,8 +23,8 @@ package lib
 import (
 	"github.com/hyperledger/fabric-sdk-go/pkg/common/providers/core"
 
-	"github.com/kfsoftware/hlf-operator/internal/github.com/hyperledger/fabric-ca/lib/tls"
-	"github.com/kfsoftware/hlf-operator/internal/github.com/hyperledger/fabric-ca/sdkinternal/pkg/api"
+	"github.com/hyperledger-labs/hlf-operator/internal/github.com/hyperledger/fabric-ca/lib/tls"
+	"github.com/hyperledger-labs/hlf-operator/internal/github.com/hyperledger/fabric-ca/sdkinternal/pkg/api"
 )
 
 // ClientConfig is the fabric-ca client's config

@@ -19,8 +19,8 @@ import (
 	"fmt"
 
 	"github.com/golang/protobuf/proto"
+	"github.com/hyperledger-labs/hlf-operator/internal/github.com/hyperledger/fabric/protoutil"
 	cb "github.com/hyperledger/fabric-protos-go/common"
-	"github.com/kfsoftware/hlf-operator/internal/github.com/hyperledger/fabric/protoutil"
 )
 
 func computePoliciesMapUpdate(original, updated map[string]*cb.ConfigPolicy) (readSet, writeSet, sameSet map[string]*cb.ConfigPolicy, updatedMembers bool) {

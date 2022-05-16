@@ -5,7 +5,7 @@
 replicaCount: 1
 
 image:
-  repository: quay.io/kfsoftware/hlf-operator
+  repository: quay.io/hyperledger-labs/hlf-operator
   pullPolicy: Always
   # Overrides the image tag whose default is the chart appVersion.
   tag: "v1.4.0"

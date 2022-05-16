@@ -1,16 +1,16 @@
 package cmd
 
 import (
-	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/ca"
-	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/chaincode"
-	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/channel"
-	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/externalchaincode"
-	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/inspect"
-	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/networkconfig"
-	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/ordnode"
-	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/org"
-	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/peer"
-	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/utils"
+	"github.com/hyperledger-labs/hlf-operator/kubectl-hlf/cmd/ca"
+	"github.com/hyperledger-labs/hlf-operator/kubectl-hlf/cmd/chaincode"
+	"github.com/hyperledger-labs/hlf-operator/kubectl-hlf/cmd/channel"
+	"github.com/hyperledger-labs/hlf-operator/kubectl-hlf/cmd/externalchaincode"
+	"github.com/hyperledger-labs/hlf-operator/kubectl-hlf/cmd/inspect"
+	"github.com/hyperledger-labs/hlf-operator/kubectl-hlf/cmd/networkconfig"
+	"github.com/hyperledger-labs/hlf-operator/kubectl-hlf/cmd/ordnode"
+	"github.com/hyperledger-labs/hlf-operator/kubectl-hlf/cmd/org"
+	"github.com/hyperledger-labs/hlf-operator/kubectl-hlf/cmd/peer"
+	"github.com/hyperledger-labs/hlf-operator/kubectl-hlf/cmd/utils"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	// Workaround for authentication plugins https://krew.sigs.k8s.io/docs/developer-guide/develop/best-practices/#auth-plugins
@@ -42,6 +42,6 @@ func NewCmdHLF() *cobra.Command {
 		utils.NewUtilsCMD(cmd.OutOrStdout(), cmd.ErrOrStderr()),
 		networkconfig.NewNetworkConfigCmd(cmd.OutOrStdout(), cmd.ErrOrStderr()),
 		externalchaincode.NewExternalChaincodeCmd(cmd.OutOrStdout(), cmd.ErrOrStderr()),
-)
+	)
 	return cmd
 }

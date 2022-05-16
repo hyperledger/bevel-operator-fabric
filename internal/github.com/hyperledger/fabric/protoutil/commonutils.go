@@ -17,8 +17,8 @@ import (
 
 	"github.com/golang/protobuf/proto"
 	"github.com/golang/protobuf/ptypes/timestamp"
+	"github.com/hyperledger-labs/hlf-operator/internal/github.com/hyperledger/fabric/sdkinternal/pkg/identity"
 	cb "github.com/hyperledger/fabric-protos-go/common"
-	"github.com/kfsoftware/hlf-operator/internal/github.com/hyperledger/fabric/sdkinternal/pkg/identity"
 	"github.com/pkg/errors"
 )
 

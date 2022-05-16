@@ -31,7 +31,7 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/kfsoftware/hlf-operator/internal/github.com/hyperledger/fabric/bccsp/utils"
+	"github.com/hyperledger-labs/hlf-operator/internal/github.com/hyperledger/fabric/bccsp/utils"
 	"github.com/pkg/errors"
 )
 

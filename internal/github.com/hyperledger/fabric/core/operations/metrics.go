@@ -13,8 +13,8 @@ package operations
 import (
 	"sync"
 
-	"github.com/kfsoftware/hlf-operator/internal/github.com/hyperledger/fabric/common/metrics"
-	"github.com/kfsoftware/hlf-operator/internal/github.com/hyperledger/fabric/common/metrics/prometheus"
+	"github.com/hyperledger-labs/hlf-operator/internal/github.com/hyperledger/fabric/common/metrics"
+	"github.com/hyperledger-labs/hlf-operator/internal/github.com/hyperledger/fabric/common/metrics/prometheus"
 )
 
 var (

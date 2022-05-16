@@ -15,7 +15,7 @@ import (
 	"sort"
 	"time"
 
-	"github.com/kfsoftware/hlf-operator/internal/github.com/hyperledger/fabric/gossip/protoext"
+	"github.com/hyperledger-labs/hlf-operator/internal/github.com/hyperledger/fabric/gossip/protoext"
 )
 
 // Filter filters and sorts the given endorsers

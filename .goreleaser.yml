@@ -62,8 +62,8 @@ dockers:
     goarch: amd64
     dockerfile: Dockerfile
     image_templates:
-      - "quay.io/kfsoftware/hlf-operator:{{ .Tag }}"
-      - "quay.io/kfsoftware/hlf-operator:latest"
+      - "quay.io/hyperledger-labs/hlf-operator:{{ .Tag }}"
+      - "quay.io/hyperledger-labs/hlf-operator:latest"
     extra_files:
       - charts
       - LICENSE

@@ -8,10 +8,10 @@ import (
 	cb "github.com/hyperledger/fabric-protos-go/common"
 	"github.com/hyperledger/fabric-protos-go/orderer/etcdraft"
 	"github.com/hyperledger/fabric-sdk-go/pkg/fab/resource/genesisconfig"
-	"github.com/kfsoftware/hlf-operator/internal/github.com/hyperledger/fabric/common/channelconfig"
-	"github.com/kfsoftware/hlf-operator/internal/github.com/hyperledger/fabric/sdkinternal/configtxgen/encoder"
+	"github.com/hyperledger-labs/hlf-operator/internal/github.com/hyperledger/fabric/common/channelconfig"
+	"github.com/hyperledger-labs/hlf-operator/internal/github.com/hyperledger/fabric/sdkinternal/configtxgen/encoder"
 
-	genesisconfig2 "github.com/kfsoftware/hlf-operator/internal/github.com/hyperledger/fabric/sdkinternal/configtxgen/genesisconfig"
+	genesisconfig2 "github.com/hyperledger-labs/hlf-operator/internal/github.com/hyperledger/fabric/sdkinternal/configtxgen/genesisconfig"
 	"io/ioutil"
 	"log"
 	"os"

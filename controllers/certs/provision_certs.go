@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"strings"
 
+	"github.com/hyperledger-labs/hlf-operator/controllers/utils"
 	"github.com/hyperledger/fabric-sdk-go/pkg/common/providers/core"
 	mspprov "github.com/hyperledger/fabric-sdk-go/pkg/common/providers/msp"
 	fabricctx "github.com/hyperledger/fabric-sdk-go/pkg/context"
@@ -18,7 +19,6 @@ import (
 	fabImpl "github.com/hyperledger/fabric-sdk-go/pkg/fab"
 	"github.com/hyperledger/fabric-sdk-go/pkg/msp"
 	"github.com/hyperledger/fabric-sdk-go/pkg/msp/api"
-	"github.com/kfsoftware/hlf-operator/controllers/utils"
 	"gopkg.in/yaml.v2"
 )
 
@@ -226,7 +226,6 @@ func GetCAInfo(params GetCAInfoRequest) (*api.GetCAInfoResponse, error) {
 	return caInfo, nil
 }
 
-
 func ReEnrollUser(params EnrollUserRequest) (*x509.Certificate, *ecdsa.PrivateKey, *x509.Certificate, error) {
 	keystorePath, err := ioutil.TempDir("", "enroll")
 	if err != nil {
@@ -284,7 +283,6 @@ func ReEnrollUser(params EnrollUserRequest) (*x509.Certificate, *ecdsa.PrivateKe
 	}
 	return userCrt, userKey, rootCrt, nil
 }
-
 
 func EnrollUser(params EnrollUserRequest) (*x509.Certificate, *ecdsa.PrivateKey, *x509.Certificate, error) {
 	keystorePath, err := ioutil.TempDir("", "enroll")

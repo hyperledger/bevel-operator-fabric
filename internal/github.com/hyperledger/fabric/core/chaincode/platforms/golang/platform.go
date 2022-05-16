@@ -26,9 +26,9 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/hyperledger-labs/hlf-operator/internal/github.com/hyperledger/fabric/core/chaincode/platforms/util"
+	"github.com/hyperledger-labs/hlf-operator/internal/github.com/hyperledger/fabric/sdkinternal/ccmetadata"
 	pb "github.com/hyperledger/fabric-protos-go/peer"
-	"github.com/kfsoftware/hlf-operator/internal/github.com/hyperledger/fabric/core/chaincode/platforms/util"
-	"github.com/kfsoftware/hlf-operator/internal/github.com/hyperledger/fabric/sdkinternal/ccmetadata"
 	"github.com/pkg/errors"
 )
 

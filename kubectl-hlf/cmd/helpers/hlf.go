@@ -3,12 +3,12 @@ package helpers
 import (
 	"context"
 	"fmt"
-	"github.com/kfsoftware/hlf-operator/controllers/utils"
+	"github.com/hyperledger-labs/hlf-operator/controllers/utils"
 	"k8s.io/client-go/kubernetes"
 	"strings"
 
-	hlfv1alpha1 "github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
-	operatorv1 "github.com/kfsoftware/hlf-operator/pkg/client/clientset/versioned"
+	hlfv1alpha1 "github.com/hyperledger-labs/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
+	operatorv1 "github.com/hyperledger-labs/hlf-operator/pkg/client/clientset/versioned"
 	"github.com/pkg/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )

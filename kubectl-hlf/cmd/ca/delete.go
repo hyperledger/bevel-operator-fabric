@@ -3,8 +3,8 @@ package ca
 import (
 	"context"
 	"fmt"
-	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/helpers"
-	operatorv1 "github.com/kfsoftware/hlf-operator/pkg/client/clientset/versioned"
+	"github.com/hyperledger-labs/hlf-operator/kubectl-hlf/cmd/helpers"
+	operatorv1 "github.com/hyperledger-labs/hlf-operator/pkg/client/clientset/versioned"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"io"

@@ -3,7 +3,7 @@ package networkconfig
 import (
 	"context"
 	"fmt"
-	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/helpers"
+	"github.com/hyperledger-labs/hlf-operator/kubectl-hlf/cmd/helpers"
 	"github.com/spf13/cobra"
 	"io"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"

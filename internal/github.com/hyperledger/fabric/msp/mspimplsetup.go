@@ -19,7 +19,7 @@ import (
 
 	"github.com/golang/protobuf/proto"
 	m "github.com/hyperledger/fabric-protos-go/msp"
-	bccsp "github.com/kfsoftware/hlf-operator/internal/github.com/hyperledger/fabric/sdkpatch/cryptosuitebridge"
+	bccsp "github.com/hyperledger-labs/hlf-operator/internal/github.com/hyperledger/fabric/sdkpatch/cryptosuitebridge"
 	errors "github.com/pkg/errors"
 )
 

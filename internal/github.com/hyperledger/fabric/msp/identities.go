@@ -24,10 +24,10 @@ import (
 	"time"
 
 	"github.com/golang/protobuf/proto"
+	bccsp "github.com/hyperledger-labs/hlf-operator/internal/github.com/hyperledger/fabric/sdkpatch/cryptosuitebridge"
+	flogging "github.com/hyperledger-labs/hlf-operator/internal/github.com/hyperledger/fabric/sdkpatch/logbridge"
+	logging "github.com/hyperledger-labs/hlf-operator/internal/github.com/hyperledger/fabric/sdkpatch/logbridge"
 	"github.com/hyperledger/fabric-protos-go/msp"
-	bccsp "github.com/kfsoftware/hlf-operator/internal/github.com/hyperledger/fabric/sdkpatch/cryptosuitebridge"
-	flogging "github.com/kfsoftware/hlf-operator/internal/github.com/hyperledger/fabric/sdkpatch/logbridge"
-	logging "github.com/kfsoftware/hlf-operator/internal/github.com/hyperledger/fabric/sdkpatch/logbridge"
 	"github.com/pkg/errors"
 )
 

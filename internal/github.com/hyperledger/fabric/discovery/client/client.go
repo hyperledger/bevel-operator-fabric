@@ -18,10 +18,10 @@ import (
 	"time"
 
 	"github.com/golang/protobuf/proto"
+	"github.com/hyperledger-labs/hlf-operator/internal/github.com/hyperledger/fabric/discovery/protoext"
+	gprotoext "github.com/hyperledger-labs/hlf-operator/internal/github.com/hyperledger/fabric/gossip/protoext"
 	"github.com/hyperledger/fabric-protos-go/discovery"
 	"github.com/hyperledger/fabric-protos-go/msp"
-	"github.com/kfsoftware/hlf-operator/internal/github.com/hyperledger/fabric/discovery/protoext"
-	gprotoext "github.com/kfsoftware/hlf-operator/internal/github.com/hyperledger/fabric/gossip/protoext"
 	"github.com/pkg/errors"
 )
 

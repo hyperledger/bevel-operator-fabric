@@ -14,12 +14,12 @@ import (
 	"fmt"
 	"math"
 
+	"github.com/hyperledger-labs/hlf-operator/internal/github.com/hyperledger/fabric/bccsp"
+	"github.com/hyperledger-labs/hlf-operator/internal/github.com/hyperledger/fabric/common/capabilities"
+	"github.com/hyperledger-labs/hlf-operator/internal/github.com/hyperledger/fabric/common/util"
+	"github.com/hyperledger-labs/hlf-operator/internal/github.com/hyperledger/fabric/msp"
 	cb "github.com/hyperledger/fabric-protos-go/common"
 	"github.com/hyperledger/fabric-sdk-go/pkg/common/providers/core"
-	"github.com/kfsoftware/hlf-operator/internal/github.com/hyperledger/fabric/bccsp"
-	"github.com/kfsoftware/hlf-operator/internal/github.com/hyperledger/fabric/common/capabilities"
-	"github.com/kfsoftware/hlf-operator/internal/github.com/hyperledger/fabric/common/util"
-	"github.com/kfsoftware/hlf-operator/internal/github.com/hyperledger/fabric/msp"
 	"github.com/pkg/errors"
 )
 
