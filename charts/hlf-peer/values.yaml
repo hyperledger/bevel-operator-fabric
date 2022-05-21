@@ -18,6 +18,8 @@ couchdbExporter:
   tag: "v30.0.0"
   pullPolicy: IfNotPresent
 
+imagePullSecrets: []
+
 fsServer:
   image: "quay.io/kfsoftware/fs-peer"
   tag: "amd64-2.2.0"

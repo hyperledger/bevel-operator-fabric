@@ -1124,9 +1124,10 @@ func GetConfig(
 	}
 
 	var c = FabricPeerChart{
-		EnvVars:  spec.Env,
-		Replicas: spec.Replicas,
-		Istio:    istio,
+		EnvVars:          spec.Env,
+		Replicas:         spec.Replicas,
+		ImagePullSecrets: spec.ImagePullSecrets,
+		Istio:            istio,
 		Image: Image{
 			Repository: spec.Image,
 			Tag:        spec.Tag,
