@@ -115,7 +115,7 @@ spec:
 
           {{- if $.Values.envVars }}
           env:
-          {{ toYaml .Values.envVars | indent 12 }}
+{{ toYaml .Values.envVars | indent 12 }}
           {{- end }}
           envFrom:
             - configMapRef:
