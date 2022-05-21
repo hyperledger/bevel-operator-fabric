@@ -459,6 +459,7 @@ spec:
                         TODO: Add other useful fields. apiVersion, kind, uid?'
                       type: string
                   type: object
+                nullable: true
                 type: array
               istio:
                 nullable: true
@@ -925,7 +926,6 @@ spec:
             - debug
             - hosts
             - image
-            - imagePullSecrets
             - metrics
             - resources
             - rootCA
