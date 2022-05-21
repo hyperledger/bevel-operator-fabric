@@ -128,6 +128,9 @@ type FabricPeerSpec struct {
 	FSServer *FabricFSServer `json:"fsServer"`
 
 	// +kubebuilder:validation:Default={}
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +nullable
 	ImagePullSecrets []corev1.LocalObjectReference `json:"imagePullSecrets"`
 
 	// +kubebuilder:validation:MinLength=3
@@ -395,6 +398,9 @@ type FabricOrdererNodeSpec struct {
 	// +kubebuilder:validation:MinLength=3
 	MspID string `json:"mspID"`
 	// +kubebuilder:validation:Default={}
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +nullable
 	ImagePullSecrets []corev1.LocalObjectReference `json:"imagePullSecrets"`
 
 	Genesis                     string             `json:"genesis"`
@@ -504,6 +510,9 @@ type FabricCASpec struct {
 	// +kubebuilder:validation:Default={}
 	Tolerations []corev1.Toleration `json:"tolerations"`
 	// +kubebuilder:validation:Default={}
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +nullable
 	ImagePullSecrets []corev1.LocalObjectReference `json:"imagePullSecrets"`
 
 	// +optional
@@ -976,6 +985,9 @@ type FabricChaincodeSpec struct {
 	// +kubebuilder:validation:MinLength=1
 	PackageID string `json:"packageId"`
 	// +kubebuilder:validation:Default={}
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +nullable
 	ImagePullSecrets []corev1.LocalObjectReference `json:"imagePullSecrets"`
 
 	// +nullable
