@@ -17,6 +17,10 @@ module.exports = {
       "user-guide/develop-chaincode-locally",
     ],
     "Kubectl Plugin": ["kubectl-plugin/installation"],
+    "CouchDB": [
+      "couchdb/external-couchdb",
+      "couchdb/custom-image",
+    ],
     "Operator Guide": [
       "operator-guide/state-db",
       "operator-guide/monitoring",
@@ -25,7 +29,6 @@ module.exports = {
       "operator-guide/increase-storage",
       "operator-guide/renew-certificates",
       "operator-guide/istio",
-      "operator-guide/external-couchdb",
     ],
   },
 };

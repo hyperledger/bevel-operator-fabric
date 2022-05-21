@@ -127,6 +127,9 @@ type FabricPeerSpec struct {
 	// +nullable
 	FSServer *FabricFSServer `json:"fsServer"`
 
+	// +kubebuilder:validation:Default={}
+	ImagePullSecrets []corev1.LocalObjectReference `json:"imagePullSecrets"`
+
 	// +kubebuilder:validation:MinLength=3
 	MspID     string              `json:"mspID"`
 	Secret    Secret              `json:"secret"`
@@ -391,6 +394,8 @@ type FabricOrdererNodeSpec struct {
 	PullPolicy corev1.PullPolicy `json:"pullPolicy,omitempty"`
 	// +kubebuilder:validation:MinLength=3
 	MspID string `json:"mspID"`
+	// +kubebuilder:validation:Default={}
+	ImagePullSecrets []corev1.LocalObjectReference `json:"imagePullSecrets"`
 
 	Genesis                     string             `json:"genesis"`
 	BootstrapMethod             BootstrapMethod    `json:"bootstrapMethod"`
@@ -498,6 +503,8 @@ type FabricCASpec struct {
 	// +nullable
 	// +kubebuilder:validation:Default={}
 	Tolerations []corev1.Toleration `json:"tolerations"`
+	// +kubebuilder:validation:Default={}
+	ImagePullSecrets []corev1.LocalObjectReference `json:"imagePullSecrets"`
 
 	// +optional
 	// +nullable

@@ -61,6 +61,10 @@ spec:
             items:
               - key: 'config.yaml'
                 path: 'config.yaml'
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+      {{- toYaml . | nindent 8 }}
+      {{- end }}
       containers:
         - name: orderer
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
