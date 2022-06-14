@@ -51,6 +51,7 @@ archives:
   -
     id: kubectl-hlf
     format: zip
+    name_template: "{{ .ProjectName }}_{{ .Tag }}_{{ .Os }}_{{ .Arch }}"
     allow_different_binary_count: true
 
 dockers:

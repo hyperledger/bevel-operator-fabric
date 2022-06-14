@@ -2,10 +2,6 @@
 id: getting-started
 title: Getting started
 ---
-[![Build Status](https://img.shields.io/travis/kfsoftware/hlf-operator/main.svg?label=E2E%20testing)](https://travis-ci.org/kfsoftware/hlf-operator)
-
-> :warning: **This repository was transferred to hyperledger-labs on 24th of April**
-
 
 # Hyperledger Fabric Operator
 
@@ -27,6 +23,14 @@ title: Getting started
 `hlf-operator` is currently in stable. Watch **releases** of this repository to be notified for future updates:
 
 ![hlf-operator-star-github](https://user-images.githubusercontent.com/6862893/123808402-022aa800-d8f1-11eb-8df4-8a9552f126a2.gif)
+
+## Discord
+
+For discussions and questions, please join the Hyperledger Foundation Discord: 
+
+[https://discord.com/invite/hyperledger](https://discord.com/invite/hyperledger)
+
+Channel is located under `LABS`, named `hlf-operator`.
 
 ## Tutorial Videos
 Step by step video tutorials to setup hlf-opertor in kubernetes
@@ -323,6 +327,7 @@ If something went wrong or didn't work, please, open an issue.
 kubectl delete fabricorderernodes.hlf.kungfusoftware.es --all-namespaces --all
 kubectl delete fabricpeers.hlf.kungfusoftware.es --all-namespaces --all
 kubectl delete fabriccas.hlf.kungfusoftware.es --all-namespaces --all
+kubectl delete fabricchaincode.hlf.kungfusoftware.es --all-namespaces --all
 ```
 
 ## Troubleshooting
