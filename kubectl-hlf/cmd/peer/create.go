@@ -20,7 +20,9 @@ import (
 type Options struct {
 	Name                            string
 	StorageClass                    string
-	Capacity                        string
+	PeerCapacity                    string
+	DbCapacity                      string
+	ChaincodeCapacity               string
 	NS                              string
 	Image                           string
 	Version                         string
@@ -192,17 +194,17 @@ func (c *createCmd) run() error {
 			StateDb: v1alpha1.StateDB(c.peerOpts.StateDB),
 			Storage: v1alpha1.FabricPeerStorage{
 				CouchDB: v1alpha1.Storage{
-					Size:         "5Gi",
+					Size:         c.peerOpts.DbCapacity,
 					StorageClass: c.peerOpts.StorageClass,
 					AccessMode:   "ReadWriteOnce",
 				},
 				Peer: v1alpha1.Storage{
-					Size:         "5Gi",
+					Size:         c.peerOpts.PeerCapacity,
 					StorageClass: c.peerOpts.StorageClass,
 					AccessMode:   "ReadWriteOnce",
 				},
 				Chaincode: v1alpha1.Storage{
-					Size:         "5Gi",
+					Size:         c.peerOpts.ChaincodeCapacity,
 					StorageClass: c.peerOpts.StorageClass,
 					AccessMode:   "ReadWriteOnce",
 				},
@@ -354,7 +356,9 @@ func newCreatePeerCmd(out io.Writer, errOut io.Writer) *cobra.Command {
 	f.StringVar(&c.peerOpts.CAName, "ca-name", "", "CA name to enroll this user")
 	f.StringVar(&c.peerOpts.EnrollID, "enroll-id", "", "Enroll ID of the CA")
 	f.StringVar(&c.peerOpts.EnrollPW, "enroll-pw", "", "Enroll secret of the CA")
-	f.StringVar(&c.peerOpts.Capacity, "capacity", "5Gi", "Total raw capacity of Fabric Peer in this zone, e.g. 16Ti")
+	f.StringVar(&c.peerOpts.PeerCapacity, "capacity", "5Gi", "Total raw capacity of Fabric Peer in this zone, e.g. 16Ti")
+	f.StringVar(&c.peerOpts.DbCapacity, "db-capacity", "5Gi", "Total raw capacity of CouchDB in this zone, e.g. 16Ti")
+	f.StringVar(&c.peerOpts.ChaincodeCapacity, "chaincode-capacity", "5Gi", "Total raw capacity of chaincode in this zone, e.g. 16Ti")
 	f.StringVarP(&c.peerOpts.NS, "namespace", "n", helpers.DefaultNamespace, "Namespace scope for this request")
 	f.StringVarP(&c.peerOpts.StorageClass, "storage-class", "s", helpers.DefaultStorageclass, "Storage class for this Fabric Peer")
 	f.StringVarP(&c.peerOpts.Image, "image", "", helpers.DefaultPeerImage, "Version of the Fabric Peer")
