@@ -282,6 +282,41 @@ spec:
                 - orgLeader
                 - useLeaderElection
                 type: object
+              grpcProxy:
+                nullable: true
+                properties:
+                  enabled:
+                    default: false
+                    type: boolean
+                  image:
+                    default: ghcr.io/hyperledger-labs/grpc-web
+                    type: string
+                  imagePullPolicy:
+                    default: IfNotPresent
+                    description: PullPolicy describes a policy for if/when to pull
+                      a container image
+                    type: string
+                  imagePullSecrets:
+                    items:
+                      description: LocalObjectReference contains enough information
+                        to let you locate the referenced object inside the same namespace.
+                      properties:
+                        name:
+                          description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                            TODO: Add other useful fields. apiVersion, kind, uid?'
+                          type: string
+                      type: object
+                    nullable: true
+                    type: array
+                  tag:
+                    default: latest
+                    type: string
+                required:
+                - enabled
+                - image
+                - imagePullPolicy
+                - tag
+                type: object
               hostAliases:
                 items:
                   description: HostAlias holds the mapping between IP and hostnames

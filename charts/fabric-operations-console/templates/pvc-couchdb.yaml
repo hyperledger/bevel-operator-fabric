@@ -1,0 +1,25 @@
+{{- if and .Values.couchdb.persistence.enabled (not .Values.couchdb.external.enabled) (not .Values.couchdb.persistence.existingClaim) }}
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: {{ include "fabric-operations-console.fullname" . }}--couchdb
+  labels:
+{{ include "fabric-operations-console.labels" . | indent 4 }}
+{{- if .Values.couchdb.persistence.annotations }}
+  annotations:
+{{ toYaml .Values.couchdb.persistence.annotations | indent 4 }}
+{{- end }}
+spec:
+  accessModes:
+    - {{ .Values.couchdb.persistence.accessMode | quote }}
+  resources:
+    requests:
+      storage: {{ .Values.couchdb.persistence.size | quote }}
+  {{- if .Values.couchdb.persistence.storageClass }}
+  {{- if (eq "-" .Values.couchdb.persistence.storageClass) }}
+  storageClassName: ""
+  {{- else }}
+  storageClassName: "{{ .Values.couchdb.persistence.storageClass }}"
+  {{- end }}
+  {{- end }}
+{{- end }}

@@ -19,6 +19,7 @@ package main
 import (
 	"flag"
 	"github.com/kfsoftware/hlf-operator/controllers/chaincode"
+	"github.com/kfsoftware/hlf-operator/controllers/console"
 	"github.com/kfsoftware/hlf-operator/controllers/hlfmetrics"
 	"github.com/kfsoftware/hlf-operator/controllers/networkconfig"
 	"github.com/kfsoftware/hlf-operator/controllers/ordnode"
@@ -159,21 +160,37 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err = (&networkconfig.FabricNetworkConfigReconciler{
+	fabricConsoleChartPath, err := filepath.Abs("./charts/fabric-operations-console")
+	if err != nil {
+		setupLog.Error(err, "unable to find the fabric-operations-console chart")
+		os.Exit(1)
+	}
+	if err = (&console.FabricOperationsConsoleReconciler{
 		Client:    mgr.GetClient(),
-		Log:       ctrl.Log.WithName("controllers").WithName("FabricNetworkConfig"),
+		Log:       ctrl.Log.WithName("controllers").WithName("FabricOperationsConsole"),
 		Scheme:    mgr.GetScheme(),
 		Config:    mgr.GetConfig(),
+		ChartPath: fabricConsoleChartPath,
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "FabricOperationsConsole")
+		os.Exit(1)
+	}
+
+	if err = (&networkconfig.FabricNetworkConfigReconciler{
+		Client: mgr.GetClient(),
+		Log:    ctrl.Log.WithName("controllers").WithName("FabricNetworkConfig"),
+		Scheme: mgr.GetScheme(),
+		Config: mgr.GetConfig(),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "FabricNetworkConfig")
 		os.Exit(1)
 	}
 
 	if err = (&chaincode.FabricChaincodeReconciler{
-		Client:    mgr.GetClient(),
-		Log:       ctrl.Log.WithName("controllers").WithName("FabricChaincode"),
-		Scheme:    mgr.GetScheme(),
-		Config:    mgr.GetConfig(),
+		Client: mgr.GetClient(),
+		Log:    ctrl.Log.WithName("controllers").WithName("FabricChaincode"),
+		Scheme: mgr.GetScheme(),
+		Config: mgr.GetConfig(),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "FabricNetworkConfig")
 		os.Exit(1)

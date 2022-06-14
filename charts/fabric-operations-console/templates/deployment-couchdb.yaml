@@ -1,0 +1,81 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "fabric-operations-console.fullname" . }}--couchdb
+  labels:
+    {{- include "fabric-operations-console.couchDBLabels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      {{- include "fabric-operations-console.couchDBselectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "fabric-operations-console.couchDBselectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      volumes:
+        - name: "couchdb"
+          {{- if and .Values.couchdb.persistence.enabled ( not .Values.couchdb.external.enabled) }}
+          persistentVolumeClaim:
+            claimName: {{ include "fabric-operations-console.fullname" . }}--couchdb
+          {{- else }}
+          emptyDir: { }
+          {{- end }}
+
+      serviceAccountName: {{ include "fabric-operations-console.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: couchdb
+          image: "{{ .Values.couchdb.image }}:{{ .Values.couchdb.tag }}"
+          imagePullPolicy: {{ .Values.couchdb.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 5984
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /opt/couchdb/data
+              name: couchdb
+          envFrom:
+            - secretRef:
+                name: {{ include "fabric-operations-console.fullname" . }}--couchdb
+          livenessProbe:
+            tcpSocket:
+              port: 5984
+            initialDelaySeconds: 60
+            timeoutSeconds: 5
+            failureThreshold: 6
+          readinessProbe:
+            tcpSocket:
+              port: 5984
+            initialDelaySeconds: 5
+            timeoutSeconds: 3
+            periodSeconds: 5
+          resources:
+{{ toYaml .Values.couchdb.resources | nindent 12 }}
+
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
