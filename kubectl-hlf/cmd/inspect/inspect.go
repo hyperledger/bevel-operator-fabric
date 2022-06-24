@@ -318,7 +318,7 @@ func NewInspectHLFConfig(out io.Writer) *cobra.Command {
 	f.StringVar(&c.fileOutput, "output", "", "Output file")
 	f.BoolVar(&c.internal, "internal", false, "Use kubernetes service names")
 	f.StringArrayVarP(&c.organizations, "organizations", "o", []string{}, "Organizations to export")
-	f.StringArrayVarP(&c.ordererNodes, "ordererNodes", "o", []string{}, "Orderer nodes to export")
+	f.StringArrayVarP(&c.ordererNodes, "ordererNodes", "", []string{}, "Orderer nodes to export")
 	f.StringVar(&c.format, "format", yamlFormat, "Connection profile output format (yaml/json)")
 	f.StringArrayVarP(&c.namespaces, "namespace", "n", []string{}, "Namespace scope for this request")
 
