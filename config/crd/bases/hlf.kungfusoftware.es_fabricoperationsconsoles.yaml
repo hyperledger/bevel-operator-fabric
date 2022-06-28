@@ -14,8 +14,8 @@ spec:
     listKind: FabricOperationsConsoleList
     plural: fabricoperationsconsoles
     shortNames:
-    - console
-    singular: console
+    - fabricoperationsconsoles
+    singular: fabricoperationsconsoles
   scope: Namespaced
   versions:
   - additionalPrinterColumns:

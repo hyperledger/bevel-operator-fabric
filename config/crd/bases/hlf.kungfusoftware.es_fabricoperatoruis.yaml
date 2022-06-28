@@ -14,8 +14,8 @@ spec:
     listKind: FabricOperatorUIList
     plural: fabricoperatoruis
     shortNames:
-    - ui
-    singular: ui
+    - fabricoperatorui
+    singular: fabricoperatorui
   scope: Namespaced
   versions:
   - additionalPrinterColumns:

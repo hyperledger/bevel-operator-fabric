@@ -18,6 +18,7 @@ package v1alpha1
 
 import (
 	"fmt"
+
 	"github.com/operator-framework/operator-lib/status"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -1091,7 +1092,7 @@ type FabricOperationsConsoleStatus struct {
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 // +k8s:defaulter-gen=true
 // +kubebuilder:subresource:status
-// +kubebuilder:resource:scope=Namespaced,shortName=console,singular=console
+// +kubebuilder:resource:scope=Namespaced,shortName=fabricoperationsconsoles,singular=fabricoperationsconsoles
 // +kubebuilder:printcolumn:name="State",type="string",JSONPath=".status.status"
 // +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
 // +kubebuilder:object:root=true
@@ -1127,7 +1128,7 @@ type FabricOperatorUIStatus struct {
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 // +k8s:defaulter-gen=true
 // +kubebuilder:subresource:status
-// +kubebuilder:resource:scope=Namespaced,shortName=ui,singular=ui
+// +kubebuilder:resource:scope=Namespaced,shortName=fabricoperatorui,singular=fabricoperatorui
 // +kubebuilder:printcolumn:name="State",type="string",JSONPath=".status.status"
 // +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
 // +kubebuilder:object:root=true
