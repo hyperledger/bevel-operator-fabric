@@ -133,6 +133,10 @@ const consoleFinalizer = "finalizer.console.hlf.kungfusoftware.es"
 // +kubebuilder:rbac:groups=hlf.kungfusoftware.es,resources=fabricpeers/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=hlf.kungfusoftware.es,resources=fabricpeers/finalizers,verbs=get;update;patch
 
+// +kubebuilder:rbac:groups=hlf.kungfusoftware.es,resources=console,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=hlf.kungfusoftware.es,resources=console/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=hlf.kungfusoftware.es,resources=console/finalizers,verbs=get;update;patch
+
 // +kubebuilder:rbac:groups=hlf.kungfusoftware.es,resources=fabricorderernodes,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=hlf.kungfusoftware.es,resources=fabricorderernodes/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=hlf.kungfusoftware.es,resources=fabricorderernodes/finalizers,verbs=get;update;patch

@@ -14,8 +14,8 @@ spec:
     listKind: FabricOperationsConsoleList
     plural: fabricoperationsconsoles
     shortNames:
-    - explorer
-    singular: explorer
+    - console
+    singular: console
   scope: Namespaced
   versions:
   - additionalPrinterColumns:
@@ -1530,7 +1530,7 @@ spec:
                   className:
                     type: string
                   enabled:
-                    default: "true"
+                    default: true
                     type: boolean
                   hosts:
                     items:
@@ -1588,7 +1588,7 @@ spec:
                 - tls
                 type: object
               port:
-                default: "3000"
+                default: 3000
                 type: integer
               replicas:
                 type: integer

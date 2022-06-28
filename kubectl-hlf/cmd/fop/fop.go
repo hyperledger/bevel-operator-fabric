@@ -6,7 +6,7 @@ import (
 	"io"
 )
 
-func NewFOPChannel(stdOut io.Writer, stdErr io.Writer) *cobra.Command {
+func NewFOPCMD(stdOut io.Writer, stdErr io.Writer) *cobra.Command {
 	fopCmd := &cobra.Command{
 		Use: "fop",
 	}

@@ -353,6 +353,34 @@ rules:
 - apiGroups:
   - hlf.kungfusoftware.es
   resources:
+  - console
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - hlf.kungfusoftware.es
+  resources:
+  - console/finalizers
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - hlf.kungfusoftware.es
+  resources:
+  - console/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - hlf.kungfusoftware.es
+  resources:
   - fabriccas
   verbs:
   - create

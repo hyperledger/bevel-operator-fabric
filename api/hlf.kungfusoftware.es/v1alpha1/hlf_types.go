@@ -1047,7 +1047,7 @@ type FabricOperationsConsoleSpec struct {
 	// +optional
 	Affinity *corev1.Affinity `json:"affinity"`
 
-	// +kubebuilder:default:="3000"
+	// +kubebuilder:default:=3000
 	Port int `json:"port"`
 
 	// +optional
@@ -1058,7 +1058,7 @@ type FabricOperationsConsoleSpec struct {
 	HostURL string  `json:"hostUrl"`
 }
 type Ingress struct {
-	// +kubebuilder:default:="true"
+	// +kubebuilder:default:=true
 	Enabled bool `json:"enabled"`
 
 	ClassName string `json:"className"`
@@ -1091,7 +1091,7 @@ type FabricOperationsConsoleStatus struct {
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 // +k8s:defaulter-gen=true
 // +kubebuilder:subresource:status
-// +kubebuilder:resource:scope=Namespaced,shortName=explorer,singular=explorer
+// +kubebuilder:resource:scope=Namespaced,shortName=console,singular=console
 // +kubebuilder:printcolumn:name="State",type="string",JSONPath=".status.status"
 // +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
 // +kubebuilder:object:root=true
@@ -1127,7 +1127,7 @@ type FabricOperatorUIStatus struct {
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 // +k8s:defaulter-gen=true
 // +kubebuilder:subresource:status
-// +kubebuilder:resource:scope=Namespaced,shortName=explorer,singular=explorer
+// +kubebuilder:resource:scope=Namespaced,shortName=ui,singular=ui
 // +kubebuilder:printcolumn:name="State",type="string",JSONPath=".status.status"
 // +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
 // +kubebuilder:object:root=true
@@ -1287,4 +1287,6 @@ func init() {
 	SchemeBuilder.Register(&FabricExplorer{}, &FabricExplorerList{})
 	SchemeBuilder.Register(&FabricNetworkConfig{}, &FabricNetworkConfigList{})
 	SchemeBuilder.Register(&FabricChaincode{}, &FabricChaincodeList{})
+	SchemeBuilder.Register(&FabricOperationsConsole{}, &FabricOperationsConsoleList{})
+	SchemeBuilder.Register(&FabricOperatorUI{}, &FabricOperatorUIList{})
 }
