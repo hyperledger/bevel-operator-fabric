@@ -1,0 +1,18 @@
+{{ if .Values.proxy.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "hlf-peer.fullname" . }}-proxy
+  labels:
+{{ include "labels.standard" . | indent 4 }}
+spec:
+  type: ClusterIP
+  ports:
+    - port: 7443
+      targetPort: 7443
+      protocol: TCP
+  selector:
+    app: {{ include "hlf-peer.name" . }}
+    release: {{ .Release.Name }}
+
+{{ end}}

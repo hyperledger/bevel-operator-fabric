@@ -66,6 +66,50 @@ spec:
       {{- toYaml . | nindent 8 }}
       {{- end }}
       containers:
+{{ if .Values.proxy.enabled}}
+        - name: grpc-web
+          image: "{{.Values.proxy.image}}:{{.Values.proxy.tag}}"
+          ports:
+            - containerPort: 7443
+              name: grpc-web
+              protocol: TCP
+          resources:
+{{ toYaml .Values.proxy.resources | nindent 12 }}
+          volumeMounts:
+            - mountPath: /var/hyperledger/tls/client/pair
+              name: tls-client
+            - mountPath: /var/hyperledger/tls/client/cert
+              name: tls-clientrootcert
+            - mountPath: /var/hyperledger/tls/server/pair
+              name: tls
+            - mountPath: /var/hyperledger/tls/operations/pair
+              name: tls-ops
+            - mountPath: /var/hyperledger/tls/server/cert
+              name: tls-rootcert
+          env:
+            - name: BACKEND_ADDRESS
+              value: "127.0.0.1:7051"
+            - name: SERVER_TLS_CERT_FILE
+              value: "/var/hyperledger/tls/server/pair/tls.crt"
+            - name: SERVER_TLS_KEY_FILE
+              value: "/var/hyperledger/tls/server/pair/tls.key"
+            - name: BACKEND_TLS_CA_FILES
+              value: "/var/hyperledger/tls/server/cert/cacert.pem"
+            - name: SERVER_BIND_ADDRESS
+              value: "0.0.0.0"
+            - name: SERVER_HTTP_DEBUG_PORT
+              value: "8080"
+            - name: SERVER_HTTP_TLS_PORT
+              value: "7443"
+            - name: BACKEND_TLS
+              value: "true"
+            - name: SERVER_HTTP_MAX_WRITE_TIMEOUT
+              value: "5m"
+            - name: SERVER_HTTP_MAX_READ_TIMEOUT
+              value: "5m"
+            - name: USE_WEBSOCKETS
+              value: "true"
+{{ end }}
         - name: orderer
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}

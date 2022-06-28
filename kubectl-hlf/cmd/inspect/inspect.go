@@ -2,7 +2,6 @@ package inspect
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -323,12 +322,4 @@ func NewInspectHLFConfig(out io.Writer) *cobra.Command {
 	f.StringArrayVarP(&c.namespaces, "namespace", "n", []string{}, "Namespace scope for this request")
 
 	return cmd
-}
-
-func marshallOrPanic(d interface{}) string {
-	data, err := json.MarshalIndent(d, "", "  ")
-	if err != nil {
-		panic(err)
-	}
-	return string(data)
 }

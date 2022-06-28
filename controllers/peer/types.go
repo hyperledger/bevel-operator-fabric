@@ -37,6 +37,7 @@ type FabricPeerChart struct {
 	Cert                     string                        `json:"cert"`
 	Key                      string                        `json:"key"`
 	Hosts                    []string                      `json:"hosts"`
+	Proxy                    GRPCProxy                     `json:"proxy"`
 	TLS                      TLS                           `json:"tls"`
 	OPSTLS                   TLS                           `json:"opsTLS"`
 	Cacert                   string                        `json:"cacert"`
@@ -58,7 +59,14 @@ type FabricPeerChart struct {
 	ServiceMonitor           ServiceMonitor                `json:"serviceMonitor"`
 	EnvVars                  []corev1.EnvVar               `json:"envVars"`
 }
-
+type GRPCProxy struct {
+	Enabled          bool                          `json:"enabled"`
+	Image            string                        `json:"image"`
+	Tag              string                        `json:"tag"`
+	PullPolicy       string                        `json:"pullPolicy"`
+	ImagePullSecrets []corev1.LocalObjectReference `json:"imagePullSecrets"`
+	Istio            Istio                         `json:"istio"`
+}
 type ServiceMonitor struct {
 	Enabled           bool              `json:"enabled"`
 	Labels            map[string]string `json:"labels"`
@@ -87,6 +95,7 @@ type PeerResources struct {
 	CouchDB         Resources  `json:"couchdb"`
 	Chaincode       Resources  `json:"chaincode"`
 	CouchDBExporter *Resources `json:"couchdbExporter,omitempty"`
+	Proxy           *Resources `json:"proxy,omitempty"`
 }
 type CouchDBExporter struct {
 	Enabled    bool   `json:"enabled"`
