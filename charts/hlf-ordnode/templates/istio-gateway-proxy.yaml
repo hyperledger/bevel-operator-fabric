@@ -1,0 +1,20 @@
+{{- if and .Values.proxy.enabled .Values.proxy.istio.hosts  -}}
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: {{ include "hlf-ordnode.fullname" . }}-gateway-proxy
+spec:
+  selector:
+    istio: {{ .Values.proxy.istio.ingressGateway }}
+  servers:
+    - port:
+        number: {{ .Values.proxy.istio.port }}
+        name: tcp
+        protocol: TLS
+      tls:
+        mode: PASSTHROUGH
+      hosts:
+      {{- range .Values.proxy.istio.hosts }}
+        - {{ . }}
+      {{- end }}
+{{- end -}}

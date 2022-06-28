@@ -877,6 +877,31 @@ func getConfig(
 			Memory: spec.Resources.Limits.Memory().String(),
 		},
 	}
+	proxy := GRPCProxy{
+		Enabled:          false,
+		Image:            "",
+		Tag:              "",
+		PullPolicy:       "",
+		ImagePullSecrets: nil,
+		Istio:            Istio{},
+		Resources:        nil,
+	}
+	if spec.GRPCProxy != nil && spec.GRPCProxy.Enabled {
+		proxy = GRPCProxy{
+			Enabled:          spec.GRPCProxy.Enabled,
+			Image:            spec.GRPCProxy.Image,
+			Tag:              spec.GRPCProxy.Tag,
+			PullPolicy:       spec.GRPCProxy.Image,
+			ImagePullSecrets: spec.GRPCProxy.ImagePullSecrets,
+			Istio: Istio{
+				Port:           spec.GRPCProxy.Istio.Port,
+				Hosts:          spec.GRPCProxy.Istio.Hosts,
+				IngressGateway: spec.GRPCProxy.Istio.IngressGateway,
+			},
+		}
+		proxy.Resources = spec.GRPCProxy.Resources
+	}
+
 	fabricOrdChart := fabricOrdChart{
 		ImagePullSecrets:            spec.ImagePullSecrets,
 		EnvVars:                     spec.Env,
@@ -885,6 +910,7 @@ func getConfig(
 		AdminIstio:                  adminIstio,
 		Replicas:                    spec.Replicas,
 		Genesis:                     spec.Genesis,
+		Proxy:                       proxy,
 		ChannelParticipationEnabled: spec.ChannelParticipationEnabled,
 		BootstrapMethod:             string(spec.BootstrapMethod),
 		Admin: admin{

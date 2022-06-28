@@ -1,0 +1,89 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "hlf-operator-api.fullname" . }}
+  labels:
+    {{- include "hlf-operator-api.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "hlf-operator-api.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "hlf-operator-api.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "hlf-operator-api.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+  {{ if and .Values.hlf.mspID .Values.hlf.networkConfig.secretName .Values.hlf.networkConfig.key .Values.hlf.user }}
+      volumes:
+        - name: hlf-config
+          secret:
+            secretName: {{.Values.hlf.networkConfig.secretName}}
+            items:
+              - key: {{.Values.hlf.networkConfig.key}}
+                path: {{.Values.hlf.networkConfig.key}}
+  {{ end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+  {{ if and .Values.hlf.mspID .Values.hlf.networkConfig.secretName .Values.hlf.networkConfig.key .Values.hlf.user }}
+          volumeMounts:
+            - mountPath: /hlf-config
+              name: hlf-config
+  {{ end }}
+
+          command:
+            - /hlf-operator-api
+            - serve
+            - "--address"
+            - "0.0.0.0:80"
+  {{ if and .Values.hlf.mspID .Values.hlf.networkConfig.secretName .Values.hlf.networkConfig.key .Values.hlf.user }}
+            - "--hlf-config"
+            - "/hlf-config/{{.Values.hlf.networkConfig.key}}"
+            - "--msp-id"
+            - "{{.Values.hlf.mspID}}"
+            - "--user"
+            - "{{.Values.hlf.user}}"
+  {{ end }}
+          livenessProbe:
+            httpGet:
+              path: /playground
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /playground
+              port: http
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

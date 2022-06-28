@@ -1122,6 +1122,41 @@ func GetConfig(
 		fsServer.Tag = helpers.DefaultFSServerVersion
 		fsServer.PullPolicy = string(hlfv1alpha1.DefaultImagePullPolicy)
 	}
+	proxy := GRPCProxy{
+		Enabled:          false,
+		Image:            "",
+		Tag:              "",
+		PullPolicy:       "",
+		ImagePullSecrets: nil,
+		Istio:            Istio{},
+	}
+	var proxyResources *Resources
+	if spec.GRPCProxy != nil && spec.GRPCProxy.Enabled {
+		proxy = GRPCProxy{
+			Enabled:          spec.GRPCProxy.Enabled,
+			Image:            spec.GRPCProxy.Image,
+			Tag:              spec.GRPCProxy.Tag,
+			PullPolicy:       spec.GRPCProxy.Image,
+			ImagePullSecrets: spec.GRPCProxy.ImagePullSecrets,
+			Istio: Istio{
+				Port:           spec.GRPCProxy.Istio.Port,
+				Hosts:          spec.GRPCProxy.Istio.Hosts,
+				IngressGateway: spec.GRPCProxy.Istio.IngressGateway,
+			},
+		}
+		if spec.Resources.Proxy != nil {
+			proxyResources = &Resources{
+				Requests: Requests{
+					CPU:    spec.Resources.Proxy.Requests.Cpu().String(),
+					Memory: spec.Resources.Proxy.Requests.Memory().String(),
+				},
+				Limits: Limits{
+					CPU:    spec.Resources.Proxy.Limits.Cpu().String(),
+					Memory: spec.Resources.Proxy.Limits.Memory().String(),
+				},
+			}
+		}
+	}
 
 	var c = FabricPeerChart{
 		EnvVars:          spec.Env,
@@ -1133,6 +1168,7 @@ func GetConfig(
 			Tag:        spec.Tag,
 			PullPolicy: string(imagePullPolicy),
 		},
+		Proxy:            proxy,
 		ServiceMonitor:   monitor,
 		ExternalBuilders: externalBuilders,
 		DockerSocketPath: spec.DockerSocketPath,
@@ -1204,6 +1240,7 @@ func GetConfig(
 				},
 			},
 			CouchDBExporter: couchDBExporterResources,
+			Proxy:           proxyResources,
 		},
 		NodeSelector:     NodeSelector{},
 		Tolerations:      spec.Tolerations,

@@ -91,9 +91,12 @@ type GRPCProxy struct {
 	// +kubebuilder:default:="latest"
 	Tag string `json:"tag"`
 
+	Istio FabricIstio `json:"istio"`
 	// +kubebuilder:default:="IfNotPresent"
 	ImagePullPolicy corev1.PullPolicy `json:"imagePullPolicy"`
 
+	// +nullable
+	Resources *corev1.ResourceRequirements `json:"resources"`
 	// +kubebuilder:validation:Default={}
 	// +optional
 	// +kubebuilder:validation:Optional
@@ -185,6 +188,9 @@ type FabricPeerResources struct {
 	// +optional
 	// +nullable
 	CouchDBExporter *corev1.ResourceRequirements `json:"couchdbExporter"`
+	// +optional
+	// +nullable
+	Proxy *corev1.ResourceRequirements `json:"proxy"`
 }
 type FabricPeerDiscovery struct {
 	Period      string `json:"period"`
@@ -1107,6 +1113,46 @@ type FabricOperationsConsoleList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
 	Items           []FabricOperationsConsole `json:"items"`
+}
+
+// FabricOperatorUIStatus defines the observed state of FabricOperatorUI
+type FabricOperatorUIStatus struct {
+	Conditions status.Conditions `json:"conditions"`
+	Message    string            `json:"message"`
+	// Status of the FabricCA
+	Status DeploymentStatus `json:"status"`
+}
+
+// +genclient
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+// +k8s:defaulter-gen=true
+// +kubebuilder:subresource:status
+// +kubebuilder:resource:scope=Namespaced,shortName=explorer,singular=explorer
+// +kubebuilder:printcolumn:name="State",type="string",JSONPath=".status.status"
+// +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
+// +kubebuilder:object:root=true
+// +kubebuilder:subresource:status
+// +k8s:openapi-gen=true
+
+// FabricOperatorUI is the Schema for the hlfs API
+type FabricOperatorUI struct {
+	metav1.TypeMeta   `json:",inline"`
+	metav1.ObjectMeta `json:"metadata,omitempty"`
+	Spec              FabricOperatorUISpec   `json:"spec,omitempty"`
+	Status            FabricOperatorUIStatus `json:"status,omitempty"`
+}
+
+// +kubebuilder:object:root=true
+
+// FabricOperatorUIList contains a list of FabricOperatorUI
+type FabricOperatorUIList struct {
+	metav1.TypeMeta `json:",inline"`
+	metav1.ListMeta `json:"metadata,omitempty"`
+	Items           []FabricOperatorUI `json:"items"`
+}
+
+// FabricOperatorUISpec defines the desired state of FabricOperatorUI
+type FabricOperatorUISpec struct {
 }
 
 // FabricNetworkConfigSpec defines the desired state of FabricNetworkConfig

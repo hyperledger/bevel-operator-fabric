@@ -30,7 +30,22 @@ type fabricOrdChart struct {
 	ServiceMonitor              ServiceMonitor                `json:"serviceMonitor"`
 	EnvVars                     []corev1.EnvVar               `json:"envVars"`
 	ImagePullSecrets            []corev1.LocalObjectReference `json:"imagePullSecrets"`
+
+	Proxy GRPCProxy `json:"proxy"`
 }
+type GRPCProxy struct {
+	Enabled          bool                          `json:"enabled"`
+	Image            string                        `json:"image"`
+	Tag              string                        `json:"tag"`
+	PullPolicy       string                        `json:"pullPolicy"`
+	ImagePullSecrets []corev1.LocalObjectReference `json:"imagePullSecrets"`
+	Istio            Istio                         `json:"istio"`
+
+	// +optional
+	// +nullable
+	Resources *corev1.ResourceRequirements `json:"resources"`
+}
+
 type Resources struct {
 	Limits   Limits   `json:"limits"`
 	Requests Requests `json:"requests"`
