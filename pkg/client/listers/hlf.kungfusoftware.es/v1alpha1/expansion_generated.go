@@ -50,6 +50,22 @@ type FabricNetworkConfigListerExpansion interface{}
 // FabricNetworkConfigNamespaceLister.
 type FabricNetworkConfigNamespaceListerExpansion interface{}
 
+// FabricOperationsConsoleListerExpansion allows custom methods to be added to
+// FabricOperationsConsoleLister.
+type FabricOperationsConsoleListerExpansion interface{}
+
+// FabricOperationsConsoleNamespaceListerExpansion allows custom methods to be added to
+// FabricOperationsConsoleNamespaceLister.
+type FabricOperationsConsoleNamespaceListerExpansion interface{}
+
+// FabricOperatorUIListerExpansion allows custom methods to be added to
+// FabricOperatorUILister.
+type FabricOperatorUIListerExpansion interface{}
+
+// FabricOperatorUINamespaceListerExpansion allows custom methods to be added to
+// FabricOperatorUINamespaceLister.
+type FabricOperatorUINamespaceListerExpansion interface{}
+
 // FabricOrdererNodeListerExpansion allows custom methods to be added to
 // FabricOrdererNodeLister.
 type FabricOrdererNodeListerExpansion interface{}
