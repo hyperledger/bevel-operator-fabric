@@ -456,6 +456,30 @@ func (r *FabricOperationsConsoleReconciler) updateCRStatusOrFailReconcile(ctx co
 
 func GetConfig(conf *hlfv1alpha1.FabricOperationsConsole) (*FabricOperationsConsoleChart, error) {
 	spec := conf.Spec
+	ingress := Ingress{}
+	if spec.Ingress.Enabled {
+		hosts := []IngressHost{}
+		for _, host := range spec.Ingress.Hosts {
+			paths := []IngressPath{}
+			for _, path := range host.Paths {
+				paths = append(paths, IngressPath{
+					Path:     path.Path,
+					PathType: path.PathType,
+				})
+			}
+			hosts = append(hosts, IngressHost{
+				Host:  host.Host,
+				Paths: paths,
+			})
+		}
+		ingress = Ingress{
+			Enabled:     spec.Ingress.Enabled,
+			ClassName:   spec.Ingress.ClassName,
+			Annotations: spec.Ingress.Annotations,
+			TLS:         spec.Ingress.TLS,
+			Hosts:       hosts,
+		}
+	}
 	var c = FabricOperationsConsoleChart{
 		Replicas: spec.Replicas,
 		Image: Image{
@@ -465,7 +489,7 @@ func GetConfig(conf *hlfv1alpha1.FabricOperationsConsole) (*FabricOperationsCons
 		},
 		ImagePullSecrets: spec.ImagePullSecrets,
 		PodAnnotations:   map[string]string{},
-		Ingress:          Ingress{},
+		Ingress:          ingress,
 		Resources:        spec.Resources,
 		Tolerations:      spec.Tolerations,
 		Affinity:         spec.Affinity,

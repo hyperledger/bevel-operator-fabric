@@ -18,11 +18,11 @@ package v1alpha1
 
 import (
 	"fmt"
+	"k8s.io/api/networking/v1beta1"
 
 	"github.com/operator-framework/operator-lib/status"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/kubernetes/staging/src/k8s.io/api/extensions/v1beta1"
 )
 
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
@@ -1154,6 +1154,108 @@ type FabricOperatorUIList struct {
 
 // FabricOperatorUISpec defines the desired state of FabricOperatorUI
 type FabricOperatorUISpec struct {
+	Image string `json:"image"`
+	Tag   string `json:"tag"`
+	// +kubebuilder:default:="IfNotPresent"
+	ImagePullPolicy corev1.PullPolicy `json:"imagePullPolicy"`
+	Istio           FabricIstio       `json:"istio"`
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +nullable
+	// +kubebuilder:validation:Default={}
+	Tolerations []corev1.Toleration `json:"tolerations"`
+
+	// +kubebuilder:validation:Default={}
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +nullable
+	ImagePullSecrets []corev1.LocalObjectReference `json:"imagePullSecrets"`
+	// +nullable
+	// +kubebuilder:validation:Optional
+	// +optional
+	// +kubebuilder:validation:Default={}
+	Env []corev1.EnvVar `json:"env"`
+
+	// +nullable
+	// +kubebuilder:validation:Optional
+	// +optional
+	Affinity *corev1.Affinity `json:"affinity"`
+
+	// +nullable
+	// +kubebuilder:validation:Optional
+	// +optional
+	Resources *corev1.ResourceRequirements `json:"resources"`
+}
+
+// FabricOperatorAPIStatus defines the observed state of FabricOperatorAPI
+type FabricOperatorAPIStatus struct {
+	Conditions status.Conditions `json:"conditions"`
+	Message    string            `json:"message"`
+	// Status of the FabricCA
+	Status DeploymentStatus `json:"status"`
+}
+
+// +genclient
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+// +k8s:defaulter-gen=true
+// +kubebuilder:subresource:status
+// +kubebuilder:resource:scope=Namespaced,shortName=fabricoperatorui,singular=fabricoperatorui
+// +kubebuilder:printcolumn:name="State",type="string",JSONPath=".status.status"
+// +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
+// +kubebuilder:object:root=true
+// +kubebuilder:subresource:status
+// +k8s:openapi-gen=true
+
+// FabricOperatorAPI is the Schema for the hlfs API
+type FabricOperatorAPI struct {
+	metav1.TypeMeta   `json:",inline"`
+	metav1.ObjectMeta `json:"metadata,omitempty"`
+	Spec              FabricOperatorAPISpec   `json:"spec,omitempty"`
+	Status            FabricOperatorAPIStatus `json:"status,omitempty"`
+}
+
+// +kubebuilder:object:root=true
+
+// FabricOperatorAPIList contains a list of FabricOperatorAPI
+type FabricOperatorAPIList struct {
+	metav1.TypeMeta `json:",inline"`
+	metav1.ListMeta `json:"metadata,omitempty"`
+	Items           []FabricOperatorAPI `json:"items"`
+}
+
+// FabricOperatorAPISpec defines the desired state of FabricOperatorAPI
+type FabricOperatorAPISpec struct {
+	Image string `json:"image"`
+	Tag   string `json:"tag"`
+	// +kubebuilder:default:="IfNotPresent"
+	ImagePullPolicy corev1.PullPolicy `json:"imagePullPolicy"`
+	Istio           FabricIstio       `json:"istio"`
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +nullable
+	// +kubebuilder:validation:Default={}
+	Tolerations []corev1.Toleration `json:"tolerations"`
+
+	// +kubebuilder:validation:Default={}
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +nullable
+	ImagePullSecrets []corev1.LocalObjectReference `json:"imagePullSecrets"`
+	// +nullable
+	// +kubebuilder:validation:Optional
+	// +optional
+	// +kubebuilder:validation:Default={}
+	Env []corev1.EnvVar `json:"env"`
+
+	// +nullable
+	// +kubebuilder:validation:Optional
+	// +optional
+	Affinity *corev1.Affinity `json:"affinity"`
+
+	// +nullable
+	// +kubebuilder:validation:Optional
+	// +optional
+	Resources *corev1.ResourceRequirements `json:"resources"`
 }
 
 // FabricNetworkConfigSpec defines the desired state of FabricNetworkConfig
@@ -1290,4 +1392,5 @@ func init() {
 	SchemeBuilder.Register(&FabricChaincode{}, &FabricChaincodeList{})
 	SchemeBuilder.Register(&FabricOperationsConsole{}, &FabricOperationsConsoleList{})
 	SchemeBuilder.Register(&FabricOperatorUI{}, &FabricOperatorUIList{})
+	SchemeBuilder.Register(&FabricOperatorAPI{}, &FabricOperatorAPIList{})
 }
