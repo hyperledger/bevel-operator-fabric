@@ -34,6 +34,8 @@ type Interface interface {
 	FabricNetworkConfigs() FabricNetworkConfigInformer
 	// FabricOperationsConsoles returns a FabricOperationsConsoleInformer.
 	FabricOperationsConsoles() FabricOperationsConsoleInformer
+	// FabricOperatorAPIs returns a FabricOperatorAPIInformer.
+	FabricOperatorAPIs() FabricOperatorAPIInformer
 	// FabricOperatorUIs returns a FabricOperatorUIInformer.
 	FabricOperatorUIs() FabricOperatorUIInformer
 	// FabricOrdererNodes returns a FabricOrdererNodeInformer.
@@ -78,6 +80,11 @@ func (v *version) FabricNetworkConfigs() FabricNetworkConfigInformer {
 // FabricOperationsConsoles returns a FabricOperationsConsoleInformer.
 func (v *version) FabricOperationsConsoles() FabricOperationsConsoleInformer {
 	return &fabricOperationsConsoleInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
+}
+
+// FabricOperatorAPIs returns a FabricOperatorAPIInformer.
+func (v *version) FabricOperatorAPIs() FabricOperatorAPIInformer {
+	return &fabricOperatorAPIInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
 }
 
 // FabricOperatorUIs returns a FabricOperatorUIInformer.

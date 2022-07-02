@@ -58,6 +58,14 @@ type FabricOperationsConsoleListerExpansion interface{}
 // FabricOperationsConsoleNamespaceLister.
 type FabricOperationsConsoleNamespaceListerExpansion interface{}
 
+// FabricOperatorAPIListerExpansion allows custom methods to be added to
+// FabricOperatorAPILister.
+type FabricOperatorAPIListerExpansion interface{}
+
+// FabricOperatorAPINamespaceListerExpansion allows custom methods to be added to
+// FabricOperatorAPINamespaceLister.
+type FabricOperatorAPINamespaceListerExpansion interface{}
+
 // FabricOperatorUIListerExpansion allows custom methods to be added to
 // FabricOperatorUILister.
 type FabricOperatorUIListerExpansion interface{}

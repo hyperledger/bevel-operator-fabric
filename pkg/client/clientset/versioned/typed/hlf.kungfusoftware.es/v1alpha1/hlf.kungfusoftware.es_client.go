@@ -31,6 +31,7 @@ type HlfV1alpha1Interface interface {
 	FabricExplorersGetter
 	FabricNetworkConfigsGetter
 	FabricOperationsConsolesGetter
+	FabricOperatorAPIsGetter
 	FabricOperatorUIsGetter
 	FabricOrdererNodesGetter
 	FabricOrderingServicesGetter
@@ -60,6 +61,10 @@ func (c *HlfV1alpha1Client) FabricNetworkConfigs(namespace string) FabricNetwork
 
 func (c *HlfV1alpha1Client) FabricOperationsConsoles(namespace string) FabricOperationsConsoleInterface {
 	return newFabricOperationsConsoles(c, namespace)
+}
+
+func (c *HlfV1alpha1Client) FabricOperatorAPIs(namespace string) FabricOperatorAPIInterface {
+	return newFabricOperatorAPIs(c, namespace)
 }
 
 func (c *HlfV1alpha1Client) FabricOperatorUIs(namespace string) FabricOperatorUIInterface {

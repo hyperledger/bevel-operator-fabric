@@ -48,6 +48,10 @@ func (c *FakeHlfV1alpha1) FabricOperationsConsoles(namespace string) v1alpha1.Fa
 	return &FakeFabricOperationsConsoles{c, namespace}
 }
 
+func (c *FakeHlfV1alpha1) FabricOperatorAPIs(namespace string) v1alpha1.FabricOperatorAPIInterface {
+	return &FakeFabricOperatorAPIs{c, namespace}
+}
+
 func (c *FakeHlfV1alpha1) FabricOperatorUIs(namespace string) v1alpha1.FabricOperatorUIInterface {
 	return &FakeFabricOperatorUIs{c, namespace}
 }
