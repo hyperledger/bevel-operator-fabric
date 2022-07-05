@@ -37,6 +37,9 @@ type Options struct {
 	Output                          bool
 	KubernetesBuilder               bool
 	ExternalChaincodeServiceBuilder bool
+	CouchDBImage                    string
+	CouchDBTag                      string
+	CouchDBPassword                 string
 }
 
 func (o Options) Validate() error {
@@ -125,6 +128,38 @@ func (c *createCmd) run() error {
 		})
 	}
 	kubernetesBuilder := c.peerOpts.KubernetesBuilder
+	if c.peerOpts.KubernetesBuilder {
+		externalBuilders = append(externalBuilders, v1alpha1.ExternalBuilder{
+			Name: "k8s-builder",
+			Path: "/builders/golang",
+			PropagateEnvironment: []string{
+				"CHAINCODE_SHARED_DIR",
+				"FILE_SERVER_BASE_IP",
+				"KUBERNETES_SERVICE_HOST",
+				"KUBERNETES_SERVICE_PORT",
+				"K8SCC_CFGFILE",
+				"TMPDIR",
+				"LD_LIBRARY_PATH",
+				"LIBPATH",
+				"PATH",
+				"EXTERNAL_BUILDER_HTTP_PROXY",
+				"EXTERNAL_BUILDER_HTTPS_PROXY",
+				"EXTERNAL_BUILDER_NO_PROXY",
+				"EXTERNAL_BUILDER_PEER_URL",
+			},
+		})
+	}
+	couchDB := v1alpha1.FabricPeerCouchDB{
+		User:     "couchdb",
+		Password: "couchdb",
+	}
+	if c.peerOpts.CouchDBPassword != "" {
+		couchDB.Password = c.peerOpts.CouchDBPassword
+	}
+	if c.peerOpts.CouchDBImage != "" && c.peerOpts.CouchDBTag != "" {
+		couchDB.Image = c.peerOpts.CouchDBImage
+		couchDB.Tag = c.peerOpts.CouchDBTag
+	}
 	fabricPeer := &v1alpha1.FabricPeer{
 		TypeMeta: v1.TypeMeta{
 			Kind:       "FabricPeer",
@@ -153,11 +188,8 @@ func (c *createCmd) run() error {
 			ExternalEndpoint: externalEndpoint,
 			Tag:              c.peerOpts.Version,
 			ImagePullPolicy:  "Always",
-			CouchDB: v1alpha1.FabricPeerCouchDB{
-				User:     "couchdb",
-				Password: "couchdb",
-			},
-			MspID: c.peerOpts.MspID,
+			CouchDB:          couchDB,
+			MspID:            c.peerOpts.MspID,
 			Secret: v1alpha1.Secret{
 				Enrollment: v1alpha1.Enrollment{
 					Component: v1alpha1.Component{
@@ -369,5 +401,9 @@ func newCreatePeerCmd(out io.Writer, errOut io.Writer) *cobra.Command {
 	f.BoolVarP(&c.peerOpts.Output, "output", "o", false, "Output in yaml")
 	f.BoolVarP(&c.peerOpts.KubernetesBuilder, "k8s-builder", "", false, "Enable kubernetes builder (deprecated)")
 	f.BoolVarP(&c.peerOpts.ExternalChaincodeServiceBuilder, "external-service-builder", "", true, "External chaincode service builder enabled(only use in 2.4.1+)")
+
+	f.StringVarP(&c.peerOpts.CouchDBImage, "couchdb-repository", "", helpers.DefaultCouchDBImage, "CouchDB image")
+	f.StringVarP(&c.peerOpts.CouchDBTag, "couchdb-tag", "", helpers.DefaultCouchDBVersion, "CouchDB version")
+	f.StringVarP(&c.peerOpts.CouchDBPassword, "couchdb-password", "", "", "CouchDB password")
 	return cmd
 }
