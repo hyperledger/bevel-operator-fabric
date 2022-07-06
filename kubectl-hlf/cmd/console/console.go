@@ -11,6 +11,7 @@ func NewConsoleCmd(out io.Writer, errOut io.Writer) *cobra.Command {
 	}
 	cmd.AddCommand(
 		newCreateConsoleCmd(out, errOut),
+		newDeleteConsoleCmd(out, errOut),
 	)
 
 	return cmd

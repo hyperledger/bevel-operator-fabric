@@ -1,4 +1,4 @@
-package console
+package operatorapi
 
 import (
 	"context"
@@ -9,12 +9,12 @@ import (
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-type deleteConsoleCmd struct {
+type deleteOperatorAPICmd struct {
 	name      string
 	namespace string
 }
 
-func (c *deleteConsoleCmd) validate() error {
+func (c *deleteOperatorAPICmd) validate() error {
 	if c.name == "" {
 		return fmt.Errorf("--name is required")
 	}
@@ -23,29 +23,29 @@ func (c *deleteConsoleCmd) validate() error {
 	}
 	return nil
 }
-func (c *deleteConsoleCmd) run() error {
+func (c *deleteOperatorAPICmd) run() error {
 	oclient, err := helpers.GetKubeOperatorClient()
 	if err != nil {
 		return err
 	}
 	ctx := context.Background()
-	fabricOperationsConsole, err := oclient.HlfV1alpha1().FabricOperationsConsoles(c.namespace).Get(ctx, c.name, v1.GetOptions{})
+	fabricOperatorAPI, err := oclient.HlfV1alpha1().FabricOperatorAPIs(c.namespace).Get(ctx, c.name, v1.GetOptions{})
 	if err != nil {
 		return err
 	}
-	err = oclient.HlfV1alpha1().FabricOperationsConsoles(c.namespace).Delete(
+	err = oclient.HlfV1alpha1().FabricOperatorAPIs(c.namespace).Delete(
 		ctx,
-		fabricOperationsConsole.Name,
+		fabricOperatorAPI.Name,
 		v1.DeleteOptions{},
 	)
 	if err != nil {
 		return err
 	}
-	fmt.Printf("Deleted operations console %s\n", fabricOperationsConsole.Name)
+	fmt.Printf("Deleted operator API %s\n", fabricOperatorAPI.Name)
 	return nil
 }
-func newDeleteConsoleCmd(out io.Writer, errOut io.Writer) *cobra.Command {
-	c := &deleteConsoleCmd{}
+func newDeleteOperatorAPICmd(out io.Writer, errOut io.Writer) *cobra.Command {
+	c := &deleteOperatorAPICmd{}
 	cmd := &cobra.Command{
 		Use: "delete",
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -56,7 +56,7 @@ func newDeleteConsoleCmd(out io.Writer, errOut io.Writer) *cobra.Command {
 		},
 	}
 	f := cmd.Flags()
-	f.StringVar(&c.name, "name", "", "Name of the operations console")
-	f.StringVar(&c.namespace, "namespace", "", "Namespace of the operations console")
+	f.StringVar(&c.name, "name", "", "Name of the operator API")
+	f.StringVar(&c.namespace, "namespace", "", "Namespace of the operator API")
 	return cmd
 }

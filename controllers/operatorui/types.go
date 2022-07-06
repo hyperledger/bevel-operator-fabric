@@ -6,9 +6,9 @@ import (
 )
 
 type Image struct {
-	Repository string `json:"repository"`
-	PullPolicy string `json:"pullPolicy"`
-	Tag        string `json:"tag"`
+	Repository string            `json:"repository"`
+	PullPolicy corev1.PullPolicy `json:"pullPolicy"`
+	Tag        string            `json:"tag"`
 }
 type ServiceAccount struct {
 	Create      bool              `json:"create"`
@@ -52,16 +52,16 @@ type IngressPath struct {
 	PathType string `json:"pathType"`
 }
 
-type HLFOperatorAPIChart struct {
+type HLFOperatorUIChart struct {
 	ReplicaCount     int                           `json:"replicaCount"`
 	Image            Image                         `json:"image"`
-	Hlf              HLFConfig                     `json:"hlf"`
+	APIUrl           string                        `json:"apiUrl"`
 	ImagePullSecrets []corev1.LocalObjectReference `json:"imagePullSecrets"`
 	ServiceAccount   ServiceAccount                `json:"serviceAccount"`
 	PodAnnotations   map[string]string             `json:"podAnnotations"`
 	Service          Service                       `json:"service"`
 	Ingress          Ingress                       `json:"ingress"`
-	Resources        corev1.ResourceRequirements   `json:"resources"`
+	Resources        *corev1.ResourceRequirements  `json:"resources"`
 	Autoscaling      Autoscaling                   `json:"autoscaling"`
 	Tolerations      []corev1.Toleration           `json:"tolerations,omitempty"`
 	Affinity         *corev1.Affinity              `json:"affinity"`

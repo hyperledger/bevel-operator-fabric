@@ -1158,13 +1158,16 @@ type FabricOperatorUISpec struct {
 	Tag   string `json:"tag"`
 	// +kubebuilder:default:="IfNotPresent"
 	ImagePullPolicy corev1.PullPolicy `json:"imagePullPolicy"`
-	Istio           FabricIstio       `json:"istio"`
 	// +optional
 	// +kubebuilder:validation:Optional
 	// +nullable
 	// +kubebuilder:validation:Default={}
 	Tolerations []corev1.Toleration `json:"tolerations"`
+	// +kubebuilder:validation:Default=1
+	Replicas int     `json:"replicas"`
+	Ingress  Ingress `json:"ingress"`
 
+	APIURL string `json:"apiUrl"`
 	// +kubebuilder:validation:Default={}
 	// +optional
 	// +kubebuilder:validation:Optional
@@ -1199,7 +1202,7 @@ type FabricOperatorAPIStatus struct {
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 // +k8s:defaulter-gen=true
 // +kubebuilder:subresource:status
-// +kubebuilder:resource:scope=Namespaced,shortName=fabricoperatorui,singular=fabricoperatorui
+// +kubebuilder:resource:scope=Namespaced,shortName=fabricoperatorapi,singular=fabricoperatorapi
 // +kubebuilder:printcolumn:name="State",type="string",JSONPath=".status.status"
 // +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
 // +kubebuilder:object:root=true
@@ -1222,6 +1225,15 @@ type FabricOperatorAPIList struct {
 	metav1.ListMeta `json:"metadata,omitempty"`
 	Items           []FabricOperatorAPI `json:"items"`
 }
+type FabricOperatorAPIHLFConfig struct {
+	MSPID         string                         `json:"mspID"`
+	User          string                         `json:"user"`
+	NetworkConfig FabricOperatorAPINetworkConfig `json:"networkConfig"`
+}
+type FabricOperatorAPINetworkConfig struct {
+	SecretName string `json:"secretName"`
+	Key        string `json:"key"`
+}
 
 // FabricOperatorAPISpec defines the desired state of FabricOperatorAPI
 type FabricOperatorAPISpec struct {
@@ -1230,6 +1242,11 @@ type FabricOperatorAPISpec struct {
 	// +kubebuilder:default:="IfNotPresent"
 	ImagePullPolicy corev1.PullPolicy `json:"imagePullPolicy"`
 	Istio           FabricIstio       `json:"istio"`
+	Ingress         Ingress           `json:"ingress"`
+	// +kubebuilder:validation:Default=1
+	Replicas int `json:"replicas"`
+
+	HLFConfig FabricOperatorAPIHLFConfig `json:"hlfConfig"`
 	// +optional
 	// +kubebuilder:validation:Optional
 	// +nullable

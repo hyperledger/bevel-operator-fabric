@@ -637,6 +637,8 @@ spec:
                         type: array
                     type: object
                 type: object
+              apiUrl:
+                type: string
               env:
                 items:
                   description: EnvVar represents an environment variable present in
@@ -759,21 +761,74 @@ spec:
                   type: object
                 nullable: true
                 type: array
-              istio:
+              ingress:
                 properties:
+                  annotations:
+                    additionalProperties:
+                      type: string
+                    type: object
+                  className:
+                    type: string
+                  enabled:
+                    default: true
+                    type: boolean
                   hosts:
                     items:
-                      type: string
-                    nullable: true
+                      properties:
+                        host:
+                          type: string
+                        paths:
+                          items:
+                            properties:
+                              path:
+                                default: /
+                                type: string
+                              pathType:
+                                default: Prefix
+                                type: string
+                            required:
+                            - path
+                            - pathType
+                            type: object
+                          type: array
+                      required:
+                      - host
+                      - paths
+                      type: object
                     type: array
-                  ingressGateway:
-                    type: string
-                  port:
-                    nullable: true
-                    type: integer
+                  tls:
+                    items:
+                      description: IngressTLS describes the transport layer security
+                        associated with an Ingress.
+                      properties:
+                        hosts:
+                          description: Hosts are a list of hosts included in the TLS
+                            certificate. The values in this list must match the name/s
+                            used in the tlsSecret. Defaults to the wildcard host setting
+                            for the loadbalancer controller fulfilling this Ingress,
+                            if left unspecified.
+                          items:
+                            type: string
+                          type: array
+                        secretName:
+                          description: SecretName is the name of the secret used to
+                            terminate TLS traffic on port 443. Field is left optional
+                            to allow TLS routing based on SNI hostname alone. If the
+                            SNI host in a listener conflicts with the "Host" header
+                            field used by an IngressRule, the SNI host is used for
+                            termination and value of the Host header is used for routing.
+                          type: string
+                      type: object
+                    type: array
                 required:
-                - ingressGateway
+                - annotations
+                - className
+                - enabled
+                - hosts
+                - tls
                 type: object
+              replicas:
+                type: integer
               resources:
                 description: ResourceRequirements describes the compute resource requirements.
                 nullable: true
@@ -844,9 +899,11 @@ spec:
                 nullable: true
                 type: array
             required:
+            - apiUrl
             - image
             - imagePullPolicy
-            - istio
+            - ingress
+            - replicas
             - tag
             type: object
           status:

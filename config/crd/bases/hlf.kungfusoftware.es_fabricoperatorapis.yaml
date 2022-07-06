@@ -14,8 +14,8 @@ spec:
     listKind: FabricOperatorAPIList
     plural: fabricoperatorapis
     shortNames:
-    - fabricoperatorui
-    singular: fabricoperatorui
+    - fabricoperatorapi
+    singular: fabricoperatorapi
   scope: Namespaced
   versions:
   - additionalPrinterColumns:
@@ -740,6 +740,27 @@ spec:
                   type: object
                 nullable: true
                 type: array
+              hlfConfig:
+                properties:
+                  mspID:
+                    type: string
+                  networkConfig:
+                    properties:
+                      key:
+                        type: string
+                      secretName:
+                        type: string
+                    required:
+                    - key
+                    - secretName
+                    type: object
+                  user:
+                    type: string
+                required:
+                - mspID
+                - networkConfig
+                - user
+                type: object
               image:
                 type: string
               imagePullPolicy:
@@ -759,6 +780,72 @@ spec:
                   type: object
                 nullable: true
                 type: array
+              ingress:
+                properties:
+                  annotations:
+                    additionalProperties:
+                      type: string
+                    type: object
+                  className:
+                    type: string
+                  enabled:
+                    default: true
+                    type: boolean
+                  hosts:
+                    items:
+                      properties:
+                        host:
+                          type: string
+                        paths:
+                          items:
+                            properties:
+                              path:
+                                default: /
+                                type: string
+                              pathType:
+                                default: Prefix
+                                type: string
+                            required:
+                            - path
+                            - pathType
+                            type: object
+                          type: array
+                      required:
+                      - host
+                      - paths
+                      type: object
+                    type: array
+                  tls:
+                    items:
+                      description: IngressTLS describes the transport layer security
+                        associated with an Ingress.
+                      properties:
+                        hosts:
+                          description: Hosts are a list of hosts included in the TLS
+                            certificate. The values in this list must match the name/s
+                            used in the tlsSecret. Defaults to the wildcard host setting
+                            for the loadbalancer controller fulfilling this Ingress,
+                            if left unspecified.
+                          items:
+                            type: string
+                          type: array
+                        secretName:
+                          description: SecretName is the name of the secret used to
+                            terminate TLS traffic on port 443. Field is left optional
+                            to allow TLS routing based on SNI hostname alone. If the
+                            SNI host in a listener conflicts with the "Host" header
+                            field used by an IngressRule, the SNI host is used for
+                            termination and value of the Host header is used for routing.
+                          type: string
+                      type: object
+                    type: array
+                required:
+                - annotations
+                - className
+                - enabled
+                - hosts
+                - tls
+                type: object
               istio:
                 properties:
                   hosts:
@@ -774,6 +861,8 @@ spec:
                 required:
                 - ingressGateway
                 type: object
+              replicas:
+                type: integer
               resources:
                 description: ResourceRequirements describes the compute resource requirements.
                 nullable: true
@@ -844,9 +933,12 @@ spec:
                 nullable: true
                 type: array
             required:
+            - hlfConfig
             - image
             - imagePullPolicy
+            - ingress
             - istio
+            - replicas
             - tag
             type: object
           status:
