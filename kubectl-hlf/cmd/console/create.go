@@ -28,6 +28,7 @@ type Options struct {
 	InitialAdminPassword string
 	InitialAdmin         string
 	HostURL              string
+	TLSSecretName        string
 }
 
 func (o Options) Validate() error {
@@ -52,12 +53,34 @@ func (c *createCmd) run() error {
 	if err != nil {
 		return err
 	}
+	hosts := []v1alpha1.IngressHost{}
+	for _, host := range c.consoleOpts.Hosts {
+		hosts = append(hosts, v1alpha1.IngressHost{
+			Paths: []v1alpha1.IngressPath{
+				{
+					Path:     "/",
+					PathType: "Prefix",
+				},
+			},
+			Host: host,
+		})
+	}
 	ingress := v1alpha1.Ingress{
-		Enabled:     false,
-		ClassName:   "",
-		Annotations: map[string]string{},
-		TLS:         []v1beta1.IngressTLS{},
-		Hosts:       []v1alpha1.IngressHost{},
+		Enabled:   true,
+		ClassName: "istio",
+		Annotations: map[string]string{
+			"kubernetes.io/ingress.class": "istio",
+		},
+		TLS:   []v1beta1.IngressTLS{},
+		Hosts: hosts,
+	}
+	if c.consoleOpts.TLSSecretName != "" {
+		ingress.TLS = []v1beta1.IngressTLS{
+			{
+				Hosts:      c.consoleOpts.Hosts,
+				SecretName: c.consoleOpts.TLSSecretName,
+			},
+		}
 	}
 	fabricConsole := &v1alpha1.FabricOperationsConsole{
 		TypeMeta: v1.TypeMeta{
@@ -151,6 +174,7 @@ func newCreateConsoleCmd(out io.Writer, errOut io.Writer) *cobra.Command {
 	f.StringVarP(&c.consoleOpts.StorageClass, "storage-class", "s", helpers.DefaultStorageclass, "Storage class for this Fabric Console")
 	f.StringVarP(&c.consoleOpts.Image, "image", "", helpers.DefaultOperationsConsoleImage, "Image of the Fabric Console")
 	f.StringVarP(&c.consoleOpts.Version, "version", "", helpers.DefaultOperationsConsoleVersion, "Version of the Fabric Console")
+	f.StringVarP(&c.consoleOpts.TLSSecretName, "tls-secret-name", "", "", "TLS Secret name for serving the console in HTTPS")
 	f.StringVarP(&c.consoleOpts.InitialAdmin, "admin-user", "", "", "User name of the console")
 	f.StringVarP(&c.consoleOpts.InitialAdminPassword, "admin-pwd", "", "", "Admin password")
 	f.StringVarP(&c.consoleOpts.IngressGateway, "istio-ingressgateway", "", "ingressgateway", "Istio ingress gateway name")
