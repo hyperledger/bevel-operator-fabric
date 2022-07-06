@@ -57,7 +57,6 @@ func (c *createCmd) run() error {
 			Host: host,
 		})
 	}
-
 	ingress := v1alpha1.Ingress{
 		Enabled:   true,
 		ClassName: "istio",
@@ -66,6 +65,14 @@ func (c *createCmd) run() error {
 		},
 		TLS:   []v1beta1.IngressTLS{},
 		Hosts: hosts,
+	}
+	if c.apiOpts.TLSSecretName != "" {
+		ingress.TLS = []v1beta1.IngressTLS{
+			{
+				Hosts:      c.apiOpts.Hosts,
+				SecretName: c.apiOpts.TLSSecretName,
+			},
+		}
 	}
 	fabricAPI := &v1alpha1.FabricOperatorAPI{
 		TypeMeta: v1.TypeMeta{
