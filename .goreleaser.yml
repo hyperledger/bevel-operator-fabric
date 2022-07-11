@@ -37,6 +37,9 @@ builds:
       - darwin
       - windows
       - freebsd
+    ignore:
+      - goos: windows
+        goarch: arm64
     goarch:
       - amd64
       - arm64
