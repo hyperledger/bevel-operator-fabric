@@ -178,7 +178,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	fabricOperatorAPIChartPath, err := filepath.Abs("./charts/fabric-operations-api")
+	fabricOperatorAPIChartPath, err := filepath.Abs("./charts/hlf-operator-api")
 	if err != nil {
 		setupLog.Error(err, "unable to find the fabric-operations-api chart")
 		os.Exit(1)
@@ -194,7 +194,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	fabricOperatorUIChartPath, err := filepath.Abs("./charts/fabric-operations-ui")
+	fabricOperatorUIChartPath, err := filepath.Abs("./charts/hlf-operator-ui")
 	if err != nil {
 		setupLog.Error(err, "unable to find the fabric-operations-ui chart")
 		os.Exit(1)

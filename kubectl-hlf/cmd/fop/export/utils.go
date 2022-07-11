@@ -53,19 +53,19 @@ type FabricOrgOUIdentifier struct {
 	OrganizationalUnitIdentifier string `json:"organizational_unit_identifier"`
 }
 type FabricOperationsPeer struct {
-	DisplayName   string        `json:"display_name"`
-	GrpcwpUrl     string        `json:"grpcwp_url"`
-	ApiUrl        string        `json:"api_url"`
-	OperationsUrl string        `json:"operations_url"`
-	MspId         string        `json:"msp_id"`
-	Name          string        `json:"name"`
-	Type          string        `json:"type"`
-	Msp           FabricPeerMSP `json:"msp"`
-	Pem           string        `json:"pem"`
-	TlsCert       string        `json:"tls_cert"`
-	TlsCaRootCert string        `json:"tls_ca_root_cert"`
+	DisplayName   string              `json:"display_name"`
+	GrpcwpUrl     string              `json:"grpcwp_url"`
+	ApiUrl        string              `json:"api_url"`
+	OperationsUrl string              `json:"operations_url"`
+	MspId         string              `json:"msp_id"`
+	Name          string              `json:"name"`
+	Type          string              `json:"type"`
+	Msp           FabricOperationsMSP `json:"msp"`
+	Pem           string              `json:"pem"`
+	TlsCert       string              `json:"tls_cert"`
+	TlsCaRootCert string              `json:"tls_ca_root_cert"`
 }
-type FabricPeerMSP struct {
+type FabricOperationsMSP struct {
 	Component FabricPeerComponentMSP `json:"component"`
 	CA        FabricPeerMSPCA        `json:"ca"`
 	TLSCA     FabricPeerMSPCA        `json:"tlsca"`
@@ -76,6 +76,27 @@ type FabricPeerComponentMSP struct {
 }
 type FabricPeerMSPCA struct {
 	RootCerts []string `json:"root_certs"`
+}
+type FeatureFlagsOrderer struct {
+	OSNAdminFeatsEnabled bool `json:"osnadmin_feats_enabled"`
+}
+type FabricOperationsOrderer struct {
+	DisplayName   string              `json:"display_name"`
+	GrpcwpUrl     string              `json:"grpcwp_url"`
+	ApiUrl        string              `json:"api_url"`
+	OperationsUrl string              `json:"operations_url"`
+	Type          string              `json:"type"`
+	MspId         string              `json:"msp_id"`
+	ClusterId     string              `json:"cluster_id"`
+	ClusterName   string              `json:"cluster_name"`
+	Name          string              `json:"name"`
+	Msp           FabricOperationsMSP `json:"msp"`
+	Pem           string              `json:"pem"`
+	OSNAdminURL   string              `json:"osnadmin_url"`
+	Systemless    bool                `json:"systemless"`
+	TlsCert       string              `json:"tls_cert"`
+	TlsCaRootCert string              `json:"tls_ca_root_cert"`
+	FeatureFlags  FeatureFlagsOrderer `json:"feature_flags"`
 }
 
 func appendFile(filename string, data []byte, zipw *zip.Writer) error {
@@ -93,10 +114,14 @@ func appendFile(filename string, data []byte, zipw *zip.Writer) error {
 func mapFabricOperationsCA(clusterCA *helpers.ClusterCA) *FabricOperationsCA {
 	caURL := fmt.Sprintf("https://%s", clusterCA.PublicURL)
 	displayName := fmt.Sprintf("%s_%s", clusterCA.Object.Name, clusterCA.Object.Namespace)
+	if len(displayName) >= 30 {
+		displayName = displayName[0:29]
+	}
+	internalOperationsURL := fmt.Sprintf("http://%s.%s:%d", clusterCA.Object.Name, clusterCA.Object.Namespace, 9443)
 	ca := &FabricOperationsCA{
 		DisplayName:   displayName,
 		ApiUrl:        caURL,
-		OperationsUrl: caURL,
+		OperationsUrl: internalOperationsURL,
 		CaUrl:         caURL,
 		Type:          "fabric-ca",
 		CaName:        "ca",
@@ -110,16 +135,23 @@ func mapFabricOperationsCA(clusterCA *helpers.ClusterCA) *FabricOperationsCA {
 func mapFabricOperationsPeer(clusterPeer *helpers.ClusterPeer) (*FabricOperationsPeer, error) {
 	apiURL := fmt.Sprintf("grpcs://%s", clusterPeer.PublicURL)
 	displayName := fmt.Sprintf("%s_%s", clusterPeer.Object.Name, clusterPeer.Object.Namespace)
-
+	if len(displayName) >= 30 {
+		displayName = displayName[0:29]
+	}
+	if clusterPeer.Spec.GRPCProxy == nil {
+		return nil, fmt.Errorf("grpc proxy not configured for peer %s", clusterPeer.Object.Name)
+	}
+	grpcwpURL := fmt.Sprintf("https://%s:%d", clusterPeer.Spec.GRPCProxy.Istio.Hosts[0], clusterPeer.Spec.GRPCProxy.Istio.Port)
+	internalOperationsURL := fmt.Sprintf("http://%s.%s:%d", clusterPeer.ObjectMeta.Name, clusterPeer.ObjectMeta.Namespace, 9443)
 	fabricOperationsPeer := &FabricOperationsPeer{
 		DisplayName:   displayName,
-		GrpcwpUrl:     "",
+		GrpcwpUrl:     grpcwpURL,
 		ApiUrl:        apiURL,
-		OperationsUrl: "",
+		OperationsUrl: internalOperationsURL,
 		MspId:         clusterPeer.Spec.MspID,
 		Name:          displayName,
 		Type:          "fabric-peer",
-		Msp: FabricPeerMSP{
+		Msp: FabricOperationsMSP{
 			Component: FabricPeerComponentMSP{
 				AdminCerts: []interface{}{},
 				TlsCert:    base64.StdEncoding.EncodeToString([]byte(clusterPeer.Object.Status.TlsCert)),
@@ -138,6 +170,60 @@ func mapFabricOperationsPeer(clusterPeer *helpers.ClusterPeer) (*FabricOperation
 		Pem:           base64.StdEncoding.EncodeToString([]byte(clusterPeer.Status.SignCert)),
 		TlsCert:       base64.StdEncoding.EncodeToString([]byte(clusterPeer.Status.TlsCert)),
 		TlsCaRootCert: base64.StdEncoding.EncodeToString([]byte(clusterPeer.Status.TlsCACert)),
+	}
+	return fabricOperationsPeer, nil
+}
+
+type MapFabricOperationsOrderer struct {
+	ClusterID   string
+	ClusterName string
+	OSNAdminURL string
+}
+
+func mapFabricOperationsOrderer(clusterOrdererNode *helpers.ClusterOrdererNode, opts MapFabricOperationsOrderer) (*FabricOperationsOrderer, error) {
+	apiURL := fmt.Sprintf("grpcs://%s", clusterOrdererNode.PublicURL)
+	displayName := fmt.Sprintf("%s_%s", clusterOrdererNode.ObjectMeta.Name, clusterOrdererNode.ObjectMeta.Namespace)
+	if len(displayName) >= 30 {
+		displayName = displayName[0:29]
+	}
+	if clusterOrdererNode.Spec.GRPCProxy == nil {
+		return nil, fmt.Errorf("grpc proxy not configured for peer %s", clusterOrdererNode.ObjectMeta.Name)
+	}
+	grpcwpURL := fmt.Sprintf("https://%s:%d", clusterOrdererNode.Spec.GRPCProxy.Istio.Hosts[0], clusterOrdererNode.Spec.GRPCProxy.Istio.Port)
+	internalOperationsURL := fmt.Sprintf("http://%s.%s:%d", clusterOrdererNode.ObjectMeta.Name, clusterOrdererNode.ObjectMeta.Namespace, 9443)
+
+	fabricOperationsPeer := &FabricOperationsOrderer{
+		DisplayName:   displayName,
+		GrpcwpUrl:     grpcwpURL,
+		ApiUrl:        apiURL,
+		OperationsUrl: internalOperationsURL,
+		MspId:         clusterOrdererNode.Spec.MspID,
+		FeatureFlags:  FeatureFlagsOrderer{OSNAdminFeatsEnabled: true},
+		Name:          displayName,
+		OSNAdminURL:   opts.OSNAdminURL,
+		Systemless:    true,
+		Type:          "fabric-orderer",
+		ClusterId:     opts.ClusterID,
+		ClusterName:   opts.ClusterName,
+		Msp: FabricOperationsMSP{
+			Component: FabricPeerComponentMSP{
+				AdminCerts: []interface{}{},
+				TlsCert:    base64.StdEncoding.EncodeToString([]byte(clusterOrdererNode.Status.TlsCert)),
+			},
+			CA: FabricPeerMSPCA{
+				RootCerts: []string{
+					base64.StdEncoding.EncodeToString([]byte(clusterOrdererNode.Status.SignCACert)),
+				},
+			},
+			TLSCA: FabricPeerMSPCA{
+				RootCerts: []string{
+					base64.StdEncoding.EncodeToString([]byte(clusterOrdererNode.Status.TlsCACert)),
+				},
+			},
+		},
+		Pem:           base64.StdEncoding.EncodeToString([]byte(clusterOrdererNode.Status.SignCert)),
+		TlsCert:       base64.StdEncoding.EncodeToString([]byte(clusterOrdererNode.Status.TlsCert)),
+		TlsCaRootCert: base64.StdEncoding.EncodeToString([]byte(clusterOrdererNode.Status.TlsCACert)),
 	}
 	return fabricOperationsPeer, nil
 }
