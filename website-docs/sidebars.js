@@ -20,6 +20,12 @@ module.exports = {
       "chaincode-development/getting-started",
       "chaincode-development/architecture",
     ],
+    "Chaincode deployment": [
+      "chaincode-deployment/getting-started",
+      "chaincode-deployment/architecture",
+      "chaincode-deployment/external-chaincode-as-a-service",
+      "chaincode-deployment/k8s-builder",
+    ],
     "Kubectl Plugin": ["kubectl-plugin/installation"],
     CouchDB: ["couchdb/external-couchdb", "couchdb/custom-image"],
     "Operations Console": [

@@ -202,6 +202,9 @@ func (r *FabricOperatorAPIReconciler) Reconcile(req ctrl.Request) (ctrl.Result, 
 	fabricOpConsole := &hlfv1alpha1.FabricOperatorAPI{}
 	releaseName := req.Name
 	ns := req.Namespace
+	if ns == "" {
+		ns = "default"
+	}
 	cfg, err := newActionCfg(r.Log, r.Config, ns)
 	if err != nil {
 		r.setConditionStatus(ctx, fabricOpConsole, hlfv1alpha1.FailedStatus, false, err, false)
@@ -312,6 +315,7 @@ func (r *FabricOperatorAPIReconciler) Reconcile(req ctrl.Request) (ctrl.Result, 
 		}
 	} else {
 		cmd := action.NewInstall(cfg)
+		cmd.Namespace = ns
 		name, chart, err := cmd.NameAndChart([]string{releaseName, r.ChartPath})
 		if err != nil {
 			r.setConditionStatus(ctx, fabricOpConsole, hlfv1alpha1.FailedStatus, false, err, false)
@@ -382,6 +386,7 @@ func (r *FabricOperatorAPIReconciler) upgradeChart(
 	}
 	cmd := action.NewUpgrade(cfg)
 	cmd.MaxHistory = 5
+	cmd.Namespace = ns
 	err = os.Setenv("HELM_NAMESPACE", ns)
 	if err != nil {
 		return err

@@ -4,36 +4,33 @@ import (
 	"github.com/hyperledger/fabric-protos-go/common"
 	pb "github.com/hyperledger/fabric-protos-go/peer"
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/resmgmt"
-	"github.com/hyperledger/fabric-sdk-go/pkg/common/providers/fab"
 	"github.com/hyperledger/fabric-sdk-go/pkg/core/config"
 	"github.com/hyperledger/fabric-sdk-go/pkg/fabsdk"
 	"github.com/kfsoftware/hlf-operator/internal/github.com/hyperledger/fabric/common/policydsl"
 	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/helpers"
-	log "github.com/sirupsen/logrus"
+	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
 	"io"
 	"io/ioutil"
-	"time"
 )
 
-type approveChaincodeCmd struct {
+type queryCheckCommitReadiness struct {
 	configPath        string
 	peer              string
 	userName          string
 	channelName       string
-	packageID         string
-	version           string
-	name              string
+	chaincodeName     string
 	sequence          int64
 	policy            string
 	initRequired      bool
 	collectionsConfig string
+	version           string
 }
 
-func (c *approveChaincodeCmd) validate() error {
+func (c *queryCheckCommitReadiness) validate() error {
 	return nil
 }
-func (c *approveChaincodeCmd) run() error {
+func (c *queryCheckCommitReadiness) run(out io.Writer) error {
 	oclient, err := helpers.GetKubeOperatorClient()
 	if err != nil {
 		return err
@@ -61,13 +58,6 @@ func (c *approveChaincodeCmd) run() error {
 	if err != nil {
 		return err
 	}
-	var sp *common.SignaturePolicyEnvelope
-	if c.policy != "" {
-		sp, err = policydsl.FromString(c.policy)
-		if err != nil {
-			return err
-		}
-	}
 	var collectionConfigs []*pb.CollectionConfig
 
 	if c.collectionsConfig != "" {
@@ -80,15 +70,21 @@ func (c *approveChaincodeCmd) run() error {
 			return err
 		}
 	}
+	var sp *common.SignaturePolicyEnvelope
+	if c.policy != "" {
+		sp, err = policydsl.FromString(c.policy)
+		if err != nil {
+			return err
+		}
+	}
 	if len(collectionConfigs) == 0 {
 		collectionConfigs = nil
 	}
-	txID, err := resClient.LifecycleApproveCC(
+	chaincode, err := resClient.LifecycleCheckCCCommitReadiness(
 		c.channelName,
-		resmgmt.LifecycleApproveCCRequest{
-			Name:              c.name,
+		resmgmt.LifecycleCheckCCCommitReadinessRequest{
+			Name:              c.chaincodeName,
 			Version:           c.version,
-			PackageID:         c.packageID,
 			Sequence:          c.sequence,
 			EndorsementPlugin: "escc",
 			ValidationPlugin:  "vscc",
@@ -97,34 +93,50 @@ func (c *approveChaincodeCmd) run() error {
 			InitRequired:      c.initRequired,
 		},
 		resmgmt.WithTargetEndpoints(peerName),
-		resmgmt.WithTimeout(fab.ResMgmt, 20*time.Minute),
-		resmgmt.WithTimeout(fab.PeerResponse, 20*time.Minute),
 	)
-	if err != nil {
-		return err
+	data := [][]string{}
+	for mspID, approved := range chaincode.Approvals {
+		isApproved := "false"
+		if !approved {
+			isApproved = "true"
+		}
+		data = append(data, []string{mspID, isApproved})
 	}
-	log.Infof("Chaincode approved=%s", txID)
+	table := tablewriter.NewWriter(out)
+	table.SetHeader([]string{"MSP ID", "Approved"})
+	table.SetAutoWrapText(false)
+	table.SetAutoFormatHeaders(true)
+	table.SetHeaderAlignment(tablewriter.ALIGN_LEFT)
+	table.SetAlignment(tablewriter.ALIGN_LEFT)
+	table.SetCenterSeparator("")
+	table.SetColumnSeparator("")
+	table.SetRowSeparator("")
+	table.SetHeaderLine(false)
+	table.SetBorder(false)
+	table.SetTablePadding("\t") // pad with tabs
+	table.SetNoWhiteSpace(true)
+	table.AppendBulk(data) // Add Bulk Data
+	table.Render()
 	return nil
 }
-func newChaincodeApproveCMD(out io.Writer, errOut io.Writer) *cobra.Command {
-	c := &approveChaincodeCmd{}
+func newCheckCommitReadiness(out io.Writer, errOut io.Writer) *cobra.Command {
+	c := &queryCheckCommitReadiness{}
 	cmd := &cobra.Command{
-		Use: "approveformyorg",
+		Use: "checkcommitreadiness",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := c.validate(); err != nil {
 				return err
 			}
-			return c.run()
+			return c.run(out)
 		},
 	}
 	persistentFlags := cmd.PersistentFlags()
-	persistentFlags.StringVarP(&c.configPath, "config", "", "", "Configuration file for the SDK")
 	persistentFlags.StringVarP(&c.peer, "peer", "p", "", "Peer org to invoke the updates")
 	persistentFlags.StringVarP(&c.userName, "user", "", "", "User name for the transaction")
-	persistentFlags.StringVarP(&c.channelName, "channel", "", "", "Channel name")
-	persistentFlags.StringVarP(&c.packageID, "package-id", "", "", "Package ID")
+	persistentFlags.StringVarP(&c.configPath, "config", "", "", "Configuration file for the SDK")
+	persistentFlags.StringVarP(&c.channelName, "channel", "C", "", "Channel name")
+	persistentFlags.StringVarP(&c.chaincodeName, "chaincode", "c", "", "Chaincode label")
 	persistentFlags.StringVarP(&c.version, "version", "", "1.0", "Version")
-	persistentFlags.StringVarP(&c.name, "name", "", "", "Chaincode name")
 	persistentFlags.Int64VarP(&c.sequence, "sequence", "", 1, "Sequence number")
 	persistentFlags.StringVarP(&c.policy, "policy", "", "", "Policy")
 	persistentFlags.BoolVarP(&c.initRequired, "init-required", "", false, "Init required")
@@ -133,8 +145,7 @@ func newChaincodeApproveCMD(out io.Writer, errOut io.Writer) *cobra.Command {
 	cmd.MarkPersistentFlagRequired("user")
 	cmd.MarkPersistentFlagRequired("peer")
 	cmd.MarkPersistentFlagRequired("config")
-	cmd.MarkPersistentFlagRequired("channelName")
-	cmd.MarkPersistentFlagRequired("package-id")
-	cmd.MarkPersistentFlagRequired("name")
+	cmd.MarkPersistentFlagRequired("channel")
+
 	return cmd
 }

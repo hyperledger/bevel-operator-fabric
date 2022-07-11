@@ -21,6 +21,7 @@ func NewChaincodeCmd(stdOut io.Writer, stdErr io.Writer) *cobra.Command {
 		newQueryApprovedCMD(stdOut, stdErr),
 		newCalculatePackageIDCMD(stdOut, stdErr),
 		newGetLatestInfoCMD(stdOut, stdErr),
+		newCheckCommitReadiness(stdOut, stdErr),
 	)
 	return consortiumCmd
 }

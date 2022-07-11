@@ -9,7 +9,6 @@ If you want to use a custom image for the CouchDB instance, you can use the `ima
 apiVersion: hlf.kungfusoftware.es/v1alpha1
 kind: FabricPeer
 metadata:
-  creationTimestamp: null
   name: org1-peer0
   namespace: default
 spec:

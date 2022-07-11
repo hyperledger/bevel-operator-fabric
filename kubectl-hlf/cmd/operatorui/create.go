@@ -14,18 +14,15 @@ import (
 )
 
 type Options struct {
-	Name           string
-	StorageClass   string
-	Capacity       string
-	NS             string
-	Image          string
-	Version        string
-	IngressGateway string
-	IngressPort    int
-	Hosts          []string
-	Output         bool
-	TLSSecretName  string
-	APIURL         string
+	Name            string
+	NS              string
+	Image           string
+	Version         string
+	Hosts           []string
+	Output          bool
+	TLSSecretName   string
+	APIURL          string
+	IngresClassName string
 }
 
 func (o Options) Validate() error {
@@ -63,9 +60,9 @@ func (c *createCmd) run() error {
 	}
 	ingress := v1alpha1.Ingress{
 		Enabled:   true,
-		ClassName: "istio",
+		ClassName: "",
 		Annotations: map[string]string{
-			"kubernetes.io/ingress.class": "istio",
+			"kubernetes.io/ingress.class": c.uiOpts.IngresClassName,
 		},
 		TLS:   []v1beta1.IngressTLS{},
 		Hosts: hosts,
@@ -139,15 +136,12 @@ func newCreateOperatorUICmd(out io.Writer, errOut io.Writer) *cobra.Command {
 	}
 	f := cmd.Flags()
 	f.StringVar(&c.uiOpts.Name, "name", "", "Name of the Operator UI to create")
-	f.StringVar(&c.uiOpts.Capacity, "capacity", "1Gi", "Total raw capacity of Operator UI in this zone, e.g. 16Ti")
 	f.StringVarP(&c.uiOpts.NS, "namespace", "n", helpers.DefaultNamespace, "Namespace scope for this request")
-	f.StringVarP(&c.uiOpts.StorageClass, "storage-class", "s", helpers.DefaultStorageclass, "Storage class for this Operator UI")
 	f.StringVarP(&c.uiOpts.Image, "image", "", helpers.DefaultOperationsOperatorUIImage, "Image of the Operator UI")
 	f.StringVarP(&c.uiOpts.Version, "version", "", helpers.DefaultOperationsOperatorUIVersion, "Version of the Operator UI")
-	f.StringVarP(&c.uiOpts.IngressGateway, "istio-ingressgateway", "", "ingressgateway", "Istio ingress gateway name")
+	f.StringVarP(&c.uiOpts.IngresClassName, "ingress-class-name", "", "istio", "Ingress class name")
 	f.StringVarP(&c.uiOpts.TLSSecretName, "tls-secret-name", "", "", "TLS Secret for the Operator UI")
 	f.StringVarP(&c.uiOpts.APIURL, "api-url", "", "", "API URL for the Operator UI")
-	f.IntVarP(&c.uiOpts.IngressPort, "istio-port", "", 443, "Istio ingress port")
 	f.StringArrayVarP(&c.uiOpts.Hosts, "hosts", "", []string{}, "External hosts")
 	f.BoolVarP(&c.uiOpts.Output, "output", "o", false, "Output in yaml")
 	return cmd

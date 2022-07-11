@@ -125,6 +125,22 @@ func MapClusterPeer(clientSet *kubernetes.Clientset, peer hlfv1alpha1.FabricPeer
 		MSPID:      peer.Spec.MspID,
 	}, nil
 }
+
+func MapClusterOrdererNode(clientSet *kubernetes.Clientset, ordNode hlfv1alpha1.FabricOrdererNode) (*ClusterOrdererNode, error) {
+	publicURL, err := GetOrdererPublicURL(clientSet, ordNode)
+	if err != nil {
+		return nil, err
+	}
+	privateURL := GetOrdererPrivateURL(ordNode)
+	return &ClusterOrdererNode{
+		Name:       ordNode.FullName(),
+		ObjectMeta: ordNode.ObjectMeta,
+		Spec:       ordNode.Spec,
+		Status:     ordNode.Status,
+		PublicURL:  publicURL,
+		PrivateURL: privateURL,
+	}, nil
+}
 func GetClusterCAs(clientSet *kubernetes.Clientset, oclient *operatorv1.Clientset, ns string) ([]*ClusterCA, error) {
 	ctx := context.Background()
 	certAuthsRes, err := oclient.HlfV1alpha1().FabricCAs(ns).List(ctx, v1.ListOptions{})

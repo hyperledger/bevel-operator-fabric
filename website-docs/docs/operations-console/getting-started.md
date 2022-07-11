@@ -11,7 +11,7 @@ This guide intends to showcase the installation of [Fabric Operations Console](h
 
 :::caution
 
-Once you set the state database of the peer, you cannot change it since the structure is different between using **LevelDB** and **CouchDB** you can find more information in [the official HLF docs](https://hyperledger-fabric.readthedocs.io/en/release-2.3/couchdb_as_state_database.html)
+Since the
 
 :::
 
