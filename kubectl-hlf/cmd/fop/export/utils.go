@@ -30,7 +30,7 @@ type FabricOrgResult struct {
 	IssuerRevocationPublicKey string `json:"IssuerRevocationPublicKey"`
 	Version                   string `json:"Version"`
 }
-type FabricOrg struct {
+type FabricOperationsOrg struct {
 	DisplayName   string        `json:"display_name"`
 	MspId         string        `json:"msp_id"`
 	Type          string        `json:"type"`
@@ -38,7 +38,7 @@ type FabricOrg struct {
 	RootCerts     []string      `json:"root_certs"`
 	TlsRootCerts  []string      `json:"tls_root_certs"`
 	FabricNodeOus FabricNodeOus `json:"fabric_node_ous"`
-	HostUrl       string        `json:"host_url"`
+	HostUrl       string        `json:"host_url,omitempty"`
 	Name          string        `json:"name"`
 }
 type FabricNodeOus struct {
@@ -224,6 +224,48 @@ func mapFabricOperationsOrderer(clusterOrdererNode *helpers.ClusterOrdererNode, 
 		Pem:           base64.StdEncoding.EncodeToString([]byte(clusterOrdererNode.Status.SignCert)),
 		TlsCert:       base64.StdEncoding.EncodeToString([]byte(clusterOrdererNode.Status.TlsCert)),
 		TlsCaRootCert: base64.StdEncoding.EncodeToString([]byte(clusterOrdererNode.Status.TlsCACert)),
+	}
+	return fabricOperationsPeer, nil
+}
+
+type MapFabricOperationsOrg struct {
+	MSPID   string
+	HostURL string
+}
+
+func mapFabricOperationsOrg(clusterCA *helpers.ClusterCA, opts MapFabricOperationsOrg) (*FabricOperationsOrg, error) {
+	displayName := fmt.Sprintf("%s_%s", clusterCA.Object.Name, clusterCA.Object.Namespace)
+	if len(displayName) >= 30 {
+		displayName = displayName[0:29]
+	}
+	fabricOperationsPeer := &FabricOperationsOrg{
+		DisplayName:  displayName,
+		MspId:        opts.MSPID,
+		Type:         "msp",
+		HostUrl:      opts.HostURL,
+		Admins:       []string{},
+		RootCerts:    []string{base64.StdEncoding.EncodeToString([]byte(clusterCA.Object.Status.CACert))},
+		TlsRootCerts: []string{base64.StdEncoding.EncodeToString([]byte(clusterCA.Object.Status.TLSCACert))},
+		FabricNodeOus: FabricNodeOus{
+			AdminOuIdentifier: FabricOrgOUIdentifier{
+				Certificate:                  base64.StdEncoding.EncodeToString([]byte(clusterCA.Object.Status.CACert)),
+				OrganizationalUnitIdentifier: "admin",
+			},
+			ClientOuIdentifier: FabricOrgOUIdentifier{
+				Certificate:                  base64.StdEncoding.EncodeToString([]byte(clusterCA.Object.Status.CACert)),
+				OrganizationalUnitIdentifier: "client",
+			},
+			Enable: true,
+			OrdererOuIdentifier: FabricOrgOUIdentifier{
+				Certificate:                  base64.StdEncoding.EncodeToString([]byte(clusterCA.Object.Status.CACert)),
+				OrganizationalUnitIdentifier: "orderer",
+			},
+			PeerOuIdentifier: FabricOrgOUIdentifier{
+				Certificate:                  base64.StdEncoding.EncodeToString([]byte(clusterCA.Object.Status.CACert)),
+				OrganizationalUnitIdentifier: "peer",
+			},
+		},
+		Name: displayName,
 	}
 	return fabricOperationsPeer, nil
 }

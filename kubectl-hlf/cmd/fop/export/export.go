@@ -74,7 +74,7 @@ func (c exportFopCmd) run() error {
 			return err
 		}
 
-		org := FabricOrg{
+		org := FabricOperationsOrg{
 			DisplayName:  displayName,
 			MspId:        fabricCA.Object.Name,
 			Type:         "msp",
@@ -131,6 +131,7 @@ func NewExportCmd(stdOut io.Writer, stdErr io.Writer) *cobra.Command {
 		newExportOrdererCMD(),
 		newExportPeerCMD(),
 		newExportCACMD(),
+		newExportOrgCMD(),
 	)
 	persistentFlags := cmd.PersistentFlags()
 	persistentFlags.StringVarP(&c.outFile, "out", "p", "", "ZIP Output file")
