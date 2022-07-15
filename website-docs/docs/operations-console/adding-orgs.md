@@ -31,22 +31,22 @@ Open a browser and navigate to the URL you configured when creating the Fabric O
 
 Click on `Organizations` at the sidenav to see the Available organizations
 
-![img_4.png](img_4.png)
+![img_4.png](/img/img_4.png)
 
 ## Click on `Import MSP Definition`
 
 Click on `Import MSP Definition` to open the dialog to import the Organization.
 
-![img_6.png](img_6.png)
+![img_6.png](/img/img_6.png)
 
 ## Select the JSON from the file system
 
 Click on `Add file` and select the JSON file you exported from the step `Export Organization to JSON`.
 
-![img_7.png](img_7.png)
+![img_7.png](/img/img_7.png)
 
 ## Click on `Add Organization`
 
 The last step is to click on `Add Organization` and the Organization will be imported to the console.
 
-![img_8.png](img_8.png)
+![img_8.png](/img/img_8.png)

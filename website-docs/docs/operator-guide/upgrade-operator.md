@@ -3,96 +3,24 @@ id: upgrade-hlf-operator
 title: Upgrade HLF operator
 ---
 
-## Upgrade hlf-operator
+When there's a new release, the following resources may be added or modified:
+- Custom resource definitions
+- Cluster Role 
+- Deployment
 
-To increase the storage for the orderer node, you can modify the `resources` section in the fabricpeers object.
+In order to upgrade the hlf-operator, you need to execute the following command:
 
-Note that there are 5 different types of resources that can be increased:
-- peer
-- couchdb
-- chaincode
-- couchdbExporter
+```bash
+export NEW_VERSION=1.7.0
+helm install hlf-operator --version=$NEW_VERSION kfs/hlf-operator
+```
 
-```yaml
-resources:
-  peer:
-    limits:
-      cpu: "2"
-      memory: 2Gi
-    requests:
-      cpu: 10m
-      memory: 256Mi
-  chaincode:
-    limits:
-      cpu: 500m
-      memory: 256Mi
-    requests:
-      cpu: 10m
-      memory: 256Mi
-  couchdb:
-    limits:
-      cpu: "2"
-      memory: 2Gi
-    requests:
-      cpu: 10m
-      memory: 256Mi
-  couchdbExporter:
-    limits:
-      cpu: 500m
-      memory: 256Mi
-    requests:
-      cpu: 10m
-      memory: 256Mi
+If you specified a `values.yaml`, you'll need to pass the values to the upgrade command:
+
+```bash
+export NEW_VERSION=1.7.0
+helm upgrade hlf-operator --values=values.yaml --version=$NEW_VERSION kfs/hlf-operator
 ```
 
 
-### Peer
-These resources are the ones used for the fabric-peer container.
-
-### CouchDB
-These resources are the ones used for the fabric-couchdb container.
-
-
-### CouchDB Exporter
-These resources are the ones used for the fabric-couchdb-exporter container in case it's enabled with the following property:
-
-```yaml
-  couchDBexporter:
-    enabled: true
-    image: gesellix/couchdb-prometheus-exporter
-    imagePullPolicy: IfNotPresent
-    tag: v30.0.0
-```
-
-### Chaincode
-
-This is used in case externalBuilder is enabled, in which case the chaincode container is created, this container is used to store the chaincode build output.
-
-
-## Increase storage for the orderer
-
-To increase the storage for the orderer node, you can modify the `resources` section in the fabricorderernode object
-
-```yaml
-resources:
-  limits:
-    cpu: "2"
-    memory: 2Gi
-  requests:
-    cpu: 10m
-    memory: 256Mi
-```
-
-## Increase storage for the certificate authority
-
-To increase the storage for the certificate authority, you can modify the `resources` section in the fabriccas object
-
-```yaml
-resources:
-  limits:
-    cpu: "2"
-    memory: 2Gi
-  requests:
-    cpu: 10m
-    memory: 256Mi
-```
+After upgrading the operator, make sure it starts and there are no errors, in case there are and you don't know how to fix it, please, open an [issue in Github](https://github.com/hyperledger-labs/hlf-operator/issues/new)

@@ -5,15 +5,15 @@ title: Adding Orderer nodes
 
 
 
-The steps to follow to add a peer to the Fabric Operations console are:
-- Export peer to JSON format
+The steps to follow to add a Ordering Service to the Fabric Operations console are:
+- Export Ordering Service to JSON format
 - Enter the Fabric Operations Console UI
 - Go to `Nodes`
 - Click on `Import Ordering services`
 - Select the JSON from the file system
 - Click on `Add Ordering services`
 
-## Export peer to JSON
+## Export Ordering Service to JSON
 
 ```bash
 export ORDERER_NAME=orderer0-ordmsp068wi-5vph
@@ -30,26 +30,25 @@ Open a browser and navigate to the URL you configured when creating the Fabric O
 
 Click on `Nodes` at the sidenav to see the Peers, Certificate Authorities and Ordering Services
 
-![img_1.png](img_1.png)
+![img_1.png](/img/img_1.png)
 
 ## Click on `Import Ordering services`
 
-Click on `Import Ordering services` to open the dialog to import the peer.
+Click on `Import Ordering services` to open the dialog to import the Ordering Service.
 
-![img_2.png](img_2.png)
+![img.png](/img/ordering_service_import.png)
 
 ## Select the JSON from the file system
 
 Click on `Add file` and select the JSON file you exported from the step `Export ordering services to JSON`.
 
-![img_3.png](img_3.png)
+![img.png](/img/select_json_ordering_service.png)
 
 ## Click on `Add Ordering services`
 
-The last step is to click on `Add Ordering services` and the peer will be imported to the console.
+The last step is to set `Ordering service location` to Kubernetes and to click on `Add Ordering services` and the Ordering Service will be imported to the console.
 
-![img.png](img.png)
-
+![img.png](/img/add_ordering_service.png)
 
 
 

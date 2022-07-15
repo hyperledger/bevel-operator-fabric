@@ -28,23 +28,25 @@ Open a browser and navigate to the URL you configured when creating the Fabric O
 
 Click on `Nodes` at the sidenav to see the Certificate Authorities, Certificate Authorities and Ordering Services
 
-![img_1.png](img_1.png)
+![img_1.png](/img/img_1.png)
 
 ## Click on `Import Certificate Authority`
 
 Click on `Import Certificate Authority` to open the dialog to import the Certificate Authority.
 
-![img_2.png](img_2.png)
+
+![img.png](/img/import_ca_table.png)
 
 ## Select the JSON from the file system
 
 Click on `Add file` and select the JSON file you exported from the step `Export Certificate Authority to JSON`.
 
-![img_3.png](img_3.png)
+![img.png](/img/import_ord_service.png)
 
 ## Click on `Add Certificate Authority`
 
 The last step is to click on `Add Certificate Authority` and the Certificate Authority will be imported to the console.
 
-![img.png](img.png)
+
+![img.png](/img/final_add_ca.png)
 

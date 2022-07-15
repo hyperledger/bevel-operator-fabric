@@ -19,4 +19,5 @@ stringData:
   {{- else }}
     feature_flags:
        import_only_enabled: true
+       osnadmin_feats_enabled: true
   {{ end -}}

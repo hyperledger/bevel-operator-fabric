@@ -28,25 +28,25 @@ Open a browser and navigate to the URL you configured when creating the Fabric O
 
 Click on `Nodes` at the sidenav to see the Peers, Certificate Authorities and Ordering Services
 
-![img_1.png](img_1.png)
+![img_1.png](/img/img_1.png)
 
 ## Click on `Import Peer`
 
 Click on `Import Peer` to open the dialog to import the peer.
 
-![img_2.png](img_2.png)
+![img_2.png](/img/img_2.png)
 
 ## Select the JSON from the file system
 
 Click on `Add file` and select the JSON file you exported from the step `Export peer to JSON`.
 
-![img_3.png](img_3.png)
+![img_3.png](/img/img_3.png)
 
 ## Click on `Add Peer`
 
 The last step is to click on `Add Peer` and the peer will be imported to the console.
 
-![img.png](img.png)
+![img.png](/img/img.png)
 
 
 

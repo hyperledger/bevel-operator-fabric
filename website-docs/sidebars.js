@@ -17,8 +17,8 @@ module.exports = {
       "user-guide/develop-chaincode-locally",
     ],
     "Chaincode development": [
-      "chaincode-development/getting-started",
       "chaincode-development/architecture",
+      "chaincode-development/getting-started",
     ],
     "Chaincode deployment": [
       "chaincode-deployment/getting-started",
@@ -33,12 +33,13 @@ module.exports = {
       "operations-console/adding-cas",
       "operations-console/adding-peers",
       "operations-console/adding-orderers",
+      "operations-console/adding-orgs",
     ],
     "Operator UI": [
       "operator-ui/getting-started",
       "operator-ui/deploy-operator-ui",
       "operator-ui/deploy-operator-api",
-      "operator-ui/tour",
+      // "operator-ui/tour",
     ],
     "Operator Guide": [
       "operator-guide/state-db",
@@ -48,6 +49,7 @@ module.exports = {
       "operator-guide/increase-storage",
       "operator-guide/renew-certificates",
       "operator-guide/istio",
+      "operator-guide/upgrade-hlf-operator",
     ],
   },
 };
