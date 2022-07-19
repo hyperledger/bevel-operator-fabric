@@ -6,15 +6,16 @@ title: Deploy Operator API
 
 
 ## Create operator API
-In order to create
+In order to create the operator API:
 
 ```bash
-export API_URL=api-operator.hlf.kfs.es
+export API_URL=api-operator.<domain>
 kubectl hlf operatorapi create --name=operator-api --namespace=default --hosts=$API_URL --ingress-class-name=istio
 ```
 
 ## Delete operator API
-In order to delete:
+In order to delete the operator API:
+
 ```bash
 kubectl hlf operatorapi delete --name=operator-api --namespace=default
 ```

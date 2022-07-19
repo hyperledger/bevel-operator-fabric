@@ -3,10 +3,16 @@ module.exports = {
     Operator: [
       "intro",
       "getting-started",
-      "ca",
-      "peer",
-      "orderer",
-      "api-reference",
+    ],
+    "Operator Guide": [
+      "operator-guide/state-db",
+      "operator-guide/monitoring",
+      "operator-guide/migrate-network",
+      "operator-guide/increase-resources",
+      "operator-guide/increase-storage",
+      "operator-guide/renew-certificates",
+      "operator-guide/istio",
+      "operator-guide/upgrade-hlf-operator",
     ],
     "User Guide": [
       "user-guide/network-config",
@@ -41,15 +47,6 @@ module.exports = {
       "operator-ui/deploy-operator-api",
       // "operator-ui/tour",
     ],
-    "Operator Guide": [
-      "operator-guide/state-db",
-      "operator-guide/monitoring",
-      "operator-guide/migrate-network",
-      "operator-guide/increase-resources",
-      "operator-guide/increase-storage",
-      "operator-guide/renew-certificates",
-      "operator-guide/istio",
-      "operator-guide/upgrade-hlf-operator",
-    ],
+
   },
 };

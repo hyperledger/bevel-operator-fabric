@@ -5,16 +5,17 @@ title: Deploy Operator UI
 
 
 ## Create operator UI
-In order to create
+In order to create the operator UI:
 
 ```bash
-export HOST=operator-ui.hlf.kfs.es
-export API_URL="http://api-operator.hlf.kfs.es/graphql"
+export HOST=operator-ui.<domain>
+export API_URL="http://api-operator.<domain>/graphql"
 kubectl hlf operatorui create --name=operator-ui --namespace=default --hosts=$HOST --ingress-class-name=istio --api-url=$API_URL
 ```
 
 ## Delete operator UI
-In order to delete:
+In order to delete the operator UI:
+
 ```bash
 kubectl hlf operatorui delete --name=operator-ui --namespace=default
 ```
