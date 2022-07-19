@@ -22,7 +22,7 @@ module.exports = {
     ],
     "Chaincode deployment": [
       "chaincode-deployment/getting-started",
-      "chaincode-deployment/architecture",
+      // "chaincode-deployment/architecture",
       "chaincode-deployment/external-chaincode-as-a-service",
       "chaincode-deployment/k8s-builder",
     ],
