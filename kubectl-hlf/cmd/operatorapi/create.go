@@ -22,6 +22,10 @@ type Options struct {
 	Output           bool
 	TLSSecretName    string
 	IngressClassName string
+	HLFSecretName    string
+	MSPID            string
+	User             string
+	HLFKey           string
 }
 
 func (o Options) Validate() error {
@@ -81,19 +85,28 @@ func (c *createCmd) run() error {
 			Namespace: c.apiOpts.NS,
 		},
 		Spec: v1alpha1.FabricOperatorAPISpec{
+			Image:           c.apiOpts.Image,
+			Tag:             c.apiOpts.Version,
+			ImagePullPolicy: "Always",
+			Istio:           v1alpha1.FabricIstio{},
+			Ingress:         ingress,
+			Replicas:        1,
+			HLFConfig: v1alpha1.FabricOperatorAPIHLFConfig{
+				MSPID: c.apiOpts.MSPID,
+				User:  c.apiOpts.User,
+				NetworkConfig: v1alpha1.FabricOperatorAPINetworkConfig{
+					SecretName: c.apiOpts.HLFSecretName,
+					Key:        c.apiOpts.HLFKey,
+				},
+			},
+			Tolerations:      []corev1.Toleration{},
+			ImagePullSecrets: []corev1.LocalObjectReference{},
+			Env:              []corev1.EnvVar{},
+			Affinity:         &corev1.Affinity{},
 			Resources: &corev1.ResourceRequirements{
 				Limits:   nil,
 				Requests: nil,
 			},
-			Image:            c.apiOpts.Image,
-			Tag:              c.apiOpts.Version,
-			ImagePullPolicy:  "Always",
-			Tolerations:      []corev1.Toleration{},
-			Replicas:         1,
-			Env:              []corev1.EnvVar{},
-			ImagePullSecrets: []corev1.LocalObjectReference{},
-			Affinity:         &corev1.Affinity{},
-			Ingress:          ingress,
 		},
 		Status: v1alpha1.FabricOperatorAPIStatus{},
 	}
@@ -136,6 +149,10 @@ func newCreateOperatorAPICmd(out io.Writer, errOut io.Writer) *cobra.Command {
 	f.StringVarP(&c.apiOpts.Version, "version", "", helpers.DefaultOperationsOperatorAPIVersion, "Version of the Operator API")
 	f.StringVarP(&c.apiOpts.TLSSecretName, "tls-secret-name", "", "", "TLS Secret for the Operator API")
 	f.StringVarP(&c.apiOpts.IngressClassName, "ingress-class-name", "", "istio", "Ingress class name")
+	f.StringVarP(&c.apiOpts.MSPID, "hlf-mspid", "", "", "HLF Network Config MSPID")
+	f.StringVarP(&c.apiOpts.User, "hlf-user", "", "", "HLF Network Config User")
+	f.StringVarP(&c.apiOpts.HLFSecretName, "hlf-secret", "", "", "HLF Network Config Secret name")
+	f.StringVarP(&c.apiOpts.HLFKey, "hlf-secret-key", "", "", "HLF Network Config Secret key")
 	f.StringArrayVarP(&c.apiOpts.Hosts, "hosts", "", []string{}, "External hosts")
 	f.BoolVarP(&c.apiOpts.Output, "output", "o", false, "Output in yaml")
 	return cmd

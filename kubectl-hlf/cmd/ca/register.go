@@ -1,7 +1,10 @@
 package ca
 
 import (
+	"github.com/hyperledger/fabric-sdk-go/pkg/msp/api"
+	"github.com/pkg/errors"
 	"io"
+	"strings"
 
 	"github.com/kfsoftware/hlf-operator/controllers/certs"
 	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/helpers"
@@ -17,6 +20,7 @@ type RegisterOptions struct {
 	MspID        string
 	EnrollID     string
 	EnrollSecret string
+	Attributes   []string
 }
 
 func (o RegisterOptions) Validate() error {
@@ -50,6 +54,17 @@ func (c *registerCmd) run(args []string) error {
 	if err != nil {
 		return err
 	}
+	var attributes []api.Attribute
+	for _, attr := range c.caOpts.Attributes {
+		chunks := strings.Split(attr, "=")
+		if len(chunks) != 2 {
+			return errors.Errorf("Invalid attribute: %s", attr)
+		}
+		value := chunks[1]
+		name := chunks[0]
+		attribute := api.Attribute{Name: name, Value: value}
+		attributes = append(attributes, attribute)
+	}
 	_, err = certs.RegisterUser(certs.RegisterUserRequest{
 		TLSCert:      certAuth.Status.TlsCert,
 		URL:          url,
@@ -60,7 +75,7 @@ func (c *registerCmd) run(args []string) error {
 		User:         c.caOpts.User,
 		Secret:       c.caOpts.Secret,
 		Type:         c.caOpts.Type,
-		Attributes:   nil,
+		Attributes:   attributes,
 	})
 	if err != nil {
 		return err
@@ -88,6 +103,7 @@ func newCARegisterCmd(out io.Writer, errOut io.Writer) *cobra.Command {
 	f.StringVarP(&c.caOpts.Secret, "secret", "", "", "Password for the new user")
 	f.StringVarP(&c.caOpts.Type, "type", "", "", "Type of the identity to create (peer/client/orderer/admin)")
 	f.StringVarP(&c.caOpts.MspID, "mspid", "", "", "MSP ID of the organization")
+	f.StringSliceVarP(&c.caOpts.Attributes, "mspid", "", []string{}, "Attributes of the user")
 
 	return cmd
 }
