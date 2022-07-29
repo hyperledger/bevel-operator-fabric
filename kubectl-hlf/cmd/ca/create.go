@@ -84,6 +84,8 @@ func (c *createCmd) run(args []string) error {
 		fmt.Sprintf("%s.%s", c.caOpts.Name, c.caOpts.NS),
 	}
 	hosts = append(hosts, c.caOpts.Hosts...)
+	csrHosts := []string{"localhost"}
+	csrHosts = append(csrHosts, c.caOpts.Hosts...)
 	fabricCA := &v1alpha1.FabricCA{
 		TypeMeta: v1.TypeMeta{
 			Kind:       "FabricCA",
@@ -137,7 +139,7 @@ func (c *createCmd) run(args []string) error {
 				},
 				CSR: v1alpha1.FabricCACSR{
 					CN:    "ca",
-					Hosts: []string{"localhost"},
+					Hosts: csrHosts,
 					Names: []v1alpha1.FabricCANames{
 						{C: "US", ST: "", O: "Hyperledger", L: "", OU: "North Carolina"},
 					},
@@ -187,7 +189,7 @@ func (c *createCmd) run(args []string) error {
 				},
 				CSR: v1alpha1.FabricCACSR{
 					CN:    "tlsca",
-					Hosts: []string{"localhost"},
+					Hosts: csrHosts,
 					Names: []v1alpha1.FabricCANames{
 						{C: "US", ST: "", O: "Hyperledger", L: "", OU: "North Carolina"},
 					},
