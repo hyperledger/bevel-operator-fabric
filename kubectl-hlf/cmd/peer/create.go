@@ -398,7 +398,7 @@ func newCreatePeerCmd(out io.Writer, errOut io.Writer) *cobra.Command {
 	f.StringVar(&c.peerOpts.Name, "name", "", "Name of the Fabric Peer to create")
 	f.StringVar(&c.peerOpts.CAName, "ca-name", "", "CA name to enroll the peer identity")
 	f.StringVar(&c.peerOpts.CAHost, "ca-host", "", "CA host to enroll the peer identity")
-	f.IntVar(&c.peerOpts.CAPort, "ca-host", 0, "CA host to enroll the peer identity")
+	f.IntVar(&c.peerOpts.CAPort, "ca-port", 0, "CA host to enroll the peer identity")
 	f.StringVar(&c.peerOpts.EnrollID, "enroll-id", "", "Enroll ID of the CA")
 	f.StringVar(&c.peerOpts.EnrollPW, "enroll-pw", "", "Enroll secret of the CA")
 	f.StringVar(&c.peerOpts.Capacity, "capacity", "5Gi", "Total raw capacity of Fabric Peer in this zone, e.g. 16Ti")

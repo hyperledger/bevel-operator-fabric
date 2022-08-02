@@ -103,7 +103,7 @@ func newCARegisterCmd(out io.Writer, errOut io.Writer) *cobra.Command {
 	f.StringVarP(&c.caOpts.Secret, "secret", "", "", "Password for the new user")
 	f.StringVarP(&c.caOpts.Type, "type", "", "", "Type of the identity to create (peer/client/orderer/admin)")
 	f.StringVarP(&c.caOpts.MspID, "mspid", "", "", "MSP ID of the organization")
-	f.StringSliceVarP(&c.caOpts.Attributes, "mspid", "", []string{}, "Attributes of the user")
+	f.StringSliceVarP(&c.caOpts.Attributes, "attributes", "", []string{}, "Attributes of the user")
 
 	return cmd
 }

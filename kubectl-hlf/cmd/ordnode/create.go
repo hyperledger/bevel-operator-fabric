@@ -204,7 +204,7 @@ func newCreateOrdererNodeCmd(out io.Writer, errOut io.Writer) *cobra.Command {
 	f.StringVar(&c.ordererOpts.Name, "name", "", "Name of the Fabric Orderer to create")
 	f.StringVar(&c.ordererOpts.CAName, "ca-name", "", "CA name to enroll the orderer identity")
 	f.StringVar(&c.ordererOpts.CAHost, "ca-host", "", "CA host to enroll the orderer identity")
-	f.IntVar(&c.ordererOpts.CAPort, "ca-host", 0, "CA host to enroll the orderer identity")
+	f.IntVar(&c.ordererOpts.CAPort, "ca-port", 0, "CA host to enroll the orderer identity")
 	f.StringVar(&c.ordererOpts.EnrollID, "enroll-id", "", "Enroll ID of the CA")
 	f.StringVar(&c.ordererOpts.EnrollPW, "enroll-pw", "", "Enroll secret of the CA")
 	f.StringVar(&c.ordererOpts.Capacity, "capacity", "5Gi", "Total raw capacity of Fabric Orderer in this zone, e.g. 16Ti")
