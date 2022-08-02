@@ -493,9 +493,12 @@ func GetConfig(conf *hlfv1alpha1.FabricOperatorAPI) (*HLFOperatorAPIChart, error
 			PullPolicy: spec.ImagePullPolicy,
 		},
 		Hlf: HLFConfig{
-			MspID:         spec.HLFConfig.MSPID,
-			User:          spec.HLFConfig.User,
-			NetworkConfig: HLFNetworkConfig{},
+			MspID: spec.HLFConfig.MSPID,
+			User:  spec.HLFConfig.User,
+			NetworkConfig: HLFNetworkConfig{
+				SecretName: spec.HLFConfig.NetworkConfig.SecretName,
+				Key:        spec.HLFConfig.NetworkConfig.Key,
+			},
 		},
 		ImagePullSecrets: spec.ImagePullSecrets,
 		PodAnnotations:   map[string]string{},
