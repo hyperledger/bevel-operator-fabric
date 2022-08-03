@@ -639,6 +639,20 @@ spec:
                 type: object
               apiUrl:
                 type: string
+              auth:
+                nullable: true
+                properties:
+                  oidcAuthority:
+                    type: string
+                  oidcClientId:
+                    type: string
+                  oidcScope:
+                    type: string
+                required:
+                - oidcAuthority
+                - oidcClientId
+                - oidcScope
+                type: object
               env:
                 items:
                   description: EnvVar represents an environment variable present in
@@ -827,6 +841,8 @@ spec:
                 - hosts
                 - tls
                 type: object
+              logoUrl:
+                type: string
               replicas:
                 type: integer
               resources:
@@ -903,6 +919,7 @@ spec:
             - image
             - imagePullPolicy
             - ingress
+            - logoUrl
             - replicas
             - tag
             type: object

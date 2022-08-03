@@ -11,6 +11,7 @@ type fabricOrdChart struct {
 	BootstrapMethod             string                        `json:"bootstrapMethod"`
 	Admin                       admin                         `json:"admin"`
 	Cacert                      string                        `json:"cacert"`
+	NodeSelector                *corev1.NodeSelector          `json:"nodeSelector,omitempty"`
 	Tlsrootcert                 string                        `json:"tlsrootcert"`
 	AdminCert                   string                        `json:"adminCert"`
 	Cert                        string                        `json:"cert"`

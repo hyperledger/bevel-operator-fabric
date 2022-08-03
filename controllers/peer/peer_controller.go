@@ -1242,7 +1242,7 @@ func GetConfig(
 			CouchDBExporter: couchDBExporterResources,
 			Proxy:           proxyResources,
 		},
-		NodeSelector:     NodeSelector{},
+		NodeSelector:     spec.NodeSelector,
 		Tolerations:      spec.Tolerations,
 		Affinity:         Affinity{},
 		ExternalHost:     externalEndpoint,
