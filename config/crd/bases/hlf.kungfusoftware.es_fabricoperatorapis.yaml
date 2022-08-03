@@ -637,6 +637,17 @@ spec:
                         type: array
                     type: object
                 type: object
+              auth:
+                nullable: true
+                properties:
+                  oidcIssuer:
+                    type: string
+                  oidcJWKS:
+                    type: string
+                required:
+                - oidcIssuer
+                - oidcJWKS
+                type: object
               env:
                 items:
                   description: EnvVar represents an environment variable present in

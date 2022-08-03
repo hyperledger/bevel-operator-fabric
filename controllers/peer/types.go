@@ -44,7 +44,7 @@ type FabricPeerChart struct {
 	IntCacert                string                        `json:"intCAcert"`
 	Tlsrootcert              string                        `json:"tlsrootcert"`
 	Resources                PeerResources                 `json:"resources,omitempty"`
-	NodeSelector             NodeSelector                  `json:"nodeSelector,omitempty"`
+	NodeSelector             *corev1.NodeSelector          `json:"nodeSelector,omitempty"`
 	Tolerations              []corev1.Toleration           `json:"tolerations,omitempty"`
 	ImagePullSecrets         []corev1.LocalObjectReference `json:"imagePullSecrets"`
 	Affinity                 Affinity                      `json:"affinity,omitempty"`
@@ -155,8 +155,7 @@ type Resources struct {
 	Limits   Limits   `json:"limits"`
 	Requests Requests `json:"requests"`
 }
-type NodeSelector struct {
-}
+
 type Affinity struct {
 }
 type HostAlias struct {

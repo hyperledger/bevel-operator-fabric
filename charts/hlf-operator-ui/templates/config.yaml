@@ -7,5 +7,9 @@ metadata:
 data:
   config.json: |
     {
-      "apiUrl": "{{ .Values.apiUrl }}"
+      "apiUrl": "{{ .Values.apiUrl }}",
+      "logoUrl": "{{ .Values.logoUrl }}",
+      "oidcAuthority": "{{ .Values.auth.oidcAuthority }}",
+      "oidcClientId": "{{ .Values.auth.oidcClientId }}",
+      "oidcScope": "{{ .Values.auth.oidcScope }}"
     }

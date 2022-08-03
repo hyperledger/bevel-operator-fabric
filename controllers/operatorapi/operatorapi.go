@@ -501,6 +501,7 @@ func GetConfig(conf *hlfv1alpha1.FabricOperatorAPI) (*HLFOperatorAPIChart, error
 			},
 		},
 		ImagePullSecrets: spec.ImagePullSecrets,
+		ServiceAccount:   ServiceAccount{},
 		PodAnnotations:   map[string]string{},
 		Service: Service{
 			Type: "ClusterIP",
@@ -516,6 +517,10 @@ func GetConfig(conf *hlfv1alpha1.FabricOperatorAPI) (*HLFOperatorAPIChart, error
 		},
 		Tolerations: spec.Tolerations,
 		Affinity:    spec.Affinity,
+		Auth: Auth{
+			OIDCJWKS:   spec.Auth.OIDCJWKS,
+			OIDCIssuer: spec.Auth.OIDCIssuer,
+		},
 	}
 	return &c, nil
 }

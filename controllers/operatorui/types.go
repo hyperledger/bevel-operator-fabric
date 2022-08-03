@@ -65,4 +65,12 @@ type HLFOperatorUIChart struct {
 	Autoscaling      Autoscaling                   `json:"autoscaling"`
 	Tolerations      []corev1.Toleration           `json:"tolerations,omitempty"`
 	Affinity         *corev1.Affinity              `json:"affinity"`
+	LogoURL          string                        `json:"logoUrl"`
+	Auth             Auth                          `json:"auth"`
+}
+
+type Auth struct {
+	OIDCAuthority string `json:"oidcAuthority"`
+	OIDCClientId  string `json:"oidcClientId"`
+	OIDCScope     string `json:"oidcScope"`
 }

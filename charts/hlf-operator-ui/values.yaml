@@ -11,6 +11,13 @@ image:
   # Overrides the image tag whose default is the chart appVersion.
   tag: "0.0.4"
 
+
+logoUrl: ""
+auth:
+  oidcAuthority: "",
+  oidcClientId: "",
+  oidcScope: ""
+
 imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""

@@ -11,7 +11,7 @@ type FabricCAChart struct {
 	Msp              Msp                           `json:"msp"`
 	Database         Database                      `json:"db"`
 	Resources        Resources                     `json:"resources"`
-	NodeSelector     NodeSelector                  `json:"nodeSelector"`
+	NodeSelector     *corev1.NodeSelector          `json:"nodeSelector,omitempty"`
 	Tolerations      []corev1.Toleration           `json:"tolerations"`
 	Affinity         Affinity                      `json:"affinity"`
 	Metrics          FabricCAChartMetrics          `json:"metrics"`

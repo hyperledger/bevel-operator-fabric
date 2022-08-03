@@ -505,6 +505,12 @@ func GetConfig(conf *hlfv1alpha1.FabricOperatorUI) (*HLFOperatorUIChart, error) 
 		},
 		Tolerations: spec.Tolerations,
 		Affinity:    spec.Affinity,
+		LogoURL:     spec.LogoURL,
+		Auth: Auth{
+			OIDCAuthority: spec.Auth.OIDCAuthority,
+			OIDCClientId:  spec.Auth.OIDCClientId,
+			OIDCScope:     spec.Auth.OIDCScope,
+		},
 	}
 	return &c, nil
 }
