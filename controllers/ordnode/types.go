@@ -14,6 +14,7 @@ type fabricOrdChart struct {
 	NodeSelector                *corev1.NodeSelector          `json:"nodeSelector,omitempty"`
 	Tlsrootcert                 string                        `json:"tlsrootcert"`
 	AdminCert                   string                        `json:"adminCert"`
+	Affinity                    *corev1.Affinity              `json:"affinity,omitempty"`
 	Cert                        string                        `json:"cert"`
 	Key                         string                        `json:"key"`
 	TLS                         tls                           `json:"tls"`

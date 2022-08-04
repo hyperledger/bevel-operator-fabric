@@ -110,7 +110,10 @@ type FabricPeerSpec struct {
 	// +optional
 	// +nullable
 	UpdateCertificateTime *metav1.Time `json:"updateCertificateTime"`
-
+	// +nullable
+	// +kubebuilder:validation:Optional
+	// +optional
+	Affinity *corev1.Affinity `json:"affinity"`
 	// +optional
 	// +nullable
 	ServiceMonitor *ServiceMonitor `json:"serviceMonitor"`
@@ -413,6 +416,10 @@ type FabricOrdererNodeSpec struct {
 	// +optional
 	// +nullable
 	GRPCProxy *GRPCProxy `json:"grpcProxy"`
+	// +nullable
+	// +kubebuilder:validation:Optional
+	// +optional
+	Affinity *corev1.Affinity `json:"affinity"`
 	// +optional
 	// +nullable
 	UpdateCertificateTime *metav1.Time `json:"updateCertificateTime"`
@@ -550,6 +557,10 @@ type FabricCADatabase struct {
 
 // FabricCASpec defines the desired state of FabricCA
 type FabricCASpec struct {
+	// +nullable
+	// +kubebuilder:validation:Optional
+	// +optional
+	Affinity *corev1.Affinity `json:"affinity"`
 	// +optional
 	// +kubebuilder:validation:Optional
 	// +nullable

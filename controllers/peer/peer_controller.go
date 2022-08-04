@@ -1244,7 +1244,7 @@ func GetConfig(
 		},
 		NodeSelector:     spec.NodeSelector,
 		Tolerations:      spec.Tolerations,
-		Affinity:         Affinity{},
+		Affinity:         spec.Affinity,
 		ExternalHost:     externalEndpoint,
 		FullnameOverride: conf.Name,
 		HostAliases:      hostAliases,

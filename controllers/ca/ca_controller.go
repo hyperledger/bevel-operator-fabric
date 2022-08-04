@@ -467,7 +467,6 @@ func GetConfig(conf *hlfv1alpha1.FabricCA, client *kubernetes.Clientset, chartNa
 	}
 
 	var c = FabricCAChart{
-
 		ImagePullSecrets: spec.ImagePullSecrets,
 		EnvVars:          spec.Env,
 		FullNameOverride: conf.Name,
@@ -509,7 +508,7 @@ func GetConfig(conf *hlfv1alpha1.FabricCA, client *kubernetes.Clientset, chartNa
 		},
 		NodeSelector: spec.NodeSelector,
 		Tolerations:  spec.Tolerations,
-		Affinity:     Affinity{},
+		Affinity:     spec.Affinity,
 		Debug:        spec.Debug,
 		CLRSizeLimit: spec.CLRSizeLimit,
 		Metrics: FabricCAChartMetrics{
