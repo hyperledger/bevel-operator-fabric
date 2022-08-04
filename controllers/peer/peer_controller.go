@@ -388,23 +388,21 @@ func (r *FabricPeerReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) 
 		}
 		lastTimeCertsRenewed := fabricPeer.Status.LastCertificateUpdate
 		if fabricPeer.Status.LastCertificateUpdate != nil {
-			if fabricPeer.Status.LastCertificateUpdate != nil {
-				lastCertificateUpdate := fabricPeer.Status.LastCertificateUpdate.Time
-				if fabricPeer.Spec.UpdateCertificateTime.Time.After(lastCertificateUpdate) {
-					// must update the certificates and block until it's done
-					// scale down to zero replicas
-					// wait for the deployment to scale down
-					// update the certs
-					// scale up the peer
-					log.Infof("Trying to upgrade certs")
-					err := r.updateCerts(req, fabricPeer, clientSet, releaseName, svc, ctx, cfg, ns)
-					if err != nil {
-						log.Errorf("Error renewing certs: %v", err)
-						r.setConditionStatus(ctx, fabricPeer, hlfv1alpha1.FailedStatus, false, err, false)
-						return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricPeer)
-					}
-					lastTimeCertsRenewed = fabricPeer.Spec.UpdateCertificateTime
+			lastCertificateUpdate := fabricPeer.Status.LastCertificateUpdate.Time
+			if fabricPeer.Spec.UpdateCertificateTime.Time.After(lastCertificateUpdate) {
+				// must update the certificates and block until it's done
+				// scale down to zero replicas
+				// wait for the deployment to scale down
+				// update the certs
+				// scale up the peer
+				log.Infof("Trying to upgrade certs")
+				err := r.updateCerts(req, fabricPeer, clientSet, releaseName, svc, ctx, cfg, ns)
+				if err != nil {
+					log.Errorf("Error renewing certs: %v", err)
+					r.setConditionStatus(ctx, fabricPeer, hlfv1alpha1.FailedStatus, false, err, false)
+					return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricPeer)
 				}
+				lastTimeCertsRenewed = fabricPeer.Spec.UpdateCertificateTime
 			}
 		} else if fabricPeer.Status.LastCertificateUpdate == nil && fabricPeer.Spec.UpdateCertificateTime != nil {
 			log.Infof("Trying to upgrade certs")
@@ -529,7 +527,6 @@ func (r *FabricPeerReconciler) updateCerts(req ctrl.Request, fPeer *hlfv1alpha1.
 		log.Errorf("Error getting the config: %v", err)
 		return err
 	}
-	//config.Replicas = 0
 	err = r.upgradeChart(cfg, err, ns, releaseName, config)
 	if err != nil {
 		return err
