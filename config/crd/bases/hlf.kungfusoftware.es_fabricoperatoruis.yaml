@@ -842,6 +842,7 @@ spec:
                 - tls
                 type: object
               logoUrl:
+                default: ""
                 type: string
               replicas:
                 type: integer
