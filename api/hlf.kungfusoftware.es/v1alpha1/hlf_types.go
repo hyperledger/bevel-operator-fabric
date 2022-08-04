@@ -1183,7 +1183,9 @@ type FabricOperatorUISpec struct {
 	Tag   string `json:"tag"`
 	// +kubebuilder:default:="IfNotPresent"
 	ImagePullPolicy corev1.PullPolicy `json:"imagePullPolicy"`
-	LogoURL         string            `json:"logoUrl"`
+
+	// +kubebuilder:default:=""
+	LogoURL string `json:"logoUrl"`
 
 	// +optional
 	// +kubebuilder:validation:Optional
