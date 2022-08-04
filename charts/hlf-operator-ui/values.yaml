@@ -14,8 +14,8 @@ image:
 
 logoUrl: ""
 auth:
-  oidcAuthority: "",
-  oidcClientId: "",
+  oidcAuthority: ""
+  oidcClientId: ""
   oidcScope: ""
 
 imagePullSecrets: []

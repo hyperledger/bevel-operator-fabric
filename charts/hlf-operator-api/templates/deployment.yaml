@@ -65,6 +65,12 @@ spec:
             - "--user"
             - "{{.Values.hlf.user}}"
   {{ end }}
+  {{ if and .Values.auth.oidcJWKS .Values.auth.oidcIssuer }}
+            - "--auth-issuer"
+            - "{{ .Values.auth.oidcIssuer }}"
+            - "--auth-jwks"
+            - "{{ .Values.auth.oidcJWKS }}"
+  {{ end }}
           livenessProbe:
             httpGet:
               path: /playground
