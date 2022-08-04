@@ -485,6 +485,11 @@ func GetConfig(conf *hlfv1alpha1.FabricOperatorAPI) (*HLFOperatorAPIChart, error
 			Hosts:       hosts,
 		}
 	}
+	auth := Auth{}
+	if spec.Auth != nil {
+		auth.OIDCJWKS = spec.Auth.OIDCJWKS
+		auth.OIDCIssuer = spec.Auth.OIDCIssuer
+	}
 	var c = HLFOperatorAPIChart{
 		ReplicaCount: spec.Replicas,
 		Image: Image{
@@ -517,10 +522,7 @@ func GetConfig(conf *hlfv1alpha1.FabricOperatorAPI) (*HLFOperatorAPIChart, error
 		},
 		Tolerations: spec.Tolerations,
 		Affinity:    spec.Affinity,
-		Auth: Auth{
-			OIDCJWKS:   spec.Auth.OIDCJWKS,
-			OIDCIssuer: spec.Auth.OIDCIssuer,
-		},
+		Auth:        auth,
 	}
 	return &c, nil
 }
