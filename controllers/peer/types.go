@@ -47,7 +47,7 @@ type FabricPeerChart struct {
 	NodeSelector             *corev1.NodeSelector          `json:"nodeSelector,omitempty"`
 	Tolerations              []corev1.Toleration           `json:"tolerations,omitempty"`
 	ImagePullSecrets         []corev1.LocalObjectReference `json:"imagePullSecrets"`
-	Affinity                 Affinity                      `json:"affinity,omitempty"`
+	Affinity                 *corev1.Affinity              `json:"affinity,omitempty"`
 	ExternalHost             string                        `json:"externalHost"`
 	FullnameOverride         string                        `json:"fullnameOverride"`
 	CouchDBExporter          CouchDBExporter               `json:"couchdbExporter"`
@@ -156,8 +156,6 @@ type Resources struct {
 	Requests Requests `json:"requests"`
 }
 
-type Affinity struct {
-}
 type HostAlias struct {
 	IP        string   `json:"ip"`
 	Hostnames []string `json:"hostnames"`
