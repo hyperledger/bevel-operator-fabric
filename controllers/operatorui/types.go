@@ -66,7 +66,7 @@ type HLFOperatorUIChart struct {
 	Tolerations      []corev1.Toleration           `json:"tolerations,omitempty"`
 	Affinity         *corev1.Affinity              `json:"affinity"`
 	LogoURL          string                        `json:"logoUrl"`
-	Auth             Auth                          `json:"auth"`
+	Auth             Auth                          `json:"auth,omitempty"`
 }
 
 type Auth struct {

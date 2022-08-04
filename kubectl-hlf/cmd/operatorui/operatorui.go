@@ -12,6 +12,7 @@ func NewOperatorUICMD(out io.Writer, errOut io.Writer) *cobra.Command {
 	cmd.AddCommand(
 		newCreateOperatorUICmd(out, errOut),
 		newDeleteOperatorUICmd(out, errOut),
+		newUpdateOperatorUICmd(out, errOut),
 	)
 
 	return cmd
