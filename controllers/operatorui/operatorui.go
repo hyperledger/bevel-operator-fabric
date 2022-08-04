@@ -64,7 +64,7 @@ type Status struct {
 	NodePort int
 }
 
-func GetConsoleState(conf *action.Configuration, config *rest.Config, releaseName string, ns string) (*hlfv1alpha1.FabricOperatorUIStatus, error) {
+func GetOperatorUIState(conf *action.Configuration, config *rest.Config, releaseName string, ns string) (*hlfv1alpha1.FabricOperatorUIStatus, error) {
 	ctx := context.Background()
 	cmd := action.NewGet(conf)
 	rel, err := cmd.Run(releaseName)
@@ -272,7 +272,7 @@ func (r *FabricOperatorUIReconciler) Reconcile(req ctrl.Request) (ctrl.Result, e
 			r.setConditionStatus(ctx, fabricOpConsole, hlfv1alpha1.FailedStatus, false, err, false)
 			return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricOpConsole)
 		}
-		s, err := GetConsoleState(cfg, r.Config, releaseName, ns)
+		s, err := GetOperatorUIState(cfg, r.Config, releaseName, ns)
 		if err != nil {
 			r.setConditionStatus(ctx, fabricOpConsole, hlfv1alpha1.FailedStatus, false, err, false)
 			return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricOpConsole)
@@ -480,11 +480,7 @@ func GetConfig(conf *hlfv1alpha1.FabricOperatorUI) (*HLFOperatorUIChart, error) 
 			Hosts:       hosts,
 		}
 	}
-	auth := Auth{
-		OIDCAuthority: spec.Auth.OIDCAuthority,
-		OIDCClientId:  spec.Auth.OIDCClientId,
-		OIDCScope:     spec.Auth.OIDCScope,
-	}
+	auth := Auth{}
 	if spec.Auth != nil {
 		auth.OIDCAuthority = spec.Auth.OIDCAuthority
 		auth.OIDCClientId = spec.Auth.OIDCClientId

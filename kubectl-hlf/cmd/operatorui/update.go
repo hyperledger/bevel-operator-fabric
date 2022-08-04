@@ -5,51 +5,24 @@ import (
 	"fmt"
 	"github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
 	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/helpers"
+	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"io"
-	corev1 "k8s.io/api/core/v1"
 	"k8s.io/api/networking/v1beta1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-type Options struct {
-	Name            string
-	NS              string
-	Image           string
-	Version         string
-	Hosts           []string
-	Output          bool
-	TLSSecretName   string
-	APIURL          string
-	IngresClassName string
-	LogoURL         string
-	OIDCAuthority   string
-	OIDCClientId    string
-	OIDCScope       string
-	Replicas        int
-}
-
-func (o Options) Validate() error {
-	if o.APIURL == "" {
-		return fmt.Errorf("--api-url is required")
-	}
-	if o.Replicas < 1 {
-		return fmt.Errorf("--replicas must be greater than 0")
-	}
-	return nil
-}
-
-type createCmd struct {
+type updateCmd struct {
 	out    io.Writer
 	errOut io.Writer
 	uiOpts Options
 }
 
-func (c *createCmd) validate() error {
+func (c *updateCmd) validate() error {
 	return c.uiOpts.Validate()
 }
-func (c *createCmd) run() error {
+func (c *updateCmd) run() error {
 	oclient, err := helpers.GetKubeOperatorClient()
 	if err != nil {
 		return err
@@ -83,39 +56,22 @@ func (c *createCmd) run() error {
 			},
 		}
 	}
-	fabricOperatorUI := &v1alpha1.FabricOperatorUI{
-		TypeMeta: v1.TypeMeta{
-			Kind:       "FabricOperatorUI",
-			APIVersion: v1alpha1.GroupVersion.String(),
-		},
-		ObjectMeta: v1.ObjectMeta{
-			Name:      c.uiOpts.Name,
-			Namespace: c.uiOpts.NS,
-		},
-		Spec: v1alpha1.FabricOperatorUISpec{
-			Resources: &corev1.ResourceRequirements{
-				Limits:   nil,
-				Requests: nil,
-			},
-			LogoURL: c.uiOpts.LogoURL,
-			Auth: &v1alpha1.FabricOperatorUIAuth{
-				OIDCAuthority: c.uiOpts.OIDCAuthority,
-				OIDCClientId:  c.uiOpts.OIDCClientId,
-				OIDCScope:     c.uiOpts.OIDCScope,
-			},
-			APIURL:           c.uiOpts.APIURL,
-			Image:            c.uiOpts.Image,
-			Tag:              c.uiOpts.Version,
-			ImagePullPolicy:  "Always",
-			Tolerations:      []corev1.Toleration{},
-			Replicas:         c.uiOpts.Replicas,
-			Env:              []corev1.EnvVar{},
-			ImagePullSecrets: []corev1.LocalObjectReference{},
-			Affinity:         &corev1.Affinity{},
-			Ingress:          ingress,
-		},
-		Status: v1alpha1.FabricOperatorUIStatus{},
+	ctx := context.Background()
+	fabricOperatorUI, err := oclient.HlfV1alpha1().FabricOperatorUIs(c.uiOpts.NS).Get(ctx, c.uiOpts.Name, v1.GetOptions{})
+	if err != nil {
+		return errors.Wrapf(err, "failed to get Fabric Operator UI %s", c.uiOpts.Name)
 	}
+	fabricOperatorUI.Spec.Image = c.uiOpts.Image
+	fabricOperatorUI.Spec.Tag = c.uiOpts.Version
+	fabricOperatorUI.Spec.Auth = &v1alpha1.FabricOperatorUIAuth{
+		OIDCAuthority: c.uiOpts.OIDCAuthority,
+		OIDCClientId:  c.uiOpts.OIDCClientId,
+		OIDCScope:     c.uiOpts.OIDCScope,
+	}
+	fabricOperatorUI.Spec.LogoURL = c.uiOpts.LogoURL
+	fabricOperatorUI.Spec.Ingress = ingress
+	fabricOperatorUI.Spec.APIURL = c.uiOpts.APIURL
+	fabricOperatorUI.Spec.Replicas = c.uiOpts.Replicas
 	if c.uiOpts.Output {
 		ot, err := helpers.MarshallWithoutStatus(&fabricOperatorUI)
 		if err != nil {
@@ -124,23 +80,23 @@ func (c *createCmd) run() error {
 		fmt.Println(string(ot))
 	} else {
 		ctx := context.Background()
-		_, err = oclient.HlfV1alpha1().FabricOperatorUIs(c.uiOpts.NS).Create(
+		_, err = oclient.HlfV1alpha1().FabricOperatorUIs(c.uiOpts.NS).Update(
 			ctx,
 			fabricOperatorUI,
-			v1.CreateOptions{},
+			v1.UpdateOptions{},
 		)
 		if err != nil {
 			return err
 		}
-		log.Infof("Operator UI %s created on namespace %s", fabricOperatorUI.Name, fabricOperatorUI.Namespace)
+		log.Infof("Operator UI %s updated on namespace %s", fabricOperatorUI.Name, fabricOperatorUI.Namespace)
 	}
 	return nil
 }
-func newCreateOperatorUICmd(out io.Writer, errOut io.Writer) *cobra.Command {
-	c := createCmd{out: out, errOut: errOut}
+func newUpdateOperatorUICmd(out io.Writer, errOut io.Writer) *cobra.Command {
+	c := updateCmd{out: out, errOut: errOut}
 	cmd := &cobra.Command{
-		Use:   "create",
-		Short: "Create a Operator UI",
+		Use:   "update",
+		Short: "Update a Operator UI",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := c.validate(); err != nil {
 				return err
@@ -149,16 +105,16 @@ func newCreateOperatorUICmd(out io.Writer, errOut io.Writer) *cobra.Command {
 		},
 	}
 	f := cmd.Flags()
-	f.StringVar(&c.uiOpts.Name, "name", "", "Name of the Operator UI to create")
+	f.StringVar(&c.uiOpts.Name, "name", "", "Name of the Operator UI to update")
 	f.StringVarP(&c.uiOpts.NS, "namespace", "n", helpers.DefaultNamespace, "Namespace scope for this request")
 	f.StringVarP(&c.uiOpts.Image, "image", "", helpers.DefaultOperationsOperatorUIImage, "Image of the Operator UI")
 	f.StringVarP(&c.uiOpts.Version, "version", "", helpers.DefaultOperationsOperatorUIVersion, "Version of the Operator UI")
 	f.StringVarP(&c.uiOpts.IngresClassName, "ingress-class-name", "", "istio", "Ingress class name")
 	f.StringVarP(&c.uiOpts.TLSSecretName, "tls-secret-name", "", "", "TLS Secret for the Operator UI")
 	f.StringVarP(&c.uiOpts.APIURL, "api-url", "", "", "API URL for the Operator UI")
+	f.IntVarP(&c.uiOpts.Replicas, "replicas", "", 1, "Number of replicas of the Operator UI")
 	f.StringArrayVarP(&c.uiOpts.Hosts, "hosts", "", []string{}, "External hosts")
 	f.BoolVarP(&c.uiOpts.Output, "output", "o", false, "Output in yaml")
-	f.IntVarP(&c.uiOpts.Replicas, "replicas", "", 1, "Number of replicas of the Operator UI")
 	f.StringVarP(&c.uiOpts.LogoURL, "logo-url", "", "", "Logo URL for the Operator UI")
 	f.StringVarP(&c.uiOpts.OIDCAuthority, "oidc-authority", "", "", "OIDC Authority for the Operator UI")
 	f.StringVarP(&c.uiOpts.OIDCClientId, "oidc-client-id", "", "", "OIDC Client ID for the Operator UI")

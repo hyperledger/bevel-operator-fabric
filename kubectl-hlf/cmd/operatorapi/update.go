@@ -5,49 +5,24 @@ import (
 	"fmt"
 	"github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
 	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/helpers"
+	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"io"
-	corev1 "k8s.io/api/core/v1"
 	"k8s.io/api/networking/v1beta1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-type Options struct {
-	Name             string
-	NS               string
-	Image            string
-	Version          string
-	Hosts            []string
-	Output           bool
-	TLSSecretName    string
-	IngressClassName string
-	HLFSecretName    string
-	MSPID            string
-	User             string
-	HLFKey           string
-	OIDCIssuer       string
-	OIDCJWKS         string
-	Replicas         int
-}
-
-func (o Options) Validate() error {
-	if o.Replicas < 1 {
-		return fmt.Errorf("replicas must be greater than 0")
-	}
-	return nil
-}
-
-type createCmd struct {
+type updateCmd struct {
 	out     io.Writer
 	errOut  io.Writer
 	apiOpts Options
 }
 
-func (c *createCmd) validate() error {
+func (c *updateCmd) validate() error {
 	return c.apiOpts.Validate()
 }
-func (c *createCmd) run() error {
+func (c *updateCmd) run() error {
 	oclient, err := helpers.GetKubeOperatorClient()
 	if err != nil {
 		return err
@@ -81,45 +56,29 @@ func (c *createCmd) run() error {
 			},
 		}
 	}
-	fabricAPI := &v1alpha1.FabricOperatorAPI{
-		TypeMeta: v1.TypeMeta{
-			Kind:       "FabricOperatorAPI",
-			APIVersion: v1alpha1.GroupVersion.String(),
+	config := v1alpha1.FabricOperatorAPIHLFConfig{
+		MSPID: c.apiOpts.MSPID,
+		User:  c.apiOpts.User,
+		NetworkConfig: v1alpha1.FabricOperatorAPINetworkConfig{
+			SecretName: c.apiOpts.HLFSecretName,
+			Key:        c.apiOpts.HLFKey,
 		},
-		ObjectMeta: v1.ObjectMeta{
-			Name:      c.apiOpts.Name,
-			Namespace: c.apiOpts.NS,
-		},
-		Spec: v1alpha1.FabricOperatorAPISpec{
-			Image:           c.apiOpts.Image,
-			Tag:             c.apiOpts.Version,
-			ImagePullPolicy: "Always",
-			Auth: &v1alpha1.FabricOperatorAPIAuth{
-				OIDCJWKS:   c.apiOpts.OIDCJWKS,
-				OIDCIssuer: c.apiOpts.OIDCIssuer,
-			},
-			Istio:    v1alpha1.FabricIstio{},
-			Ingress:  ingress,
-			Replicas: c.apiOpts.Replicas,
-			HLFConfig: v1alpha1.FabricOperatorAPIHLFConfig{
-				MSPID: c.apiOpts.MSPID,
-				User:  c.apiOpts.User,
-				NetworkConfig: v1alpha1.FabricOperatorAPINetworkConfig{
-					SecretName: c.apiOpts.HLFSecretName,
-					Key:        c.apiOpts.HLFKey,
-				},
-			},
-			Tolerations:      []corev1.Toleration{},
-			ImagePullSecrets: []corev1.LocalObjectReference{},
-			Env:              []corev1.EnvVar{},
-			Affinity:         &corev1.Affinity{},
-			Resources: &corev1.ResourceRequirements{
-				Limits:   nil,
-				Requests: nil,
-			},
-		},
-		Status: v1alpha1.FabricOperatorAPIStatus{},
 	}
+	auth := &v1alpha1.FabricOperatorAPIAuth{
+		OIDCJWKS:   c.apiOpts.OIDCJWKS,
+		OIDCIssuer: c.apiOpts.OIDCIssuer,
+	}
+	ctx := context.Background()
+	fabricAPI, err := oclient.HlfV1alpha1().FabricOperatorAPIs(c.apiOpts.NS).Get(ctx, c.apiOpts.Name, v1.GetOptions{})
+	if err != nil {
+		return errors.Wrapf(err, "failed to get Fabric Operator UI %s", c.apiOpts.Name)
+	}
+	fabricAPI.Spec.Ingress = ingress
+	fabricAPI.Spec.Image = c.apiOpts.Image
+	fabricAPI.Spec.Tag = c.apiOpts.Version
+	fabricAPI.Spec.HLFConfig = config
+	fabricAPI.Spec.Auth = auth
+	fabricAPI.Spec.Replicas = c.apiOpts.Replicas
 	if c.apiOpts.Output {
 		ot, err := helpers.MarshallWithoutStatus(&fabricAPI)
 		if err != nil {
@@ -128,10 +87,10 @@ func (c *createCmd) run() error {
 		fmt.Println(string(ot))
 	} else {
 		ctx := context.Background()
-		_, err = oclient.HlfV1alpha1().FabricOperatorAPIs(c.apiOpts.NS).Create(
+		_, err = oclient.HlfV1alpha1().FabricOperatorAPIs(c.apiOpts.NS).Update(
 			ctx,
 			fabricAPI,
-			v1.CreateOptions{},
+			v1.UpdateOptions{},
 		)
 		if err != nil {
 			return err
@@ -140,11 +99,11 @@ func (c *createCmd) run() error {
 	}
 	return nil
 }
-func newCreateOperatorAPICmd(out io.Writer, errOut io.Writer) *cobra.Command {
-	c := createCmd{out: out, errOut: errOut}
+func newUpdateOperatorAPICmd(out io.Writer, errOut io.Writer) *cobra.Command {
+	c := updateCmd{out: out, errOut: errOut}
 	cmd := &cobra.Command{
-		Use:   "create",
-		Short: "Create a Operator API",
+		Use:   "update",
+		Short: "Update a Operator API",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := c.validate(); err != nil {
 				return err
@@ -153,7 +112,7 @@ func newCreateOperatorAPICmd(out io.Writer, errOut io.Writer) *cobra.Command {
 		},
 	}
 	f := cmd.Flags()
-	f.StringVar(&c.apiOpts.Name, "name", "", "Name of the Operator API to create")
+	f.StringVar(&c.apiOpts.Name, "name", "", "Name of the Operator API to update")
 	f.StringVarP(&c.apiOpts.NS, "namespace", "n", helpers.DefaultNamespace, "Namespace scope for this request")
 	f.StringVarP(&c.apiOpts.Image, "image", "", helpers.DefaultOperationsOperatorAPIImage, "Image of the Operator API")
 	f.StringVarP(&c.apiOpts.Version, "version", "", helpers.DefaultOperationsOperatorAPIVersion, "Version of the Operator API")
@@ -161,11 +120,11 @@ func newCreateOperatorAPICmd(out io.Writer, errOut io.Writer) *cobra.Command {
 	f.StringVarP(&c.apiOpts.IngressClassName, "ingress-class-name", "", "istio", "Ingress class name")
 	f.StringVarP(&c.apiOpts.MSPID, "hlf-mspid", "", "", "HLF Network Config MSPID")
 	f.StringVarP(&c.apiOpts.User, "hlf-user", "", "", "HLF Network Config User")
+	f.IntVarP(&c.apiOpts.Replicas, "replicas", "", 1, "Number of replicas of the Operator UI")
 	f.StringVarP(&c.apiOpts.HLFSecretName, "hlf-secret", "", "", "HLF Network Config Secret name")
 	f.StringVarP(&c.apiOpts.HLFKey, "hlf-secret-key", "", "", "HLF Network Config Secret key")
 	f.StringVarP(&c.apiOpts.OIDCJWKS, "oidc-jwks", "", "", "OIDC JWKS URL")
 	f.StringVarP(&c.apiOpts.OIDCIssuer, "oidc-issuer", "", "", "OIDC Issuer URL")
-	f.IntVarP(&c.apiOpts.Replicas, "replicas", "", 1, "Number of replicas of the Operator UI")
 	f.StringArrayVarP(&c.apiOpts.Hosts, "hosts", "", []string{}, "External hosts")
 	f.BoolVarP(&c.apiOpts.Output, "output", "o", false, "Output in yaml")
 	return cmd

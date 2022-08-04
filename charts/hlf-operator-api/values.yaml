@@ -11,6 +11,9 @@ image:
   tag: ""
 
 
+auth:
+  oidcJWKS: ""
+  oidcIssuer: ""
 
 hlf:
   mspID: ""
