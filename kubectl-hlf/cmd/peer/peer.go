@@ -13,6 +13,7 @@ func NewPeerCmd(out io.Writer, errOut io.Writer) *cobra.Command {
 		newCreatePeerCmd(out, errOut),
 		newPeerDeleteCmd(out, errOut),
 		newRenewChannelCMD(out, errOut),
+		newUpgradePeerCMD(out, errOut),
 	)
 	return cmd
 }
