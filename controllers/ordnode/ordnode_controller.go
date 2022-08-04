@@ -903,6 +903,7 @@ func getConfig(
 	}
 
 	fabricOrdChart := fabricOrdChart{
+		Affinity:                    spec.Affinity,
 		NodeSelector:                spec.NodeSelector,
 		ImagePullSecrets:            spec.ImagePullSecrets,
 		EnvVars:                     spec.Env,

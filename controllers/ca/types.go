@@ -13,7 +13,7 @@ type FabricCAChart struct {
 	Resources        Resources                     `json:"resources"`
 	NodeSelector     *corev1.NodeSelector          `json:"nodeSelector,omitempty"`
 	Tolerations      []corev1.Toleration           `json:"tolerations"`
-	Affinity         Affinity                      `json:"affinity"`
+	Affinity         *corev1.Affinity              `json:"affinity,omitempty"`
 	Metrics          FabricCAChartMetrics          `json:"metrics"`
 	Debug            bool                          `json:"debug"`
 	CLRSizeLimit     int                           `json:"clrsizelimit"`
@@ -225,9 +225,4 @@ type Requests struct {
 type RequestsLimit struct {
 	CPU    string `json:"cpu"`
 	Memory string `json:"memory"`
-}
-
-type NodeSelector struct {
-}
-type Affinity struct {
 }
