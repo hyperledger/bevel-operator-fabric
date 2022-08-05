@@ -82,6 +82,28 @@ jobs:
               --storage-class=standard --enroll-id=orderer --mspid=OrdererMSP \
               --enroll-pw=ordererpw --capacity=2Gi --name=ord-node1 --ca-name=ord-ca.default
           kubectl wait --timeout=180s --for=condition=Running fabricorderernodes.hlf.kungfusoftware.es --all
+      - name: Prepare Connection string for Orderer Node
+        run: |
+          kubectl hlf inspect --output ordservice.yaml -o OrdererMSP
+          kubectl hlf ca register --name=ord-ca --user=admin --secret=adminpw \
+              --type=admin --enroll-id enroll --enroll-secret=enrollpw --mspid=OrdererMSP
+
+          kubectl hlf ca enroll --name=ord-ca --user=admin --secret=adminpw --mspid OrdererMSP \
+                  --ca-name ca  --output admin-ordservice.yaml 
+          ## add user from admin-ordservice.yaml to ordservice.yaml
+          kubectl hlf utils adduser --userPath=admin-ordservice.yaml --config=ordservice.yaml --username=admin --mspid=OrdererMSP
+
+      - name: Create a channel
+        run: |
+          kubectl hlf channel generate --output=demo.block --name=demo --organizations Org1MSP --ordererOrganizations OrdererMSP
+
+          # enroll using the TLS CA
+          kubectl hlf ca enroll --name=ord-ca --namespace=default --user=admin --secret=adminpw --mspid OrdererMSP \
+                  --ca-name tlsca  --output admin-tls-ordservice.yaml 
+
+          kubectl hlf ordnode join --block=demo.block --name=ord-node1 --namespace=default --identity=admin-tls-ordservice.yaml
+
+
 
       - name: Show information
         if: ${{ failure() }}
