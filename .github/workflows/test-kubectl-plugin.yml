@@ -1,0 +1,58 @@
+on:
+  push:
+  pull_request:
+
+name: Test
+jobs:
+  test:
+    strategy:
+      matrix:
+        go-version: [ 1.16.x ]
+        os: [ ubuntu-latest ]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Install Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: ${{ matrix.go-version }}
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Create k8s Kind Cluster
+        uses: helm/kind-action@v1.2.0
+      - name: Install operator
+        run: make generate manifests install
+      - name: Install kubectl plugin
+        run: |
+          cd kubectl-hlf
+          go build -o kubectl-hlf ./main.go
+          sudo mv kubectl-hlf /usr/local/bin/kubectl-hlf 
+      - name: Create CA and peers
+        run: |
+          export PEER_IMAGE=hyperledger/fabric-peer
+          export PEER_VERSION=2.4.3
+
+          export ORDERER_IMAGE=hyperledger/fabric-orderer
+          export ORDERER_VERSION=2.4.3
+
+          kubectl hlf ca create --storage-class=standard --capacity=2Gi --name=org1-ca \
+              --enroll-id=enroll --enroll-pw=enrollpw  
+          kubectl wait --timeout=180s --for=condition=Running fabriccas.hlf.kungfusoftware.es --all    
+
+          # register user for the peers
+          kubectl hlf ca register --name=org1-ca --user=peer --secret=peerpw --type=peer \
+          --enroll-id enroll --enroll-secret=enrollpw --mspid Org1MSP
+
+
+          kubectl hlf peer create --statedb=couchdb --image=$PEER_IMAGE --version=$PEER_VERSION --storage-class=standard --enroll-id=peer --mspid=Org1MSP \
+                  --enroll-pw=peerpw --capacity=5Gi --name=org1-peer0 --ca-name=org1-ca.default
+          kubectl wait --timeout=180s --for=condition=Running fabricpeers.hlf.kungfusoftware.es --all
+
+      - name: Show information
+        if: ${{ failure() }}
+        run: |
+          kubectl get nodes -o=wide
+          kubectl get pods -o=wide -A
+          kubectl get fabricpeers.hlf.kungfusoftware.es  -A -o=custom-columns='NAME:metadata.name,NAMESPACE:metadata.namespace,STATE:status.status,MESSAGE:status.message'
+          kubectl get fabricorderernodes.hlf.kungfusoftware.es  -A -o=custom-columns='NAME:metadata.name,NAMESPACE:metadata.namespace,STATE:status.status,MESSAGE:status.message'
+          kubectl get fabriccas.hlf.kungfusoftware.es -A -o=custom-columns='NAME:metadata.name,NAMESPACE:metadata.namespace,STATE:status.status,MESSAGE:status.message'
+
