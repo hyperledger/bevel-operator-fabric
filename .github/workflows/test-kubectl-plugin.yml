@@ -2,9 +2,9 @@ on:
   push:
   pull_request:
 
-name: Test
+name: Test Kubectl plugin
 jobs:
-  test:
+  kubectl-hlf:
     strategy:
       matrix:
         go-version: [ 1.16.x ]
@@ -25,7 +25,21 @@ jobs:
         run: |
           cd kubectl-hlf
           go build -o kubectl-hlf ./main.go
-          sudo mv kubectl-hlf /usr/local/bin/kubectl-hlf 
+          sudo mv kubectl-hlf /usr/local/bin/kubectl-hlf
+      - name: Build Docker Image
+        run: |
+          export IMAGE=hlf-operator
+          export TAG=test
+          export GOOS=linux
+          export GOARCH=amd64
+          export CGO_ENABLED=0
+          go build -o hlf-operator ./main.go
+          docker build -t $IMAGE .
+          kind load docker-image $IMAGE
+      - name: Deploy operator
+        run: |
+          helm install hlf-operator --version=1.7.0-beta12 kfs/hlf-operator --set image.repository="${IMAGE}" --set image.tag="${TAG}"
+
       - name: Create CA and peers
         run: |
           export PEER_IMAGE=hyperledger/fabric-peer
