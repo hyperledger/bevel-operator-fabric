@@ -37,12 +37,10 @@ jobs:
           export GOARCH=amd64
           export CGO_ENABLED=0
           go build -o hlf-operator ./main.go
-          docker build -t $IMAGE .
-          kind load docker-image $IMAGE
+          docker build -t "${IMAGE}:${TAG}" .
+          kind load docker-image "${IMAGE}:${TAG}"
       - name: Deploy operator
         run: |
-          export IMAGE=hlf-operator
-          export TAG=test
           helm repo add kfs https://kfsoftware.github.io/hlf-helm-charts --force-update
           helm install hlf-operator --version=1.7.0-beta12 kfs/hlf-operator --set image.repository="${IMAGE}" --set image.tag="${TAG}"
 
