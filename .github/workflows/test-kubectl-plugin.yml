@@ -25,8 +25,7 @@ jobs:
         uses: helm/kind-action@v1.2.0
         with:
           cluster_name: kind
-      - name: Install operator
-        run: make generate manifests install
+
       - name: Install kubectl plugin
         run: |
           cd kubectl-hlf
@@ -46,6 +45,9 @@ jobs:
           export TAG=test
           helm repo add kfs https://kfsoftware.github.io/hlf-helm-charts --force-update
           helm install hlf-operator --version=1.7.0-beta12 kfs/hlf-operator --set image.repository="${IMAGE}" --set image.tag="${TAG}"
+
+      - name: Install operator CRDs
+        run: make generate manifests install
 
       - name: Create Peer org
         run: |
