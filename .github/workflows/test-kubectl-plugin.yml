@@ -44,6 +44,7 @@ jobs:
         run: |
           export IMAGE=hlf-operator
           export TAG=test
+          helm repo add kfs https://kfsoftware.github.io/hlf-helm-charts --force-update
           helm install hlf-operator --version=1.7.0-beta12 kfs/hlf-operator --set image.repository="${IMAGE}" --set image.tag="${TAG}"
 
       - name: Create Peer org
