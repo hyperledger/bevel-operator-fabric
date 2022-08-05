@@ -19,6 +19,8 @@ jobs:
         uses: actions/checkout@v2
       - name: Create k8s Kind Cluster
         uses: helm/kind-action@v1.2.0
+        with:
+          name: kind
       - name: Install operator
         run: make generate manifests install
       - name: Install kubectl plugin
@@ -40,7 +42,7 @@ jobs:
         run: |
           helm install hlf-operator --version=1.7.0-beta12 kfs/hlf-operator --set image.repository="${IMAGE}" --set image.tag="${TAG}"
 
-      - name: Create CA and peers
+      - name: Create Peer org
         run: |
           export PEER_IMAGE=hyperledger/fabric-peer
           export PEER_VERSION=2.4.3
@@ -60,6 +62,21 @@ jobs:
           kubectl hlf peer create --statedb=couchdb --image=$PEER_IMAGE --version=$PEER_VERSION --storage-class=standard --enroll-id=peer --mspid=Org1MSP \
                   --enroll-pw=peerpw --capacity=5Gi --name=org1-peer0 --ca-name=org1-ca.default
           kubectl wait --timeout=180s --for=condition=Running fabricpeers.hlf.kungfusoftware.es --all
+      - name: Create Orderer Org
+        run: |
+          export ORDERER_IMAGE=hyperledger/fabric-orderer
+          export ORDERER_VERSION=2.4.3
+
+          kubectl hlf ca create --storage-class=standard --capacity=2Gi --name=ord-ca \
+              --enroll-id=enroll --enroll-pw=enrollpw
+          kubectl wait --timeout=180s --for=condition=Running fabriccas.hlf.kungfusoftware.es --all
+          kubectl hlf ca register --name=ord-ca --user=orderer --secret=ordererpw \
+              --type=orderer --enroll-id enroll --enroll-secret=enrollpw --mspid=OrdererMSP
+
+          kubectl hlf ordnode create --image=$ORDERER_IMAGE --version=$ORDERER_VERSION \
+              --storage-class=standard --enroll-id=orderer --mspid=OrdererMSP \
+              --enroll-pw=ordererpw --capacity=2Gi --name=ord-node1 --ca-name=ord-ca.default
+          kubectl wait --timeout=180s --for=condition=Running fabricorderernodes.hlf.kungfusoftware.es --all
 
       - name: Show information
         if: ${{ failure() }}
