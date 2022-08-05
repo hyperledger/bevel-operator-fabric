@@ -7,6 +7,7 @@ module.exports = {
     "Operator Guide": [
       "operator-guide/state-db",
       "operator-guide/monitoring",
+      "operator-guide/configuration",
       "operator-guide/migrate-network",
       "operator-guide/increase-resources",
       "operator-guide/increase-storage",
