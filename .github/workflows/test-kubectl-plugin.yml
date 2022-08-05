@@ -2,6 +2,7 @@ on:
   push:
   pull_request:
 
+
 name: Test Kubectl plugin
 jobs:
   kubectl-hlf:
@@ -10,6 +11,9 @@ jobs:
         go-version: [ 1.16.x ]
         os: [ ubuntu-latest ]
     runs-on: ${{ matrix.os }}
+    env:
+      IMAGE: hlf-operator
+      TAG: test
     steps:
       - name: Install Go
         uses: actions/setup-go@v2
@@ -30,8 +34,6 @@ jobs:
           sudo mv kubectl-hlf /usr/local/bin/kubectl-hlf
       - name: Build Docker Image
         run: |
-          export IMAGE=hlf-operator
-          export TAG=test
           export GOOS=linux
           export GOARCH=amd64
           export CGO_ENABLED=0
@@ -40,6 +42,8 @@ jobs:
           kind load docker-image $IMAGE
       - name: Deploy operator
         run: |
+          export IMAGE=hlf-operator
+          export TAG=test
           helm install hlf-operator --version=1.7.0-beta12 kfs/hlf-operator --set image.repository="${IMAGE}" --set image.tag="${TAG}"
 
       - name: Create Peer org
