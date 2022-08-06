@@ -118,6 +118,7 @@ jobs:
 
       - name: Join peers to channel
         run: |
+          sleep 5
           kubectl hlf channel join --name=demo --config=org1.yaml \
               --user=admin -p=org1-peer0.default
       - name: Join anchor peer
