@@ -123,10 +123,16 @@ jobs:
               --user=admin -p=org1-peer0.default
       - name: Join anchor peer
         run: |
-          sleep 5
           kubectl hlf channel addanchorpeer --channel=demo --config=org1.yaml \
               --user=admin --peer=org1-peer0.default 
+      - name: Get channel
+        run: |
+          sleep 3
 
+          kubectl hlf channel inspect --channel=demo --config=org1.yaml \
+              --user=admin -p=org1-peer0.default > demo.json
+
+          cat demo.json
       - name: Install chaincode
         run: |
           # remove the code.tar.gz asset-transfer-basic-external.tgz if they exist
