@@ -130,7 +130,6 @@ jobs:
       - name: Install chaincode
         run: |
           # remove the code.tar.gz asset-transfer-basic-external.tgz if they exist
-          rm code.tar.gz asset-transfer-basic-external.tgz
           export CHAINCODE_NAME=asset
           export CHAINCODE_LABEL=asset
           cat << METADATA-EOF > "metadata.json"
