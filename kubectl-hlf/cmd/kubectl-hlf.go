@@ -4,9 +4,13 @@ import (
 	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/ca"
 	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/chaincode"
 	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/channel"
+	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/console"
 	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/externalchaincode"
+	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/fop"
 	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/inspect"
 	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/networkconfig"
+	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/operatorapi"
+	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/operatorui"
 	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/ordnode"
 	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/org"
 	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/peer"
@@ -42,6 +46,10 @@ func NewCmdHLF() *cobra.Command {
 		utils.NewUtilsCMD(cmd.OutOrStdout(), cmd.ErrOrStderr()),
 		networkconfig.NewNetworkConfigCmd(cmd.OutOrStdout(), cmd.ErrOrStderr()),
 		externalchaincode.NewExternalChaincodeCmd(cmd.OutOrStdout(), cmd.ErrOrStderr()),
-)
+		fop.NewFOPCMD(cmd.OutOrStdout(), cmd.ErrOrStderr()),
+		console.NewConsoleCmd(cmd.OutOrStdout(), cmd.ErrOrStderr()),
+		operatorapi.NewOperatorAPICMD(cmd.OutOrStdout(), cmd.ErrOrStderr()),
+		operatorui.NewOperatorUICMD(cmd.OutOrStdout(), cmd.ErrOrStderr()),
+	)
 	return cmd
 }

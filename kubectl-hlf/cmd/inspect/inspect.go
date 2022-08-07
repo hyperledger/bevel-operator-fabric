@@ -2,7 +2,6 @@ package inspect
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -29,6 +28,7 @@ type inspectCmd struct {
 	internal      bool
 	format        string
 	namespaces    []string
+	ordererNodes  []string
 }
 
 func (c *inspectCmd) validate() error {
@@ -198,9 +198,13 @@ func (c *inspectCmd) run(out io.Writer) error {
 	}
 	filterByOrgs := len(c.organizations) > 0
 	filterByNS := len(c.namespaces) > 0
+	filterByOrdererNodes := len(c.ordererNodes) > 0
 	orgMap := map[string]*helpers.Organization{}
 	for _, ordererNode := range clusterOrderersNodes {
 		if filterByNS && !utils.Contains(c.namespaces, ordererNode.ObjectMeta.Namespace) {
+			continue
+		}
+		if filterByOrdererNodes && !utils.Contains(c.ordererNodes, ordererNode.Name) {
 			continue
 		}
 		if (filterByOrgs && utils.Contains(c.organizations, ordererNode.Spec.MspID)) || !filterByOrgs {
@@ -313,16 +317,9 @@ func NewInspectHLFConfig(out io.Writer) *cobra.Command {
 	f.StringVar(&c.fileOutput, "output", "", "Output file")
 	f.BoolVar(&c.internal, "internal", false, "Use kubernetes service names")
 	f.StringArrayVarP(&c.organizations, "organizations", "o", []string{}, "Organizations to export")
+	f.StringArrayVarP(&c.ordererNodes, "ordererNodes", "", []string{}, "Orderer nodes to export")
 	f.StringVar(&c.format, "format", yamlFormat, "Connection profile output format (yaml/json)")
 	f.StringArrayVarP(&c.namespaces, "namespace", "n", []string{}, "Namespace scope for this request")
 
 	return cmd
-}
-
-func marshallOrPanic(d interface{}) string {
-	data, err := json.MarshalIndent(d, "", "  ")
-	if err != nil {
-		panic(err)
-	}
-	return string(data)
 }

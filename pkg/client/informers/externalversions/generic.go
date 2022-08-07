@@ -61,6 +61,12 @@ func (f *sharedInformerFactory) ForResource(resource schema.GroupVersionResource
 		return &genericInformer{resource: resource.GroupResource(), informer: f.Hlf().V1alpha1().FabricExplorers().Informer()}, nil
 	case v1alpha1.SchemeGroupVersion.WithResource("fabricnetworkconfigs"):
 		return &genericInformer{resource: resource.GroupResource(), informer: f.Hlf().V1alpha1().FabricNetworkConfigs().Informer()}, nil
+	case v1alpha1.SchemeGroupVersion.WithResource("fabricoperationsconsoles"):
+		return &genericInformer{resource: resource.GroupResource(), informer: f.Hlf().V1alpha1().FabricOperationsConsoles().Informer()}, nil
+	case v1alpha1.SchemeGroupVersion.WithResource("fabricoperatorapis"):
+		return &genericInformer{resource: resource.GroupResource(), informer: f.Hlf().V1alpha1().FabricOperatorAPIs().Informer()}, nil
+	case v1alpha1.SchemeGroupVersion.WithResource("fabricoperatoruis"):
+		return &genericInformer{resource: resource.GroupResource(), informer: f.Hlf().V1alpha1().FabricOperatorUIs().Informer()}, nil
 	case v1alpha1.SchemeGroupVersion.WithResource("fabricorderernodes"):
 		return &genericInformer{resource: resource.GroupResource(), informer: f.Hlf().V1alpha1().FabricOrdererNodes().Informer()}, nil
 	case v1alpha1.SchemeGroupVersion.WithResource("fabricorderingservices"):

@@ -3,25 +3,26 @@ package ca
 import corev1 "k8s.io/api/core/v1"
 
 type FabricCAChart struct {
-	Istio            Istio                 `json:"istio"`
-	FullNameOverride string                `json:"fullnameOverride"`
-	Image            Image                 `json:"image"`
-	Service          Service               `json:"service"`
-	Persistence      Persistence           `json:"persistence"`
-	Msp              Msp                   `json:"msp"`
-	Database         Database              `json:"db"`
-	Resources        Resources             `json:"resources"`
-	NodeSelector     NodeSelector          `json:"nodeSelector"`
-	Tolerations      []corev1.Toleration   `json:"tolerations"`
-	Affinity         Affinity              `json:"affinity"`
-	Metrics          FabricCAChartMetrics  `json:"metrics"`
-	Debug            bool                  `json:"debug"`
-	CLRSizeLimit     int                   `json:"clrsizelimit"`
-	Ca               FabricCAChartItemConf `json:"ca"`
-	TLSCA            FabricCAChartItemConf `json:"tlsCA"`
-	Cors             Cors                  `json:"cors"`
-	ServiceMonitor   ServiceMonitor        `json:"serviceMonitor"`
-	EnvVars          []corev1.EnvVar       `json:"envVars"`
+	Istio            Istio                         `json:"istio"`
+	FullNameOverride string                        `json:"fullnameOverride"`
+	Image            Image                         `json:"image"`
+	Service          Service                       `json:"service"`
+	Persistence      Persistence                   `json:"persistence"`
+	Msp              Msp                           `json:"msp"`
+	Database         Database                      `json:"db"`
+	Resources        Resources                     `json:"resources"`
+	NodeSelector     *corev1.NodeSelector          `json:"nodeSelector,omitempty"`
+	Tolerations      []corev1.Toleration           `json:"tolerations"`
+	Affinity         *corev1.Affinity              `json:"affinity,omitempty"`
+	Metrics          FabricCAChartMetrics          `json:"metrics"`
+	Debug            bool                          `json:"debug"`
+	CLRSizeLimit     int                           `json:"clrsizelimit"`
+	Ca               FabricCAChartItemConf         `json:"ca"`
+	TLSCA            FabricCAChartItemConf         `json:"tlsCA"`
+	Cors             Cors                          `json:"cors"`
+	ServiceMonitor   ServiceMonitor                `json:"serviceMonitor"`
+	EnvVars          []corev1.EnvVar               `json:"envVars"`
+	ImagePullSecrets []corev1.LocalObjectReference `json:"imagePullSecrets"`
 }
 type ServiceMonitor struct {
 	Enabled           bool              `json:"enabled"`
@@ -224,9 +225,4 @@ type Requests struct {
 type RequestsLimit struct {
 	CPU    string `json:"cpu"`
 	Memory string `json:"memory"`
-}
-
-type NodeSelector struct {
-}
-type Affinity struct {
 }

@@ -11,12 +11,12 @@ import (
 	"time"
 )
 
-type renewChannelCmd struct {
+type renewPeerCertsCmd struct {
 	name      string
 	namespace string
 }
 
-func (c *renewChannelCmd) validate() error {
+func (c *renewPeerCertsCmd) validate() error {
 	if c.namespace == "" {
 		return errors.Errorf("--namespace is required")
 	}
@@ -25,7 +25,7 @@ func (c *renewChannelCmd) validate() error {
 	}
 	return nil
 }
-func (c *renewChannelCmd) run() error {
+func (c *renewPeerCertsCmd) run() error {
 	hlfClient, err := helpers.GetKubeOperatorClient()
 	if err != nil {
 		return err
@@ -47,7 +47,7 @@ func (c *renewChannelCmd) run() error {
 }
 
 func newRenewChannelCMD(io.Writer, io.Writer) *cobra.Command {
-	c := &renewChannelCmd{}
+	c := &renewPeerCertsCmd{}
 	cmd := &cobra.Command{
 		Use: "renew",
 		RunE: func(cmd *cobra.Command, args []string) error {

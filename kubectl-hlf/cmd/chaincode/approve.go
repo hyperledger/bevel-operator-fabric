@@ -80,6 +80,9 @@ func (c *approveChaincodeCmd) run() error {
 			return err
 		}
 	}
+	if len(collectionConfigs) == 0 {
+		collectionConfigs = nil
+	}
 	txID, err := resClient.LifecycleApproveCC(
 		c.channelName,
 		resmgmt.LifecycleApproveCCRequest{

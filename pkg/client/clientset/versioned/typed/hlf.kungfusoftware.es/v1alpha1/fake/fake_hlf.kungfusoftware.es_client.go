@@ -44,6 +44,18 @@ func (c *FakeHlfV1alpha1) FabricNetworkConfigs(namespace string) v1alpha1.Fabric
 	return &FakeFabricNetworkConfigs{c, namespace}
 }
 
+func (c *FakeHlfV1alpha1) FabricOperationsConsoles(namespace string) v1alpha1.FabricOperationsConsoleInterface {
+	return &FakeFabricOperationsConsoles{c, namespace}
+}
+
+func (c *FakeHlfV1alpha1) FabricOperatorAPIs(namespace string) v1alpha1.FabricOperatorAPIInterface {
+	return &FakeFabricOperatorAPIs{c, namespace}
+}
+
+func (c *FakeHlfV1alpha1) FabricOperatorUIs(namespace string) v1alpha1.FabricOperatorUIInterface {
+	return &FakeFabricOperatorUIs{c, namespace}
+}
+
 func (c *FakeHlfV1alpha1) FabricOrdererNodes(namespace string) v1alpha1.FabricOrdererNodeInterface {
 	return &FakeFabricOrdererNodes{c, namespace}
 }

@@ -8,6 +8,9 @@ resources:
   - bases/hlf.kungfusoftware.es_fabriccas.yaml
   - bases/hlf.kungfusoftware.es_fabricnetworkconfigs.yaml
   - bases/hlf.kungfusoftware.es_fabricchaincodes.yaml
+  - bases/hlf.kungfusoftware.es_fabricoperationsconsoles.yaml
+  - bases/hlf.kungfusoftware.es_fabricoperatoruis.yaml
+  - bases/hlf.kungfusoftware.es_fabricoperatorapis.yaml
 # +kubebuilder:scaffold:crdkustomizeresource
 
 patchesStrategicMerge:
@@ -23,4 +26,4 @@ patchesStrategicMerge:
 
 # the following config is for teaching kustomize how to do kustomization for CRDs.
 configurations:
-- kustomizeconfig.yaml
+  - kustomizeconfig.yaml

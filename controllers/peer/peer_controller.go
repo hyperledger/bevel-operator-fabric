@@ -388,23 +388,21 @@ func (r *FabricPeerReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) 
 		}
 		lastTimeCertsRenewed := fabricPeer.Status.LastCertificateUpdate
 		if fabricPeer.Status.LastCertificateUpdate != nil {
-			if fabricPeer.Status.LastCertificateUpdate != nil {
-				lastCertificateUpdate := fabricPeer.Status.LastCertificateUpdate.Time
-				if fabricPeer.Spec.UpdateCertificateTime.Time.After(lastCertificateUpdate) {
-					// must update the certificates and block until it's done
-					// scale down to zero replicas
-					// wait for the deployment to scale down
-					// update the certs
-					// scale up the peer
-					log.Infof("Trying to upgrade certs")
-					err := r.updateCerts(req, fabricPeer, clientSet, releaseName, svc, ctx, cfg, ns)
-					if err != nil {
-						log.Errorf("Error renewing certs: %v", err)
-						r.setConditionStatus(ctx, fabricPeer, hlfv1alpha1.FailedStatus, false, err, false)
-						return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricPeer)
-					}
-					lastTimeCertsRenewed = fabricPeer.Spec.UpdateCertificateTime
+			lastCertificateUpdate := fabricPeer.Status.LastCertificateUpdate.Time
+			if fabricPeer.Spec.UpdateCertificateTime.Time.After(lastCertificateUpdate) {
+				// must update the certificates and block until it's done
+				// scale down to zero replicas
+				// wait for the deployment to scale down
+				// update the certs
+				// scale up the peer
+				log.Infof("Trying to upgrade certs")
+				err := r.updateCerts(req, fabricPeer, clientSet, releaseName, svc, ctx, cfg, ns)
+				if err != nil {
+					log.Errorf("Error renewing certs: %v", err)
+					r.setConditionStatus(ctx, fabricPeer, hlfv1alpha1.FailedStatus, false, err, false)
+					return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricPeer)
 				}
+				lastTimeCertsRenewed = fabricPeer.Spec.UpdateCertificateTime
 			}
 		} else if fabricPeer.Status.LastCertificateUpdate == nil && fabricPeer.Spec.UpdateCertificateTime != nil {
 			log.Infof("Trying to upgrade certs")
@@ -529,7 +527,6 @@ func (r *FabricPeerReconciler) updateCerts(req ctrl.Request, fPeer *hlfv1alpha1.
 		log.Errorf("Error getting the config: %v", err)
 		return err
 	}
-	//config.Replicas = 0
 	err = r.upgradeChart(cfg, err, ns, releaseName, config)
 	if err != nil {
 		return err
@@ -1122,16 +1119,53 @@ func GetConfig(
 		fsServer.Tag = helpers.DefaultFSServerVersion
 		fsServer.PullPolicy = string(hlfv1alpha1.DefaultImagePullPolicy)
 	}
+	proxy := GRPCProxy{
+		Enabled:          false,
+		Image:            "",
+		Tag:              "",
+		PullPolicy:       "",
+		ImagePullSecrets: nil,
+		Istio:            Istio{},
+	}
+	var proxyResources *Resources
+	if spec.GRPCProxy != nil && spec.GRPCProxy.Enabled {
+		proxy = GRPCProxy{
+			Enabled:          spec.GRPCProxy.Enabled,
+			Image:            spec.GRPCProxy.Image,
+			Tag:              spec.GRPCProxy.Tag,
+			PullPolicy:       spec.GRPCProxy.Image,
+			ImagePullSecrets: spec.GRPCProxy.ImagePullSecrets,
+			Istio: Istio{
+				Port:           spec.GRPCProxy.Istio.Port,
+				Hosts:          spec.GRPCProxy.Istio.Hosts,
+				IngressGateway: spec.GRPCProxy.Istio.IngressGateway,
+			},
+		}
+		if spec.Resources.Proxy != nil {
+			proxyResources = &Resources{
+				Requests: Requests{
+					CPU:    spec.Resources.Proxy.Requests.Cpu().String(),
+					Memory: spec.Resources.Proxy.Requests.Memory().String(),
+				},
+				Limits: Limits{
+					CPU:    spec.Resources.Proxy.Limits.Cpu().String(),
+					Memory: spec.Resources.Proxy.Limits.Memory().String(),
+				},
+			}
+		}
+	}
 
 	var c = FabricPeerChart{
-		EnvVars:  spec.Env,
-		Replicas: spec.Replicas,
-		Istio:    istio,
+		EnvVars:          spec.Env,
+		Replicas:         spec.Replicas,
+		ImagePullSecrets: spec.ImagePullSecrets,
+		Istio:            istio,
 		Image: Image{
 			Repository: spec.Image,
 			Tag:        spec.Tag,
 			PullPolicy: string(imagePullPolicy),
 		},
+		Proxy:            proxy,
 		ServiceMonitor:   monitor,
 		ExternalBuilders: externalBuilders,
 		DockerSocketPath: spec.DockerSocketPath,
@@ -1203,10 +1237,11 @@ func GetConfig(
 				},
 			},
 			CouchDBExporter: couchDBExporterResources,
+			Proxy:           proxyResources,
 		},
-		NodeSelector:     NodeSelector{},
+		NodeSelector:     spec.NodeSelector,
 		Tolerations:      spec.Tolerations,
-		Affinity:         Affinity{},
+		Affinity:         spec.Affinity,
 		ExternalHost:     externalEndpoint,
 		FullnameOverride: conf.Name,
 		HostAliases:      hostAliases,

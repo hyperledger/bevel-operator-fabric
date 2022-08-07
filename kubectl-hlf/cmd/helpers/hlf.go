@@ -64,6 +64,7 @@ type ClusterOrdererNode struct {
 
 type ClusterPeer struct {
 	Name       string
+	Object     hlfv1alpha1.FabricPeer
 	Spec       hlfv1alpha1.FabricPeerSpec
 	Status     hlfv1alpha1.FabricPeerStatus
 	PublicURL  string
@@ -79,6 +80,67 @@ type Identity struct {
 	Cert string
 }
 
+func MapClusterCA(clientSet *kubernetes.Clientset, certAuth hlfv1alpha1.FabricCA) (*ClusterCA, error) {
+	certauthName := fmt.Sprintf("%s.%s", certAuth.Name, certAuth.Namespace)
+	privateURL := GetCAPrivateURL(certAuth)
+	publicURL, err := GetCAPublicURL(clientSet, certAuth)
+	if err != nil {
+		return nil, err
+	}
+	certAuthIdentities := certAuth.Spec.CA.Registry.Identities
+	var enrollId string
+	var enrollPwd string
+	if len(certAuthIdentities) > 0 {
+		enrollId = certAuthIdentities[0].Name
+		enrollPwd = certAuthIdentities[0].Pass
+	}
+	return &ClusterCA{
+		Object:     certAuth,
+		Spec:       certAuth.Spec,
+		Status:     certAuth.Status,
+		Name:       certauthName,
+		PublicURL:  publicURL,
+		PrivateURL: privateURL,
+		EnrollID:   enrollId,
+		EnrollPWD:  enrollPwd,
+		Item:       certAuth,
+	}, nil
+}
+
+func MapClusterPeer(clientSet *kubernetes.Clientset, peer hlfv1alpha1.FabricPeer) (*ClusterPeer, error) {
+	publicURL, err := GetPeerPublicURL(clientSet, peer)
+	if err != nil {
+		return nil, err
+	}
+	privateURL := GetPeerPrivateURL(peer)
+	return &ClusterPeer{
+		Name:       peer.FullName(),
+		ObjectMeta: peer.ObjectMeta,
+		Object:     peer,
+		Spec:       peer.Spec,
+		Status:     peer.Status,
+		Identity:   Identity{},
+		PublicURL:  publicURL,
+		PrivateURL: privateURL,
+		MSPID:      peer.Spec.MspID,
+	}, nil
+}
+
+func MapClusterOrdererNode(clientSet *kubernetes.Clientset, ordNode hlfv1alpha1.FabricOrdererNode) (*ClusterOrdererNode, error) {
+	publicURL, err := GetOrdererPublicURL(clientSet, ordNode)
+	if err != nil {
+		return nil, err
+	}
+	privateURL := GetOrdererPrivateURL(ordNode)
+	return &ClusterOrdererNode{
+		Name:       ordNode.FullName(),
+		ObjectMeta: ordNode.ObjectMeta,
+		Spec:       ordNode.Spec,
+		Status:     ordNode.Status,
+		PublicURL:  publicURL,
+		PrivateURL: privateURL,
+	}, nil
+}
 func GetClusterCAs(clientSet *kubernetes.Clientset, oclient *operatorv1.Clientset, ns string) ([]*ClusterCA, error) {
 	ctx := context.Background()
 	certAuthsRes, err := oclient.HlfV1alpha1().FabricCAs(ns).List(ctx, v1.ListOptions{})
@@ -87,30 +149,11 @@ func GetClusterCAs(clientSet *kubernetes.Clientset, oclient *operatorv1.Clientse
 	}
 	var certAuths []*ClusterCA
 	for _, certAuth := range certAuthsRes.Items {
-		certauthName := fmt.Sprintf("%s.%s", certAuth.Name, certAuth.Namespace)
-		privateURL := GetCAPrivateURL(certAuth)
-		publicURL, err := GetCAPublicURL(clientSet, certAuth)
+		clusterCA, err := MapClusterCA(clientSet, certAuth)
 		if err != nil {
 			return nil, err
 		}
-		certAuthIdentities := certAuth.Spec.CA.Registry.Identities
-		var enrollId string
-		var enrollPwd string
-		if len(certAuthIdentities) > 0 {
-			enrollId = certAuthIdentities[0].Name
-			enrollPwd = certAuthIdentities[0].Pass
-		}
-		certAuths = append(certAuths, &ClusterCA{
-			Object:     certAuth,
-			Spec:       certAuth.Spec,
-			Status:     certAuth.Status,
-			Name:       certauthName,
-			PublicURL:  publicURL,
-			PrivateURL: privateURL,
-			EnrollID:   enrollId,
-			EnrollPWD:  enrollPwd,
-			Item:       certAuth,
-		})
+		certAuths = append(certAuths, clusterCA)
 	}
 	return certAuths, nil
 }
@@ -474,23 +517,13 @@ func GetClusterPeers(
 	}
 	var peers []*ClusterPeer
 	for _, peer := range peerResponse.Items {
-		publicURL, err := GetPeerPublicURL(clientSet, peer)
+		clusterPeer, err := MapClusterPeer(clientSet, peer)
 		if err != nil {
 			return nil, nil, err
 		}
-		privateURL := GetPeerPrivateURL(peer)
 		peers = append(
 			peers,
-			&ClusterPeer{
-				Name:       peer.FullName(),
-				ObjectMeta: peer.ObjectMeta,
-				Spec:       peer.Spec,
-				Status:     peer.Status,
-				Identity:   Identity{},
-				PublicURL:  publicURL,
-				PrivateURL: privateURL,
-				MSPID:      peer.Spec.MspID,
-			},
+			clusterPeer,
 		)
 	}
 	orgMap := map[string]*Organization{}
