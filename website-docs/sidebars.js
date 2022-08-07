@@ -29,12 +29,12 @@ module.exports = {
     ],
     "Chaincode deployment": [
       "chaincode-deployment/getting-started",
-      // "chaincode-deployment/architecture",
       "chaincode-deployment/external-chaincode-as-a-service",
       "chaincode-deployment/k8s-builder",
     ],
     "Kubectl Plugin": ["kubectl-plugin/installation"],
     CouchDB: ["couchdb/external-couchdb", "couchdb/custom-image"],
+    "GRPC Proxy": ["grpc-proxy/enable-peers", "grpc-proxy/enable-orderers"],
     "Operations Console": [
       "operations-console/getting-started",
       "operations-console/adding-cas",
@@ -46,7 +46,6 @@ module.exports = {
       "operator-ui/getting-started",
       "operator-ui/deploy-operator-ui",
       "operator-ui/deploy-operator-api",
-      // "operator-ui/tour",
     ],
 
   },
