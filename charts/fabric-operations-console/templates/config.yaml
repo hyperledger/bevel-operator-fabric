@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "fabric-operations-console.fullname" . }}--config
+  labels:
+  {{- include "fabric-operations-console.labels" . | nindent 4 }}
+stringData:
+  config.yaml: |
+    ---
+    version: v1.0
+    app_port: {{.Values.port}}
+    auth_scheme: {{.Values.auth.scheme}}
+    initial_admin: {{.Values.auth.username}}
+    configtxlator_url_original: http://localhost:7059
+    host_url: {{ .Values.hostUrl }}
+    default_user_password_initial: {{.Values.auth.password}}
+  {{- if .Values.config }}
+{{.Values.config | nindent 4}}
+  {{- else }}
+    feature_flags:
+       import_only_enabled: true
+       osnadmin_feats_enabled: true
+  {{ end -}}

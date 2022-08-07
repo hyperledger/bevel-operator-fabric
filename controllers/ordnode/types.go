@@ -3,33 +3,51 @@ package ordnode
 import corev1 "k8s.io/api/core/v1"
 
 type fabricOrdChart struct {
-	Istio                       Istio               `json:"istio"`
-	AdminIstio                  Istio               `json:"adminIstio"`
-	Replicas                    int                 `json:"replicas"`
-	Genesis                     string              `json:"genesis"`
-	ChannelParticipationEnabled bool                `json:"channelParticipationEnabled"`
-	BootstrapMethod             string              `json:"bootstrapMethod"`
-	Admin                       admin               `json:"admin"`
-	Cacert                      string              `json:"cacert"`
-	Tlsrootcert                 string              `json:"tlsrootcert"`
-	AdminCert                   string              `json:"adminCert"`
-	Cert                        string              `json:"cert"`
-	Key                         string              `json:"key"`
-	TLS                         tls                 `json:"tls"`
-	Tolerations                 []corev1.Toleration `json:"tolerations,omitempty"`
-	Resources                   Resources           `json:"resources,omitempty"`
-	FullnameOverride            string              `json:"fullnameOverride"`
-	HostAliases                 []HostAlias         `json:"hostAliases"`
-	Service                     service             `json:"service"`
-	Image                       image               `json:"image"`
-	Persistence                 persistence         `json:"persistence"`
-	Ord                         ord                 `json:"ord"`
-	Clientcerts                 clientcerts         `json:"clientcerts"`
-	Hosts                       []string            `json:"hosts"`
-	Logging                     Logging             `json:"logging"`
-	ServiceMonitor              ServiceMonitor      `json:"serviceMonitor"`
-	EnvVars                     []corev1.EnvVar     `json:"envVars"`
+	Istio                       Istio                         `json:"istio"`
+	AdminIstio                  Istio                         `json:"adminIstio"`
+	Replicas                    int                           `json:"replicas"`
+	Genesis                     string                        `json:"genesis"`
+	ChannelParticipationEnabled bool                          `json:"channelParticipationEnabled"`
+	BootstrapMethod             string                        `json:"bootstrapMethod"`
+	Admin                       admin                         `json:"admin"`
+	Cacert                      string                        `json:"cacert"`
+	NodeSelector                *corev1.NodeSelector          `json:"nodeSelector,omitempty"`
+	Tlsrootcert                 string                        `json:"tlsrootcert"`
+	AdminCert                   string                        `json:"adminCert"`
+	Affinity                    *corev1.Affinity              `json:"affinity,omitempty"`
+	Cert                        string                        `json:"cert"`
+	Key                         string                        `json:"key"`
+	TLS                         tls                           `json:"tls"`
+	Tolerations                 []corev1.Toleration           `json:"tolerations,omitempty"`
+	Resources                   Resources                     `json:"resources,omitempty"`
+	FullnameOverride            string                        `json:"fullnameOverride"`
+	HostAliases                 []HostAlias                   `json:"hostAliases"`
+	Service                     service                       `json:"service"`
+	Image                       image                         `json:"image"`
+	Persistence                 persistence                   `json:"persistence"`
+	Ord                         ord                           `json:"ord"`
+	Clientcerts                 clientcerts                   `json:"clientcerts"`
+	Hosts                       []string                      `json:"hosts"`
+	Logging                     Logging                       `json:"logging"`
+	ServiceMonitor              ServiceMonitor                `json:"serviceMonitor"`
+	EnvVars                     []corev1.EnvVar               `json:"envVars"`
+	ImagePullSecrets            []corev1.LocalObjectReference `json:"imagePullSecrets"`
+
+	Proxy GRPCProxy `json:"proxy"`
 }
+type GRPCProxy struct {
+	Enabled          bool                          `json:"enabled"`
+	Image            string                        `json:"image"`
+	Tag              string                        `json:"tag"`
+	PullPolicy       string                        `json:"pullPolicy"`
+	ImagePullSecrets []corev1.LocalObjectReference `json:"imagePullSecrets"`
+	Istio            Istio                         `json:"istio"`
+
+	// +optional
+	// +nullable
+	Resources *corev1.ResourceRequirements `json:"resources"`
+}
+
 type Resources struct {
 	Limits   Limits   `json:"limits"`
 	Requests Requests `json:"requests"`

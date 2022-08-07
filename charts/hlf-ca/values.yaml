@@ -13,6 +13,8 @@ serviceMonitor:
   metricRelabelings: []
   sampleLimit: 0
 
+imagePullSecrets: []
+
 istio:
   port: 443
   hosts: []

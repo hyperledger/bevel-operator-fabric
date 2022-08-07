@@ -26,6 +26,12 @@ type FabricExplorerExpansion interface{}
 
 type FabricNetworkConfigExpansion interface{}
 
+type FabricOperationsConsoleExpansion interface{}
+
+type FabricOperatorAPIExpansion interface{}
+
+type FabricOperatorUIExpansion interface{}
+
 type FabricOrdererNodeExpansion interface{}
 
 type FabricOrderingServiceExpansion interface{}

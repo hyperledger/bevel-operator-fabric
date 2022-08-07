@@ -19,8 +19,11 @@ package main
 import (
 	"flag"
 	"github.com/kfsoftware/hlf-operator/controllers/chaincode"
+	"github.com/kfsoftware/hlf-operator/controllers/console"
 	"github.com/kfsoftware/hlf-operator/controllers/hlfmetrics"
 	"github.com/kfsoftware/hlf-operator/controllers/networkconfig"
+	"github.com/kfsoftware/hlf-operator/controllers/operatorapi"
+	"github.com/kfsoftware/hlf-operator/controllers/operatorui"
 	"github.com/kfsoftware/hlf-operator/controllers/ordnode"
 	"github.com/kfsoftware/hlf-operator/controllers/utils"
 	log "github.com/sirupsen/logrus"
@@ -159,21 +162,69 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err = (&networkconfig.FabricNetworkConfigReconciler{
+	fabricConsoleChartPath, err := filepath.Abs("./charts/fabric-operations-console")
+	if err != nil {
+		setupLog.Error(err, "unable to find the fabric-operations-console chart")
+		os.Exit(1)
+	}
+	if err = (&console.FabricOperationsConsoleReconciler{
 		Client:    mgr.GetClient(),
-		Log:       ctrl.Log.WithName("controllers").WithName("FabricNetworkConfig"),
+		Log:       ctrl.Log.WithName("controllers").WithName("FabricOperationsConsole"),
 		Scheme:    mgr.GetScheme(),
 		Config:    mgr.GetConfig(),
+		ChartPath: fabricConsoleChartPath,
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "FabricOperationsConsole")
+		os.Exit(1)
+	}
+
+	fabricOperatorAPIChartPath, err := filepath.Abs("./charts/hlf-operator-api")
+	if err != nil {
+		setupLog.Error(err, "unable to find the fabric-operations-api chart")
+		os.Exit(1)
+	}
+	if err = (&operatorapi.FabricOperatorAPIReconciler{
+		Client:    mgr.GetClient(),
+		Log:       ctrl.Log.WithName("controllers").WithName("FabricOperatorAPI"),
+		Scheme:    mgr.GetScheme(),
+		Config:    mgr.GetConfig(),
+		ChartPath: fabricOperatorAPIChartPath,
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "FabricOperatorAPI")
+		os.Exit(1)
+	}
+
+	fabricOperatorUIChartPath, err := filepath.Abs("./charts/hlf-operator-ui")
+	if err != nil {
+		setupLog.Error(err, "unable to find the fabric-operations-ui chart")
+		os.Exit(1)
+	}
+	if err = (&operatorui.FabricOperatorUIReconciler{
+		Client:    mgr.GetClient(),
+		Log:       ctrl.Log.WithName("controllers").WithName("FabricOperatorUI"),
+		Scheme:    mgr.GetScheme(),
+		Config:    mgr.GetConfig(),
+		ChartPath: fabricOperatorUIChartPath,
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "FabricOperatorUI")
+		os.Exit(1)
+	}
+
+	if err = (&networkconfig.FabricNetworkConfigReconciler{
+		Client: mgr.GetClient(),
+		Log:    ctrl.Log.WithName("controllers").WithName("FabricNetworkConfig"),
+		Scheme: mgr.GetScheme(),
+		Config: mgr.GetConfig(),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "FabricNetworkConfig")
 		os.Exit(1)
 	}
 
 	if err = (&chaincode.FabricChaincodeReconciler{
-		Client:    mgr.GetClient(),
-		Log:       ctrl.Log.WithName("controllers").WithName("FabricChaincode"),
-		Scheme:    mgr.GetScheme(),
-		Config:    mgr.GetConfig(),
+		Client: mgr.GetClient(),
+		Log:    ctrl.Log.WithName("controllers").WithName("FabricChaincode"),
+		Scheme: mgr.GetScheme(),
+		Config: mgr.GetConfig(),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "FabricNetworkConfig")
 		os.Exit(1)

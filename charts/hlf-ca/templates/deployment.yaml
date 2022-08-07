@@ -42,6 +42,10 @@ spec:
         - name: msp-tls-cryptomaterial
           secret:
             secretName: {{ include "hlf-ca.fullname" . }}--msp-tls-cryptomaterial
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+      {{- toYaml . | nindent 8 }}
+      {{- end }}
       containers:
         - name: ca
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"

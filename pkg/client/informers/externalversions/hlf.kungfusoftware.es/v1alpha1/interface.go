@@ -32,6 +32,12 @@ type Interface interface {
 	FabricExplorers() FabricExplorerInformer
 	// FabricNetworkConfigs returns a FabricNetworkConfigInformer.
 	FabricNetworkConfigs() FabricNetworkConfigInformer
+	// FabricOperationsConsoles returns a FabricOperationsConsoleInformer.
+	FabricOperationsConsoles() FabricOperationsConsoleInformer
+	// FabricOperatorAPIs returns a FabricOperatorAPIInformer.
+	FabricOperatorAPIs() FabricOperatorAPIInformer
+	// FabricOperatorUIs returns a FabricOperatorUIInformer.
+	FabricOperatorUIs() FabricOperatorUIInformer
 	// FabricOrdererNodes returns a FabricOrdererNodeInformer.
 	FabricOrdererNodes() FabricOrdererNodeInformer
 	// FabricOrderingServices returns a FabricOrderingServiceInformer.
@@ -69,6 +75,21 @@ func (v *version) FabricExplorers() FabricExplorerInformer {
 // FabricNetworkConfigs returns a FabricNetworkConfigInformer.
 func (v *version) FabricNetworkConfigs() FabricNetworkConfigInformer {
 	return &fabricNetworkConfigInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
+}
+
+// FabricOperationsConsoles returns a FabricOperationsConsoleInformer.
+func (v *version) FabricOperationsConsoles() FabricOperationsConsoleInformer {
+	return &fabricOperationsConsoleInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
+}
+
+// FabricOperatorAPIs returns a FabricOperatorAPIInformer.
+func (v *version) FabricOperatorAPIs() FabricOperatorAPIInformer {
+	return &fabricOperatorAPIInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
+}
+
+// FabricOperatorUIs returns a FabricOperatorUIInformer.
+func (v *version) FabricOperatorUIs() FabricOperatorUIInformer {
+	return &fabricOperatorUIInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
 }
 
 // FabricOrdererNodes returns a FabricOrdererNodeInformer.

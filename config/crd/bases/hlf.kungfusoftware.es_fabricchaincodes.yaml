@@ -794,6 +794,7 @@ spec:
                         TODO: Add other useful fields. apiVersion, kind, uid?'
                       type: string
                   type: object
+                nullable: true
                 type: array
               packageId:
                 minLength: 1
@@ -870,7 +871,6 @@ spec:
             required:
             - image
             - imagePullPolicy
-            - imagePullSecrets
             - packageId
             - replicas
             type: object

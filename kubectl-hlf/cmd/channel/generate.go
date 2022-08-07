@@ -3,6 +3,7 @@ package channel
 import (
 	"context"
 	"github.com/golang/protobuf/proto"
+	"github.com/hyperledger/fabric-config/configtx/orderer"
 	"github.com/kfsoftware/hlf-operator/controllers/testutils"
 	"github.com/kfsoftware/hlf-operator/controllers/utils"
 	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/helpers"
@@ -20,6 +21,9 @@ type generateChannelCmd struct {
 	ordererOrganizations []string
 	consenterNodes       []string
 	output               string
+	maxMessageCount      int
+	absoluteMaxBytes     int
+	preferredMaxBytes    int
 }
 
 func (c generateChannelCmd) validate() error {
@@ -180,6 +184,11 @@ func (c generateChannelCmd) run() error {
 		testutils.WithOrdererOrgs(ordererOrgs...),
 		testutils.WithPeerOrgs(peerOrgs...),
 		testutils.WithConsenters(consenters...),
+		testutils.WithBatchSize(&orderer.BatchSize{
+			MaxMessageCount:   uint32(c.maxMessageCount),
+			AbsoluteMaxBytes:  uint32(c.absoluteMaxBytes),
+			PreferredMaxBytes: uint32(c.preferredMaxBytes),
+		}),
 	)
 	if err != nil {
 		return err
@@ -211,6 +220,9 @@ func newGenerateChannelCMD(io.Writer, io.Writer) *cobra.Command {
 	persistentFlags.StringSliceVarP(&c.organizations, "organizations", "p", nil, "Organizations belonging to the channel")
 	persistentFlags.StringSliceVarP(&c.ordererOrganizations, "ordererOrganizations", "", nil, "Orderer organizations belonging to the channel")
 	persistentFlags.StringSliceVarP(&c.consenterNodes, "consenterNodes", "c", []string{}, "Consenter nodes belonging to the channel")
+	persistentFlags.IntVarP(&c.maxMessageCount, "maxMessageCount", "", 100, "Max transactions per block")
+	persistentFlags.IntVarP(&c.absoluteMaxBytes, "absoluteMaxBytes", "", 1024*1024, "Max size per block")
+	persistentFlags.IntVarP(&c.preferredMaxBytes, "preferredMaxBytes", "", 512*1024, "Max size per block")
 	cmd.MarkPersistentFlagRequired("name")
 	cmd.MarkPersistentFlagRequired("organizations")
 	cmd.MarkPersistentFlagRequired("ordererOrganizations")
