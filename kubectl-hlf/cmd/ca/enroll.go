@@ -66,25 +66,27 @@ func (c *enrollCmd) run(args []string) error {
 	}
 	log.Debugf("CA URL=%s", url)
 	var attributes []*api.AttributeRequest
-	attributeList := strings.Split(c.enrollOpts.Attributes, ",")
-	for _, attr := range attributeList {
-		sreq := strings.Split(attr, ":")
-		name := sreq[0]
-		var attrReq *api.AttributeRequest
-		switch len(sreq) {
-		case 1:
-			attrReq = &api.AttributeRequest{Name: name}
-		case 2:
-			if sreq[1] != "opt" {
-				return errors.Errorf("Invalid option in attribute request specification at '%s'; the value after the colon must be 'opt'", attr)
+	if len(c.enrollOpts.Attributes) > 0 {
+		attributeList := strings.Split(c.enrollOpts.Attributes, ",")
+		for _, attr := range attributeList {
+			sreq := strings.Split(attr, ":")
+			name := sreq[0]
+			var attrReq *api.AttributeRequest
+			switch len(sreq) {
+			case 1:
+				attrReq = &api.AttributeRequest{Name: name}
+			case 2:
+				if sreq[1] != "opt" {
+					return errors.Errorf("Invalid option in attribute request specification at '%s'; the value after the colon must be 'opt'", attr)
+				}
+				attrReq = &api.AttributeRequest{Name: name, Optional: true}
+			default:
+				return errors.Errorf("Multiple ':' characters not allowed in attribute request specification; error at '%s'", attr)
 			}
-			attrReq = &api.AttributeRequest{Name: name, Optional: true}
-		default:
-			return errors.Errorf("Multiple ':' characters not allowed in attribute request specification; error at '%s'", attr)
+			attributes = append(attributes, attrReq)
 		}
-		attributes = append(attributes, attrReq)
 	}
-	crt, pk, _, err := certs.EnrollUser(certs.EnrollUserRequest{
+	request := certs.EnrollUserRequest{
 		TLSCert:    certAuth.Status.TlsCert,
 		URL:        url,
 		Name:       c.enrollOpts.CAName,
@@ -94,8 +96,12 @@ func (c *enrollCmd) run(args []string) error {
 		Hosts:      c.enrollOpts.Hosts,
 		CN:         c.enrollOpts.CN,
 		Profile:    c.enrollOpts.Profile,
-		Attributes: attributes,
-	})
+		Attributes: nil,
+	}
+	if len(attributes) > 0 {
+		request.Attributes = attributes
+	}
+	crt, pk, _, err := certs.EnrollUser(request)
 	if err != nil {
 		return err
 	}
