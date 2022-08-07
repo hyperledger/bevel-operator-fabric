@@ -49,21 +49,27 @@ func (c *registerCmd) run(args []string) error {
 	if err != nil {
 		return err
 	}
-
 	url, err := helpers.GetURLForCA(certAuth)
 	if err != nil {
 		return err
 	}
-	var attributes []api.Attribute
+	attrMap := make(map[string]string)
 	for _, attr := range c.caOpts.Attributes {
-		chunks := strings.Split(attr, "=")
-		if len(chunks) != 2 {
-			return errors.Errorf("Invalid attribute: %s", attr)
+		// skipping empty attributes
+		if len(attr) == 0 {
+			continue
 		}
-		value := chunks[1]
-		name := chunks[0]
-		attribute := api.Attribute{Name: name, Value: value}
-		attributes = append(attributes, attribute)
+		sattr := strings.SplitN(attr, "=", 2)
+		if len(sattr) != 2 {
+			return errors.Errorf("Attribute '%s' is missing '=' ; it "+
+				"must be of the form <name>=<value>", attr)
+		}
+		attrMap := make(map[string]string)
+		attrMap[sattr[0]] = sattr[1]
+	}
+	fabricSDKAttrs, err := ConvertAttrs(attrMap)
+	if err != nil {
+		return err
 	}
 	_, err = certs.RegisterUser(certs.RegisterUserRequest{
 		TLSCert:      certAuth.Status.TlsCert,
@@ -75,7 +81,7 @@ func (c *registerCmd) run(args []string) error {
 		User:         c.caOpts.User,
 		Secret:       c.caOpts.Secret,
 		Type:         c.caOpts.Type,
-		Attributes:   attributes,
+		Attributes:   fabricSDKAttrs,
 	})
 	if err != nil {
 		return err
@@ -106,4 +112,34 @@ func newCARegisterCmd(out io.Writer, errOut io.Writer) *cobra.Command {
 	f.StringSliceVarP(&c.caOpts.Attributes, "attributes", "", []string{}, "Attributes of the user")
 
 	return cmd
+}
+
+// ConvertAttrs converts attribute string into an Attribute object array
+func ConvertAttrs(inAttrs map[string]string) ([]api.Attribute, error) {
+	var outAttrs []api.Attribute
+	for name, value := range inAttrs {
+		sattr := strings.Split(value, ":")
+		if len(sattr) > 2 {
+			return []api.Attribute{}, errors.Errorf("Multiple ':' characters not allowed "+
+				"in attribute specification '%s'; The attributes have been discarded!", value)
+		}
+		attrFlag := ""
+		if len(sattr) > 1 {
+			attrFlag = sattr[1]
+		}
+		ecert := false
+		switch strings.ToLower(attrFlag) {
+		case "":
+		case "ecert":
+			ecert = true
+		default:
+			return []api.Attribute{}, errors.Errorf("Invalid attribute flag: '%s'", attrFlag)
+		}
+		outAttrs = append(outAttrs, api.Attribute{
+			Name:  name,
+			Value: sattr[0],
+			ECert: ecert,
+		})
+	}
+	return outAttrs, nil
 }
