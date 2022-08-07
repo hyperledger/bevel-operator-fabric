@@ -31,7 +31,7 @@ MSP_ID=Org1MSP
 kubectl hlf ca register --name=$CA_NAME --namespace=$CA_NAMESPACE \
     --user $USER --secret=$USER_SECRET --type=$USER_TYPE \
     --enroll-id=$ENROLL_ID --enroll-secret=$ENROLL_SECRET \
-    --mspid $MSP_ID --attributes="isAdmin=true"
+    --mspid $MSP_ID --attributes="isAdmin=true,anotherAttribute=foo"
 ```
 
 ## Enrolling users in the TLS CA
@@ -69,5 +69,5 @@ CA_MSPID=Org1MSP
 CA_TYPE=tlsca # can be `ca` or `tlsca`
 kubectl hlf ca enroll --name=$CA_NAME --namespace=$CA_NAMESPACE \
     --user=admin --secret=adminpw --mspid $CA_MSPID \
-    --ca-name $CA_TYPE  --output user.yaml --attributes="isAdmin" --attributes="email:opt" # for optional attributes
+    --ca-name $CA_TYPE  --output user.yaml --attributes="isAdmin,anotherAttribute:opt" # for optional attributes
 ```

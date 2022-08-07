@@ -30,7 +30,7 @@ type EnrollOptions struct {
 	CN         string
 	WalletPath string
 	WalletUser string
-	Attributes []string
+	Attributes string
 }
 
 func (o EnrollOptions) Validate() error {
@@ -66,7 +66,8 @@ func (c *enrollCmd) run(args []string) error {
 	}
 	log.Debugf("CA URL=%s", url)
 	var attributes []*api.AttributeRequest
-	for _, attr := range c.enrollOpts.Attributes {
+	attributeList := strings.Split(c.enrollOpts.Attributes, ",")
+	for _, attr := range attributeList {
 		sreq := strings.Split(attr, ":")
 		name := sreq[0]
 		var attrReq *api.AttributeRequest
@@ -161,7 +162,7 @@ func newCAEnrollCmd(out io.Writer, errOut io.Writer) *cobra.Command {
 	f.StringVarP(&c.enrollOpts.WalletPath, "wallet-path", "", "", "Wallet path to store the user in")
 	f.StringVarP(&c.enrollOpts.WalletUser, "wallet-user", "", "", "Wallet user name for the identity stored in the wallet")
 	f.StringSliceVarP(&c.enrollOpts.Hosts, "hosts", "", []string{}, "Hosts")
-	f.StringSliceVarP(&c.enrollOpts.Attributes, "attributes", "", []string{}, "Attributes of the user")
+	f.StringVarP(&c.enrollOpts.Attributes, "attributes", "", "", "Attributes of the user")
 
 	f.StringVar(&c.fileOutput, "output", "", "output file")
 

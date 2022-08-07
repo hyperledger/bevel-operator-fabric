@@ -20,7 +20,7 @@ type RegisterOptions struct {
 	MspID        string
 	EnrollID     string
 	EnrollSecret string
-	Attributes   []string
+	Attributes   string
 }
 
 func (o RegisterOptions) Validate() error {
@@ -54,7 +54,8 @@ func (c *registerCmd) run(args []string) error {
 		return err
 	}
 	attrMap := make(map[string]string)
-	for _, attr := range c.caOpts.Attributes {
+	attributeList := strings.Split(c.caOpts.Attributes, ",")
+	for _, attr := range attributeList {
 		// skipping empty attributes
 		if len(attr) == 0 {
 			continue
@@ -64,7 +65,6 @@ func (c *registerCmd) run(args []string) error {
 			return errors.Errorf("Attribute '%s' is missing '=' ; it "+
 				"must be of the form <name>=<value>", attr)
 		}
-		attrMap := make(map[string]string)
 		attrMap[sattr[0]] = sattr[1]
 	}
 	fabricSDKAttrs, err := ConvertAttrs(attrMap)
@@ -109,7 +109,7 @@ func newCARegisterCmd(out io.Writer, errOut io.Writer) *cobra.Command {
 	f.StringVarP(&c.caOpts.Secret, "secret", "", "", "Password for the new user")
 	f.StringVarP(&c.caOpts.Type, "type", "", "", "Type of the identity to create (peer/client/orderer/admin)")
 	f.StringVarP(&c.caOpts.MspID, "mspid", "", "", "MSP ID of the organization")
-	f.StringSliceVarP(&c.caOpts.Attributes, "attributes", "", []string{}, "Attributes of the user")
+	f.StringVarP(&c.caOpts.Attributes, "attributes", "", "", "Attributes of the user")
 
 	return cmd
 }
