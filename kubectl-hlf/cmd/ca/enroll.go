@@ -1,10 +1,14 @@
 package ca
 
 import (
-	"github.com/hyperledger/fabric-sdk-go/pkg/gateway"
-	log "github.com/kfsoftware/hlf-operator/internal/github.com/hyperledger/fabric-ca/sdkpatch/logbridge"
 	"io"
 	"io/ioutil"
+	"strings"
+
+	"github.com/hyperledger/fabric-sdk-go/pkg/gateway"
+	"github.com/hyperledger/fabric-sdk-go/pkg/msp/api"
+	log "github.com/kfsoftware/hlf-operator/internal/github.com/hyperledger/fabric-ca/sdkpatch/logbridge"
+	"github.com/pkg/errors"
 
 	"github.com/ghodss/yaml"
 	"github.com/kfsoftware/hlf-operator/controllers/certs"
@@ -26,6 +30,7 @@ type EnrollOptions struct {
 	CN         string
 	WalletPath string
 	WalletUser string
+	Attributes []string
 }
 
 func (o EnrollOptions) Validate() error {
@@ -60,6 +65,24 @@ func (c *enrollCmd) run(args []string) error {
 		return err
 	}
 	log.Debugf("CA URL=%s", url)
+	var attributes []*api.AttributeRequest
+	for _, attr := range c.enrollOpts.Attributes {
+		sreq := strings.Split(attr, ":")
+		name := sreq[0]
+		var attrReq *api.AttributeRequest
+		switch len(sreq) {
+		case 1:
+			attrReq = &api.AttributeRequest{Name: name}
+		case 2:
+			if sreq[1] != "opt" {
+				return errors.Errorf("Invalid option in attribute request specification at '%s'; the value after the colon must be 'opt'", attr)
+			}
+			attrReq = &api.AttributeRequest{Name: name, Optional: true}
+		default:
+			return errors.Errorf("Multiple ':' characters not allowed in attribute request specification; error at '%s'", attr)
+		}
+		attributes = append(attributes, attrReq)
+	}
 	crt, pk, _, err := certs.EnrollUser(certs.EnrollUserRequest{
 		TLSCert:    certAuth.Status.TlsCert,
 		URL:        url,
@@ -70,7 +93,7 @@ func (c *enrollCmd) run(args []string) error {
 		Hosts:      c.enrollOpts.Hosts,
 		CN:         c.enrollOpts.CN,
 		Profile:    c.enrollOpts.Profile,
-		Attributes: nil,
+		Attributes: attributes,
 	})
 	if err != nil {
 		return err
@@ -138,6 +161,7 @@ func newCAEnrollCmd(out io.Writer, errOut io.Writer) *cobra.Command {
 	f.StringVarP(&c.enrollOpts.WalletPath, "wallet-path", "", "", "Wallet path to store the user in")
 	f.StringVarP(&c.enrollOpts.WalletUser, "wallet-user", "", "", "Wallet user name for the identity stored in the wallet")
 	f.StringSliceVarP(&c.enrollOpts.Hosts, "hosts", "", []string{}, "Hosts")
+	f.StringSliceVarP(&c.enrollOpts.Attributes, "attributes", "", []string{}, "Attributes of the user")
 
 	f.StringVar(&c.fileOutput, "output", "", "output file")
 
