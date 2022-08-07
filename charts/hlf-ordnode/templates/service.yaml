@@ -17,6 +17,12 @@ spec:
       protocol: TCP
       name: admin
 {{- end }}
+{{- if .Values.proxy.enabled }}
+    - port: 7443
+      targetPort: 7443
+      protocol: TCP
+      name: proxy
+{{- end }}
     - port: {{ .Values.service.portOperations }}
       targetPort: 9444
       protocol: TCP

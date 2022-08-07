@@ -36,6 +36,7 @@ type CreateChannelOptions struct {
 	peerOrgs    []PeerOrg
 	ordererOrgs []OrdererOrg
 	name        string
+	batchSize   *orderer.BatchSize
 }
 
 func (o CreateChannelOptions) validate() error {
@@ -68,6 +69,11 @@ func WithConsenters(consenters ...Consenter) ChannelOption {
 func WithOrdererOrgs(ordererOrgs ...OrdererOrg) ChannelOption {
 	return func(o *CreateChannelOptions) {
 		o.ordererOrgs = ordererOrgs
+	}
+}
+func WithBatchSize(batchSize *orderer.BatchSize) ChannelOption {
+	return func(o *CreateChannelOptions) {
+		o.batchSize = batchSize
 	}
 }
 func WithPeerOrgs(peerOrgs ...PeerOrg) ChannelOption {
@@ -357,4 +363,3 @@ func memberToConfigtxOrg(mspID string, rootTlsCert *x509.Certificate, signTlsCer
 	}
 	return genesisOrg, nil
 }
-

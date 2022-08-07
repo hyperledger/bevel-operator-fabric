@@ -30,6 +30,8 @@ type OrdererOptions struct {
 	IngressGateway string
 	IngressPort    int
 	AdminHosts     []string
+	CAHost         string
+	CAPort         int
 }
 
 func (o OrdererOptions) Validate() error {
@@ -97,6 +99,14 @@ func (c *createCmd) run(args []string) error {
 			IngressGateway: ingressGateway,
 		}
 	}
+	caHost := k8sIP
+	if c.ordererOpts.CAHost != "" {
+		caHost = c.ordererOpts.CAHost
+	}
+	caPort := certAuth.Status.NodePort
+	if c.ordererOpts.CAPort != 0 {
+		caPort = c.ordererOpts.CAPort
+	}
 	fabricOrderer := &v1alpha1.FabricOrdererNode{
 		TypeMeta: v1.TypeMeta{
 			Kind:       "FabricOrdererNode",
@@ -129,9 +139,9 @@ func (c *createCmd) run(args []string) error {
 			Secret: &v1alpha1.Secret{
 				Enrollment: v1alpha1.Enrollment{
 					Component: v1alpha1.Component{
-						Cahost: k8sIP,
+						Cahost: caHost,
 						Caname: certAuth.Spec.CA.Name,
-						Caport: certAuth.Status.NodePort,
+						Caport: caPort,
 						Catls: v1alpha1.Catls{
 							Cacert: base64.StdEncoding.EncodeToString([]byte(certAuth.Status.TlsCert)),
 						},
@@ -139,9 +149,9 @@ func (c *createCmd) run(args []string) error {
 						Enrollsecret: c.ordererOpts.EnrollPW,
 					},
 					TLS: v1alpha1.TLS{
-						Cahost: k8sIP,
+						Cahost: caHost,
 						Caname: certAuth.Spec.TLSCA.Name,
-						Caport: certAuth.Status.NodePort,
+						Caport: caPort,
 						Catls: v1alpha1.Catls{
 							Cacert: base64.StdEncoding.EncodeToString([]byte(certAuth.Status.TlsCert)),
 						},
@@ -192,7 +202,9 @@ func newCreateOrdererNodeCmd(out io.Writer, errOut io.Writer) *cobra.Command {
 	}
 	f := cmd.Flags()
 	f.StringVar(&c.ordererOpts.Name, "name", "", "Name of the Fabric Orderer to create")
-	f.StringVar(&c.ordererOpts.CAName, "ca-name", "", "CA name to enroll this user")
+	f.StringVar(&c.ordererOpts.CAName, "ca-name", "", "CA name to enroll the orderer identity")
+	f.StringVar(&c.ordererOpts.CAHost, "ca-host", "", "CA host to enroll the orderer identity")
+	f.IntVar(&c.ordererOpts.CAPort, "ca-port", 0, "CA host to enroll the orderer identity")
 	f.StringVar(&c.ordererOpts.EnrollID, "enroll-id", "", "Enroll ID of the CA")
 	f.StringVar(&c.ordererOpts.EnrollPW, "enroll-pw", "", "Enroll secret of the CA")
 	f.StringVar(&c.ordererOpts.Capacity, "capacity", "5Gi", "Total raw capacity of Fabric Orderer in this zone, e.g. 16Ti")

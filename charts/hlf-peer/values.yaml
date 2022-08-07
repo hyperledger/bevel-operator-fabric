@@ -18,6 +18,8 @@ couchdbExporter:
   tag: "v30.0.0"
   pullPolicy: IfNotPresent
 
+imagePullSecrets: []
+
 fsServer:
   image: "quay.io/kfsoftware/fs-peer"
   tag: "amd64-2.2.0"
@@ -113,6 +115,13 @@ resources:
     requests:
       cpu: 100m
       memory: 128Mi
+  proxy:
+    limits:
+      cpu: 100m
+      memory: 128Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
 replicas: 1
 nodeSelector: { }
 
@@ -163,6 +172,16 @@ externalChaincodeBuilder: false
 
 externalBuilders: [ ]
 
+proxy:
+  enabled: false
+  image: "ghcr.io/hyperledger-labs/grpc-web"
+  tag: "latest"
+  pullPolicy: IfNotPresent
+  imagePullSecrets: []
+  istio:
+    port: 443
+    hosts: []
+    ingressGateway: ""
 
 serviceMonitor:
   ## If true, a ServiceMonitor CRD is created for a prometheus operator

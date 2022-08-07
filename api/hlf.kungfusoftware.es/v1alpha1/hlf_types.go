@@ -18,6 +18,7 @@ package v1alpha1
 
 import (
 	"fmt"
+	"k8s.io/api/networking/v1beta1"
 
 	"github.com/operator-framework/operator-lib/status"
 	corev1 "k8s.io/api/core/v1"
@@ -71,6 +72,7 @@ type ServiceMonitor struct {
 	// +kubebuilder:default:="10s"
 	ScrapeTimeout string `json:"scrapeTimeout"`
 }
+
 type FabricPeerCouchdbExporter struct {
 	// +kubebuilder:default:=false
 	Enabled bool `json:"enabled"`
@@ -82,12 +84,36 @@ type FabricPeerCouchdbExporter struct {
 	ImagePullPolicy corev1.PullPolicy `json:"imagePullPolicy"`
 }
 
+type GRPCProxy struct {
+	// +kubebuilder:default:=false
+	Enabled bool `json:"enabled"`
+	// +kubebuilder:default:="ghcr.io/hyperledger-labs/grpc-web"
+	Image string `json:"image"`
+	// +kubebuilder:default:="latest"
+	Tag string `json:"tag"`
+
+	Istio FabricIstio `json:"istio"`
+	// +kubebuilder:default:="IfNotPresent"
+	ImagePullPolicy corev1.PullPolicy `json:"imagePullPolicy"`
+
+	// +nullable
+	Resources *corev1.ResourceRequirements `json:"resources"`
+	// +kubebuilder:validation:Default={}
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +nullable
+	ImagePullSecrets []corev1.LocalObjectReference `json:"imagePullSecrets"`
+}
+
 // FabricPeerSpec defines the desired state of FabricPeer
 type FabricPeerSpec struct {
 	// +optional
 	// +nullable
 	UpdateCertificateTime *metav1.Time `json:"updateCertificateTime"`
-
+	// +nullable
+	// +kubebuilder:validation:Optional
+	// +optional
+	Affinity *corev1.Affinity `json:"affinity"`
 	// +optional
 	// +nullable
 	ServiceMonitor *ServiceMonitor `json:"serviceMonitor"`
@@ -95,9 +121,19 @@ type FabricPeerSpec struct {
 	// +nullable
 	HostAliases []corev1.HostAlias `json:"hostAliases"`
 
+	// +kubebuilder:validation:Default={}
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +nullable
+	NodeSelector *corev1.NodeSelector `json:"nodeSelector,omitempty"`
+
 	// +optional
 	// +nullable
 	CouchDBExporter *FabricPeerCouchdbExporter `json:"couchDBexporter"`
+
+	// +optional
+	// +nullable
+	GRPCProxy *GRPCProxy `json:"grpcProxy"`
 
 	// +kubebuilder:default:=1
 	Replicas int `json:"replicas"`
@@ -126,6 +162,12 @@ type FabricPeerSpec struct {
 	// +kubebuilder:validation:Optional
 	// +nullable
 	FSServer *FabricFSServer `json:"fsServer"`
+
+	// +kubebuilder:validation:Default={}
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +nullable
+	ImagePullSecrets []corev1.LocalObjectReference `json:"imagePullSecrets"`
 
 	// +kubebuilder:validation:MinLength=3
 	MspID     string              `json:"mspID"`
@@ -156,6 +198,9 @@ type FabricPeerResources struct {
 	// +optional
 	// +nullable
 	CouchDBExporter *corev1.ResourceRequirements `json:"couchdbExporter"`
+	// +optional
+	// +nullable
+	Proxy *corev1.ResourceRequirements `json:"proxy"`
 }
 type FabricPeerDiscovery struct {
 	Period      string `json:"period"`
@@ -368,7 +413,13 @@ type FabricOrdererNodeSpec struct {
 	// +nullable
 	// +kubebuilder:validation:Default={}
 	Tolerations []corev1.Toleration `json:"tolerations"`
-
+	// +optional
+	// +nullable
+	GRPCProxy *GRPCProxy `json:"grpcProxy"`
+	// +nullable
+	// +kubebuilder:validation:Optional
+	// +optional
+	Affinity *corev1.Affinity `json:"affinity"`
 	// +optional
 	// +nullable
 	UpdateCertificateTime *metav1.Time `json:"updateCertificateTime"`
@@ -379,6 +430,12 @@ type FabricOrdererNodeSpec struct {
 	// +nullable
 	HostAliases []corev1.HostAlias `json:"hostAliases"`
 
+	// +kubebuilder:validation:Default={}
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +nullable
+	NodeSelector *corev1.NodeSelector `json:"nodeSelector,omitempty"`
+
 	Resources corev1.ResourceRequirements `json:"resources"`
 
 	// +kubebuilder:default:=1
@@ -387,10 +444,17 @@ type FabricOrdererNodeSpec struct {
 	Image string `json:"image"`
 	// +kubebuilder:validation:MinLength=1
 	Tag string `json:"tag"`
+
 	// +kubebuilder:default:="IfNotPresent"
 	PullPolicy corev1.PullPolicy `json:"pullPolicy,omitempty"`
+
 	// +kubebuilder:validation:MinLength=3
 	MspID string `json:"mspID"`
+	// +kubebuilder:validation:Default={}
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +nullable
+	ImagePullSecrets []corev1.LocalObjectReference `json:"imagePullSecrets"`
 
 	Genesis                     string             `json:"genesis"`
 	BootstrapMethod             BootstrapMethod    `json:"bootstrapMethod"`
@@ -493,11 +557,26 @@ type FabricCADatabase struct {
 
 // FabricCASpec defines the desired state of FabricCA
 type FabricCASpec struct {
+	// +nullable
+	// +kubebuilder:validation:Optional
+	// +optional
+	Affinity *corev1.Affinity `json:"affinity"`
 	// +optional
 	// +kubebuilder:validation:Optional
 	// +nullable
 	// +kubebuilder:validation:Default={}
 	Tolerations []corev1.Toleration `json:"tolerations"`
+	// +kubebuilder:validation:Default={}
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +nullable
+	ImagePullSecrets []corev1.LocalObjectReference `json:"imagePullSecrets"`
+
+	// +kubebuilder:validation:Default={}
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +nullable
+	NodeSelector *corev1.NodeSelector `json:"nodeSelector,omitempty"`
 
 	// +optional
 	// +nullable
@@ -917,6 +996,340 @@ type FabricExplorerList struct {
 	Items           []FabricExplorer `json:"items"`
 }
 
+// FabricOperationsConsoleSpec defines the desired state of FabricOperationsConsole
+type FabricOperationsConsoleCouchDB struct {
+	// +kubebuilder:default:="couchdb"
+	Image string `json:"image"`
+	// +kubebuilder:default:="3.1.1"
+	Tag string `json:"tag"`
+
+	Username string  `json:"username"`
+	Password string  `json:"password"`
+	Storage  Storage `json:"storage"`
+
+	// +nullable
+	// +kubebuilder:validation:Optional
+	// +optional
+	Resources *corev1.ResourceRequirements `json:"resources"`
+
+	// +kubebuilder:validation:Default={}
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +nullable
+	ImagePullSecrets []corev1.LocalObjectReference `json:"imagePullSecrets"`
+
+	// +nullable
+	// +kubebuilder:validation:Optional
+	// +optional
+	Affinity *corev1.Affinity `json:"affinity"`
+
+	// +nullable
+	// +kubebuilder:validation:Optional
+	// +optional
+	// +kubebuilder:validation:Default={}
+	Tolerations []corev1.Toleration `json:"tolerations"`
+	// +kubebuilder:default:="IfNotPresent"
+	ImagePullPolicy corev1.PullPolicy `json:"imagePullPolicy"`
+}
+type FabricOperationsConsoleAuth struct {
+	// +kubebuilder:default:="couchdb"
+	Scheme   string `json:"scheme"`
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
+// FabricOperationsConsoleSpec defines the desired state of FabricOperationsConsole
+type FabricOperationsConsoleSpec struct {
+	Auth FabricOperationsConsoleAuth `json:"auth"`
+	// +nullable
+	// +kubebuilder:validation:Optional
+	// +optional
+	Resources corev1.ResourceRequirements `json:"resources"`
+	// +kubebuilder:default:="ghcr.io/hyperledger-labs/fabric-console"
+	Image string `json:"image"`
+	// +kubebuilder:default:="latest"
+	Tag string `json:"tag"`
+
+	// +kubebuilder:default:="IfNotPresent"
+	ImagePullPolicy corev1.PullPolicy `json:"imagePullPolicy"`
+	// +nullable
+	// +kubebuilder:validation:Optional
+	// +optional
+	// +kubebuilder:validation:Default={}
+	Tolerations []corev1.Toleration `json:"tolerations"`
+
+	// +kubebuilder:validation:Default=1
+	Replicas int `json:"replicas"`
+
+	CouchDB FabricOperationsConsoleCouchDB `json:"couchDB"`
+	// +nullable
+	// +kubebuilder:validation:Optional
+	// +optional
+	// +kubebuilder:validation:Default={}
+	Env []corev1.EnvVar `json:"env"`
+
+	// +kubebuilder:validation:Default={}
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +nullable
+	ImagePullSecrets []corev1.LocalObjectReference `json:"imagePullSecrets"`
+
+	// +nullable
+	// +kubebuilder:validation:Optional
+	// +optional
+	Affinity *corev1.Affinity `json:"affinity"`
+
+	// +kubebuilder:default:=3000
+	Port int `json:"port"`
+
+	// +optional
+	// +nullable
+	Config string `json:"config"`
+
+	Ingress Ingress `json:"ingress"`
+	HostURL string  `json:"hostUrl"`
+}
+type Ingress struct {
+	// +kubebuilder:default:=true
+	Enabled bool `json:"enabled"`
+
+	ClassName string `json:"className"`
+	// +kubebuilder:default:={}
+	Annotations map[string]string    `json:"annotations"`
+	TLS         []v1beta1.IngressTLS `json:"tls"`
+	Hosts       []IngressHost        `json:"hosts"`
+}
+
+type IngressHost struct {
+	Host  string        `json:"host"`
+	Paths []IngressPath `json:"paths"`
+}
+type IngressPath struct {
+	// +kubebuilder:default:="/"
+	Path string `json:"path"`
+	// +kubebuilder:default:="Prefix"
+	PathType string `json:"pathType"`
+}
+
+// FabricOperationsConsoleStatus defines the observed state of FabricOperationsConsole
+type FabricOperationsConsoleStatus struct {
+	Conditions status.Conditions `json:"conditions"`
+	Message    string            `json:"message"`
+	// Status of the FabricCA
+	Status DeploymentStatus `json:"status"`
+}
+
+// +genclient
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+// +k8s:defaulter-gen=true
+// +kubebuilder:subresource:status
+// +kubebuilder:resource:scope=Namespaced,shortName=fabricoperationsconsoles,singular=fabricoperationsconsoles
+// +kubebuilder:printcolumn:name="State",type="string",JSONPath=".status.status"
+// +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
+// +kubebuilder:object:root=true
+// +kubebuilder:subresource:status
+// +k8s:openapi-gen=true
+
+// FabricOperationsConsole is the Schema for the hlfs API
+type FabricOperationsConsole struct {
+	metav1.TypeMeta   `json:",inline"`
+	metav1.ObjectMeta `json:"metadata,omitempty"`
+	Spec              FabricOperationsConsoleSpec   `json:"spec,omitempty"`
+	Status            FabricOperationsConsoleStatus `json:"status,omitempty"`
+}
+
+// +kubebuilder:object:root=true
+
+// FabricOperationsConsoleList contains a list of FabricOperationsConsole
+type FabricOperationsConsoleList struct {
+	metav1.TypeMeta `json:",inline"`
+	metav1.ListMeta `json:"metadata,omitempty"`
+	Items           []FabricOperationsConsole `json:"items"`
+}
+
+// FabricOperatorUIStatus defines the observed state of FabricOperatorUI
+type FabricOperatorUIStatus struct {
+	Conditions status.Conditions `json:"conditions"`
+	Message    string            `json:"message"`
+	// Status of the FabricCA
+	Status DeploymentStatus `json:"status"`
+}
+
+// +genclient
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+// +k8s:defaulter-gen=true
+// +kubebuilder:subresource:status
+// +kubebuilder:resource:scope=Namespaced,shortName=fabricoperatorui,singular=fabricoperatorui
+// +kubebuilder:printcolumn:name="State",type="string",JSONPath=".status.status"
+// +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
+// +kubebuilder:object:root=true
+// +kubebuilder:subresource:status
+// +k8s:openapi-gen=true
+
+// FabricOperatorUI is the Schema for the hlfs API
+type FabricOperatorUI struct {
+	metav1.TypeMeta   `json:",inline"`
+	metav1.ObjectMeta `json:"metadata,omitempty"`
+	Spec              FabricOperatorUISpec   `json:"spec,omitempty"`
+	Status            FabricOperatorUIStatus `json:"status,omitempty"`
+}
+
+// +kubebuilder:object:root=true
+
+// FabricOperatorUIList contains a list of FabricOperatorUI
+type FabricOperatorUIList struct {
+	metav1.TypeMeta `json:",inline"`
+	metav1.ListMeta `json:"metadata,omitempty"`
+	Items           []FabricOperatorUI `json:"items"`
+}
+type FabricOperatorUIAuth struct {
+	OIDCAuthority string `json:"oidcAuthority"`
+	OIDCClientId  string `json:"oidcClientId"`
+	OIDCScope     string `json:"oidcScope"`
+}
+
+// FabricOperatorUISpec defines the desired state of FabricOperatorUI
+type FabricOperatorUISpec struct {
+	Image string `json:"image"`
+	Tag   string `json:"tag"`
+	// +kubebuilder:default:="IfNotPresent"
+	ImagePullPolicy corev1.PullPolicy `json:"imagePullPolicy"`
+
+	// +kubebuilder:default:=""
+	LogoURL string `json:"logoUrl"`
+
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +nullable
+	// +kubebuilder:validation:Default={}
+	Auth *FabricOperatorUIAuth `json:"auth"`
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +nullable
+	// +kubebuilder:validation:Default={}
+	Tolerations []corev1.Toleration `json:"tolerations"`
+	// +kubebuilder:validation:Default=1
+	Replicas int     `json:"replicas"`
+	Ingress  Ingress `json:"ingress"`
+
+	APIURL string `json:"apiUrl"`
+	// +kubebuilder:validation:Default={}
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +nullable
+	ImagePullSecrets []corev1.LocalObjectReference `json:"imagePullSecrets"`
+	// +nullable
+	// +kubebuilder:validation:Optional
+	// +optional
+	// +kubebuilder:validation:Default={}
+	Env []corev1.EnvVar `json:"env"`
+
+	// +nullable
+	// +kubebuilder:validation:Optional
+	// +optional
+	Affinity *corev1.Affinity `json:"affinity"`
+
+	// +nullable
+	// +kubebuilder:validation:Optional
+	// +optional
+	Resources *corev1.ResourceRequirements `json:"resources"`
+}
+
+// FabricOperatorAPIStatus defines the observed state of FabricOperatorAPI
+type FabricOperatorAPIStatus struct {
+	Conditions status.Conditions `json:"conditions"`
+	Message    string            `json:"message"`
+	// Status of the FabricCA
+	Status DeploymentStatus `json:"status"`
+}
+
+// +genclient
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+// +k8s:defaulter-gen=true
+// +kubebuilder:subresource:status
+// +kubebuilder:resource:scope=Namespaced,shortName=fabricoperatorapi,singular=fabricoperatorapi
+// +kubebuilder:printcolumn:name="State",type="string",JSONPath=".status.status"
+// +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
+// +kubebuilder:object:root=true
+// +kubebuilder:subresource:status
+// +k8s:openapi-gen=true
+
+// FabricOperatorAPI is the Schema for the hlfs API
+type FabricOperatorAPI struct {
+	metav1.TypeMeta   `json:",inline"`
+	metav1.ObjectMeta `json:"metadata,omitempty"`
+	Spec              FabricOperatorAPISpec   `json:"spec,omitempty"`
+	Status            FabricOperatorAPIStatus `json:"status,omitempty"`
+}
+
+// +kubebuilder:object:root=true
+
+// FabricOperatorAPIList contains a list of FabricOperatorAPI
+type FabricOperatorAPIList struct {
+	metav1.TypeMeta `json:",inline"`
+	metav1.ListMeta `json:"metadata,omitempty"`
+	Items           []FabricOperatorAPI `json:"items"`
+}
+type FabricOperatorAPIHLFConfig struct {
+	MSPID         string                         `json:"mspID"`
+	User          string                         `json:"user"`
+	NetworkConfig FabricOperatorAPINetworkConfig `json:"networkConfig"`
+}
+type FabricOperatorAPINetworkConfig struct {
+	SecretName string `json:"secretName"`
+	Key        string `json:"key"`
+}
+type FabricOperatorAPIAuth struct {
+	OIDCJWKS   string `json:"oidcJWKS"`
+	OIDCIssuer string `json:"oidcIssuer"`
+}
+
+// FabricOperatorAPISpec defines the desired state of FabricOperatorAPI
+type FabricOperatorAPISpec struct {
+	Image string `json:"image"`
+	Tag   string `json:"tag"`
+	// +kubebuilder:default:="IfNotPresent"
+	ImagePullPolicy corev1.PullPolicy `json:"imagePullPolicy"`
+	Istio           FabricIstio       `json:"istio"`
+	Ingress         Ingress           `json:"ingress"`
+	// +kubebuilder:validation:Default=1
+	Replicas int `json:"replicas"`
+
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +nullable
+	// +kubebuilder:validation:Default={}
+	Auth *FabricOperatorAPIAuth `json:"auth"`
+
+	HLFConfig FabricOperatorAPIHLFConfig `json:"hlfConfig"`
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +nullable
+	// +kubebuilder:validation:Default={}
+	Tolerations []corev1.Toleration `json:"tolerations"`
+
+	// +kubebuilder:validation:Default={}
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +nullable
+	ImagePullSecrets []corev1.LocalObjectReference `json:"imagePullSecrets"`
+	// +nullable
+	// +kubebuilder:validation:Optional
+	// +optional
+	// +kubebuilder:validation:Default={}
+	Env []corev1.EnvVar `json:"env"`
+
+	// +nullable
+	// +kubebuilder:validation:Optional
+	// +optional
+	Affinity *corev1.Affinity `json:"affinity"`
+
+	// +nullable
+	// +kubebuilder:validation:Optional
+	// +optional
+	Resources *corev1.ResourceRequirements `json:"resources"`
+}
+
 // FabricNetworkConfigSpec defines the desired state of FabricNetworkConfig
 type FabricNetworkConfigSpec struct {
 	Organization  string   `json:"organization"`
@@ -969,6 +1382,9 @@ type FabricChaincodeSpec struct {
 	// +kubebuilder:validation:MinLength=1
 	PackageID string `json:"packageId"`
 	// +kubebuilder:validation:Default={}
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +nullable
 	ImagePullSecrets []corev1.LocalObjectReference `json:"imagePullSecrets"`
 
 	// +nullable
@@ -1046,4 +1462,7 @@ func init() {
 	SchemeBuilder.Register(&FabricExplorer{}, &FabricExplorerList{})
 	SchemeBuilder.Register(&FabricNetworkConfig{}, &FabricNetworkConfigList{})
 	SchemeBuilder.Register(&FabricChaincode{}, &FabricChaincodeList{})
+	SchemeBuilder.Register(&FabricOperationsConsole{}, &FabricOperationsConsoleList{})
+	SchemeBuilder.Register(&FabricOperatorUI{}, &FabricOperatorUIList{})
+	SchemeBuilder.Register(&FabricOperatorAPI{}, &FabricOperatorAPIList{})
 }

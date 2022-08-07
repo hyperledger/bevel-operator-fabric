@@ -39,6 +39,11 @@ type Options struct {
 	Output                          bool
 	KubernetesBuilder               bool
 	ExternalChaincodeServiceBuilder bool
+	CouchDBImage                    string
+	CouchDBTag                      string
+	CouchDBPassword                 string
+	CAPort                          int
+	CAHost                          string
 }
 
 func (o Options) Validate() error {
@@ -127,6 +132,71 @@ func (c *createCmd) run() error {
 		})
 	}
 	kubernetesBuilder := c.peerOpts.KubernetesBuilder
+	if c.peerOpts.KubernetesBuilder {
+		externalBuilders = append(externalBuilders, v1alpha1.ExternalBuilder{
+			Name: "k8s-builder",
+			Path: "/builders/golang",
+			PropagateEnvironment: []string{
+				"CHAINCODE_SHARED_DIR",
+				"FILE_SERVER_BASE_IP",
+				"KUBERNETES_SERVICE_HOST",
+				"KUBERNETES_SERVICE_PORT",
+				"K8SCC_CFGFILE",
+				"TMPDIR",
+				"LD_LIBRARY_PATH",
+				"LIBPATH",
+				"PATH",
+				"EXTERNAL_BUILDER_HTTP_PROXY",
+				"EXTERNAL_BUILDER_HTTPS_PROXY",
+				"EXTERNAL_BUILDER_NO_PROXY",
+				"EXTERNAL_BUILDER_PEER_URL",
+			},
+		})
+	}
+	couchDB := v1alpha1.FabricPeerCouchDB{
+		User:     "couchdb",
+		Password: "couchdb",
+	}
+	if c.peerOpts.CouchDBPassword != "" {
+		couchDB.Password = c.peerOpts.CouchDBPassword
+	}
+	if c.peerOpts.CouchDBImage != "" && c.peerOpts.CouchDBTag != "" {
+		couchDB.Image = c.peerOpts.CouchDBImage
+		couchDB.Tag = c.peerOpts.CouchDBTag
+	}
+	caHost := k8sIP
+	if c.peerOpts.CAHost != "" {
+		caHost = c.peerOpts.CAHost
+	}
+	caPort := certAuth.Status.NodePort
+	if c.peerOpts.CAPort != 0 {
+		caPort = c.peerOpts.CAPort
+	}
+	component := v1alpha1.Component{
+		Cahost: caHost,
+		Caport: caPort,
+		Caname: certAuth.Spec.CA.Name,
+		Catls: v1alpha1.Catls{
+			Cacert: base64.StdEncoding.EncodeToString([]byte(certAuth.Status.TlsCert)),
+		},
+		Enrollid:     c.peerOpts.EnrollID,
+		Enrollsecret: c.peerOpts.EnrollPW,
+	}
+	tls := v1alpha1.TLS{
+		Cahost: caHost,
+		Caport: caPort,
+		Caname: certAuth.Spec.TLSCA.Name,
+		Catls: v1alpha1.Catls{
+			Cacert: base64.StdEncoding.EncodeToString([]byte(certAuth.Status.TlsCert)),
+		},
+		Csr: v1alpha1.Csr{
+			Hosts: csrHosts,
+			CN:    "",
+		},
+		Enrollid:     c.peerOpts.EnrollID,
+		Enrollsecret: c.peerOpts.EnrollPW,
+	}
+
 	fabricPeer := &v1alpha1.FabricPeer{
 		TypeMeta: v1.TypeMeta{
 			Kind:       "FabricPeer",
@@ -155,37 +225,12 @@ func (c *createCmd) run() error {
 			ExternalEndpoint: externalEndpoint,
 			Tag:              c.peerOpts.Version,
 			ImagePullPolicy:  "Always",
-			CouchDB: v1alpha1.FabricPeerCouchDB{
-				User:     "couchdb",
-				Password: "couchdb",
-			},
-			MspID: c.peerOpts.MspID,
+			CouchDB:          couchDB,
+			MspID:            c.peerOpts.MspID,
 			Secret: v1alpha1.Secret{
 				Enrollment: v1alpha1.Enrollment{
-					Component: v1alpha1.Component{
-						Cahost: k8sIP,
-						Caname: certAuth.Spec.CA.Name,
-						Caport: certAuth.Status.NodePort,
-						Catls: v1alpha1.Catls{
-							Cacert: base64.StdEncoding.EncodeToString([]byte(certAuth.Status.TlsCert)),
-						},
-						Enrollid:     c.peerOpts.EnrollID,
-						Enrollsecret: c.peerOpts.EnrollPW,
-					},
-					TLS: v1alpha1.TLS{
-						Cahost: k8sIP,
-						Caname: certAuth.Spec.TLSCA.Name,
-						Caport: certAuth.Status.NodePort,
-						Catls: v1alpha1.Catls{
-							Cacert: base64.StdEncoding.EncodeToString([]byte(certAuth.Status.TlsCert)),
-						},
-						Csr: v1alpha1.Csr{
-							Hosts: csrHosts,
-							CN:    "",
-						},
-						Enrollid:     c.peerOpts.EnrollID,
-						Enrollsecret: c.peerOpts.EnrollPW,
-					},
+					Component: component,
+					TLS:       tls,
 				},
 			},
 			Service: v1alpha1.PeerService{
@@ -353,7 +398,9 @@ func newCreatePeerCmd(out io.Writer, errOut io.Writer) *cobra.Command {
 	}
 	f := cmd.Flags()
 	f.StringVar(&c.peerOpts.Name, "name", "", "Name of the Fabric Peer to create")
-	f.StringVar(&c.peerOpts.CAName, "ca-name", "", "CA name to enroll this user")
+	f.StringVar(&c.peerOpts.CAName, "ca-name", "", "CA name to enroll the peer identity")
+	f.StringVar(&c.peerOpts.CAHost, "ca-host", "", "CA host to enroll the peer identity")
+	f.IntVar(&c.peerOpts.CAPort, "ca-port", 0, "CA host to enroll the peer identity")
 	f.StringVar(&c.peerOpts.EnrollID, "enroll-id", "", "Enroll ID of the CA")
 	f.StringVar(&c.peerOpts.EnrollPW, "enroll-pw", "", "Enroll secret of the CA")
 	f.StringVar(&c.peerOpts.PeerCapacity, "capacity", "5Gi", "Total raw capacity of Fabric Peer in this zone, e.g. 16Ti")
@@ -373,5 +420,9 @@ func newCreatePeerCmd(out io.Writer, errOut io.Writer) *cobra.Command {
 	f.BoolVarP(&c.peerOpts.Output, "output", "o", false, "Output in yaml")
 	f.BoolVarP(&c.peerOpts.KubernetesBuilder, "k8s-builder", "", false, "Enable kubernetes builder (deprecated)")
 	f.BoolVarP(&c.peerOpts.ExternalChaincodeServiceBuilder, "external-service-builder", "", true, "External chaincode service builder enabled(only use in 2.4.1+)")
+
+	f.StringVarP(&c.peerOpts.CouchDBImage, "couchdb-repository", "", helpers.DefaultCouchDBImage, "CouchDB image")
+	f.StringVarP(&c.peerOpts.CouchDBTag, "couchdb-tag", "", helpers.DefaultCouchDBVersion, "CouchDB version")
+	f.StringVarP(&c.peerOpts.CouchDBPassword, "couchdb-password", "", "", "CouchDB password")
 	return cmd
 }

@@ -1,0 +1,25 @@
+{{- if .Values.proxy.istio.hosts -}}
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: {{ include "hlf-peer.fullname" . }}-virtualservice-proxy
+spec:
+  hosts:
+    {{- range .Values.proxy.istio.hosts }}
+    - {{ . }}
+    {{- end }}
+  gateways:
+    - {{ include "hlf-peer.fullname" . }}-proxy
+  tls:
+    - match:
+        - port: 443
+          sniHosts:
+          {{- range .Values.proxy.istio.hosts }}
+              - {{ . }}
+          {{- end }}
+      route:
+        - destination:
+            host: {{ include "hlf-peer.fullname" . }}-proxy
+            port:
+              number: 7443
+{{- end -}}

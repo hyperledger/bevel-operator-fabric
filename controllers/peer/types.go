@@ -23,41 +23,50 @@ type FSServer struct {
 }
 
 type FabricPeerChart struct {
-	FSServer                 FSServer            `json:"fsServer"`
-	Istio                    Istio               `json:"istio"`
-	Replicas                 int                 `json:"replicas"`
-	ExternalChaincodeBuilder bool                `json:"externalChaincodeBuilder"`
-	CouchdbUsername          string              `json:"couchdbUsername"`
-	CouchdbPassword          string              `json:"couchdbPassword"`
-	Image                    Image               `json:"image"`
-	CouchDB                  CouchDB             `json:"couchdb"`
-	Rbac                     RBAC                `json:"rbac"`
-	DockerSocketPath         string              `json:"dockerSocketPath"`
-	Peer                     Peer                `json:"peer"`
-	Cert                     string              `json:"cert"`
-	Key                      string              `json:"key"`
-	Hosts                    []string            `json:"hosts"`
-	TLS                      TLS                 `json:"tls"`
-	OPSTLS                   TLS                 `json:"opsTLS"`
-	Cacert                   string              `json:"cacert"`
-	IntCacert                string              `json:"intCAcert"`
-	Tlsrootcert              string              `json:"tlsrootcert"`
-	Resources                PeerResources       `json:"resources,omitempty"`
-	NodeSelector             NodeSelector        `json:"nodeSelector,omitempty"`
-	Tolerations              []corev1.Toleration `json:"tolerations,omitempty"`
-	Affinity                 Affinity            `json:"affinity,omitempty"`
-	ExternalHost             string              `json:"externalHost"`
-	FullnameOverride         string              `json:"fullnameOverride"`
-	CouchDBExporter          CouchDBExporter     `json:"couchdbExporter"`
-	HostAliases              []HostAlias         `json:"hostAliases"`
-	Service                  Service             `json:"service"`
-	Persistence              PeerPersistence     `json:"persistence"`
-	Logging                  Logging             `json:"logging"`
-	ExternalBuilders         []ExternalBuilder   `json:"externalBuilders"`
-	ServiceMonitor           ServiceMonitor      `json:"serviceMonitor"`
-	EnvVars                  []corev1.EnvVar     `json:"envVars"`
+	FSServer                 FSServer                      `json:"fsServer"`
+	Istio                    Istio                         `json:"istio"`
+	Replicas                 int                           `json:"replicas"`
+	ExternalChaincodeBuilder bool                          `json:"externalChaincodeBuilder"`
+	CouchdbUsername          string                        `json:"couchdbUsername"`
+	CouchdbPassword          string                        `json:"couchdbPassword"`
+	Image                    Image                         `json:"image"`
+	CouchDB                  CouchDB                       `json:"couchdb"`
+	Rbac                     RBAC                          `json:"rbac"`
+	DockerSocketPath         string                        `json:"dockerSocketPath"`
+	Peer                     Peer                          `json:"peer"`
+	Cert                     string                        `json:"cert"`
+	Key                      string                        `json:"key"`
+	Hosts                    []string                      `json:"hosts"`
+	Proxy                    GRPCProxy                     `json:"proxy"`
+	TLS                      TLS                           `json:"tls"`
+	OPSTLS                   TLS                           `json:"opsTLS"`
+	Cacert                   string                        `json:"cacert"`
+	IntCacert                string                        `json:"intCAcert"`
+	Tlsrootcert              string                        `json:"tlsrootcert"`
+	Resources                PeerResources                 `json:"resources,omitempty"`
+	NodeSelector             *corev1.NodeSelector          `json:"nodeSelector,omitempty"`
+	Tolerations              []corev1.Toleration           `json:"tolerations,omitempty"`
+	ImagePullSecrets         []corev1.LocalObjectReference `json:"imagePullSecrets"`
+	Affinity                 *corev1.Affinity              `json:"affinity,omitempty"`
+	ExternalHost             string                        `json:"externalHost"`
+	FullnameOverride         string                        `json:"fullnameOverride"`
+	CouchDBExporter          CouchDBExporter               `json:"couchdbExporter"`
+	HostAliases              []HostAlias                   `json:"hostAliases"`
+	Service                  Service                       `json:"service"`
+	Persistence              PeerPersistence               `json:"persistence"`
+	Logging                  Logging                       `json:"logging"`
+	ExternalBuilders         []ExternalBuilder             `json:"externalBuilders"`
+	ServiceMonitor           ServiceMonitor                `json:"serviceMonitor"`
+	EnvVars                  []corev1.EnvVar               `json:"envVars"`
 }
-
+type GRPCProxy struct {
+	Enabled          bool                          `json:"enabled"`
+	Image            string                        `json:"image"`
+	Tag              string                        `json:"tag"`
+	PullPolicy       string                        `json:"pullPolicy"`
+	ImagePullSecrets []corev1.LocalObjectReference `json:"imagePullSecrets"`
+	Istio            Istio                         `json:"istio"`
+}
 type ServiceMonitor struct {
 	Enabled           bool              `json:"enabled"`
 	Labels            map[string]string `json:"labels"`
@@ -86,6 +95,7 @@ type PeerResources struct {
 	CouchDB         Resources  `json:"couchdb"`
 	Chaincode       Resources  `json:"chaincode"`
 	CouchDBExporter *Resources `json:"couchdbExporter,omitempty"`
+	Proxy           *Resources `json:"proxy,omitempty"`
 }
 type CouchDBExporter struct {
 	Enabled    bool   `json:"enabled"`
@@ -145,10 +155,7 @@ type Resources struct {
 	Limits   Limits   `json:"limits"`
 	Requests Requests `json:"requests"`
 }
-type NodeSelector struct {
-}
-type Affinity struct {
-}
+
 type HostAlias struct {
 	IP        string   `json:"ip"`
 	Hostnames []string `json:"hostnames"`
