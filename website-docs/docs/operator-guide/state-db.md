@@ -41,5 +41,5 @@ couchdb:
     user: couchdb
     password: couchdb
 ```
-If you wish to use an external CouchDB instance, [check this page](./external-couchdb)
+If you wish to use an external CouchDB instance, [check this page](../couchdb/external-couchdb)
 
