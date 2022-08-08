@@ -45,15 +45,3 @@ spec:
           arch: amd64
       {{addURIAndSha "https://github.com/hyperledger-labs/hlf-operator/releases/download/{{ .TagName }}/hlf-operator_{{ .TagName }}_windows_amd64.zip" .TagName | indent 6 }}
       bin: kubectl-hlf.exe
-    - selector:
-        matchLabels:
-          os: freebsd
-          arch: amd64
-      {{addURIAndSha "https://github.com/hyperledger-labs/hlf-operator/releases/download/{{ .TagName }}/hlf-operator_{{ .TagName }}_freebsd_amd64.zip" .TagName | indent 6 }}
-      bin: kubectl-hlf
-    - selector:
-        matchLabels:
-          os: freebsd
-          arch: arm64
-      {{addURIAndSha "https://github.com/hyperledger-labs/hlf-operator/releases/download/{{ .TagName }}/hlf-operator_{{ .TagName }}_freebsd_arm64.zip" .TagName | indent 6 }}
-      bin: kubectl-hlf
