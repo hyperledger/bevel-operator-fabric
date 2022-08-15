@@ -50,6 +50,7 @@ type FabricCAChartItemConf struct {
 	CSR          FabricCAChartCSR          `json:"csr"`
 	CRL          FabricCAChartCRL          `json:"crl"`
 	Registry     FabricCAChartRegistry     `json:"registry"`
+	Signing      FabricCASigning           `json:"signing"`
 	Intermediate FabricCAChartIntermediate `json:"intermediate"`
 	BCCSP        FabricCAChartBCCSP        `json:"bccsp"`
 	Affiliations []Affiliation             `json:"affiliations"`
@@ -225,4 +226,38 @@ type Requests struct {
 type RequestsLimit struct {
 	CPU    string `json:"cpu"`
 	Memory string `json:"memory"`
+}
+
+type FabricCASigning struct {
+	Default  FabricCASigningDefault  `json:"default"`
+	Profiles FabricCASigningProfiles `json:"profiles"`
+}
+type FabricCASigningProfiles struct {
+	CA  FabricCASigningSignProfile `json:"ca"`
+	TLS FabricCASigningTLSProfile  `json:"tls"`
+}
+type FabricCASigningSignProfile struct {
+	// +kubebuilder:default:={"cert sign","crl sign"}
+	Usage []string `json:"usage"`
+	// +kubebuilder:default:="43800h"
+	Expiry       string                               `json:"expiry"`
+	CAConstraint FabricCASigningSignProfileConstraint `json:"caconstraint"`
+}
+type FabricCASigningSignProfileConstraint struct {
+	// +kubebuilder:default:=true
+	IsCA bool `json:"isCA"`
+	// +kubebuilder:default:=0
+	MaxPathLen int `json:"maxPathLen"`
+}
+type FabricCASigningTLSProfile struct {
+	// +kubebuilder:default:={"signing","key encipherment", "server auth", "client auth", "key agreement"}
+	Usage []string `json:"usage"`
+	// +kubebuilder:default:="8760h"
+	Expiry string `json:"expiry"`
+}
+type FabricCASigningDefault struct {
+	// +kubebuilder:default:="8760h"
+	Expiry string `json:"expiry"`
+	// +kubebuilder:default:={"digital signature"}
+	Usage []string `json:"usage"`
 }

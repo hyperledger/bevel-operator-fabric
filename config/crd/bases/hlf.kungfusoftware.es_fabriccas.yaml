@@ -639,6 +639,21 @@ spec:
                 type: object
               ca:
                 properties:
+                  affiliations:
+                    items:
+                      properties:
+                        departments:
+                          items:
+                            type: string
+                          type: array
+                        name:
+                          type: string
+                      required:
+                      - departments
+                      - name
+                      type: object
+                    nullable: true
+                    type: array
                   bccsp:
                     properties:
                       default:
@@ -835,6 +850,82 @@ spec:
                     required:
                     - identities
                     - max_enrollments
+                    type: object
+                  signing:
+                    nullable: true
+                    properties:
+                      default:
+                        properties:
+                          expiry:
+                            default: 8760h
+                            type: string
+                          usage:
+                            default:
+                            - digital signature
+                            items:
+                              type: string
+                            type: array
+                        required:
+                        - expiry
+                        - usage
+                        type: object
+                      profiles:
+                        properties:
+                          ca:
+                            properties:
+                              caconstraint:
+                                properties:
+                                  isCA:
+                                    default: true
+                                    type: boolean
+                                  maxPathLen:
+                                    default: 0
+                                    type: integer
+                                required:
+                                - isCA
+                                - maxPathLen
+                                type: object
+                              expiry:
+                                default: 43800h
+                                type: string
+                              usage:
+                                default:
+                                - cert sign
+                                - crl sign
+                                items:
+                                  type: string
+                                type: array
+                            required:
+                            - caconstraint
+                            - expiry
+                            - usage
+                            type: object
+                          tls:
+                            properties:
+                              expiry:
+                                default: 8760h
+                                type: string
+                              usage:
+                                default:
+                                - signing
+                                - key encipherment
+                                - server auth
+                                - client auth
+                                - key agreement
+                                items:
+                                  type: string
+                                type: array
+                            required:
+                            - expiry
+                            - usage
+                            type: object
+                        required:
+                        - ca
+                        - tls
+                        type: object
+                    required:
+                    - default
+                    - profiles
                     type: object
                   subject:
                     properties:
@@ -1291,6 +1382,21 @@ spec:
                 type: object
               tlsCA:
                 properties:
+                  affiliations:
+                    items:
+                      properties:
+                        departments:
+                          items:
+                            type: string
+                          type: array
+                        name:
+                          type: string
+                      required:
+                      - departments
+                      - name
+                      type: object
+                    nullable: true
+                    type: array
                   bccsp:
                     properties:
                       default:
@@ -1487,6 +1593,82 @@ spec:
                     required:
                     - identities
                     - max_enrollments
+                    type: object
+                  signing:
+                    nullable: true
+                    properties:
+                      default:
+                        properties:
+                          expiry:
+                            default: 8760h
+                            type: string
+                          usage:
+                            default:
+                            - digital signature
+                            items:
+                              type: string
+                            type: array
+                        required:
+                        - expiry
+                        - usage
+                        type: object
+                      profiles:
+                        properties:
+                          ca:
+                            properties:
+                              caconstraint:
+                                properties:
+                                  isCA:
+                                    default: true
+                                    type: boolean
+                                  maxPathLen:
+                                    default: 0
+                                    type: integer
+                                required:
+                                - isCA
+                                - maxPathLen
+                                type: object
+                              expiry:
+                                default: 43800h
+                                type: string
+                              usage:
+                                default:
+                                - cert sign
+                                - crl sign
+                                items:
+                                  type: string
+                                type: array
+                            required:
+                            - caconstraint
+                            - expiry
+                            - usage
+                            type: object
+                          tls:
+                            properties:
+                              expiry:
+                                default: 8760h
+                                type: string
+                              usage:
+                                default:
+                                - signing
+                                - key encipherment
+                                - server auth
+                                - client auth
+                                - key agreement
+                                items:
+                                  type: string
+                                type: array
+                            required:
+                            - expiry
+                            - usage
+                            type: object
+                        required:
+                        - ca
+                        - tls
+                        type: object
+                    required:
+                    - default
+                    - profiles
                     type: object
                   subject:
                     properties:
