@@ -18,7 +18,7 @@ hlf-cc-dev serve --address ":8080" --metrics-address ":8081" --config "<PATH_TO_
 You need to have a chaincode that's able to be deployed as an external service; you can take a look at the following templates:
 
 - For Go (https://github.com/kfsoftware/hlf-cc-go-template)
-- For Node.JS (https://github.com/kfsoftware/hlf-cc-node-template)
+- For Node.JS (https://github.com/kfsoftware/hlf-cc-nodejs-template)
 - **pending** For Java (https://github.com/kfsoftware/hlf-cc-java-template)
 
 We recommend using the Go template since it's the easiest one to get started with.
