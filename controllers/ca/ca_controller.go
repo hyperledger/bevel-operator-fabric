@@ -305,9 +305,9 @@ func mapCRDItemConfToChart(conf hlfv1alpha1.FabricCAItemConf) FabricCAChartItemC
 			Departments: affiliation.Departments,
 		})
 	}
-	item := FabricCAChartItemConf{
-		Name: conf.Name,
-		Signing: FabricCASigning{
+	var signing FabricCASigning
+	if conf.Signing != nil {
+		signing = FabricCASigning{
 			Default: FabricCASigningDefault{
 				Expiry: conf.Signing.Default.Expiry,
 				Usage:  conf.Signing.Default.Usage,
@@ -326,7 +326,41 @@ func mapCRDItemConfToChart(conf hlfv1alpha1.FabricCAItemConf) FabricCAChartItemC
 					Expiry: conf.Signing.Profiles.TLS.Expiry,
 				},
 			},
-		},
+		}
+	} else {
+		signing = FabricCASigning{
+			Default: FabricCASigningDefault{
+				Expiry: "8760h",
+				Usage:  []string{"digital signature"},
+			},
+			Profiles: FabricCASigningProfiles{
+				CA: FabricCASigningSignProfile{
+					Usage: []string{
+						"cert sign",
+						"crl sign",
+					},
+					Expiry: "43800h",
+					CAConstraint: FabricCASigningSignProfileConstraint{
+						IsCA:       true,
+						MaxPathLen: 0,
+					},
+				},
+				TLS: FabricCASigningTLSProfile{
+					Usage: []string{
+						"signing",
+						"key encipherment",
+						"server auth",
+						"client auth",
+						"key agreement",
+					},
+					Expiry: "8760h",
+				},
+			},
+		}
+	}
+	item := FabricCAChartItemConf{
+		Name:    conf.Name,
+		Signing: signing,
 		CFG: FabricCAChartCFG{
 			Identities:   FabricCAChartCFGIdentities{AllowRemove: conf.CFG.Identities.AllowRemove},
 			Affiliations: FabricCAChartCFGAffilitions{AllowRemove: conf.CFG.Affiliations.AllowRemove},
