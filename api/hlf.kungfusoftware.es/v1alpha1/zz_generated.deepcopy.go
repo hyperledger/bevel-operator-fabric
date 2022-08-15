@@ -549,7 +549,11 @@ func (in *FabricCAItemConf) DeepCopyInto(out *FabricCAItemConf) {
 	out.CFG = in.CFG
 	out.Subject = in.Subject
 	in.CSR.DeepCopyInto(&out.CSR)
-	in.Signing.DeepCopyInto(&out.Signing)
+	if in.Signing != nil {
+		in, out := &in.Signing, &out.Signing
+		*out = new(FabricCASigning)
+		(*in).DeepCopyInto(*out)
+	}
 	out.CRL = in.CRL
 	in.Registry.DeepCopyInto(&out.Registry)
 	out.Intermediate = in.Intermediate

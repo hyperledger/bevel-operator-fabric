@@ -706,10 +706,10 @@ type FabricCAItemConf struct {
 	CFG     FabricCACFG     `json:"cfg"`
 	Subject FabricCASubject `json:"subject"`
 	CSR     FabricCACSR     `json:"csr"`
-	// +nullable
-	// +kubebuilder:validation:Optional
 	// +optional
-	Signing      FabricCASigning      `json:"signing"`
+	// +kubebuilder:validation:Optional
+	// +nullable
+	Signing      *FabricCASigning     `json:"signing"`
 	CRL          FabricCACRL          `json:"crl"`
 	Registry     FabricCARegistry     `json:"registry"`
 	Intermediate FabricCAIntermediate `json:"intermediate"`
