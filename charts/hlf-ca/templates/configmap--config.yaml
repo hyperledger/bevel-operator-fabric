@@ -184,27 +184,8 @@ data:
     #  the default expiration ("expiry" field) is "8760h", which is 1 year in hours.
     #############################################################################
     signing:
-        default:
-          usage:
-            - digital signature
-          expiry: 8760h
-        profiles:
-          ca:
-             usage:
-               - cert sign
-               - crl sign
-             expiry: 43800h
-             caconstraint:
-               isca: true
-               maxpathlen: 0
-          tls:
-             usage:
-                - signing
-                - key encipherment
-                - server auth
-                - client auth
-                - key agreement
-             expiry: 8760h
+    {{- toYaml .Values.ca.signing | nindent 6 }}
+
     ###########################################################################
     #  Certificate Signing Request (CSR) section.
     #  This controls the creation of the root CA certificate.

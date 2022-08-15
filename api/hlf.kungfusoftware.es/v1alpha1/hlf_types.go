@@ -662,15 +662,63 @@ type Storage struct {
 	AccessMode corev1.PersistentVolumeAccessMode `json:"accessMode"`
 }
 
+type FabricCASigning struct {
+	Default  FabricCASigningDefault  `json:"default"`
+	Profiles FabricCASigningProfiles `json:"profiles"`
+}
+type FabricCASigningProfiles struct {
+	CA  FabricCASigningSignProfile `json:"ca"`
+	TLS FabricCASigningTLSProfile  `json:"tls"`
+}
+type FabricCASigningSignProfile struct {
+	// +kubebuilder:default:={"cert sign","crl sign"}
+	Usage []string `json:"usage"`
+	// +kubebuilder:default:="43800h"
+	Expiry       string                               `json:"expiry"`
+	CAConstraint FabricCASigningSignProfileConstraint `json:"caconstraint"`
+}
+type FabricCASigningSignProfileConstraint struct {
+	// +kubebuilder:default:=true
+	IsCA bool `json:"isCA"`
+	// +kubebuilder:default:=0
+	MaxPathLen int `json:"maxPathLen"`
+}
+type FabricCASigningTLSProfile struct {
+	// +kubebuilder:default:={"signing","key encipherment", "server auth", "client auth", "key agreement"}
+	Usage []string `json:"usage"`
+	// +kubebuilder:default:="8760h"
+	Expiry string `json:"expiry"`
+}
+type FabricCASigningDefault struct {
+	// +kubebuilder:default:="8760h"
+	Expiry string `json:"expiry"`
+	// +kubebuilder:default:={"digital signature"}
+	Usage []string `json:"usage"`
+}
+
+type FabricCAAffiliation struct {
+	Name        string   `json:"name"`
+	Departments []string `json:"departments"`
+}
+
 type FabricCAItemConf struct {
-	Name         string               `json:"name"`
-	CFG          FabricCACFG          `json:"cfg"`
-	Subject      FabricCASubject      `json:"subject"`
-	CSR          FabricCACSR          `json:"csr"`
+	Name    string          `json:"name"`
+	CFG     FabricCACFG     `json:"cfg"`
+	Subject FabricCASubject `json:"subject"`
+	CSR     FabricCACSR     `json:"csr"`
+	// +nullable
+	// +kubebuilder:validation:Optional
+	// +optional
+	Signing      FabricCASigning      `json:"signing"`
 	CRL          FabricCACRL          `json:"crl"`
 	Registry     FabricCARegistry     `json:"registry"`
 	Intermediate FabricCAIntermediate `json:"intermediate"`
 	BCCSP        FabricCABCCSP        `json:"bccsp"`
+	// +nullable
+	// +kubebuilder:validation:Optional
+	// +optional
+	// +kubebuilder:validation:Default={}
+	Affiliations []FabricCAAffiliation `json:"affiliations"`
 	// +optional
 	// +kubebuilder:validation:Optional
 	// +nullable
