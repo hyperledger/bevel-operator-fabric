@@ -33,7 +33,7 @@ For discussions and questions, please join the Hyperledger Foundation Discord:
 Channel is located under `LABS`, named `hlf-operator`.
 
 ## Tutorial Videos
-Step by step video tutorials to setup hlf-opertor in kubernetes
+Step by step video tutorials to setup hlf-operator in kubernetes
 
 [![Hyperledger Fabric on Kubernetes](https://img.youtube.com/vi/e04TcJHUI5M/0.jpg)](https://www.youtube.com/playlist?list=PLuAZTZDgj0csRQuNMY8wbYqOCpzggAuMo "Hyperledger Fabric on Kubernetes")
 

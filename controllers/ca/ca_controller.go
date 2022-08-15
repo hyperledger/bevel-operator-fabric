@@ -298,8 +298,35 @@ func mapCRDItemConfToChart(conf hlfv1alpha1.FabricCAItemConf) FabricCAChartItemC
 			},
 		})
 	}
+	affiliations := []Affiliation{}
+	for _, affiliation := range conf.Affiliations {
+		affiliations = append(affiliations, Affiliation{
+			Name:        affiliation.Name,
+			Departments: affiliation.Departments,
+		})
+	}
 	item := FabricCAChartItemConf{
 		Name: conf.Name,
+		Signing: FabricCASigning{
+			Default: FabricCASigningDefault{
+				Expiry: conf.Signing.Default.Expiry,
+				Usage:  conf.Signing.Default.Usage,
+			},
+			Profiles: FabricCASigningProfiles{
+				CA: FabricCASigningSignProfile{
+					Usage:  conf.Signing.Profiles.CA.Usage,
+					Expiry: conf.Signing.Profiles.CA.Expiry,
+					CAConstraint: FabricCASigningSignProfileConstraint{
+						IsCA:       conf.Signing.Profiles.CA.CAConstraint.IsCA,
+						MaxPathLen: conf.Signing.Profiles.CA.CAConstraint.MaxPathLen,
+					},
+				},
+				TLS: FabricCASigningTLSProfile{
+					Usage:  conf.Signing.Profiles.TLS.Usage,
+					Expiry: conf.Signing.Profiles.TLS.Expiry,
+				},
+			},
+		},
 		CFG: FabricCAChartCFG{
 			Identities:   FabricCAChartCFGIdentities{AllowRemove: conf.CFG.Identities.AllowRemove},
 			Affiliations: FabricCAChartCFGAffilitions{AllowRemove: conf.CFG.Affiliations.AllowRemove},
@@ -324,7 +351,7 @@ func mapCRDItemConfToChart(conf hlfv1alpha1.FabricCAItemConf) FabricCAChartItemC
 				CAName: conf.Intermediate.ParentServer.CAName,
 			},
 		},
-		Affiliations: []Affiliation{},
+		Affiliations: affiliations,
 		BCCSP: FabricCAChartBCCSP{
 			Default: conf.BCCSP.Default,
 			SW: FabricCAChartBCCSPSW{

@@ -19,15 +19,16 @@ type getLatestInfoCmd struct {
 	mspID       string
 	property    string
 	outFile     string
+	peer        string
 }
 
 func (c *getLatestInfoCmd) validate() error {
 	if c.property != "version" && c.property != "sequence" {
-        return errors.New("property must be either version or sequence")
-    }
+		return errors.New("property must be either version or sequence")
+	}
 	if c.outFile == "" {
-        return errors.New("output file is required")
-    }
+		return errors.New("output file is required")
+	}
 	return nil
 }
 func (c *getLatestInfoCmd) run(out io.Writer, stdErr io.Writer) error {
@@ -55,14 +56,14 @@ func (c *getLatestInfoCmd) run(out io.Writer, stdErr io.Writer) error {
 	latestCC := committedCCs[len(committedCCs)-1]
 	var data []byte
 	if c.property == "version" {
-        data = []byte(latestCC.Version)
-    } else {
-        data = []byte(strconv.FormatInt(latestCC.Sequence, 10))
-    }
+		data = []byte(latestCC.Version)
+	} else {
+		data = []byte(strconv.FormatInt(latestCC.Sequence, 10))
+	}
 	err = ioutil.WriteFile(c.outFile, data, 0777)
 	if err != nil {
-        return err
-    }
+		return err
+	}
 	return nil
 }
 func newGetLatestInfoCMD(out io.Writer, errOut io.Writer) *cobra.Command {
@@ -84,6 +85,7 @@ func newGetLatestInfoCMD(out io.Writer, errOut io.Writer) *cobra.Command {
 	persistentFlags.StringVarP(&c.mspID, "msp-id", "", "", "MSP ID of the organization")
 	persistentFlags.StringVarP(&c.property, "property", "", "", "Property to get(\"version\" or \"sequence\")")
 	persistentFlags.StringVarP(&c.outFile, "out", "o", "", "File to write the property to")
+	persistentFlags.StringVarP(&c.peer, "peer", "p", "", "Peer org to invoke the updates")
 
 	cmd.MarkPersistentFlagRequired("user")
 	cmd.MarkPersistentFlagRequired("config")
