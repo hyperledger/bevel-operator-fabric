@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"k8s.io/apimachinery/pkg/api/resource"
 
 	"github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
 	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/helpers"
@@ -86,6 +87,10 @@ func (c *createCmd) run(args []string) error {
 	hosts = append(hosts, c.caOpts.Hosts...)
 	csrHosts := []string{"localhost"}
 	csrHosts = append(csrHosts, c.caOpts.Hosts...)
+	caResources, err := getDefaultCAResources()
+	if err != nil {
+		return err
+	}
 	fabricCA := &v1alpha1.FabricCA{
 		TypeMeta: v1.TypeMeta{
 			Kind:       "FabricCA",
@@ -223,10 +228,7 @@ func (c *createCmd) run(args []string) error {
 				Enabled: false,
 				Origins: []string{},
 			},
-			Resources: corev1.ResourceRequirements{
-				Requests: corev1.ResourceList{},
-				Limits:   corev1.ResourceList{},
-			},
+			Resources: caResources,
 			Storage: v1alpha1.Storage{
 				Size:         c.caOpts.Capacity,
 				StorageClass: c.caOpts.StorageClass,
@@ -292,4 +294,33 @@ func newCreateCACmd(out io.Writer, errOut io.Writer) *cobra.Command {
 	f.StringVarP(&c.caOpts.IngressGateway, "istio-ingressgateway", "", "ingressgateway", "Istio ingress gateway name")
 	f.IntVarP(&c.caOpts.IngressPort, "istio-port", "", 443, "Istio ingress port")
 	return cmd
+}
+
+func getDefaultCAResources() (corev1.ResourceRequirements, error) {
+	requestCpu, err := resource.ParseQuantity("10m")
+	if err != nil {
+		return corev1.ResourceRequirements{}, err
+	}
+	requestMemory, err := resource.ParseQuantity("128Mi")
+	if err != nil {
+		return corev1.ResourceRequirements{}, err
+	}
+	limitsCpu, err := resource.ParseQuantity("300m")
+	if err != nil {
+		return corev1.ResourceRequirements{}, err
+	}
+	limitsMemory, err := resource.ParseQuantity("256Mi")
+	if err != nil {
+		return corev1.ResourceRequirements{}, err
+	}
+	return corev1.ResourceRequirements{
+		Requests: corev1.ResourceList{
+			corev1.ResourceCPU:    requestCpu,
+			corev1.ResourceMemory: requestMemory,
+		},
+		Limits: corev1.ResourceList{
+			corev1.ResourceCPU:    limitsCpu,
+			corev1.ResourceMemory: limitsMemory,
+		},
+	}, nil
 }
