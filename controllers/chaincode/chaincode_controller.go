@@ -476,7 +476,7 @@ func (r *FabricChaincodeReconciler) Reconcile(req ctrl.Request) (ctrl.Result, er
 			metav1.UpdateOptions{},
 		)
 		if err != nil {
-			err = errors.New("failed to update the deployment")
+			err = errors.Wrapf(err, "failed to update the deployment")
 			r.setConditionStatus(ctx, fabricChaincode, hlfv1alpha1.FailedStatus, false, err, false)
 			return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricChaincode)
 		}
