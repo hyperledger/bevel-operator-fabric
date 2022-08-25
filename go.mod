@@ -65,6 +65,7 @@ require (
 	google.golang.org/genproto v0.0.0-20200701001935-0939c5918c31 // indirect
 	google.golang.org/grpc v1.35.0
 	gopkg.in/yaml.v2 v2.3.0
+	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
 	helm.sh/helm/v3 v3.2.4
 	k8s.io/api v0.18.4
 	k8s.io/apiextensions-apiserver v0.18.4

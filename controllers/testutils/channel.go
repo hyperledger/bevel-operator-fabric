@@ -235,6 +235,12 @@ func (s channelStore) GetApplicationChannelBlock(ctx context.Context, opts ...Ch
 			},
 		},
 	}
+	if o.batchSize != nil {
+		channelConfig.Orderer.BatchSize.MaxMessageCount = o.batchSize.MaxMessageCount
+		channelConfig.Orderer.BatchSize.AbsoluteMaxBytes = o.batchSize.AbsoluteMaxBytes
+		channelConfig.Orderer.BatchSize.PreferredMaxBytes = o.batchSize.PreferredMaxBytes
+
+	}
 	channelID := o.name
 	genesisBlock, err := configtx.NewApplicationChannelGenesisBlock(channelConfig, channelID)
 	if err != nil {
