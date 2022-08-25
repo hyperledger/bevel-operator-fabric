@@ -18,8 +18,9 @@ package v1alpha1
 
 import (
 	"fmt"
-	"k8s.io/api/networking/v1beta1"
 	"time"
+
+	"k8s.io/api/networking/v1beta1"
 
 	"github.com/operator-framework/operator-lib/status"
 	corev1 "k8s.io/api/core/v1"
@@ -1746,4 +1747,6 @@ func init() {
 	SchemeBuilder.Register(&FabricOperationsConsole{}, &FabricOperationsConsoleList{})
 	SchemeBuilder.Register(&FabricOperatorUI{}, &FabricOperatorUIList{})
 	SchemeBuilder.Register(&FabricOperatorAPI{}, &FabricOperatorAPIList{})
+	SchemeBuilder.Register(&FabricMainChannel{}, &FabricMainChannelList{})
+	SchemeBuilder.Register(&FabricFollowerChannel{}, &FabricFollowerChannelList{})
 }
