@@ -18,8 +18,6 @@ package v1alpha1
 
 import (
 	"fmt"
-	"time"
-
 	"k8s.io/api/networking/v1beta1"
 
 	"github.com/operator-framework/operator-lib/status"
@@ -1550,7 +1548,8 @@ type FabricMainChannelSpec struct {
 	PeerOrganizations         []FabricMainChannelPeerOrganization          `json:"peerOrganizations"`
 	ExternalPeerOrganizations []FabricMainChannelExternalPeerOrganization  `json:"externalPeerOrganizations"`
 
-	ChannelConfig FabricMainChannelConfig `json:"channelConfig"`
+	// +nullable
+	ChannelConfig *FabricMainChannelConfig `json:"channelConfig"`
 
 	AdminOrdererOrganizations    []FabricMainChannelAdminOrdererOrganizationSpec `json:"adminOrdererOrganizations"`
 	OrdererOrganizations         []FabricMainChannelOrdererOrganization          `json:"ordererOrganizations"`
@@ -1565,36 +1564,57 @@ type FabricMainChannelAdminOrdererOrganizationSpec struct {
 	MSPID string `json:"mspID"`
 }
 type FabricMainChannelConfig struct {
-	Application  FabricMainChannelApplicationConfig         `json:"application"`
-	Orderer      FabricMainChannelOrdererConfig             `json:"orderer"`
-	Capabilities []string                                   `json:"capabilities"`
-	Policies     map[string]FabricMainChannelPoliciesConfig `json:"policies"`
+	// +nullable
+	Application *FabricMainChannelApplicationConfig `json:"application"`
+	// +nullable
+	Orderer *FabricMainChannelOrdererConfig `json:"orderer"`
+	// +kubebuilder:default:={"V2_0"}
+	Capabilities []string `json:"capabilities"`
+	// +nullable
+	Policies *map[string]FabricMainChannelPoliciesConfig `json:"policies"`
 }
 
 type FabricMainChannelApplicationConfig struct {
-	Capabilities []string                                   `json:"capabilities"`
-	Policies     map[string]FabricMainChannelPoliciesConfig `json:"policies"`
-	ACLs         map[string]string                          `json:"acls"`
+	// +kubebuilder:default:={"V2_0"}
+	Capabilities []string `json:"capabilities"`
+	// +nullable
+	Policies *map[string]FabricMainChannelPoliciesConfig `json:"policies"`
+	// +nullable
+	ACLs *map[string]string `json:"acls"`
 }
 type FabricMainChannelOrdererConfig struct {
-	OrdererType  string                                     `json:"ordererType"`
-	Capabilities []string                                   `json:"capabilities"`
-	Policies     map[string]FabricMainChannelPoliciesConfig `json:"policies"`
-	BatchTimeout time.Duration                              `json:"batchTimeout"`
-	BatchSize    FabricMainChannelOrdererBatchSize          `json:"batchSize"`
-	State        FabricMainChannelConsensusState            `json:"state"`
-	EtcdRaft     FabricMainChannelEtcdRaft                  `json:"etcdRaft"`
+	// +kubebuilder:default:="etcdraft"
+	OrdererType string `json:"ordererType"`
+	// +kubebuilder:default:={"V2_0"}
+	Capabilities []string `json:"capabilities"`
+	// +nullable
+	Policies *map[string]FabricMainChannelPoliciesConfig `json:"policies"`
+	// +kubebuilder:default:="2s"
+	BatchTimeout string `json:"batchTimeout"`
+	// +nullable
+	BatchSize *FabricMainChannelOrdererBatchSize `json:"batchSize"`
+	// +kubebuilder:default:="STATE_NORMAL"
+	State FabricMainChannelConsensusState `json:"state"`
+	// +nullable
+	EtcdRaft *FabricMainChannelEtcdRaft `json:"etcdRaft"`
 }
 
 type FabricMainChannelEtcdRaft struct {
-	Options FabricMainChannelEtcdRaftOptions `json:"options"`
+	// +nullable
+	Options *FabricMainChannelEtcdRaftOptions `json:"options"`
 }
 
 type FabricMainChannelEtcdRaftOptions struct {
-	TickInterval         string `json:"tickInterval"`
-	ElectionTick         uint32 `json:"electionTick"`
-	HeartbeatTick        uint32 `json:"heartbeatTick"`
-	MaxInflightBlocks    uint32 `json:"maxInflightBlocks"`
+	// +kubebuilder:default:="500ms"
+	TickInterval string `json:"tickInterval"`
+	// +kubebuilder:default:=10
+	ElectionTick uint32 `json:"electionTick"`
+	// +kubebuilder:default:=1
+	HeartbeatTick uint32 `json:"heartbeatTick"`
+	// +kubebuilder:default:=5
+	MaxInflightBlocks uint32 `json:"maxInflightBlocks"`
+	// 16 MB
+	// +kubebuilder:default:=16777216
 	SnapshotIntervalSize uint32 `json:"snapshotIntervalSize"`
 }
 type FabricMainChannelConsensusState string
@@ -1606,8 +1626,13 @@ const (
 )
 
 type FabricMainChannelOrdererBatchSize struct {
-	MaxMessageCount   int `json:"maxMessageCount"`
-	AbsoluteMaxBytes  int `json:"absoluteMaxBytes"`
+	// +kubebuilder:default:=100
+	MaxMessageCount int `json:"maxMessageCount"`
+	// default is 1024 * 1024
+	// +kubebuilder:default:=1048576
+	AbsoluteMaxBytes int `json:"absoluteMaxBytes"`
+	// default is 512 * 1024
+	// +kubebuilder:default:=524288
 	PreferredMaxBytes int `json:"preferredMaxBytes"`
 }
 
@@ -1647,10 +1672,9 @@ type FabricMainChannelExternalOrdererOrganization struct {
 }
 
 type FabricMainChannelPeerOrganization struct {
-	MSPID       string                        `json:"mspID"`
-	CAName      string                        `json:"cAName"`
-	CANamespace string                        `json:"cANamespace"`
-	PeersToJoin []FabricMainChannelAnchorPeer `json:"peersToJoin"`
+	MSPID       string `json:"mspID"`
+	CAName      string `json:"cAName"`
+	CANamespace string `json:"cANamespace"`
 }
 
 type FabricMainChannelOrdererOrganization struct {

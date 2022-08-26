@@ -64,14 +64,19 @@ spec:
                   type: object
                 type: array
               channelConfig:
+                nullable: true
                 properties:
                   application:
+                    nullable: true
                     properties:
                       acls:
                         additionalProperties:
                           type: string
+                        nullable: true
                         type: object
                       capabilities:
+                        default:
+                        - V2_0
                         items:
                           type: string
                         type: array
@@ -89,6 +94,7 @@ spec:
                           - rule
                           - type
                           type: object
+                        nullable: true
                         type: object
                     required:
                     - acls
@@ -96,18 +102,27 @@ spec:
                     - policies
                     type: object
                   capabilities:
+                    default:
+                    - V2_0
                     items:
                       type: string
                     type: array
                   orderer:
+                    nullable: true
                     properties:
                       batchSize:
+                        nullable: true
                         properties:
                           absoluteMaxBytes:
+                            default: 1048576
+                            description: default is 1024 * 1024
                             type: integer
                           maxMessageCount:
+                            default: 100
                             type: integer
                           preferredMaxBytes:
+                            default: 524288
+                            description: default is 512 * 1024
                             type: integer
                         required:
                         - absoluteMaxBytes
@@ -115,33 +130,39 @@ spec:
                         - preferredMaxBytes
                         type: object
                       batchTimeout:
-                        description: A Duration represents the elapsed time between
-                          two instants as an int64 nanosecond count. The representation
-                          limits the largest representable duration to approximately
-                          290 years.
-                        format: int64
-                        type: integer
+                        default: 2s
+                        type: string
                       capabilities:
+                        default:
+                        - V2_0
                         items:
                           type: string
                         type: array
                       etcdRaft:
+                        nullable: true
                         properties:
                           options:
+                            nullable: true
                             properties:
                               electionTick:
+                                default: 10
                                 format: int32
                                 type: integer
                               heartbeatTick:
+                                default: 1
                                 format: int32
                                 type: integer
                               maxInflightBlocks:
+                                default: 5
                                 format: int32
                                 type: integer
                               snapshotIntervalSize:
+                                default: 16777216
+                                description: 16 MB
                                 format: int32
                                 type: integer
                               tickInterval:
+                                default: 500ms
                                 type: string
                             required:
                             - electionTick
@@ -154,6 +175,7 @@ spec:
                         - options
                         type: object
                       ordererType:
+                        default: etcdraft
                         type: string
                       policies:
                         additionalProperties:
@@ -169,8 +191,10 @@ spec:
                           - rule
                           - type
                           type: object
+                        nullable: true
                         type: object
                       state:
+                        default: STATE_NORMAL
                         type: string
                     required:
                     - batchSize
@@ -195,6 +219,7 @@ spec:
                       - rule
                       - type
                       type: object
+                    nullable: true
                     type: object
                 required:
                 - application
@@ -321,23 +346,10 @@ spec:
                       type: string
                     mspID:
                       type: string
-                    peersToJoin:
-                      items:
-                        properties:
-                          host:
-                            type: string
-                          port:
-                            type: integer
-                        required:
-                        - host
-                        - port
-                        type: object
-                      type: array
                   required:
                   - cAName
                   - cANamespace
                   - mspID
-                  - peersToJoin
                   type: object
                 type: array
             required:

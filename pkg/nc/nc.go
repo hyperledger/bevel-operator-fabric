@@ -256,7 +256,18 @@ func GenerateNetworkConfig(kubeClientset *kubernetes.Clientset, hlfClientSet *op
 				Intermediates: x509.NewCertPool(),
 			}
 			if _, err := cert.Verify(opts); err == nil {
-				orgMap[ord.Spec.MspID].CertAuths = append(orgMap[ord.Spec.MspID].CertAuths, certAuth)
+				_, ok = orgMap[ord.Spec.MspID]
+				if !ok {
+					orgMap[ord.Spec.MspID] = &Organization{
+						Type:         helpers.OrdererType,
+						MspID:        "",
+						OrdererNodes: []*helpers.ClusterOrdererNode{},
+						Peers:        []*helpers.ClusterPeer{},
+						CertAuths:    []*helpers.ClusterCA{certAuth},
+					}
+				} else {
+					orgMap[ord.Spec.MspID].CertAuths = append(orgMap[ord.Spec.MspID].CertAuths, certAuth)
+				}
 			}
 		}
 
