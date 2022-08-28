@@ -8,14 +8,13 @@ import (
 	"crypto/x509/pkix"
 	"encoding/json"
 	"fmt"
-	mspimpl "github.com/hyperledger/fabric-sdk-go/pkg/msp"
-	"io/ioutil"
-
 	"github.com/go-logr/logr"
 	"github.com/golang/protobuf/proto"
 	"github.com/hyperledger/fabric-config/configtx"
 	"github.com/hyperledger/fabric-config/configtx/membership"
 	"github.com/hyperledger/fabric-config/configtx/orderer"
+	"github.com/hyperledger/fabric-config/protolator"
+	"github.com/hyperledger/fabric-protos-go/common"
 	cb "github.com/hyperledger/fabric-protos-go/common"
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/resmgmt"
 	"github.com/hyperledger/fabric-sdk-go/pkg/common/providers/msp"
@@ -25,6 +24,7 @@ import (
 	"github.com/hyperledger/fabric-sdk-go/pkg/fab"
 	"github.com/hyperledger/fabric-sdk-go/pkg/fab/resource"
 	"github.com/hyperledger/fabric-sdk-go/pkg/fabsdk"
+	mspimpl "github.com/hyperledger/fabric-sdk-go/pkg/msp"
 	"github.com/hyperledger/fabric/protoutil"
 	hlfv1alpha1 "github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
 	"github.com/kfsoftware/hlf-operator/controllers/testutils"
@@ -37,6 +37,7 @@ import (
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v3"
+	"io/ioutil"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -65,7 +66,6 @@ func (r *FabricMainChannelReconciler) finalizeMainChannel(reqLogger logr.Logger,
 	if ns == "" {
 		ns = "default"
 	}
-	//releaseName := m.Name
 	reqLogger.Info("Successfully finalized mainChannel")
 
 	return nil
@@ -102,6 +102,25 @@ func (r *FabricMainChannelReconciler) Reconcile(req ctrl.Request) (ctrl.Result, 
 		reqLogger.Error(err, "Failed to get MainChannel.")
 		return ctrl.Result{}, err
 	}
+	markedToBeDeleted := fabricMainChannel.GetDeletionTimestamp() != nil
+	if markedToBeDeleted {
+		if utils.Contains(fabricMainChannel.GetFinalizers(), mainChannelFinalizer) {
+			if err := r.finalizeMainChannel(reqLogger, fabricMainChannel); err != nil {
+				return ctrl.Result{}, err
+			}
+			controllerutil.RemoveFinalizer(fabricMainChannel, mainChannelFinalizer)
+			err := r.Update(ctx, fabricMainChannel)
+			if err != nil {
+				return ctrl.Result{}, err
+			}
+		}
+		return ctrl.Result{}, nil
+	}
+	if !utils.Contains(fabricMainChannel.GetFinalizers(), mainChannelFinalizer) {
+		if err := r.addFinalizer(reqLogger, fabricMainChannel); err != nil {
+			return ctrl.Result{}, err
+		}
+	}
 	clientSet, err := utils.GetClientKubeWithConf(r.Config)
 	if err != nil {
 		r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, err, false)
@@ -112,7 +131,6 @@ func (r *FabricMainChannelReconciler) Reconcile(req ctrl.Request) (ctrl.Result, 
 		r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, err, false)
 		return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricMainChannel)
 	}
-	chStore := testutils.NewChannelStore()
 	var consenters []testutils.Consenter
 	for _, consenter := range fabricMainChannel.Spec.Consenters {
 		tlsCert, err := utils.ParseX509Certificate([]byte(consenter.TLSCert))
@@ -127,120 +145,12 @@ func (r *FabricMainChannelReconciler) Reconcile(req ctrl.Request) (ctrl.Result, 
 		)
 		consenters = append(consenters, channelConsenter)
 	}
-	var ordererOrgs []testutils.OrdererOrg
-	for _, ordererOrg := range fabricMainChannel.Spec.OrdererOrganizations {
-		certAuth, err := helpers.GetCertAuthByName(
-			clientSet,
-			hlfClientSet,
-			ordererOrg.CAName,
-			ordererOrg.CANamespace,
-		)
-		if err != nil {
-			r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, err, false)
-			return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricMainChannel)
-		}
-		tlsCACert, err := utils.ParseX509Certificate([]byte(certAuth.Status.TLSCACert))
-		if err != nil {
-			r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, err, false)
-			return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricMainChannel)
-		}
-		caCert, err := utils.ParseX509Certificate([]byte(certAuth.Status.CACert))
-		if err != nil {
-			r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, err, false)
-			return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricMainChannel)
-		}
-		ordererOrgs = append(ordererOrgs, testutils.CreateOrdererOrg(
-			ordererOrg.MSPID,
-			tlsCACert,
-			caCert,
-			ordererOrg.OrdererEndpoints,
-		))
+	channelConfig, err := r.mapToConfigTX(fabricMainChannel)
+	if err != nil {
+		r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, err, false)
+		return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricMainChannel)
 	}
-	for _, ordererOrg := range fabricMainChannel.Spec.ExternalOrdererOrganizations {
-		rootCert, err := utils.ParseX509Certificate([]byte(ordererOrg.SignRootCert))
-		if err != nil {
-			r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, err, false)
-			return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricMainChannel)
-		}
-		tlsRootCert, err := utils.ParseX509Certificate([]byte(ordererOrg.TLSRootCert))
-		if err != nil {
-			r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, err, false)
-			return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricMainChannel)
-		}
-		ordererOrgs = append(ordererOrgs, testutils.CreateOrdererOrg(
-			ordererOrg.MSPID,
-			tlsRootCert,
-			rootCert,
-			ordererOrg.OrdererEndpoints,
-		))
-	}
-	var peerOrgs []testutils.PeerOrg
-
-	for _, peerOrg := range fabricMainChannel.Spec.PeerOrganizations {
-		certAuth, err := helpers.GetCertAuthByName(
-			clientSet,
-			hlfClientSet,
-			peerOrg.CAName,
-			peerOrg.CANamespace,
-		)
-		if err != nil {
-			r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, err, false)
-			return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricMainChannel)
-		}
-		tlsCACert, err := utils.ParseX509Certificate([]byte(certAuth.Status.TLSCACert))
-		if err != nil {
-			r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, err, false)
-			return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricMainChannel)
-		}
-		caCert, err := utils.ParseX509Certificate([]byte(certAuth.Status.CACert))
-		if err != nil {
-			r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, err, false)
-			return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricMainChannel)
-		}
-		peerOrgs = append(peerOrgs, testutils.CreatePeerOrg(
-			peerOrg.MSPID,
-			tlsCACert,
-			caCert,
-		))
-	}
-	for _, peerOrg := range fabricMainChannel.Spec.ExternalPeerOrganizations {
-		rootCert, err := utils.ParseX509Certificate([]byte(peerOrg.SignRootCert))
-		if err != nil {
-			r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, err, false)
-			return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricMainChannel)
-		}
-		tlsRootCert, err := utils.ParseX509Certificate([]byte(peerOrg.TLSRootCert))
-		if err != nil {
-			r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, err, false)
-			return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricMainChannel)
-		}
-		peerOrgs = append(peerOrgs, testutils.CreatePeerOrg(
-			peerOrg.MSPID,
-			tlsRootCert,
-			rootCert,
-		))
-	}
-	channelOptions := []testutils.ChannelOption{
-		testutils.WithName(fabricMainChannel.Spec.Name),
-		testutils.WithOrdererOrgs(ordererOrgs...),
-		testutils.WithPeerOrgs(peerOrgs...),
-		testutils.WithConsenters(consenters...),
-	}
-	if fabricMainChannel.Spec.ChannelConfig != nil {
-		channelOptions = append(
-			channelOptions,
-			testutils.WithBatchSize(&orderer.BatchSize{
-				MaxMessageCount:   uint32(fabricMainChannel.Spec.ChannelConfig.Orderer.BatchSize.MaxMessageCount),
-				AbsoluteMaxBytes:  uint32(fabricMainChannel.Spec.ChannelConfig.Orderer.BatchSize.AbsoluteMaxBytes),
-				PreferredMaxBytes: uint32(fabricMainChannel.Spec.ChannelConfig.Orderer.BatchSize.PreferredMaxBytes),
-			}),
-		)
-	}
-
-	block, err := chStore.GetApplicationChannelBlock(
-		ctx,
-		channelOptions...,
-	)
+	block, err := configtx.NewApplicationChannelGenesisBlock(channelConfig, fabricMainChannel.Spec.Name)
 	if err != nil {
 		r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, err, false)
 		return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricMainChannel)
@@ -273,7 +183,7 @@ func (r *FabricMainChannelReconciler) Reconcile(req ctrl.Request) (ctrl.Result, 
 			r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, fmt.Errorf("identity not found for MSPID %s", ordererOrg.MSPID), false)
 			return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricMainChannel)
 		}
-		secret, err := clientSet.CoreV1().Secrets(fabricMainChannel.Namespace).Get(ctx, idConfig.SecretName, v1.GetOptions{})
+		secret, err := clientSet.CoreV1().Secrets(idConfig.SecretNamespace).Get(ctx, idConfig.SecretName, v1.GetOptions{})
 		if err != nil {
 			r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, err, false)
 			return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricMainChannel)
@@ -383,12 +293,12 @@ func (r *FabricMainChannelReconciler) Reconcile(req ctrl.Request) (ctrl.Result, 
 			}
 		}
 	}
-
-	ncResponse, err := nc.GenerateNetworkConfig(clientSet, hlfClientSet, "")
+	ncResponse, err := nc.GenerateNetworkConfig(fabricMainChannel, clientSet, hlfClientSet, "")
 	if err != nil {
 		r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, errors.Wrapf(err, "failed to generate network config"), false)
 		return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricMainChannel)
 	}
+	log.Infof("Generated network config: %s", ncResponse.NetworkConfig)
 	configBackend := config.FromRaw([]byte(ncResponse.NetworkConfig), "yaml")
 	sdk, err := fabsdk.New(configBackend)
 	if err != nil {
@@ -401,7 +311,7 @@ func (r *FabricMainChannelReconciler) Reconcile(req ctrl.Request) (ctrl.Result, 
 		r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, fmt.Errorf("identity not found for MSPID %s", firstAdminOrgMSPID), false)
 		return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricMainChannel)
 	}
-	secret, err := clientSet.CoreV1().Secrets(fabricMainChannel.Namespace).Get(ctx, idConfig.SecretName, v1.GetOptions{})
+	secret, err := clientSet.CoreV1().Secrets(idConfig.SecretNamespace).Get(ctx, idConfig.SecretName, v1.GetOptions{})
 	if err != nil {
 		r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, err, false)
 		return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricMainChannel)
@@ -456,13 +366,34 @@ func (r *FabricMainChannelReconciler) Reconcile(req ctrl.Request) (ctrl.Result, 
 		r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, err, false)
 		return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricMainChannel)
 	}
-	block1, err := resClient.QueryConfigBlockFromOrderer(fabricMainChannel.Spec.Name, resmgmt.WithOrdererEndpoint("orderer0-ordmsp068wi-5vph.default"))
+	resmgmtOptions := []resmgmt.RequestOption{}
+	for _, ordOrg := range fabricMainChannel.Spec.OrdererOrganizations {
+		for _, endpoint := range ordOrg.OrdererEndpoints {
+			resmgmtOptions = append(resmgmtOptions, resmgmt.WithOrdererEndpoint(endpoint))
+		}
+	}
+	r.Log.Info("Fetching block from orderer")
+	var ordererChannelBlock *common.Block
+	attemptsLeft := 5
+	for {
+		ordererChannelBlock, err = resClient.QueryConfigBlockFromOrderer(fabricMainChannel.Spec.Name, resmgmtOptions...)
+		if err == nil || attemptsLeft == 0 {
+			break
+		}
+		if err != nil {
+			attemptsLeft--
+		}
+		r.Log.Info(fmt.Sprintf("Failed to get block %v, attempts left %d", err, attemptsLeft))
+		time.Sleep(1500 * time.Millisecond)
+	}
+
 	if err != nil {
-		log.Infof("channel %s does not exist, it will be created", fabricMainChannel.Spec.Name)
+		r.Log.Info(fmt.Sprintf("Failed to get block %v", err))
 		r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, errors.Wrapf(err, "failed to get block from channel %s", fabricMainChannel.Spec.Name), false)
 		return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricMainChannel)
 	}
-	cfgBlock, err := resource.ExtractConfigFromBlock(block1)
+	r.Log.Info(fmt.Sprintf("Block from channel %s fetched from orderer", fabricMainChannel.Spec.Name))
+	cfgBlock, err := resource.ExtractConfigFromBlock(ordererChannelBlock)
 	if err != nil {
 		r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, errors.Wrapf(err, "failed to extract config from channel block"), false)
 		return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricMainChannel)
@@ -473,6 +404,14 @@ func (r *FabricMainChannelReconciler) Reconcile(req ctrl.Request) (ctrl.Result, 
 		r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, errors.Wrapf(err, "error mapping channel to configtx channel"), false)
 		return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricMainChannel)
 	}
+	var buf2 bytes.Buffer
+	err = protolator.DeepMarshalJSON(&buf2, cfgBlock)
+	if err != nil {
+		r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, errors.Wrapf(err, "error converting block to JSON"), false)
+		return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricMainChannel)
+	}
+	r.Log.Info(fmt.Sprintf("Config block main channel: %s", buf2.String()))
+	r.Log.Info(fmt.Sprintf("ConfigTX: %v", configTX))
 	err = updateApplicationChannelConfigTx(updatedConfigTX, configTX)
 	if err != nil {
 		r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, errors.Wrapf(err, "failed to update application channel config"), false)
@@ -499,7 +438,7 @@ func (r *FabricMainChannelReconciler) Reconcile(req ctrl.Request) (ctrl.Result, 
 				r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, fmt.Errorf("identity not found for MSPID %s", adminPeer.MSPID), false)
 				return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricMainChannel)
 			}
-			secret, err := clientSet.CoreV1().Secrets(fabricMainChannel.Namespace).Get(ctx, idConfig.SecretName, v1.GetOptions{})
+			secret, err := clientSet.CoreV1().Secrets(idConfig.SecretNamespace).Get(ctx, idConfig.SecretName, v1.GetOptions{})
 			if err != nil {
 				r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, err, false)
 				return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricMainChannel)
@@ -563,14 +502,17 @@ func (r *FabricMainChannelReconciler) Reconcile(req ctrl.Request) (ctrl.Result, 
 			configSignatures = append(configSignatures, signature)
 		}
 		configUpdateReader := bytes.NewReader(channelConfigBytes)
+		saveChannelOpts := []resmgmt.RequestOption{
+			resmgmt.WithConfigSignatures(configSignatures...),
+		}
+		saveChannelOpts = append(saveChannelOpts, resmgmtOptions...)
 		saveChannelResponse, err := resClient.SaveChannel(
 			resmgmt.SaveChannelRequest{
 				ChannelID:         fabricMainChannel.Spec.Name,
 				ChannelConfig:     configUpdateReader,
 				SigningIdentities: []msp.SigningIdentity{},
 			},
-			resmgmt.WithConfigSignatures(configSignatures...),
-			resmgmt.WithOrdererEndpoint("orderer0-ordmsp068wi-5vph.default"),
+			saveChannelOpts...,
 		)
 		if err != nil {
 			r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, errors.Wrapf(err, "error saving application configuration"), false)
@@ -578,27 +520,61 @@ func (r *FabricMainChannelReconciler) Reconcile(req ctrl.Request) (ctrl.Result, 
 		}
 		log.Infof("Application configuration updated with transaction ID: %s", saveChannelResponse.TransactionID)
 	}
-
-	isMainChannelMarkedToBeDeleted := fabricMainChannel.GetDeletionTimestamp() != nil
-	if isMainChannelMarkedToBeDeleted {
-		if utils.Contains(fabricMainChannel.GetFinalizers(), mainChannelFinalizer) {
-			if err := r.finalizeMainChannel(reqLogger, fabricMainChannel); err != nil {
-				return ctrl.Result{}, err
-			}
-			controllerutil.RemoveFinalizer(fabricMainChannel, mainChannelFinalizer)
-			err := r.Update(ctx, fabricMainChannel)
-			if err != nil {
-				return ctrl.Result{}, err
-			}
-		}
-		return ctrl.Result{}, nil
+	ordererChannelBlock, err = resClient.QueryConfigBlockFromOrderer(fabricMainChannel.Spec.Name, resmgmtOptions...)
+	if err != nil {
+		r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, errors.Wrapf(err, "error fetching block from orderer"), false)
+		return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricMainChannel)
 	}
-	if !utils.Contains(fabricMainChannel.GetFinalizers(), mainChannelFinalizer) {
-		if err := r.addFinalizer(reqLogger, fabricMainChannel); err != nil {
-			return ctrl.Result{}, err
+	cmnConfig, err := resource.ExtractConfigFromBlock(ordererChannelBlock)
+	if err != nil {
+		r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, errors.Wrapf(err, "error extracting the config from block"), false)
+		return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricMainChannel)
+	}
+	var buf bytes.Buffer
+	err = protolator.DeepMarshalJSON(&buf, cmnConfig)
+	if err != nil {
+		r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, errors.Wrapf(err, "error converting block to JSON"), false)
+		return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricMainChannel)
+	}
+	configMapName := fmt.Sprintf("%s-config", fabricMainChannel.ObjectMeta.Name)
+	createConfigMap := false
+	configMapNamespace := "default"
+	configMap, err := clientSet.CoreV1().ConfigMaps(configMapNamespace).Get(ctx, configMapName, v1.GetOptions{})
+	if err != nil {
+		if apierrors.IsNotFound(err) {
+			reqLogger.Info(fmt.Sprintf("ConfigMap %s not found, creating it", configMapName))
+			createConfigMap = true
+		} else {
+			r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, errors.Wrapf(err, "error getting configmap"), false)
+			return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricMainChannel)
+		}
+	}
+	if createConfigMap {
+		_, err = clientSet.CoreV1().ConfigMaps(configMapNamespace).Create(ctx, &corev1.ConfigMap{
+			TypeMeta: v1.TypeMeta{},
+			ObjectMeta: v1.ObjectMeta{
+				Name:      configMapName,
+				Namespace: configMapNamespace,
+			},
+			Data: map[string]string{
+				"channel.json": buf.String(),
+			},
+		}, v1.CreateOptions{})
+		if err != nil {
+			r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, errors.Wrapf(err, "error creating config map"), false)
+			return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricMainChannel)
+		}
+	} else {
+		configMap.Data["channel.json"] = buf.String()
+		_, err = clientSet.CoreV1().ConfigMaps(configMapNamespace).Update(ctx, configMap, v1.UpdateOptions{})
+		if err != nil {
+			r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, errors.Wrapf(err, "error updating config map"), false)
+			return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricMainChannel)
 		}
 	}
 	fabricMainChannel.Status.Status = hlfv1alpha1.RunningStatus
+	fabricMainChannel.Status.Message = "Channel setup completed"
+
 	fabricMainChannel.Status.Conditions.SetCondition(status.Condition{
 		Type:               "CREATED",
 		Status:             "True",
@@ -608,7 +584,10 @@ func (r *FabricMainChannelReconciler) Reconcile(req ctrl.Request) (ctrl.Result, 
 		r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, err, false)
 		return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricMainChannel)
 	}
-	return ctrl.Result{}, nil
+	return ctrl.Result{
+		Requeue:      false,
+		RequeueAfter: 0,
+	}, nil
 }
 
 var (
@@ -716,8 +695,25 @@ func (r *FabricMainChannelReconciler) mapToConfigTX(channel *hlfv1alpha1.FabricM
 			return configtx.Channel{}, err
 		}
 		ordererOrgs = append(ordererOrgs, configtx.Organization{
-			Name:     ordererOrg.MSPID,
-			Policies: map[string]configtx.Policy{},
+			Name: ordererOrg.MSPID,
+			Policies: map[string]configtx.Policy{
+				"Admins": {
+					Type: "Signature",
+					Rule: fmt.Sprintf("OR('%s.admin')", ordererOrg.MSPID),
+				},
+				"Readers": {
+					Type: "Signature",
+					Rule: fmt.Sprintf("OR('%s.member')", ordererOrg.MSPID),
+				},
+				"Writers": {
+					Type: "Signature",
+					Rule: fmt.Sprintf("OR('%s.member')", ordererOrg.MSPID),
+				},
+				"Endorsement": {
+					Type: "Signature",
+					Rule: fmt.Sprintf("OR('%s.member')", ordererOrg.MSPID),
+				},
+			},
 			MSP: configtx.MSP{
 				Name:         ordererOrg.MSPID,
 				RootCerts:    []*x509.Certificate{caCert},
@@ -760,6 +756,45 @@ func (r *FabricMainChannelReconciler) mapToConfigTX(channel *hlfv1alpha1.FabricM
 		MaxInflightBlocks:    5,
 		SnapshotIntervalSize: 16 * 1024 * 1024, // 16 MB
 	}
+	if channel.Spec.ChannelConfig != nil &&
+		channel.Spec.ChannelConfig.Orderer != nil &&
+		channel.Spec.ChannelConfig.Orderer.EtcdRaft != nil &&
+		channel.Spec.ChannelConfig.Orderer.EtcdRaft.Options != nil {
+		etcdRaftOptions.TickInterval = channel.Spec.ChannelConfig.Orderer.EtcdRaft.Options.TickInterval
+		etcdRaftOptions.ElectionTick = channel.Spec.ChannelConfig.Orderer.EtcdRaft.Options.ElectionTick
+		etcdRaftOptions.HeartbeatTick = channel.Spec.ChannelConfig.Orderer.EtcdRaft.Options.HeartbeatTick
+		etcdRaftOptions.MaxInflightBlocks = channel.Spec.ChannelConfig.Orderer.EtcdRaft.Options.MaxInflightBlocks
+		etcdRaftOptions.SnapshotIntervalSize = channel.Spec.ChannelConfig.Orderer.EtcdRaft.Options.SnapshotIntervalSize
+	}
+	ordererAdminRule := "MAJORITY Admins"
+	if channel.Spec.AdminOrdererOrganizations != nil {
+		ordererAdminRule = "OR("
+		for idx, adminOrg := range channel.Spec.AdminOrdererOrganizations {
+			ordererAdminRule += "'" + adminOrg.MSPID + ".admin'"
+			if idx < len(channel.Spec.AdminOrdererOrganizations)-1 {
+				ordererAdminRule += ","
+			}
+		}
+		ordererAdminRule += ")"
+	}
+	adminOrdererPolicies := map[string]configtx.Policy{
+		"Readers": {
+			Type: "ImplicitMeta",
+			Rule: "ANY Readers",
+		},
+		"Writers": {
+			Type: "ImplicitMeta",
+			Rule: "ANY Writers",
+		},
+		"Admins": {
+			Type: "Signature",
+			Rule: ordererAdminRule,
+		},
+		"BlockValidation": {
+			Type: "ImplicitMeta",
+			Rule: "ANY Writers",
+		},
+	}
 	ordConfigtx := configtx.Orderer{
 		OrdererType:   "etcdraft",
 		Organizations: ordererOrgs,
@@ -767,24 +802,7 @@ func (r *FabricMainChannelReconciler) mapToConfigTX(channel *hlfv1alpha1.FabricM
 			Consenters: consenters,
 			Options:    etcdRaftOptions,
 		},
-		Policies: map[string]configtx.Policy{
-			"Readers": {
-				Type: "ImplicitMeta",
-				Rule: "ANY Readers",
-			},
-			"Writers": {
-				Type: "ImplicitMeta",
-				Rule: "ANY Writers",
-			},
-			"Admins": {
-				Type: "ImplicitMeta",
-				Rule: "MAJORITY Admins",
-			},
-			"BlockValidation": {
-				Type: "ImplicitMeta",
-				Rule: "ANY Writers",
-			},
-		},
+		Policies:     adminOrdererPolicies,
 		Capabilities: []string{"V2_0"},
 		BatchSize: orderer.BatchSize{
 			MaxMessageCount:   100,
@@ -793,6 +811,22 @@ func (r *FabricMainChannelReconciler) mapToConfigTX(channel *hlfv1alpha1.FabricM
 		},
 		BatchTimeout: 2 * time.Second,
 		State:        "STATE_NORMAL",
+	}
+	if channel.Spec.ChannelConfig != nil {
+		if channel.Spec.ChannelConfig.Orderer != nil {
+			if channel.Spec.ChannelConfig.Orderer.BatchTimeout != "" {
+				batchTimeout, err := time.ParseDuration(channel.Spec.ChannelConfig.Orderer.BatchTimeout)
+				if err != nil {
+					return configtx.Channel{}, err
+				}
+				ordConfigtx.BatchTimeout = batchTimeout
+			}
+			if channel.Spec.ChannelConfig.Orderer.BatchSize != nil {
+				ordConfigtx.BatchSize.MaxMessageCount = uint32(channel.Spec.ChannelConfig.Orderer.BatchSize.MaxMessageCount)
+				ordConfigtx.BatchSize.AbsoluteMaxBytes = uint32(channel.Spec.ChannelConfig.Orderer.BatchSize.AbsoluteMaxBytes)
+				ordConfigtx.BatchSize.PreferredMaxBytes = uint32(channel.Spec.ChannelConfig.Orderer.BatchSize.PreferredMaxBytes)
+			}
+		}
 	}
 	var peerOrgs []configtx.Organization
 	for _, peerOrg := range channel.Spec.PeerOrganizations {
@@ -813,9 +847,26 @@ func (r *FabricMainChannelReconciler) mapToConfigTX(channel *hlfv1alpha1.FabricM
 		if err != nil {
 			return configtx.Channel{}, err
 		}
-		ordererOrgs = append(ordererOrgs, configtx.Organization{
-			Name:     peerOrg.MSPID,
-			Policies: map[string]configtx.Policy{},
+		peerOrgs = append(peerOrgs, configtx.Organization{
+			Name: peerOrg.MSPID,
+			Policies: map[string]configtx.Policy{
+				"Admins": {
+					Type: "Signature",
+					Rule: fmt.Sprintf("OR('%s.admin')", peerOrg.MSPID),
+				},
+				"Readers": {
+					Type: "Signature",
+					Rule: fmt.Sprintf("OR('%s.member')", peerOrg.MSPID),
+				},
+				"Writers": {
+					Type: "Signature",
+					Rule: fmt.Sprintf("OR('%s.member')", peerOrg.MSPID),
+				},
+				"Endorsement": {
+					Type: "Signature",
+					Rule: fmt.Sprintf("OR('%s.member')", peerOrg.MSPID),
+				},
+			},
 			MSP: configtx.MSP{
 				Name:         peerOrg.MSPID,
 				RootCerts:    []*x509.Certificate{caCert},
@@ -851,32 +902,46 @@ func (r *FabricMainChannelReconciler) mapToConfigTX(channel *hlfv1alpha1.FabricM
 			ModPolicy:        "",
 		})
 	}
+	var adminAppPolicy string
+	if len(channel.Spec.AdminPeerOrganizations) == 0 {
+		adminAppPolicy = "MAJORITY Admins"
+	} else {
+		adminAppPolicy = "OR("
+		for idx, adminPeerOrg := range channel.Spec.AdminPeerOrganizations {
+			adminAppPolicy += "'" + adminPeerOrg.MSPID + ".admin'"
+			if idx < len(channel.Spec.AdminPeerOrganizations)-1 {
+				adminAppPolicy += ","
+			}
+		}
+		adminAppPolicy += ")"
+	}
+	policies := map[string]configtx.Policy{
+		"Readers": {
+			Type: "ImplicitMeta",
+			Rule: "ANY Readers",
+		},
+		"Writers": {
+			Type: "ImplicitMeta",
+			Rule: "ANY Writers",
+		},
+		"Admins": {
+			Type: "Signature",
+			Rule: adminAppPolicy,
+		},
+		"Endorsement": {
+			Type: "ImplicitMeta",
+			Rule: "MAJORITY Endorsement",
+		},
+		"LifecycleEndorsement": {
+			Type: "ImplicitMeta",
+			Rule: "MAJORITY Endorsement",
+		},
+	}
 	application := configtx.Application{
 		Organizations: peerOrgs,
 		Capabilities:  []string{"V2_0"},
-		Policies: map[string]configtx.Policy{
-			"Readers": {
-				Type: "ImplicitMeta",
-				Rule: "ANY Readers",
-			},
-			"Writers": {
-				Type: "ImplicitMeta",
-				Rule: "ANY Writers",
-			},
-			"Admins": {
-				Type: "ImplicitMeta",
-				Rule: "MAJORITY Admins",
-			},
-			"Endorsement": {
-				Type: "ImplicitMeta",
-				Rule: "MAJORITY Endorsement",
-			},
-			"LifecycleEndorsement": {
-				Type: "ImplicitMeta",
-				Rule: "MAJORITY Endorsement",
-			},
-		},
-		ACLs: defaultACLs(),
+		Policies:      policies,
+		ACLs:          defaultACLs(),
 	}
 	channelConfig := configtx.Channel{
 		Orderer:      ordConfigtx,
@@ -950,6 +1015,12 @@ func updateApplicationChannelConfigTx(currentConfigTX configtx.ConfigTx, newConf
 		if deleted {
 			currentConfigTX.Application().RemoveOrganization(channelPeerOrg.Name)
 		}
+	}
+	err = currentConfigTX.Application().SetPolicies(
+		newConfigTx.Application.Policies,
+	)
+	if err != nil {
+		return errors.Wrap(err, "failed to set application policies")
 	}
 	err = currentConfigTX.Application().SetACLs(
 		newConfigTx.Application.ACLs,

@@ -16,7 +16,7 @@ spec:
     shortNames:
     - fabricfollowerchannel
     singular: fabricfollowerchannel
-  scope: Namespaced
+  scope: Cluster
   versions:
   - additionalPrinterColumns:
     - jsonPath: .status.status
@@ -45,15 +45,31 @@ spec:
           spec:
             description: FabricFollowerChannelSpec defines the desired state of FabricFollowerChannel
             properties:
+              anchorPeers:
+                items:
+                  properties:
+                    host:
+                      type: string
+                    port:
+                      type: integer
+                  required:
+                  - host
+                  - port
+                  type: object
+                type: array
               hlfIdentity:
                 properties:
                   secretKey:
                     type: string
                   secretName:
                     type: string
+                  secretNamespace:
+                    default: default
+                    type: string
                 required:
                 - secretKey
                 - secretName
+                - secretNamespace
                 type: object
               mspId:
                 type: string
@@ -84,6 +100,7 @@ spec:
                   type: object
                 type: array
             required:
+            - anchorPeers
             - hlfIdentity
             - mspId
             - name

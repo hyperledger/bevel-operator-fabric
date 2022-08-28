@@ -2,14 +2,43 @@ package nc
 
 import (
 	"bytes"
-	"crypto/x509"
-	"encoding/pem"
+	"context"
+	"fmt"
 	"github.com/Masterminds/sprig/v3"
+	hlfv1alpha1 "github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
 	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/helpers"
 	operatorv1 "github.com/kfsoftware/hlf-operator/pkg/client/clientset/versioned"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"text/template"
 )
+
+type CA struct {
+	Name         string
+	URL          string
+	EnrollID     string
+	EnrollSecret string
+	CAName       string
+	TLSCert      string
+}
+type Org struct {
+	MSPID     string
+	CertAuths []string
+	Peers     []string
+	Orderers  []string
+}
+
+type Peer struct {
+	Name      string
+	URL       string
+	TLSCACert string
+}
+
+type Orderer struct {
+	URL       string
+	Name      string
+	TLSCACert string
+}
 
 const tmplGoConfig = `
 name: hlf-network
@@ -20,9 +49,9 @@ client:
 organizations: {}
 {{- else }}
 organizations:
-  {{ range $mspID, $org := .Organizations }}
-  {{$mspID}}:
-    mspid: {{$mspID}}
+  {{ range $org := .Organizations }}
+  {{ $org.MSPID }}:
+    mspid: {{ $org.MSPID }}
     cryptoPath: /tmp/cryptopath
     users: {}
 {{- if not $org.CertAuths }}
@@ -30,8 +59,7 @@ organizations:
 {{- else }}
     certificateAuthorities: 
       {{- range $ca := $org.CertAuths }}
-      - {{ $ca.Name }}-sign
-      - {{ $ca.Name }}-tls
+      - {{ $ca.Name }}
  	  {{- end }}
 {{- end }}
 {{- if not $org.Peers }}
@@ -39,15 +67,15 @@ organizations:
 {{- else }}
     peers:
       {{- range $peer := $org.Peers }}
-      - {{ $peer.Name }}
+      - {{ $peer }}
  	  {{- end }}
 {{- end }}
-{{- if not $org.OrdererNodes }}
+{{- if not $org.Orderers }}
     orderers: []
 {{- else }}
     orderers:
-      {{- range $orderer := $org.OrdererNodes }}
-      - {{ $orderer.Name }}
+      {{- range $orderer := $org.Orderers }}
+      - {{ $orderer }}
  	  {{- end }}
 
     {{- end }}
@@ -55,84 +83,47 @@ organizations:
 {{- end }}
 
 {{- if not .Orderers }}
-orderers: []
 {{- else }}
 orderers:
 {{- range $orderer := .Orderers }}
   {{$orderer.Name}}:
-{{if $.Internal }}
-    url: grpcs://{{ $orderer.PrivateURL }}
-{{ else }}
-    url: grpcs://{{ $orderer.PublicURL }}
-{{ end }}
+    url: {{ $orderer.URL }}
     grpcOptions:
       allow-insecure: false
     tlsCACerts:
       pem: |
-{{ or $orderer.Status.TlsCACert $orderer.Status.TlsCert | indent 8 }}
+{{ $orderer.TLSCACert | indent 8 }}
 {{- end }}
 {{- end }}
 
 {{- if not .Peers }}
-peers: []
 {{- else }}
 peers:
   {{- range $peer := .Peers }}
   {{$peer.Name}}:
-{{if $.Internal }}
-    url: grpcs://{{ $peer.PrivateURL }}
-{{ else }}
-    url: grpcs://{{ $peer.PublicURL }}
-{{ end }}
-    grpcOptions:
-      hostnameOverride: ""
-      ssl-target-name-override: ""
-      allow-insecure: false
+    url: {{ $peer.URL }}
     tlsCACerts:
       pem: |
-{{ $peer.Status.TlsCACert | indent 8 }}
+{{ $peer.TLSCACert | indent 8 }}
 {{- end }}
 {{- end }}
 
 {{- if not .CertAuths }}
-certificateAuthorities: []
 {{- else }}
 certificateAuthorities:
 {{- range $ca := .CertAuths }}
-  
-  {{ $ca.Name }}-tls:
-{{if $.Internal }}
-    url: https://{{ $ca.PrivateURL }}
-{{ else }}
-    url: https://{{ $ca.PublicURL }}
-{{ end }}
+  {{ $ca.Name }}:
+    url: https://{{ $ca.URL }}
 {{if $ca.EnrollID }}
     registrar:
         enrollId: {{ $ca.EnrollID }}
-        enrollSecret: {{ $ca.EnrollPWD }}
+        enrollSecret: {{ $ca.EnrollSecret }}
 {{ end }}
-    caName: tlsca
+    caName: {{ $ca.CAName }}
     tlsCACerts:
       pem: 
        - |
-{{ $ca.Status.TlsCert | indent 12 }}
-  
-  {{ $ca.Name }}-sign:
-{{if $.Internal }}
-    url: https://{{ $ca.PrivateURL }}
-{{ else }}
-    url: https://{{ $ca.PublicURL }}
-{{ end }}
-{{if $ca.EnrollID }}
-    registrar:
-        enrollId: {{ $ca.EnrollID }}
-        enrollSecret: {{ $ca.EnrollPWD }}
-{{ end }}
-    caName: ca
-    tlsCACerts:
-      pem: 
-       - |
-{{ $ca.Status.TlsCert | indent 12 }}
+{{ $ca.TLSCert | indent 12 }}
 
 {{- end }}
 {{- end }}
@@ -174,115 +165,173 @@ type NetworkConfigResponse struct {
 	NetworkConfig string
 }
 
-func GenerateNetworkConfig(kubeClientset *kubernetes.Clientset, hlfClientSet *operatorv1.Clientset, mspID string) (*NetworkConfigResponse, error) {
+func GenerateNetworkConfig(channel *hlfv1alpha1.FabricMainChannel, kubeClientset *kubernetes.Clientset, hlfClientSet *operatorv1.Clientset, mspID string) (*NetworkConfigResponse, error) {
 	tmpl, err := template.New("networkConfig").Funcs(sprig.HermeticTxtFuncMap()).Parse(tmplGoConfig)
 	if err != nil {
 		return nil, err
 	}
 	var buf bytes.Buffer
-	certAuths, err := helpers.GetClusterCAs(kubeClientset, hlfClientSet, "")
-	if err != nil {
-		return nil, err
-	}
-	ordOrgs, _, err := helpers.GetClusterOrderers(kubeClientset, hlfClientSet, "")
-	if err != nil {
-		return nil, err
-	}
-	ordererNodes, err := helpers.GetClusterOrdererNodes(kubeClientset, hlfClientSet, "")
-	if err != nil {
-		return nil, err
-	}
-	peerOrgs, clusterPeers, err := helpers.GetClusterPeers(kubeClientset, hlfClientSet, "")
-	if err != nil {
-		return nil, err
-	}
-	orgMap := map[string]*Organization{}
-	for _, v := range ordOrgs {
-		orgMap[v.MspID] = &Organization{
-			Type:         v.Type,
-			MspID:        v.MspID,
-			OrdererNodes: v.OrdererNodes,
-			Peers:        v.Peers,
-			CertAuths:    []*helpers.ClusterCA{},
-		}
-	}
-	for _, v := range peerOrgs {
-		orgMap[v.MspID] = &Organization{
-			Type:         v.Type,
-			MspID:        v.MspID,
-			OrdererNodes: v.OrdererNodes,
-			Peers:        v.Peers,
-			CertAuths:    []*helpers.ClusterCA{},
-		}
-	}
-	for _, certAuth := range certAuths {
-		tlsCACertPem := certAuth.Status.TLSCACert
-		roots := x509.NewCertPool()
-		ok := roots.AppendCertsFromPEM([]byte(tlsCACertPem))
-		if !ok {
-			panic("failed to parse root certificate")
-		}
-		for mspID, org := range orgMap {
-			for _, peer := range org.Peers {
-				block, _ := pem.Decode([]byte(peer.Status.TlsCert))
-				if block == nil {
-					continue
-				}
-				cert, err := x509.ParseCertificate(block.Bytes)
-				if err != nil {
-					continue
-				}
-				opts := x509.VerifyOptions{
-					Roots:         roots,
-					Intermediates: x509.NewCertPool(),
-				}
+	orgs := []*Org{}
+	var peers []*Peer
+	var certAuths []*CA
+	var ordererNodes []*Orderer
 
-				if _, err := cert.Verify(opts); err == nil {
-					orgMap[mspID].CertAuths = append(orgMap[mspID].CertAuths, certAuth)
-				}
-			}
+	ctx := context.Background()
+	for _, peerOrg := range channel.Spec.PeerOrganizations {
+		orgs = append(orgs, &Org{
+			MSPID:     peerOrg.MSPID,
+			CertAuths: []string{},
+			Peers:     []string{},
+			Orderers:  []string{},
+		})
+	}
+	for _, ordOrg := range channel.Spec.OrdererOrganizations {
+		fabricCA, err := hlfClientSet.HlfV1alpha1().FabricCAs(ordOrg.CANamespace).Get(ctx, ordOrg.CAName, v1.GetOptions{})
+		if err != nil {
+			return nil, err
 		}
-		for _, ord := range ordererNodes {
-			block, _ := pem.Decode([]byte(ord.Status.TlsCert))
-			if block == nil {
-				continue
-			}
-			cert, err := x509.ParseCertificate(block.Bytes)
-			if err != nil {
-				continue
-			}
-			opts := x509.VerifyOptions{
-				Roots:         roots,
-				Intermediates: x509.NewCertPool(),
-			}
-			if _, err := cert.Verify(opts); err == nil {
-				_, ok = orgMap[ord.Spec.MspID]
-				if !ok {
-					orgMap[ord.Spec.MspID] = &Organization{
-						Type:         helpers.OrdererType,
-						MspID:        "",
-						OrdererNodes: []*helpers.ClusterOrdererNode{},
-						Peers:        []*helpers.ClusterPeer{},
-						CertAuths:    []*helpers.ClusterCA{certAuth},
-					}
-				} else {
-					orgMap[ord.Spec.MspID].CertAuths = append(orgMap[ord.Spec.MspID].CertAuths, certAuth)
-				}
-			}
+		org := &Org{
+			MSPID:     ordOrg.MSPID,
+			CertAuths: []string{},
+			Peers:     []string{},
+			Orderers:  []string{},
 		}
+		for _, ordererEndpoint := range ordOrg.OrdererEndpoints {
+			ordererName := ordererEndpoint
+			org.Orderers = append(org.Orderers, ordererName)
+			ordererNodes = append(ordererNodes, &Orderer{
+				URL:       fmt.Sprintf("grpcs://%s", ordererEndpoint),
+				Name:      ordererName,
+				TLSCACert: fabricCA.Status.TLSCACert,
+			})
+		}
+		orgs = append(orgs, org)
+	}
+	//for _, externalOrdOrg := range channel.Spec.ExternalOrdererOrganizations {
+	//
+	//}
+	//for _, certAuth := range certAuths {
+	//	tlsCACertPem := certAuth.Status.TLSCACert
+	//	roots := x509.NewCertPool()
+	//	ok := roots.AppendCertsFromPEM([]byte(tlsCACertPem))
+	//	if !ok {
+	//		panic("failed to parse root certificate")
+	//	}
+	//	for mspID, org := range orgMap {
+	//		for _, peer := range org.Peers {
+	//			block, _ := pem.Decode([]byte(peer.Status.TlsCert))
+	//			if block == nil {
+	//				continue
+	//			}
+	//			cert, err := x509.ParseCertificate(block.Bytes)
+	//			if err != nil {
+	//				continue
+	//			}
+	//			opts := x509.VerifyOptions{
+	//				Roots:         roots,
+	//				Intermediates: x509.NewCertPool(),
+	//			}
+	//
+	//			if _, err := cert.Verify(opts); err == nil {
+	//				orgMap[mspID].CertAuths = append(orgMap[mspID].CertAuths, certAuth)
+	//			}
+	//		}
+	//	}
+	//	for _, ord := range ordererNodes {
+	//		block, _ := pem.Decode([]byte(ord.Status.TlsCert))
+	//		if block == nil {
+	//			continue
+	//		}
+	//		cert, err := x509.ParseCertificate(block.Bytes)
+	//		if err != nil {
+	//			continue
+	//		}
+	//		opts := x509.VerifyOptions{
+	//			Roots:         roots,
+	//			Intermediates: x509.NewCertPool(),
+	//		}
+	//		if _, err := cert.Verify(opts); err == nil {
+	//			_, ok = orgMap[ord.Spec.MspID]
+	//			if !ok {
+	//				orgMap[ord.Spec.MspID] = &Organization{
+	//					Type:         helpers.OrdererType,
+	//					MspID:        "",
+	//					OrdererNodes: []*helpers.ClusterOrdererNode{},
+	//					Peers:        []*helpers.ClusterPeer{},
+	//					CertAuths:    []*helpers.ClusterCA{certAuth},
+	//				}
+	//			} else {
+	//				orgMap[ord.Spec.MspID].CertAuths = append(orgMap[ord.Spec.MspID].CertAuths, certAuth)
+	//			}
+	//		}
+	//	}
+	//
+	//}
+	//for _, ord := range ordererNodes {
+	//	orgMap[ord.Spec.MspID].OrdererNodes = append(orgMap[ord.Spec.MspID].OrdererNodes, ord)
+	//}
+	//for _, peer := range clusterPeers {
+	//	peers = append(peers, peer)
+	//}
+	err = tmpl.Execute(&buf, map[string]interface{}{
+		"Peers":         peers,
+		"Orderers":      ordererNodes,
+		"Organizations": orgs,
+		"CertAuths":     certAuths,
+		"Organization":  mspID,
+		"Internal":      false,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &NetworkConfigResponse{
+		NetworkConfig: buf.String(),
+	}, nil
+}
 
+func GenerateNetworkConfigForFollower(channel *hlfv1alpha1.FabricFollowerChannel, kubeClientset *kubernetes.Clientset, hlfClientSet *operatorv1.Clientset, mspID string) (*NetworkConfigResponse, error) {
+	tmpl, err := template.New("networkConfig").Funcs(sprig.HermeticTxtFuncMap()).Parse(tmplGoConfig)
+	if err != nil {
+		return nil, err
 	}
-	for _, ord := range ordererNodes {
-		orgMap[ord.Spec.MspID].OrdererNodes = append(orgMap[ord.Spec.MspID].OrdererNodes, ord)
+	var buf bytes.Buffer
+	orgs := []*Org{}
+	var peers []*Peer
+	var certAuths []*CA
+	var ordererNodes []*Orderer
+
+	ctx := context.Background()
+	org := &Org{
+		MSPID:     channel.Spec.MSPID,
+		CertAuths: []string{},
+		Peers:     []string{},
+		Orderers:  []string{},
 	}
-	var peers []*helpers.ClusterPeer
-	for _, peer := range clusterPeers {
-		peers = append(peers, peer)
+	for _, peer := range channel.Spec.PeersToJoin {
+		fabricPeer, err := hlfClientSet.HlfV1alpha1().FabricPeers(peer.Namespace).Get(ctx, peer.Name, v1.GetOptions{})
+		if err != nil {
+			return nil, err
+		}
+		peerName := fmt.Sprintf("%s.%s", fabricPeer.Name, fabricPeer.Namespace)
+		org.Peers = append(org.Peers, peerName)
+		peers = append(peers, &Peer{
+			Name:      peerName,
+			URL:       fmt.Sprintf("grpcs://%s:%d", fabricPeer.Spec.Istio.Hosts[0], fabricPeer.Spec.Istio.Port),
+			TLSCACert: fabricPeer.Status.TlsCACert,
+		})
+	}
+	orgs = append(orgs, org)
+	for _, orderer := range channel.Spec.Orderers {
+		ordererNodes = append(ordererNodes, &Orderer{
+			URL:       orderer.URL,
+			Name:      orderer.URL,
+			TLSCACert: orderer.Certificate,
+		})
 	}
 	err = tmpl.Execute(&buf, map[string]interface{}{
 		"Peers":         peers,
 		"Orderers":      ordererNodes,
-		"Organizations": orgMap,
+		"Organizations": orgs,
 		"CertAuths":     certAuths,
 		"Organization":  mspID,
 		"Internal":      false,

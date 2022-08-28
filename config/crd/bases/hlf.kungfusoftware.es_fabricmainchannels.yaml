@@ -16,7 +16,7 @@ spec:
     shortNames:
     - fabricmainchannel
     singular: fabricmainchannel
-  scope: Namespaced
+  scope: Cluster
   versions:
   - additionalPrinterColumns:
     - jsonPath: .status.status
@@ -97,9 +97,7 @@ spec:
                         nullable: true
                         type: object
                     required:
-                    - acls
                     - capabilities
-                    - policies
                     type: object
                   capabilities:
                     default:
@@ -171,8 +169,6 @@ spec:
                             - snapshotIntervalSize
                             - tickInterval
                             type: object
-                        required:
-                        - options
                         type: object
                       ordererType:
                         default: etcdraft
@@ -197,12 +193,9 @@ spec:
                         default: STATE_NORMAL
                         type: string
                     required:
-                    - batchSize
                     - batchTimeout
                     - capabilities
-                    - etcdRaft
                     - ordererType
-                    - policies
                     - state
                     type: object
                   policies:
@@ -222,10 +215,7 @@ spec:
                     nullable: true
                     type: object
                 required:
-                - application
                 - capabilities
-                - orderer
-                - policies
                 type: object
               externalOrdererOrganizations:
                 items:
@@ -269,9 +259,13 @@ spec:
                       type: string
                     secretName:
                       type: string
+                    secretNamespace:
+                      default: default
+                      type: string
                   required:
                   - secretKey
                   - secretName
+                  - secretNamespace
                   type: object
                 type: object
               name:

@@ -1514,7 +1514,7 @@ type FabricMainChannelStatus struct {
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 // +k8s:defaulter-gen=true
 // +kubebuilder:subresource:status
-// +kubebuilder:resource:scope=Namespaced,shortName=fabricmainchannel,singular=fabricmainchannel
+// +kubebuilder:resource:scope=Cluster,shortName=fabricmainchannel,singular=fabricmainchannel
 // +kubebuilder:printcolumn:name="State",type="string",JSONPath=".status.status"
 // +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
 // +kubebuilder:object:root=true
@@ -1565,12 +1565,18 @@ type FabricMainChannelAdminOrdererOrganizationSpec struct {
 }
 type FabricMainChannelConfig struct {
 	// +nullable
+	// +kubebuilder:validation:Optional
+	// +optional
 	Application *FabricMainChannelApplicationConfig `json:"application"`
 	// +nullable
+	// +kubebuilder:validation:Optional
+	// +optional
 	Orderer *FabricMainChannelOrdererConfig `json:"orderer"`
 	// +kubebuilder:default:={"V2_0"}
 	Capabilities []string `json:"capabilities"`
 	// +nullable
+	// +kubebuilder:validation:Optional
+	// +optional
 	Policies *map[string]FabricMainChannelPoliciesConfig `json:"policies"`
 }
 
@@ -1578,8 +1584,12 @@ type FabricMainChannelApplicationConfig struct {
 	// +kubebuilder:default:={"V2_0"}
 	Capabilities []string `json:"capabilities"`
 	// +nullable
+	// +kubebuilder:validation:Optional
+	// +optional
 	Policies *map[string]FabricMainChannelPoliciesConfig `json:"policies"`
 	// +nullable
+	// +kubebuilder:validation:Optional
+	// +optional
 	ACLs *map[string]string `json:"acls"`
 }
 type FabricMainChannelOrdererConfig struct {
@@ -1588,19 +1598,27 @@ type FabricMainChannelOrdererConfig struct {
 	// +kubebuilder:default:={"V2_0"}
 	Capabilities []string `json:"capabilities"`
 	// +nullable
+	// +kubebuilder:validation:Optional
+	// +optional
 	Policies *map[string]FabricMainChannelPoliciesConfig `json:"policies"`
 	// +kubebuilder:default:="2s"
 	BatchTimeout string `json:"batchTimeout"`
 	// +nullable
+	// +kubebuilder:validation:Optional
+	// +optional
 	BatchSize *FabricMainChannelOrdererBatchSize `json:"batchSize"`
 	// +kubebuilder:default:="STATE_NORMAL"
 	State FabricMainChannelConsensusState `json:"state"`
 	// +nullable
+	// +kubebuilder:validation:Optional
+	// +optional
 	EtcdRaft *FabricMainChannelEtcdRaft `json:"etcdRaft"`
 }
 
 type FabricMainChannelEtcdRaft struct {
 	// +nullable
+	// +kubebuilder:validation:Optional
+	// +optional
 	Options *FabricMainChannelEtcdRaftOptions `json:"options"`
 }
 
@@ -1643,8 +1661,10 @@ type FabricMainChannelPoliciesConfig struct {
 }
 
 type FabricMainChannelIdentity struct {
-	SecretName string `json:"secretName"`
-	SecretKey  string `json:"secretKey"`
+	// +kubebuilder:default:=default
+	SecretNamespace string `json:"secretNamespace"`
+	SecretName      string `json:"secretName"`
+	SecretKey       string `json:"secretKey"`
 }
 
 type FabricMainChannelConsenter struct {
@@ -1713,7 +1733,7 @@ type FabricFollowerChannelStatus struct {
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 // +k8s:defaulter-gen=true
 // +kubebuilder:subresource:status
-// +kubebuilder:resource:scope=Namespaced,shortName=fabricfollowerchannel,singular=fabricfollowerchannel
+// +kubebuilder:resource:scope=Cluster,shortName=fabricfollowerchannel,singular=fabricfollowerchannel
 // +kubebuilder:printcolumn:name="State",type="string",JSONPath=".status.status"
 // +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
 // +kubebuilder:object:root=true
@@ -1739,16 +1759,24 @@ type FabricFollowerChannelList struct {
 
 // FabricFollowerChannelSpec defines the desired state of FabricFollowerChannel
 type FabricFollowerChannelSpec struct {
-	Name        string                         `json:"name"`
-	MSPID       string                         `json:"mspId"`
-	Orderers    []FabricFollowerChannelOrderer `json:"orderers"`
-	PeersToJoin []FabricFollowerChannelPeer    `json:"peersToJoin"`
-	HLFIdentity HLFIdentity                    `json:"hlfIdentity"`
+	Name        string                            `json:"name"`
+	MSPID       string                            `json:"mspId"`
+	Orderers    []FabricFollowerChannelOrderer    `json:"orderers"`
+	PeersToJoin []FabricFollowerChannelPeer       `json:"peersToJoin"`
+	AnchorPeers []FabricFollowerChannelAnchorPeer `json:"anchorPeers"`
+	HLFIdentity HLFIdentity                       `json:"hlfIdentity"`
+}
+
+type FabricFollowerChannelAnchorPeer struct {
+	Host string `json:"host"`
+	Port int    `json:"port"`
 }
 
 type HLFIdentity struct {
 	SecretName string `json:"secretName"`
-	SecretKey  string `json:"secretKey"`
+	// +kubebuilder:default:=default
+	SecretNamespace string `json:"secretNamespace"`
+	SecretKey       string `json:"secretKey"`
 }
 type FabricFollowerChannelPeer struct {
 	Name      string `json:"name"`
