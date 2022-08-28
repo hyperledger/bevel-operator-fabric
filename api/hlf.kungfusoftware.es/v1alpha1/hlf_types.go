@@ -1693,14 +1693,14 @@ type FabricMainChannelExternalOrdererOrganization struct {
 
 type FabricMainChannelPeerOrganization struct {
 	MSPID       string `json:"mspID"`
-	CAName      string `json:"cAName"`
-	CANamespace string `json:"cANamespace"`
+	CAName      string `json:"caName"`
+	CANamespace string `json:"caNamespace"`
 }
 
 type FabricMainChannelOrdererOrganization struct {
 	MSPID                  string                                 `json:"mspID"`
-	CAName                 string                                 `json:"cAName"`
-	CANamespace            string                                 `json:"cANamespace"`
+	CAName                 string                                 `json:"caName"`
+	CANamespace            string                                 `json:"caNamespace"`
 	OrdererEndpoints       []string                               `json:"ordererEndpoints"`
 	OrderersToJoin         []FabricMainChannelOrdererNode         `json:"orderersToJoin"`
 	ExternalOrderersToJoin []FabricMainChannelExternalOrdererNode `json:"externalOrderersToJoin"`

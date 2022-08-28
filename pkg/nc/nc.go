@@ -185,6 +185,14 @@ func GenerateNetworkConfig(channel *hlfv1alpha1.FabricMainChannel, kubeClientset
 			Orderers:  []string{},
 		})
 	}
+	for _, peerOrg := range channel.Spec.ExternalPeerOrganizations {
+		orgs = append(orgs, &Org{
+			MSPID:     peerOrg.MSPID,
+			CertAuths: []string{},
+			Peers:     []string{},
+			Orderers:  []string{},
+		})
+	}
 	for _, ordOrg := range channel.Spec.OrdererOrganizations {
 		fabricCA, err := hlfClientSet.HlfV1alpha1().FabricCAs(ordOrg.CANamespace).Get(ctx, ordOrg.CAName, v1.GetOptions{})
 		if err != nil {
@@ -207,9 +215,24 @@ func GenerateNetworkConfig(channel *hlfv1alpha1.FabricMainChannel, kubeClientset
 		}
 		orgs = append(orgs, org)
 	}
-	//for _, externalOrdOrg := range channel.Spec.ExternalOrdererOrganizations {
-	//
-	//}
+	for _, externalOrdOrg := range channel.Spec.ExternalOrdererOrganizations {
+		org := &Org{
+			MSPID:     externalOrdOrg.MSPID,
+			CertAuths: []string{},
+			Peers:     []string{},
+			Orderers:  []string{},
+		}
+		for _, ordererEndpoint := range externalOrdOrg.OrdererEndpoints {
+			ordererName := ordererEndpoint
+			org.Orderers = append(org.Orderers, ordererName)
+			ordererNodes = append(ordererNodes, &Orderer{
+				URL:       fmt.Sprintf("grpcs://%s", ordererEndpoint),
+				Name:      ordererName,
+				TLSCACert: externalOrdOrg.TLSRootCert,
+			})
+		}
+		orgs = append(orgs, org)
+	}
 	//for _, certAuth := range certAuths {
 	//	tlsCACertPem := certAuth.Status.TLSCACert
 	//	roots := x509.NewCertPool()
@@ -314,9 +337,13 @@ func GenerateNetworkConfigForFollower(channel *hlfv1alpha1.FabricFollowerChannel
 		}
 		peerName := fmt.Sprintf("%s.%s", fabricPeer.Name, fabricPeer.Namespace)
 		org.Peers = append(org.Peers, peerName)
+		peerHost, err := helpers.GetPeerPublicURL(kubeClientset, *fabricPeer)
+		if err != nil {
+			return nil, err
+		}
 		peers = append(peers, &Peer{
 			Name:      peerName,
-			URL:       fmt.Sprintf("grpcs://%s:%d", fabricPeer.Spec.Istio.Hosts[0], fabricPeer.Spec.Istio.Port),
+			URL:       fmt.Sprintf("grpcs://%s", peerHost),
 			TLSCACert: fabricPeer.Status.TlsCACert,
 		})
 	}

@@ -273,9 +273,9 @@ spec:
               ordererOrganizations:
                 items:
                   properties:
-                    cAName:
+                    caName:
                       type: string
-                    cANamespace:
+                    caNamespace:
                       type: string
                     externalOrderersToJoin:
                       items:
@@ -308,8 +308,8 @@ spec:
                         type: object
                       type: array
                   required:
-                  - cAName
-                  - cANamespace
+                  - caName
+                  - caNamespace
                   - externalOrderersToJoin
                   - mspID
                   - ordererEndpoints
@@ -334,15 +334,15 @@ spec:
               peerOrganizations:
                 items:
                   properties:
-                    cAName:
+                    caName:
                       type: string
-                    cANamespace:
+                    caNamespace:
                       type: string
                     mspID:
                       type: string
                   required:
-                  - cAName
-                  - cANamespace
+                  - caName
+                  - caNamespace
                   - mspID
                   type: object
                 type: array

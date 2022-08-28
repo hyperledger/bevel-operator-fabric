@@ -54,7 +54,6 @@ func (r *FabricFollowerChannelReconciler) finalizeMainChannel(reqLogger logr.Log
 	if ns == "" {
 		ns = "default"
 	}
-	//releaseName := m.Name
 	reqLogger.Info("Successfully finalized mainChannel")
 
 	return nil
@@ -209,7 +208,6 @@ func (r *FabricFollowerChannelReconciler) Reconcile(req ctrl.Request) (ctrl.Resu
 	}
 
 	// set anchor peers
-
 	block, err := resClient.QueryConfigBlockFromOrderer(fabricFollowerChannel.Spec.Name)
 	if err != nil {
 		r.Log.Info(fmt.Sprintf("Failed to get block %v", err))
@@ -282,6 +280,8 @@ func (r *FabricFollowerChannelReconciler) Reconcile(req ctrl.Request) (ctrl.Resu
 		}
 		log.Infof("anchor anchorPeers added: %s", chResponse.TransactionID)
 	}
+
+	// update config map with the configuration
 	ordererChannelBlock, err := resClient.QueryConfigBlockFromOrderer(fabricFollowerChannel.Spec.Name)
 	if err != nil {
 		r.setConditionStatus(ctx, fabricFollowerChannel, hlfv1alpha1.FailedStatus, false, errors.Wrapf(err, "error fetching block from orderer"), false)

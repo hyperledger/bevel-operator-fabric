@@ -249,8 +249,17 @@ func (r *FabricMainChannelReconciler) Reconcile(req ctrl.Request) (ctrl.Result, 
 		}
 
 		for _, cc := range ordererOrg.OrderersToJoin {
-			adminPort := 7053
-			osnUrl := fmt.Sprintf("https://%s.%s:%d", cc.Name, cc.Namespace, adminPort)
+			ordererNode, err := hlfClientSet.HlfV1alpha1().FabricOrdererNodes(cc.Namespace).Get(ctx, cc.Name, v1.GetOptions{})
+			if err != nil {
+				r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, err, false)
+				return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricMainChannel)
+			}
+			adminHost, adminPort, err := helpers.GetOrdererAdminHostAndPort(clientSet, ordererNode.Spec, ordererNode.Status)
+			if err != nil {
+				r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, err, false)
+				return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricMainChannel)
+			}
+			osnUrl := fmt.Sprintf("https://%s:%d", adminHost, adminPort)
 			log.Infof("Trying to join orderer %s to channel %s", osnUrl, fabricMainChannel.Spec.Name)
 			chResponse, err := osnadmin.Join(osnUrl, blockBytes, certPool, tlsClientCert)
 			if err != nil {
@@ -398,8 +407,8 @@ func (r *FabricMainChannelReconciler) Reconcile(req ctrl.Request) (ctrl.Result, 
 		r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, errors.Wrapf(err, "failed to extract config from channel block"), false)
 		return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricMainChannel)
 	}
-	updatedConfigTX := configtx.New(cfgBlock)
-	configTX, err := r.mapToConfigTX(fabricMainChannel)
+	currentConfigTx := configtx.New(cfgBlock)
+	newConfigTx, err := r.mapToConfigTX(fabricMainChannel)
 	if err != nil {
 		r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, errors.Wrapf(err, "error mapping channel to configtx channel"), false)
 		return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricMainChannel)
@@ -411,13 +420,13 @@ func (r *FabricMainChannelReconciler) Reconcile(req ctrl.Request) (ctrl.Result, 
 		return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricMainChannel)
 	}
 	r.Log.Info(fmt.Sprintf("Config block main channel: %s", buf2.String()))
-	r.Log.Info(fmt.Sprintf("ConfigTX: %v", configTX))
-	err = updateApplicationChannelConfigTx(updatedConfigTX, configTX)
+	r.Log.Info(fmt.Sprintf("ConfigTX: %v", newConfigTx))
+	err = updateApplicationChannelConfigTx(currentConfigTx, newConfigTx)
 	if err != nil {
 		r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, errors.Wrapf(err, "failed to update application channel config"), false)
 		return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricMainChannel)
 	}
-	configUpdate, err := resmgmt.CalculateConfigUpdate(fabricMainChannel.Spec.Name, cfgBlock, updatedConfigTX.UpdatedConfig())
+	configUpdate, err := resmgmt.CalculateConfigUpdate(fabricMainChannel.Spec.Name, cfgBlock, currentConfigTx.UpdatedConfig())
 	if err != nil {
 		if !strings.Contains(err.Error(), "no differences detected between original and updated config") {
 			r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, errors.Wrapf(err, "error calculating config update"), false)
@@ -520,6 +529,8 @@ func (r *FabricMainChannelReconciler) Reconcile(req ctrl.Request) (ctrl.Result, 
 		}
 		log.Infof("Application configuration updated with transaction ID: %s", saveChannelResponse.TransactionID)
 	}
+	r.Log.Info(fmt.Sprintf("Waiting 3 seconds for orderers to reconcile %s", fabricMainChannel.Name))
+	time.Sleep(3 * time.Second)
 	ordererChannelBlock, err = resClient.QueryConfigBlockFromOrderer(fabricMainChannel.Spec.Name, resmgmtOptions...)
 	if err != nil {
 		r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, errors.Wrapf(err, "error fetching block from orderer"), false)
@@ -694,60 +705,18 @@ func (r *FabricMainChannelReconciler) mapToConfigTX(channel *hlfv1alpha1.FabricM
 		if err != nil {
 			return configtx.Channel{}, err
 		}
-		ordererOrgs = append(ordererOrgs, configtx.Organization{
-			Name: ordererOrg.MSPID,
-			Policies: map[string]configtx.Policy{
-				"Admins": {
-					Type: "Signature",
-					Rule: fmt.Sprintf("OR('%s.admin')", ordererOrg.MSPID),
-				},
-				"Readers": {
-					Type: "Signature",
-					Rule: fmt.Sprintf("OR('%s.member')", ordererOrg.MSPID),
-				},
-				"Writers": {
-					Type: "Signature",
-					Rule: fmt.Sprintf("OR('%s.member')", ordererOrg.MSPID),
-				},
-				"Endorsement": {
-					Type: "Signature",
-					Rule: fmt.Sprintf("OR('%s.member')", ordererOrg.MSPID),
-				},
-			},
-			MSP: configtx.MSP{
-				Name:         ordererOrg.MSPID,
-				RootCerts:    []*x509.Certificate{caCert},
-				TLSRootCerts: []*x509.Certificate{tlsCACert},
-				NodeOUs: membership.NodeOUs{
-					Enable: true,
-					ClientOUIdentifier: membership.OUIdentifier{
-						Certificate:                  caCert,
-						OrganizationalUnitIdentifier: "client",
-					},
-					PeerOUIdentifier: membership.OUIdentifier{
-						Certificate:                  caCert,
-						OrganizationalUnitIdentifier: "peer",
-					},
-					AdminOUIdentifier: membership.OUIdentifier{
-						Certificate:                  caCert,
-						OrganizationalUnitIdentifier: "admin",
-					},
-					OrdererOUIdentifier: membership.OUIdentifier{
-						Certificate:                  caCert,
-						OrganizationalUnitIdentifier: "orderer",
-					},
-				},
-				Admins:                        []*x509.Certificate{},
-				IntermediateCerts:             []*x509.Certificate{},
-				RevocationList:                []*pkix.CertificateList{},
-				OrganizationalUnitIdentifiers: []membership.OUIdentifier{},
-				CryptoConfig:                  membership.CryptoConfig{},
-				TLSIntermediateCerts:          []*x509.Certificate{},
-			},
-			AnchorPeers:      []configtx.Address{},
-			OrdererEndpoints: ordererOrg.OrdererEndpoints,
-			ModPolicy:        "",
-		})
+		ordererOrgs = append(ordererOrgs, r.mapOrdererOrg(ordererOrg.MSPID, ordererOrg.OrdererEndpoints, caCert, tlsCACert))
+	}
+	for _, ordererOrg := range channel.Spec.ExternalOrdererOrganizations {
+		tlsCACert, err := utils.ParseX509Certificate([]byte(ordererOrg.TLSRootCert))
+		if err != nil {
+			return configtx.Channel{}, err
+		}
+		caCert, err := utils.ParseX509Certificate([]byte(ordererOrg.SignRootCert))
+		if err != nil {
+			return configtx.Channel{}, err
+		}
+		ordererOrgs = append(ordererOrgs, r.mapOrdererOrg(ordererOrg.MSPID, ordererOrg.OrdererEndpoints, caCert, tlsCACert))
 	}
 	etcdRaftOptions := orderer.EtcdRaftOptions{
 		TickInterval:         "500ms",
@@ -847,60 +816,18 @@ func (r *FabricMainChannelReconciler) mapToConfigTX(channel *hlfv1alpha1.FabricM
 		if err != nil {
 			return configtx.Channel{}, err
 		}
-		peerOrgs = append(peerOrgs, configtx.Organization{
-			Name: peerOrg.MSPID,
-			Policies: map[string]configtx.Policy{
-				"Admins": {
-					Type: "Signature",
-					Rule: fmt.Sprintf("OR('%s.admin')", peerOrg.MSPID),
-				},
-				"Readers": {
-					Type: "Signature",
-					Rule: fmt.Sprintf("OR('%s.member')", peerOrg.MSPID),
-				},
-				"Writers": {
-					Type: "Signature",
-					Rule: fmt.Sprintf("OR('%s.member')", peerOrg.MSPID),
-				},
-				"Endorsement": {
-					Type: "Signature",
-					Rule: fmt.Sprintf("OR('%s.member')", peerOrg.MSPID),
-				},
-			},
-			MSP: configtx.MSP{
-				Name:         peerOrg.MSPID,
-				RootCerts:    []*x509.Certificate{caCert},
-				TLSRootCerts: []*x509.Certificate{tlsCACert},
-				NodeOUs: membership.NodeOUs{
-					Enable: true,
-					ClientOUIdentifier: membership.OUIdentifier{
-						Certificate:                  caCert,
-						OrganizationalUnitIdentifier: "client",
-					},
-					PeerOUIdentifier: membership.OUIdentifier{
-						Certificate:                  caCert,
-						OrganizationalUnitIdentifier: "peer",
-					},
-					AdminOUIdentifier: membership.OUIdentifier{
-						Certificate:                  caCert,
-						OrganizationalUnitIdentifier: "admin",
-					},
-					OrdererOUIdentifier: membership.OUIdentifier{
-						Certificate:                  caCert,
-						OrganizationalUnitIdentifier: "orderer",
-					},
-				},
-				Admins:                        []*x509.Certificate{},
-				IntermediateCerts:             []*x509.Certificate{},
-				RevocationList:                []*pkix.CertificateList{},
-				OrganizationalUnitIdentifiers: []membership.OUIdentifier{},
-				CryptoConfig:                  membership.CryptoConfig{},
-				TLSIntermediateCerts:          []*x509.Certificate{},
-			},
-			AnchorPeers:      []configtx.Address{},
-			OrdererEndpoints: []string{},
-			ModPolicy:        "",
-		})
+		peerOrgs = append(peerOrgs, r.mapPeerOrg(peerOrg.MSPID, caCert, tlsCACert))
+	}
+	for _, peerOrg := range channel.Spec.ExternalPeerOrganizations {
+		tlsCACert, err := utils.ParseX509Certificate([]byte(peerOrg.TLSRootCert))
+		if err != nil {
+			return configtx.Channel{}, err
+		}
+		caCert, err := utils.ParseX509Certificate([]byte(peerOrg.SignRootCert))
+		if err != nil {
+			return configtx.Channel{}, err
+		}
+		peerOrgs = append(peerOrgs, r.mapPeerOrg(peerOrg.MSPID, caCert, tlsCACert))
 	}
 	var adminAppPolicy string
 	if len(channel.Spec.AdminPeerOrganizations) == 0 {
@@ -965,6 +892,120 @@ func (r *FabricMainChannelReconciler) mapToConfigTX(channel *hlfv1alpha1.FabricM
 	return channelConfig, nil
 }
 
+func (r *FabricMainChannelReconciler) mapOrdererOrg(mspID string, ordererEndpoints []string, caCert *x509.Certificate, tlsCACert *x509.Certificate) configtx.Organization {
+	return configtx.Organization{
+		Name: mspID,
+		Policies: map[string]configtx.Policy{
+			"Admins": {
+				Type: "Signature",
+				Rule: fmt.Sprintf("OR('%s.admin')", mspID),
+			},
+			"Readers": {
+				Type: "Signature",
+				Rule: fmt.Sprintf("OR('%s.member')", mspID),
+			},
+			"Writers": {
+				Type: "Signature",
+				Rule: fmt.Sprintf("OR('%s.member')", mspID),
+			},
+			"Endorsement": {
+				Type: "Signature",
+				Rule: fmt.Sprintf("OR('%s.member')", mspID),
+			},
+		},
+		MSP: configtx.MSP{
+			Name:         mspID,
+			RootCerts:    []*x509.Certificate{caCert},
+			TLSRootCerts: []*x509.Certificate{tlsCACert},
+			NodeOUs: membership.NodeOUs{
+				Enable: true,
+				ClientOUIdentifier: membership.OUIdentifier{
+					Certificate:                  caCert,
+					OrganizationalUnitIdentifier: "client",
+				},
+				PeerOUIdentifier: membership.OUIdentifier{
+					Certificate:                  caCert,
+					OrganizationalUnitIdentifier: "peer",
+				},
+				AdminOUIdentifier: membership.OUIdentifier{
+					Certificate:                  caCert,
+					OrganizationalUnitIdentifier: "admin",
+				},
+				OrdererOUIdentifier: membership.OUIdentifier{
+					Certificate:                  caCert,
+					OrganizationalUnitIdentifier: "orderer",
+				},
+			},
+			Admins:                        []*x509.Certificate{},
+			IntermediateCerts:             []*x509.Certificate{},
+			RevocationList:                []*pkix.CertificateList{},
+			OrganizationalUnitIdentifiers: []membership.OUIdentifier{},
+			CryptoConfig:                  membership.CryptoConfig{},
+			TLSIntermediateCerts:          []*x509.Certificate{},
+		},
+		AnchorPeers:      []configtx.Address{},
+		OrdererEndpoints: ordererEndpoints,
+		ModPolicy:        "",
+	}
+}
+
+func (r *FabricMainChannelReconciler) mapPeerOrg(mspID string, caCert *x509.Certificate, tlsCACert *x509.Certificate) configtx.Organization {
+	return configtx.Organization{
+		Name: mspID,
+		Policies: map[string]configtx.Policy{
+			"Admins": {
+				Type: "Signature",
+				Rule: fmt.Sprintf("OR('%s.admin')", mspID),
+			},
+			"Readers": {
+				Type: "Signature",
+				Rule: fmt.Sprintf("OR('%s.member')", mspID),
+			},
+			"Writers": {
+				Type: "Signature",
+				Rule: fmt.Sprintf("OR('%s.member')", mspID),
+			},
+			"Endorsement": {
+				Type: "Signature",
+				Rule: fmt.Sprintf("OR('%s.member')", mspID),
+			},
+		},
+		MSP: configtx.MSP{
+			Name:         mspID,
+			RootCerts:    []*x509.Certificate{caCert},
+			TLSRootCerts: []*x509.Certificate{tlsCACert},
+			NodeOUs: membership.NodeOUs{
+				Enable: true,
+				ClientOUIdentifier: membership.OUIdentifier{
+					Certificate:                  caCert,
+					OrganizationalUnitIdentifier: "client",
+				},
+				PeerOUIdentifier: membership.OUIdentifier{
+					Certificate:                  caCert,
+					OrganizationalUnitIdentifier: "peer",
+				},
+				AdminOUIdentifier: membership.OUIdentifier{
+					Certificate:                  caCert,
+					OrganizationalUnitIdentifier: "admin",
+				},
+				OrdererOUIdentifier: membership.OUIdentifier{
+					Certificate:                  caCert,
+					OrganizationalUnitIdentifier: "orderer",
+				},
+			},
+			Admins:                        []*x509.Certificate{},
+			IntermediateCerts:             []*x509.Certificate{},
+			RevocationList:                []*pkix.CertificateList{},
+			OrganizationalUnitIdentifiers: []membership.OUIdentifier{},
+			CryptoConfig:                  membership.CryptoConfig{},
+			TLSIntermediateCerts:          []*x509.Certificate{},
+		},
+		AnchorPeers:      []configtx.Address{},
+		OrdererEndpoints: []string{},
+		ModPolicy:        "",
+	}
+}
+
 type identity struct {
 	Cert Pem `json:"cert"`
 	Key  Pem `json:"key"`
@@ -1003,7 +1044,8 @@ func updateApplicationChannelConfigTx(currentConfigTX configtx.ConfigTx, newConf
 	if err != nil {
 		return errors.Wrapf(err, "failed to get application configuration")
 	}
-
+	log.Infof("Current organizations %v", app.Organizations)
+	log.Infof("New organizations %v", newConfigTx.Application.Organizations)
 	for _, channelPeerOrg := range app.Organizations {
 		deleted := true
 		for _, organization := range newConfigTx.Application.Organizations {
@@ -1013,7 +1055,24 @@ func updateApplicationChannelConfigTx(currentConfigTX configtx.ConfigTx, newConf
 			}
 		}
 		if deleted {
+			log.Infof("Removing organization %s", channelPeerOrg.Name)
 			currentConfigTX.Application().RemoveOrganization(channelPeerOrg.Name)
+		}
+	}
+	for _, organization := range newConfigTx.Application.Organizations {
+		found := false
+		for _, channelPeerOrg := range app.Organizations {
+			if channelPeerOrg.Name == organization.Name {
+				found = true
+				break
+			}
+		}
+		if !found {
+			log.Infof("Adding organization %s", organization.Name)
+			err = currentConfigTX.Application().SetOrganization(organization)
+			if err != nil {
+				return errors.Wrapf(err, "failed to set organization %s", organization.Name)
+			}
 		}
 	}
 	err = currentConfigTX.Application().SetPolicies(
