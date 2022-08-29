@@ -43,7 +43,7 @@ jobs:
       - name: Deploy operator
         run: |
           helm repo add kfs https://kfsoftware.github.io/hlf-helm-charts --force-update
-          helm install hlf-operator --version=1.8.0-beta1 kfs/hlf-operator --set image.repository="${IMAGE}" --set image.tag="${TAG}" --set image.pullPolicy="IfNotPresent"
+          helm install hlf-operator --version=1.8.0-beta2 kfs/hlf-operator --set image.repository="${IMAGE}" --set image.tag="${TAG}" --set image.pullPolicy="IfNotPresent"
 
       - name: Install operator CRDs
         run: make generate manifests install
