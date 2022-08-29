@@ -8,7 +8,7 @@ jobs:
   kubectl-hlf:
     strategy:
       matrix:
-        go-version: [ 1.16.x ]
+        go-version: [ 1.17.x ]
         os: [ ubuntu-latest ]
     runs-on: ${{ matrix.os }}
     env:
