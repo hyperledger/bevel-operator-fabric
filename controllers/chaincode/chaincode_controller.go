@@ -313,8 +313,8 @@ func (r *FabricChaincodeReconciler) Reconcile(req ctrl.Request) (ctrl.Result, er
 	}
 	deploymentName := fmt.Sprintf("%s", fabricChaincode.Name)
 	serviceName := fmt.Sprintf("%s", fabricChaincode.Name)
-
-	chaincodeAddress := "0.0.0.0:7052"
+	chaincodePort := 7052
+	chaincodeAddress := fmt.Sprintf("0.0.0.0:%d", chaincodePort)
 	envVars := []corev1.EnvVar{
 		{
 			Name:  "CHAINCODE_ID",
@@ -411,6 +411,36 @@ func (r *FabricChaincodeReconciler) Reconcile(req ctrl.Request) (ctrl.Result, er
 				Image:           fabricChaincode.Spec.Image,
 				ImagePullPolicy: fabricChaincode.Spec.ImagePullPolicy,
 				VolumeMounts:    volumeMounts,
+				LivenessProbe: &corev1.Probe{
+					Handler: corev1.Handler{
+						TCPSocket: &corev1.TCPSocketAction{
+							Port: intstr.IntOrString{
+								Type:   intstr.Int,
+								IntVal: int32(chaincodePort),
+							},
+						},
+					},
+					InitialDelaySeconds: 5,
+					TimeoutSeconds:      1,
+					PeriodSeconds:       5,
+					SuccessThreshold:    1,
+					FailureThreshold:    3,
+				},
+				ReadinessProbe: &corev1.Probe{
+					Handler: corev1.Handler{
+						TCPSocket: &corev1.TCPSocketAction{
+							Port: intstr.IntOrString{
+								Type:   intstr.Int,
+								IntVal: int32(chaincodePort),
+							},
+						},
+					},
+					InitialDelaySeconds: 5,
+					TimeoutSeconds:      1,
+					PeriodSeconds:       5,
+					SuccessThreshold:    1,
+					FailureThreshold:    3,
+				},
 			},
 		},
 		EphemeralContainers: nil,
