@@ -12,8 +12,24 @@ import (
 )
 
 type Options struct {
-	Name   string
-	Output bool
+	Name                         string
+	Output                       bool
+	Capabilities                 []string
+	BatchTimeout                 string
+	MaxMessageCount              int
+	AbsoluteMaxBytes             int
+	PreferredMaxBytes            int
+	EtcdRaftTickInterval         string
+	EtcdRaftElectionTick         uint32
+	EtcdRaftHeartbeatTick        uint32
+	EtcdRaftMaxInflightBlocks    uint32
+	EtcdRaftSnapshotIntervalSize uint32
+	ChannelName                  string
+	AdminPeerOrgs                []string
+	AdminOrdererOrgs             []string
+	PeerOrgs                     []string
+	OrdererOrganizations         []string
+	Consenters                   interface{}
 }
 
 func (o Options) Validate() error {
@@ -35,6 +51,78 @@ func (c *createCmd) run() error {
 		return err
 	}
 	identities := map[string]v1alpha1.FabricMainChannelIdentity{}
+	ordererOrganizations := []v1alpha1.FabricMainChannelOrdererOrganization{}
+	adminPeerOrganizations := []v1alpha1.FabricMainChannelAdminPeerOrganizationSpec{}
+	peerOrganizations := []v1alpha1.FabricMainChannelPeerOrganization{}
+	adminOrdererOrganizations := []v1alpha1.FabricMainChannelAdminOrdererOrganizationSpec{}
+	externalOrdererOrganizations := []v1alpha1.FabricMainChannelExternalOrdererOrganization{}
+	consenters := []v1alpha1.FabricMainChannelConsenter{}
+	//for _, orderer := range c.channelOpts.OrdererOrganizations {
+	//	ordererOrganizations = append(ordererOrganizations, v1alpha1.FabricMainChannelOrdererOrganization{
+	//		MSPID:                  "",
+	//		CAName:                 "",
+	//		CANamespace:            "",
+	//		OrdererEndpoints:       nil,
+	//		OrderersToJoin:         nil,
+	//		ExternalOrderersToJoin: nil,
+	//	})
+	//}
+	//for _, adminPeerOrg := range c.channelOpts.AdminPeerOrgs {
+	//	adminPeerOrganizations = append(adminPeerOrganizations, v1alpha1.FabricMainChannelAdminPeerOrganizationSpec{
+	//		MSPID: adminPeerOrg,
+	//	})
+	//}
+	//for _, peerOrg := range c.channelOpts.PeerOrgs {
+	//	peerOrganizations = append(peerOrganizations, v1alpha1.FabricMainChannelPeerOrganization{
+	//		MSPID:       "",
+	//		CAName:      "",
+	//		CANamespace: "",
+	//	})
+	//}
+	//for _, adminOrdererOrgMSPID := range c.channelOpts.AdminOrdererOrgs {
+	//	adminOrdererOrganizations = append(adminOrdererOrganizations, v1alpha1.FabricMainChannelAdminOrdererOrganizationSpec{
+	//		MSPID: adminOrdererOrgMSPID,
+	//	})
+	//}
+	//
+	//for _, consenter := range c.channelOpts.Consenters {
+	//	consenters = append(consenters, v1alpha1.FabricMainChannelConsenter{
+	//		Host:    "",
+	//		Port:    0,
+	//		TLSCert: "",
+	//	})
+	//}
+	externalPeerOrganizations := []v1alpha1.FabricMainChannelExternalPeerOrganization{}
+	channelConfig := &v1alpha1.FabricMainChannelConfig{
+		Application: &v1alpha1.FabricMainChannelApplicationConfig{
+			Capabilities: c.channelOpts.Capabilities,
+			Policies:     nil,
+			ACLs:         nil,
+		},
+		Orderer: &v1alpha1.FabricMainChannelOrdererConfig{
+			OrdererType:  "etcdraft",
+			Capabilities: c.channelOpts.Capabilities,
+			Policies:     nil,
+			BatchTimeout: c.channelOpts.BatchTimeout,
+			BatchSize: &v1alpha1.FabricMainChannelOrdererBatchSize{
+				MaxMessageCount:   c.channelOpts.MaxMessageCount,
+				AbsoluteMaxBytes:  c.channelOpts.AbsoluteMaxBytes,
+				PreferredMaxBytes: c.channelOpts.PreferredMaxBytes,
+			},
+			State: "STATE_NORMAL",
+			EtcdRaft: &v1alpha1.FabricMainChannelEtcdRaft{
+				Options: &v1alpha1.FabricMainChannelEtcdRaftOptions{
+					TickInterval:         c.channelOpts.EtcdRaftTickInterval,
+					ElectionTick:         c.channelOpts.EtcdRaftElectionTick,
+					HeartbeatTick:        c.channelOpts.EtcdRaftHeartbeatTick,
+					MaxInflightBlocks:    c.channelOpts.EtcdRaftMaxInflightBlocks,
+					SnapshotIntervalSize: c.channelOpts.EtcdRaftSnapshotIntervalSize,
+				},
+			},
+		},
+		Capabilities: c.channelOpts.Capabilities,
+		Policies:     nil,
+	}
 	fabricConsole := &v1alpha1.FabricMainChannel{
 		TypeMeta: v1.TypeMeta{
 			Kind:       "FabricMainChannel",
@@ -44,16 +132,16 @@ func (c *createCmd) run() error {
 			Name: c.channelOpts.Name,
 		},
 		Spec: v1alpha1.FabricMainChannelSpec{
-			Name:                         "",
+			Name:                         c.channelOpts.ChannelName,
 			Identities:                   identities,
-			AdminPeerOrganizations:       []v1alpha1.FabricMainChannelAdminPeerOrganizationSpec{},
-			PeerOrganizations:            []v1alpha1.FabricMainChannelPeerOrganization{},
-			ExternalPeerOrganizations:    []v1alpha1.FabricMainChannelExternalPeerOrganization{},
-			ChannelConfig:                &v1alpha1.FabricMainChannelConfig{},
-			AdminOrdererOrganizations:    []v1alpha1.FabricMainChannelAdminOrdererOrganizationSpec{},
-			OrdererOrganizations:         []v1alpha1.FabricMainChannelOrdererOrganization{},
-			ExternalOrdererOrganizations: []v1alpha1.FabricMainChannelExternalOrdererOrganization{},
-			Consenters:                   []v1alpha1.FabricMainChannelConsenter{},
+			AdminPeerOrganizations:       adminPeerOrganizations,
+			PeerOrganizations:            peerOrganizations,
+			ExternalPeerOrganizations:    externalPeerOrganizations,
+			ChannelConfig:                channelConfig,
+			AdminOrdererOrganizations:    adminOrdererOrganizations,
+			OrdererOrganizations:         ordererOrganizations,
+			ExternalOrdererOrganizations: externalOrdererOrganizations,
+			Consenters:                   consenters,
 		},
 	}
 	if c.channelOpts.Output {
@@ -90,6 +178,7 @@ func newCreateMainChannelCmd(out io.Writer, errOut io.Writer) *cobra.Command {
 	}
 	f := cmd.Flags()
 	f.StringVar(&c.channelOpts.Name, "name", "", "Name of the Fabric Console to create")
+	f.StringSliceVar(&c.channelOpts.Capabilities, "capabilities", []string{"V2_0"}, "Capabilities of the channel")
 	f.BoolVarP(&c.channelOpts.Output, "output", "o", false, "Output in yaml")
 	return cmd
 }
