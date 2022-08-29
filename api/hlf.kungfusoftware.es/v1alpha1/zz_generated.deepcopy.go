@@ -22,7 +22,7 @@ limitations under the License.
 package v1alpha1
 
 import (
-	"github.com/operator-framework/operator-lib/status"
+	"github.com/kfsoftware/hlf-operator/pkg/status"
 	"k8s.io/api/core/v1"
 	"k8s.io/api/networking/v1beta1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
