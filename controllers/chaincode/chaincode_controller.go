@@ -10,7 +10,7 @@ import (
 	hlfv1alpha1 "github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
 	"github.com/kfsoftware/hlf-operator/controllers/certs"
 	"github.com/kfsoftware/hlf-operator/controllers/utils"
-	"github.com/operator-framework/operator-lib/status"
+	"github.com/kfsoftware/hlf-operator/pkg/status"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	appsv1 "k8s.io/api/apps/v1"
@@ -256,8 +256,7 @@ func (r FabricChaincodeReconciler) getCryptoMaterial(ctx context.Context, labels
 // +kubebuilder:rbac:groups=hlf.kungfusoftware.es,resources=fabricchaincodes,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=hlf.kungfusoftware.es,resources=fabricchaincodes/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=hlf.kungfusoftware.es,resources=fabricchaincodes/finalizers,verbs=get;update;patch
-func (r *FabricChaincodeReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
-	ctx := context.Background()
+func (r *FabricChaincodeReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	reqLogger := r.Log.WithValues("hlf", req.NamespacedName)
 	fabricChaincode := &hlfv1alpha1.FabricChaincode{}
 	//releaseName := req.Name
@@ -291,7 +290,7 @@ func (r *FabricChaincodeReconciler) Reconcile(req ctrl.Request) (ctrl.Result, er
 			return ctrl.Result{}, err
 		}
 	}
-	log.Infof("Chaincode %s reconciled", req.NamespacedName)
+	r.Log.Info(fmt.Sprintf("Chaincode %s reconciled", req.NamespacedName))
 	ns := req.Namespace
 	if ns == "" {
 		ns = "default"
@@ -412,7 +411,7 @@ func (r *FabricChaincodeReconciler) Reconcile(req ctrl.Request) (ctrl.Result, er
 				ImagePullPolicy: fabricChaincode.Spec.ImagePullPolicy,
 				VolumeMounts:    volumeMounts,
 				LivenessProbe: &corev1.Probe{
-					Handler: corev1.Handler{
+					ProbeHandler: corev1.ProbeHandler{
 						TCPSocket: &corev1.TCPSocketAction{
 							Port: intstr.IntOrString{
 								Type:   intstr.Int,
@@ -427,7 +426,7 @@ func (r *FabricChaincodeReconciler) Reconcile(req ctrl.Request) (ctrl.Result, er
 					FailureThreshold:    3,
 				},
 				ReadinessProbe: &corev1.Probe{
-					Handler: corev1.Handler{
+					ProbeHandler: corev1.ProbeHandler{
 						TCPSocket: &corev1.TCPSocketAction{
 							Port: intstr.IntOrString{
 								Type:   intstr.Int,
@@ -517,7 +516,7 @@ func (r *FabricChaincodeReconciler) Reconcile(req ctrl.Request) (ctrl.Result, er
 	}
 	defaultServiceIPFamily := corev1.IPv4Protocol
 	serviceSpec := corev1.ServiceSpec{
-		IPFamily: &defaultServiceIPFamily,
+		IPFamilies: []corev1.IPFamily{defaultServiceIPFamily},
 		Ports: []corev1.ServicePort{
 			{
 				Name:       "chaincode",

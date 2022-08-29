@@ -23,7 +23,7 @@ import (
 	"github.com/kfsoftware/hlf-operator/controllers/utils"
 	operatorv1 "github.com/kfsoftware/hlf-operator/pkg/client/clientset/versioned"
 	"github.com/kfsoftware/hlf-operator/pkg/nc"
-	"github.com/operator-framework/operator-lib/status"
+	"github.com/kfsoftware/hlf-operator/pkg/status"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v3"
@@ -75,8 +75,7 @@ func (r *FabricFollowerChannelReconciler) addFinalizer(reqLogger logr.Logger, m 
 // +kubebuilder:rbac:groups=hlf.kungfusoftware.es,resources=fabricfollowerchannels,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=hlf.kungfusoftware.es,resources=fabricfollowerchannels/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=hlf.kungfusoftware.es,resources=fabricfollowerchannels/finalizers,verbs=get;update;patch
-func (r *FabricFollowerChannelReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
-	ctx := context.Background()
+func (r *FabricFollowerChannelReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	reqLogger := r.Log.WithValues("hlf", req.NamespacedName)
 	fabricFollowerChannel := &hlfv1alpha1.FabricFollowerChannel{}
 

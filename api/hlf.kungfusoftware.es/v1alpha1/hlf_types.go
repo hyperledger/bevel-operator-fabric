@@ -18,12 +18,39 @@ package v1alpha1
 
 import (
 	"fmt"
+	"github.com/kfsoftware/hlf-operator/pkg/status"
 	"k8s.io/api/networking/v1beta1"
+	kubeclock "k8s.io/apimachinery/pkg/util/clock"
 
-	"github.com/operator-framework/operator-lib/status"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
+
+// clock is used to set status condition timestamps.
+// This variable makes it easier to test conditions.
+var clock kubeclock.Clock = &kubeclock.RealClock{}
+
+// ConditionType is the type of the condition and is typically a CamelCased
+// word or short phrase.
+//
+// Condition types should indicate state in the "abnormal-true" polarity. For
+// example, if the condition indicates when a policy is invalid, the "is valid"
+// case is probably the norm, so the condition should be called "Invalid".
+type ConditionType string
+
+// ConditionReason is intended to be a one-word, CamelCase representation of
+// the category of cause of the current status. It is intended to be used in
+// concise output, such as one-line kubectl get output, and in summarizing
+// occurrences of causes.
+type ConditionReason string
+
+type Condition struct {
+	Type               ConditionType          `json:"type"`
+	Status             corev1.ConditionStatus `json:"status"`
+	Reason             ConditionReason        `json:"reason,omitempty"`
+	Message            string                 `json:"message,omitempty"`
+	LastTransitionTime metav1.Time            `json:"lastTransitionTime,omitempty"`
+}
 
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
