@@ -1,6 +1,6 @@
 module github.com/kfsoftware/hlf-operator
 
-go 1.16
+go 1.17
 
 require (
 	github.com/Knetic/govaluate v3.0.0+incompatible
