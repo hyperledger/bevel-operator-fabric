@@ -12,20 +12,8 @@ import (
 )
 
 type Options struct {
-	Name                 string
-	StorageClass         string
-	Capacity             string
-	NS                   string
-	Image                string
-	Version              string
-	IngressGateway       string
-	IngressPort          int
-	Hosts                []string
-	Output               bool
-	InitialAdminPassword string
-	InitialAdmin         string
-	HostURL              string
-	TLSSecretName        string
+	Name   string
+	Output bool
 }
 
 func (o Options) Validate() error {
@@ -46,18 +34,18 @@ func (c *createCmd) run() error {
 	if err != nil {
 		return err
 	}
+	identities := map[string]v1alpha1.FabricMainChannelIdentity{}
 	fabricConsole := &v1alpha1.FabricMainChannel{
 		TypeMeta: v1.TypeMeta{
 			Kind:       "FabricMainChannel",
 			APIVersion: v1alpha1.GroupVersion.String(),
 		},
 		ObjectMeta: v1.ObjectMeta{
-			Name:      c.channelOpts.Name,
-			Namespace: c.channelOpts.NS,
+			Name: c.channelOpts.Name,
 		},
 		Spec: v1alpha1.FabricMainChannelSpec{
 			Name:                         "",
-			Identities:                   map[string]v1alpha1.FabricMainChannelIdentity{},
+			Identities:                   identities,
 			AdminPeerOrganizations:       []v1alpha1.FabricMainChannelAdminPeerOrganizationSpec{},
 			PeerOrganizations:            []v1alpha1.FabricMainChannelPeerOrganization{},
 			ExternalPeerOrganizations:    []v1alpha1.FabricMainChannelExternalPeerOrganization{},
@@ -76,7 +64,7 @@ func (c *createCmd) run() error {
 		fmt.Println(string(ot))
 	} else {
 		ctx := context.Background()
-		_, err = oclient.HlfV1alpha1().FabricMainChannels(c.channelOpts.NS).Create(
+		_, err = oclient.HlfV1alpha1().FabricMainChannels().Create(
 			ctx,
 			fabricConsole,
 			v1.CreateOptions{},

@@ -75,12 +75,12 @@ func (v *version) FabricExplorers() FabricExplorerInformer {
 
 // FabricFollowerChannels returns a FabricFollowerChannelInformer.
 func (v *version) FabricFollowerChannels() FabricFollowerChannelInformer {
-	return &fabricFollowerChannelInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
+	return &fabricFollowerChannelInformer{factory: v.factory, tweakListOptions: v.tweakListOptions}
 }
 
 // FabricMainChannels returns a FabricMainChannelInformer.
 func (v *version) FabricMainChannels() FabricMainChannelInformer {
-	return &fabricMainChannelInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
+	return &fabricMainChannelInformer{factory: v.factory, tweakListOptions: v.tweakListOptions}
 }
 
 // FabricNetworkConfigs returns a FabricNetworkConfigInformer.

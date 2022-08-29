@@ -56,12 +56,12 @@ func (c *HlfV1alpha1Client) FabricExplorers(namespace string) FabricExplorerInte
 	return newFabricExplorers(c, namespace)
 }
 
-func (c *HlfV1alpha1Client) FabricFollowerChannels(namespace string) FabricFollowerChannelInterface {
-	return newFabricFollowerChannels(c, namespace)
+func (c *HlfV1alpha1Client) FabricFollowerChannels() FabricFollowerChannelInterface {
+	return newFabricFollowerChannels(c)
 }
 
-func (c *HlfV1alpha1Client) FabricMainChannels(namespace string) FabricMainChannelInterface {
-	return newFabricMainChannels(c, namespace)
+func (c *HlfV1alpha1Client) FabricMainChannels() FabricMainChannelInterface {
+	return newFabricMainChannels(c)
 }
 
 func (c *HlfV1alpha1Client) FabricNetworkConfigs(namespace string) FabricNetworkConfigInterface {

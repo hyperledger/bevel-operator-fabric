@@ -8,34 +8,35 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"io"
+	"io/ioutil"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"net"
+	"strconv"
+	"strings"
 )
 
-type Options struct {
-	Name                 string
-	StorageClass         string
-	Capacity             string
-	NS                   string
-	Image                string
-	Version              string
-	IngressGateway       string
-	IngressPort          int
-	Hosts                []string
-	Output               bool
-	InitialAdminPassword string
-	InitialAdmin         string
-	HostURL              string
-	TLSSecretName        string
+type CreateOptions struct {
+	Name                string
+	Output              bool
+	MSPID               string
+	AnchorPeers         []string
+	SecretName          string
+	SecretNamespace     string
+	SecretKey           string
+	ChannelName         string
+	Peers               []string
+	OrdererCertificates []string
+	OrdererURLs         []string
 }
 
-func (o Options) Validate() error {
+func (o CreateOptions) Validate() error {
 	return nil
 }
 
 type createCmd struct {
 	out         io.Writer
 	errOut      io.Writer
-	channelOpts Options
+	channelOpts CreateOptions
 }
 
 func (c *createCmd) validate() error {
@@ -46,41 +47,92 @@ func (c *createCmd) run() error {
 	if err != nil {
 		return err
 	}
-	fabricConsole := &v1alpha1.FabricFollowerChannel{
+	orderers := []v1alpha1.FabricFollowerChannelOrderer{}
+	for idx, orderer := range c.channelOpts.OrdererURLs {
+		if len(c.channelOpts.OrdererCertificates)-1 < idx {
+			return fmt.Errorf("orderer certificate not found for orderer %s", orderer)
+		}
+		ordererCrtFile := c.channelOpts.OrdererCertificates[idx]
+		ordererCertificate, err := ioutil.ReadFile(ordererCrtFile)
+		if err != nil {
+			return fmt.Errorf("error reading orderer certificate file %s: %s", ordererCrtFile, err)
+		}
+		orderers = append(orderers, v1alpha1.FabricFollowerChannelOrderer{
+			URL:         orderer,
+			Certificate: string(ordererCertificate),
+		})
+	}
+	peers := []v1alpha1.FabricFollowerChannelPeer{}
+	for _, peer := range c.channelOpts.Peers {
+		chunks := strings.Split(peer, ",")
+		if len(chunks) != 2 {
+			return fmt.Errorf("invalid peer format: %s", peer)
+		}
+		name := chunks[0]
+		namespace := chunks[1]
+		fabricPeer, err := oclient.HlfV1alpha1().FabricPeers(namespace).Get(context.TODO(), name, v1.GetOptions{})
+		if err != nil {
+			return err
+		}
+		peers = append(peers, v1alpha1.FabricFollowerChannelPeer{
+			Name:      fabricPeer.Name,
+			Namespace: fabricPeer.Namespace,
+		})
+	}
+	anchorPeers := []v1alpha1.FabricFollowerChannelAnchorPeer{}
+	for _, anchorPeer := range c.channelOpts.AnchorPeers {
+		host, port, err := net.SplitHostPort(anchorPeer)
+		if err != nil {
+			return err
+		}
+		portNumber, err := strconv.Atoi(port)
+		if err != nil {
+			return err
+		}
+		anchorPeers = append(anchorPeers, v1alpha1.FabricFollowerChannelAnchorPeer{
+			Host: host,
+			Port: portNumber,
+		})
+	}
+	identity := v1alpha1.HLFIdentity{
+		SecretName:      c.channelOpts.SecretName,
+		SecretNamespace: c.channelOpts.SecretNamespace,
+		SecretKey:       c.channelOpts.SecretKey,
+	}
+	fabricFollowerChannel := &v1alpha1.FabricFollowerChannel{
 		TypeMeta: v1.TypeMeta{
 			Kind:       "FabricFollowerChannel",
 			APIVersion: v1alpha1.GroupVersion.String(),
 		},
 		ObjectMeta: v1.ObjectMeta{
-			Name:      c.channelOpts.Name,
-			Namespace: c.channelOpts.NS,
+			Name: c.channelOpts.Name,
 		},
 		Spec: v1alpha1.FabricFollowerChannelSpec{
-			Name:        "",
-			MSPID:       "",
-			Orderers:    nil,
-			PeersToJoin: nil,
-			AnchorPeers: nil,
-			HLFIdentity: v1alpha1.HLFIdentity{},
+			Name:        c.channelOpts.ChannelName,
+			MSPID:       c.channelOpts.MSPID,
+			Orderers:    orderers,
+			PeersToJoin: peers,
+			AnchorPeers: anchorPeers,
+			HLFIdentity: identity,
 		},
 	}
 	if c.channelOpts.Output {
-		ot, err := helpers.MarshallWithoutStatus(&fabricConsole)
+		ot, err := helpers.MarshallWithoutStatus(&fabricFollowerChannel)
 		if err != nil {
 			return err
 		}
 		fmt.Println(string(ot))
 	} else {
 		ctx := context.Background()
-		_, err = oclient.HlfV1alpha1().FabricFollowerChannels(c.channelOpts.NS).Create(
+		_, err = oclient.HlfV1alpha1().FabricFollowerChannels().Create(
 			ctx,
-			fabricConsole,
+			fabricFollowerChannel,
 			v1.CreateOptions{},
 		)
 		if err != nil {
 			return err
 		}
-		log.Infof("Console %s created on namespace %s", fabricConsole.Name, fabricConsole.Namespace)
+		log.Infof("Channel %s created on namespace %s", fabricFollowerChannel.Name, fabricFollowerChannel.Namespace)
 	}
 	return nil
 }
@@ -98,6 +150,14 @@ func newCreateFollowerChannelCmd(out io.Writer, errOut io.Writer) *cobra.Command
 	}
 	f := cmd.Flags()
 	f.StringVar(&c.channelOpts.Name, "name", "", "Name of the Fabric Console to create")
+	f.StringVar(&c.channelOpts.MSPID, "mspid", "", "MSPID of the channel")
+	f.StringArrayVar(&c.channelOpts.AnchorPeers, "anchor-peers", []string{}, "Anchor peers of the channel")
+	f.StringArrayVar(&c.channelOpts.OrdererURLs, "orderer-urls", []string{}, "Orderer URLs of the channel")
+	f.StringArrayVar(&c.channelOpts.OrdererCertificates, "orderer-certificates", []string{}, "Orderer certificates of the channel")
+	f.StringArrayVar(&c.channelOpts.Peers, "peers", []string{}, "Peers of the channel")
+	f.StringVar(&c.channelOpts.SecretName, "secret-name", "", "Name of the secret containing the certificate to join and set the anchor peers")
+	f.StringVar(&c.channelOpts.SecretNamespace, "secret-namespace", "", "Namespace of the secret containing the certificate to join and set the anchor peers")
+	f.StringVar(&c.channelOpts.SecretKey, "secret-key", "", "Key of the secret containing the certificate to join and set the anchor peers")
 	f.BoolVarP(&c.channelOpts.Output, "output", "o", false, "Output in yaml")
 	return cmd
 }

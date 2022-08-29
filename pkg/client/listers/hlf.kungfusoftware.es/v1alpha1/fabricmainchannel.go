@@ -28,8 +28,9 @@ type FabricMainChannelLister interface {
 	// List lists all FabricMainChannels in the indexer.
 	// Objects returned here must be treated as read-only.
 	List(selector labels.Selector) (ret []*v1alpha1.FabricMainChannel, err error)
-	// FabricMainChannels returns an object that can list and get FabricMainChannels.
-	FabricMainChannels(namespace string) FabricMainChannelNamespaceLister
+	// Get retrieves the FabricMainChannel from the index for a given name.
+	// Objects returned here must be treated as read-only.
+	Get(name string) (*v1alpha1.FabricMainChannel, error)
 	FabricMainChannelListerExpansion
 }
 
@@ -51,41 +52,9 @@ func (s *fabricMainChannelLister) List(selector labels.Selector) (ret []*v1alpha
 	return ret, err
 }
 
-// FabricMainChannels returns an object that can list and get FabricMainChannels.
-func (s *fabricMainChannelLister) FabricMainChannels(namespace string) FabricMainChannelNamespaceLister {
-	return fabricMainChannelNamespaceLister{indexer: s.indexer, namespace: namespace}
-}
-
-// FabricMainChannelNamespaceLister helps list and get FabricMainChannels.
-// All objects returned here must be treated as read-only.
-type FabricMainChannelNamespaceLister interface {
-	// List lists all FabricMainChannels in the indexer for a given namespace.
-	// Objects returned here must be treated as read-only.
-	List(selector labels.Selector) (ret []*v1alpha1.FabricMainChannel, err error)
-	// Get retrieves the FabricMainChannel from the indexer for a given namespace and name.
-	// Objects returned here must be treated as read-only.
-	Get(name string) (*v1alpha1.FabricMainChannel, error)
-	FabricMainChannelNamespaceListerExpansion
-}
-
-// fabricMainChannelNamespaceLister implements the FabricMainChannelNamespaceLister
-// interface.
-type fabricMainChannelNamespaceLister struct {
-	indexer   cache.Indexer
-	namespace string
-}
-
-// List lists all FabricMainChannels in the indexer for a given namespace.
-func (s fabricMainChannelNamespaceLister) List(selector labels.Selector) (ret []*v1alpha1.FabricMainChannel, err error) {
-	err = cache.ListAllByNamespace(s.indexer, s.namespace, selector, func(m interface{}) {
-		ret = append(ret, m.(*v1alpha1.FabricMainChannel))
-	})
-	return ret, err
-}
-
-// Get retrieves the FabricMainChannel from the indexer for a given namespace and name.
-func (s fabricMainChannelNamespaceLister) Get(name string) (*v1alpha1.FabricMainChannel, error) {
-	obj, exists, err := s.indexer.GetByKey(s.namespace + "/" + name)
+// Get retrieves the FabricMainChannel from the index for a given name.
+func (s *fabricMainChannelLister) Get(name string) (*v1alpha1.FabricMainChannel, error) {
+	obj, exists, err := s.indexer.GetByKey(name)
 	if err != nil {
 		return nil, err
 	}

@@ -30,7 +30,6 @@ import (
 // FakeFabricMainChannels implements FabricMainChannelInterface
 type FakeFabricMainChannels struct {
 	Fake *FakeHlfV1alpha1
-	ns   string
 }
 
 var fabricmainchannelsResource = schema.GroupVersionResource{Group: "hlf.kungfusoftware.es", Version: "v1alpha1", Resource: "fabricmainchannels"}
@@ -40,8 +39,7 @@ var fabricmainchannelsKind = schema.GroupVersionKind{Group: "hlf.kungfusoftware.
 // Get takes name of the fabricMainChannel, and returns the corresponding fabricMainChannel object, and an error if there is any.
 func (c *FakeFabricMainChannels) Get(ctx context.Context, name string, options v1.GetOptions) (result *v1alpha1.FabricMainChannel, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewGetAction(fabricmainchannelsResource, c.ns, name), &v1alpha1.FabricMainChannel{})
-
+		Invokes(testing.NewRootGetAction(fabricmainchannelsResource, name), &v1alpha1.FabricMainChannel{})
 	if obj == nil {
 		return nil, err
 	}
@@ -51,8 +49,7 @@ func (c *FakeFabricMainChannels) Get(ctx context.Context, name string, options v
 // List takes label and field selectors, and returns the list of FabricMainChannels that match those selectors.
 func (c *FakeFabricMainChannels) List(ctx context.Context, opts v1.ListOptions) (result *v1alpha1.FabricMainChannelList, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewListAction(fabricmainchannelsResource, fabricmainchannelsKind, c.ns, opts), &v1alpha1.FabricMainChannelList{})
-
+		Invokes(testing.NewRootListAction(fabricmainchannelsResource, fabricmainchannelsKind, opts), &v1alpha1.FabricMainChannelList{})
 	if obj == nil {
 		return nil, err
 	}
@@ -73,15 +70,13 @@ func (c *FakeFabricMainChannels) List(ctx context.Context, opts v1.ListOptions) 
 // Watch returns a watch.Interface that watches the requested fabricMainChannels.
 func (c *FakeFabricMainChannels) Watch(ctx context.Context, opts v1.ListOptions) (watch.Interface, error) {
 	return c.Fake.
-		InvokesWatch(testing.NewWatchAction(fabricmainchannelsResource, c.ns, opts))
-
+		InvokesWatch(testing.NewRootWatchAction(fabricmainchannelsResource, opts))
 }
 
 // Create takes the representation of a fabricMainChannel and creates it.  Returns the server's representation of the fabricMainChannel, and an error, if there is any.
 func (c *FakeFabricMainChannels) Create(ctx context.Context, fabricMainChannel *v1alpha1.FabricMainChannel, opts v1.CreateOptions) (result *v1alpha1.FabricMainChannel, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewCreateAction(fabricmainchannelsResource, c.ns, fabricMainChannel), &v1alpha1.FabricMainChannel{})
-
+		Invokes(testing.NewRootCreateAction(fabricmainchannelsResource, fabricMainChannel), &v1alpha1.FabricMainChannel{})
 	if obj == nil {
 		return nil, err
 	}
@@ -91,8 +86,7 @@ func (c *FakeFabricMainChannels) Create(ctx context.Context, fabricMainChannel *
 // Update takes the representation of a fabricMainChannel and updates it. Returns the server's representation of the fabricMainChannel, and an error, if there is any.
 func (c *FakeFabricMainChannels) Update(ctx context.Context, fabricMainChannel *v1alpha1.FabricMainChannel, opts v1.UpdateOptions) (result *v1alpha1.FabricMainChannel, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewUpdateAction(fabricmainchannelsResource, c.ns, fabricMainChannel), &v1alpha1.FabricMainChannel{})
-
+		Invokes(testing.NewRootUpdateAction(fabricmainchannelsResource, fabricMainChannel), &v1alpha1.FabricMainChannel{})
 	if obj == nil {
 		return nil, err
 	}
@@ -103,8 +97,7 @@ func (c *FakeFabricMainChannels) Update(ctx context.Context, fabricMainChannel *
 // Add a +genclient:noStatus comment above the type to avoid generating UpdateStatus().
 func (c *FakeFabricMainChannels) UpdateStatus(ctx context.Context, fabricMainChannel *v1alpha1.FabricMainChannel, opts v1.UpdateOptions) (*v1alpha1.FabricMainChannel, error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewUpdateSubresourceAction(fabricmainchannelsResource, "status", c.ns, fabricMainChannel), &v1alpha1.FabricMainChannel{})
-
+		Invokes(testing.NewRootUpdateSubresourceAction(fabricmainchannelsResource, "status", fabricMainChannel), &v1alpha1.FabricMainChannel{})
 	if obj == nil {
 		return nil, err
 	}
@@ -114,14 +107,13 @@ func (c *FakeFabricMainChannels) UpdateStatus(ctx context.Context, fabricMainCha
 // Delete takes name of the fabricMainChannel and deletes it. Returns an error if one occurs.
 func (c *FakeFabricMainChannels) Delete(ctx context.Context, name string, opts v1.DeleteOptions) error {
 	_, err := c.Fake.
-		Invokes(testing.NewDeleteActionWithOptions(fabricmainchannelsResource, c.ns, name, opts), &v1alpha1.FabricMainChannel{})
-
+		Invokes(testing.NewRootDeleteActionWithOptions(fabricmainchannelsResource, name, opts), &v1alpha1.FabricMainChannel{})
 	return err
 }
 
 // DeleteCollection deletes a collection of objects.
 func (c *FakeFabricMainChannels) DeleteCollection(ctx context.Context, opts v1.DeleteOptions, listOpts v1.ListOptions) error {
-	action := testing.NewDeleteCollectionAction(fabricmainchannelsResource, c.ns, listOpts)
+	action := testing.NewRootDeleteCollectionAction(fabricmainchannelsResource, listOpts)
 
 	_, err := c.Fake.Invokes(action, &v1alpha1.FabricMainChannelList{})
 	return err
@@ -130,8 +122,7 @@ func (c *FakeFabricMainChannels) DeleteCollection(ctx context.Context, opts v1.D
 // Patch applies the patch and returns the patched fabricMainChannel.
 func (c *FakeFabricMainChannels) Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *v1alpha1.FabricMainChannel, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewPatchSubresourceAction(fabricmainchannelsResource, c.ns, name, pt, data, subresources...), &v1alpha1.FabricMainChannel{})
-
+		Invokes(testing.NewRootPatchSubresourceAction(fabricmainchannelsResource, name, pt, data, subresources...), &v1alpha1.FabricMainChannel{})
 	if obj == nil {
 		return nil, err
 	}
