@@ -29,59 +29,59 @@ import (
 	cache "k8s.io/client-go/tools/cache"
 )
 
-// FabricPeerInformer provides access to a shared informer and lister for
-// FabricPeers.
-type FabricPeerInformer interface {
+// FabricMainChannelInformer provides access to a shared informer and lister for
+// FabricMainChannels.
+type FabricMainChannelInformer interface {
 	Informer() cache.SharedIndexInformer
-	Lister() v1alpha1.FabricPeerLister
+	Lister() v1alpha1.FabricMainChannelLister
 }
 
-type fabricPeerInformer struct {
+type fabricMainChannelInformer struct {
 	factory          internalinterfaces.SharedInformerFactory
 	tweakListOptions internalinterfaces.TweakListOptionsFunc
 	namespace        string
 }
 
-// NewFabricPeerInformer constructs a new informer for FabricPeer type.
+// NewFabricMainChannelInformer constructs a new informer for FabricMainChannel type.
 // Always prefer using an informer factory to get a shared informer instead of getting an independent
 // one. This reduces memory footprint and number of connections to the server.
-func NewFabricPeerInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers) cache.SharedIndexInformer {
-	return NewFilteredFabricPeerInformer(client, namespace, resyncPeriod, indexers, nil)
+func NewFabricMainChannelInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers) cache.SharedIndexInformer {
+	return NewFilteredFabricMainChannelInformer(client, namespace, resyncPeriod, indexers, nil)
 }
 
-// NewFilteredFabricPeerInformer constructs a new informer for FabricPeer type.
+// NewFilteredFabricMainChannelInformer constructs a new informer for FabricMainChannel type.
 // Always prefer using an informer factory to get a shared informer instead of getting an independent
 // one. This reduces memory footprint and number of connections to the server.
-func NewFilteredFabricPeerInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers, tweakListOptions internalinterfaces.TweakListOptionsFunc) cache.SharedIndexInformer {
+func NewFilteredFabricMainChannelInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers, tweakListOptions internalinterfaces.TweakListOptionsFunc) cache.SharedIndexInformer {
 	return cache.NewSharedIndexInformer(
 		&cache.ListWatch{
 			ListFunc: func(options v1.ListOptions) (runtime.Object, error) {
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.HlfV1alpha1().FabricPeers(namespace).List(context.TODO(), options)
+				return client.HlfV1alpha1().FabricMainChannels(namespace).List(context.TODO(), options)
 			},
 			WatchFunc: func(options v1.ListOptions) (watch.Interface, error) {
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.HlfV1alpha1().FabricPeers(namespace).Watch(context.TODO(), options)
+				return client.HlfV1alpha1().FabricMainChannels(namespace).Watch(context.TODO(), options)
 			},
 		},
-		&hlfkungfusoftwareesv1alpha1.FabricPeer{},
+		&hlfkungfusoftwareesv1alpha1.FabricMainChannel{},
 		resyncPeriod,
 		indexers,
 	)
 }
 
-func (f *fabricPeerInformer) defaultInformer(client versioned.Interface, resyncPeriod time.Duration) cache.SharedIndexInformer {
-	return NewFilteredFabricPeerInformer(client, f.namespace, resyncPeriod, cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc}, f.tweakListOptions)
+func (f *fabricMainChannelInformer) defaultInformer(client versioned.Interface, resyncPeriod time.Duration) cache.SharedIndexInformer {
+	return NewFilteredFabricMainChannelInformer(client, f.namespace, resyncPeriod, cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc}, f.tweakListOptions)
 }
 
-func (f *fabricPeerInformer) Informer() cache.SharedIndexInformer {
-	return f.factory.InformerFor(&hlfkungfusoftwareesv1alpha1.FabricPeer{}, f.defaultInformer)
+func (f *fabricMainChannelInformer) Informer() cache.SharedIndexInformer {
+	return f.factory.InformerFor(&hlfkungfusoftwareesv1alpha1.FabricMainChannel{}, f.defaultInformer)
 }
 
-func (f *fabricPeerInformer) Lister() v1alpha1.FabricPeerLister {
-	return v1alpha1.NewFabricPeerLister(f.Informer().GetIndexer())
+func (f *fabricMainChannelInformer) Lister() v1alpha1.FabricMainChannelLister {
+	return v1alpha1.NewFabricMainChannelLister(f.Informer().GetIndexer())
 }
