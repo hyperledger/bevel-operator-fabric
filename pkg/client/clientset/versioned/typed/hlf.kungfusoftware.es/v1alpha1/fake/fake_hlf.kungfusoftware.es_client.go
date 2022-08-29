@@ -37,12 +37,12 @@ func (c *FakeHlfV1alpha1) FabricExplorers(namespace string) v1alpha1.FabricExplo
 	return &FakeFabricExplorers{c, namespace}
 }
 
-func (c *FakeHlfV1alpha1) FabricFollowerChannels(namespace string) v1alpha1.FabricFollowerChannelInterface {
-	return &FakeFabricFollowerChannels{c, namespace}
+func (c *FakeHlfV1alpha1) FabricFollowerChannels() v1alpha1.FabricFollowerChannelInterface {
+	return &FakeFabricFollowerChannels{c}
 }
 
-func (c *FakeHlfV1alpha1) FabricMainChannels(namespace string) v1alpha1.FabricMainChannelInterface {
-	return &FakeFabricMainChannels{c, namespace}
+func (c *FakeHlfV1alpha1) FabricMainChannels() v1alpha1.FabricMainChannelInterface {
+	return &FakeFabricMainChannels{c}
 }
 
 func (c *FakeHlfV1alpha1) FabricNetworkConfigs(namespace string) v1alpha1.FabricNetworkConfigInterface {

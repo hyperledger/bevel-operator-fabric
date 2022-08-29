@@ -28,8 +28,9 @@ type FabricFollowerChannelLister interface {
 	// List lists all FabricFollowerChannels in the indexer.
 	// Objects returned here must be treated as read-only.
 	List(selector labels.Selector) (ret []*v1alpha1.FabricFollowerChannel, err error)
-	// FabricFollowerChannels returns an object that can list and get FabricFollowerChannels.
-	FabricFollowerChannels(namespace string) FabricFollowerChannelNamespaceLister
+	// Get retrieves the FabricFollowerChannel from the index for a given name.
+	// Objects returned here must be treated as read-only.
+	Get(name string) (*v1alpha1.FabricFollowerChannel, error)
 	FabricFollowerChannelListerExpansion
 }
 
@@ -51,41 +52,9 @@ func (s *fabricFollowerChannelLister) List(selector labels.Selector) (ret []*v1a
 	return ret, err
 }
 
-// FabricFollowerChannels returns an object that can list and get FabricFollowerChannels.
-func (s *fabricFollowerChannelLister) FabricFollowerChannels(namespace string) FabricFollowerChannelNamespaceLister {
-	return fabricFollowerChannelNamespaceLister{indexer: s.indexer, namespace: namespace}
-}
-
-// FabricFollowerChannelNamespaceLister helps list and get FabricFollowerChannels.
-// All objects returned here must be treated as read-only.
-type FabricFollowerChannelNamespaceLister interface {
-	// List lists all FabricFollowerChannels in the indexer for a given namespace.
-	// Objects returned here must be treated as read-only.
-	List(selector labels.Selector) (ret []*v1alpha1.FabricFollowerChannel, err error)
-	// Get retrieves the FabricFollowerChannel from the indexer for a given namespace and name.
-	// Objects returned here must be treated as read-only.
-	Get(name string) (*v1alpha1.FabricFollowerChannel, error)
-	FabricFollowerChannelNamespaceListerExpansion
-}
-
-// fabricFollowerChannelNamespaceLister implements the FabricFollowerChannelNamespaceLister
-// interface.
-type fabricFollowerChannelNamespaceLister struct {
-	indexer   cache.Indexer
-	namespace string
-}
-
-// List lists all FabricFollowerChannels in the indexer for a given namespace.
-func (s fabricFollowerChannelNamespaceLister) List(selector labels.Selector) (ret []*v1alpha1.FabricFollowerChannel, err error) {
-	err = cache.ListAllByNamespace(s.indexer, s.namespace, selector, func(m interface{}) {
-		ret = append(ret, m.(*v1alpha1.FabricFollowerChannel))
-	})
-	return ret, err
-}
-
-// Get retrieves the FabricFollowerChannel from the indexer for a given namespace and name.
-func (s fabricFollowerChannelNamespaceLister) Get(name string) (*v1alpha1.FabricFollowerChannel, error) {
-	obj, exists, err := s.indexer.GetByKey(s.namespace + "/" + name)
+// Get retrieves the FabricFollowerChannel from the index for a given name.
+func (s *fabricFollowerChannelLister) Get(name string) (*v1alpha1.FabricFollowerChannel, error) {
+	obj, exists, err := s.indexer.GetByKey(name)
 	if err != nil {
 		return nil, err
 	}

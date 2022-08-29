@@ -30,7 +30,7 @@ import (
 // FabricFollowerChannelsGetter has a method to return a FabricFollowerChannelInterface.
 // A group's client should implement this interface.
 type FabricFollowerChannelsGetter interface {
-	FabricFollowerChannels(namespace string) FabricFollowerChannelInterface
+	FabricFollowerChannels() FabricFollowerChannelInterface
 }
 
 // FabricFollowerChannelInterface has methods to work with FabricFollowerChannel resources.
@@ -50,14 +50,12 @@ type FabricFollowerChannelInterface interface {
 // fabricFollowerChannels implements FabricFollowerChannelInterface
 type fabricFollowerChannels struct {
 	client rest.Interface
-	ns     string
 }
 
 // newFabricFollowerChannels returns a FabricFollowerChannels
-func newFabricFollowerChannels(c *HlfV1alpha1Client, namespace string) *fabricFollowerChannels {
+func newFabricFollowerChannels(c *HlfV1alpha1Client) *fabricFollowerChannels {
 	return &fabricFollowerChannels{
 		client: c.RESTClient(),
-		ns:     namespace,
 	}
 }
 
@@ -65,7 +63,6 @@ func newFabricFollowerChannels(c *HlfV1alpha1Client, namespace string) *fabricFo
 func (c *fabricFollowerChannels) Get(ctx context.Context, name string, options v1.GetOptions) (result *v1alpha1.FabricFollowerChannel, err error) {
 	result = &v1alpha1.FabricFollowerChannel{}
 	err = c.client.Get().
-		Namespace(c.ns).
 		Resource("fabricfollowerchannels").
 		Name(name).
 		VersionedParams(&options, scheme.ParameterCodec).
@@ -82,7 +79,6 @@ func (c *fabricFollowerChannels) List(ctx context.Context, opts v1.ListOptions) 
 	}
 	result = &v1alpha1.FabricFollowerChannelList{}
 	err = c.client.Get().
-		Namespace(c.ns).
 		Resource("fabricfollowerchannels").
 		VersionedParams(&opts, scheme.ParameterCodec).
 		Timeout(timeout).
@@ -99,7 +95,6 @@ func (c *fabricFollowerChannels) Watch(ctx context.Context, opts v1.ListOptions)
 	}
 	opts.Watch = true
 	return c.client.Get().
-		Namespace(c.ns).
 		Resource("fabricfollowerchannels").
 		VersionedParams(&opts, scheme.ParameterCodec).
 		Timeout(timeout).
@@ -110,7 +105,6 @@ func (c *fabricFollowerChannels) Watch(ctx context.Context, opts v1.ListOptions)
 func (c *fabricFollowerChannels) Create(ctx context.Context, fabricFollowerChannel *v1alpha1.FabricFollowerChannel, opts v1.CreateOptions) (result *v1alpha1.FabricFollowerChannel, err error) {
 	result = &v1alpha1.FabricFollowerChannel{}
 	err = c.client.Post().
-		Namespace(c.ns).
 		Resource("fabricfollowerchannels").
 		VersionedParams(&opts, scheme.ParameterCodec).
 		Body(fabricFollowerChannel).
@@ -123,7 +117,6 @@ func (c *fabricFollowerChannels) Create(ctx context.Context, fabricFollowerChann
 func (c *fabricFollowerChannels) Update(ctx context.Context, fabricFollowerChannel *v1alpha1.FabricFollowerChannel, opts v1.UpdateOptions) (result *v1alpha1.FabricFollowerChannel, err error) {
 	result = &v1alpha1.FabricFollowerChannel{}
 	err = c.client.Put().
-		Namespace(c.ns).
 		Resource("fabricfollowerchannels").
 		Name(fabricFollowerChannel.Name).
 		VersionedParams(&opts, scheme.ParameterCodec).
@@ -138,7 +131,6 @@ func (c *fabricFollowerChannels) Update(ctx context.Context, fabricFollowerChann
 func (c *fabricFollowerChannels) UpdateStatus(ctx context.Context, fabricFollowerChannel *v1alpha1.FabricFollowerChannel, opts v1.UpdateOptions) (result *v1alpha1.FabricFollowerChannel, err error) {
 	result = &v1alpha1.FabricFollowerChannel{}
 	err = c.client.Put().
-		Namespace(c.ns).
 		Resource("fabricfollowerchannels").
 		Name(fabricFollowerChannel.Name).
 		SubResource("status").
@@ -152,7 +144,6 @@ func (c *fabricFollowerChannels) UpdateStatus(ctx context.Context, fabricFollowe
 // Delete takes name of the fabricFollowerChannel and deletes it. Returns an error if one occurs.
 func (c *fabricFollowerChannels) Delete(ctx context.Context, name string, opts v1.DeleteOptions) error {
 	return c.client.Delete().
-		Namespace(c.ns).
 		Resource("fabricfollowerchannels").
 		Name(name).
 		Body(&opts).
@@ -167,7 +158,6 @@ func (c *fabricFollowerChannels) DeleteCollection(ctx context.Context, opts v1.D
 		timeout = time.Duration(*listOpts.TimeoutSeconds) * time.Second
 	}
 	return c.client.Delete().
-		Namespace(c.ns).
 		Resource("fabricfollowerchannels").
 		VersionedParams(&listOpts, scheme.ParameterCodec).
 		Timeout(timeout).
@@ -180,7 +170,6 @@ func (c *fabricFollowerChannels) DeleteCollection(ctx context.Context, opts v1.D
 func (c *fabricFollowerChannels) Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *v1alpha1.FabricFollowerChannel, err error) {
 	result = &v1alpha1.FabricFollowerChannel{}
 	err = c.client.Patch(pt).
-		Namespace(c.ns).
 		Resource("fabricfollowerchannels").
 		Name(name).
 		SubResource(subresources...).
