@@ -212,7 +212,7 @@ kubectl hlf channel addanchorpeer --channel=demo --config=org1.yaml \
 In case of error, you may need to add the following to the org1.yaml configuration file:
 ```yaml
 channels:
-  _default:
+  default:
     orderers:
       - ord-node1.default
     peers:

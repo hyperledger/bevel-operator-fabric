@@ -149,7 +149,7 @@ certificateAuthorities:
 {{- end }}
 
 channels:
-  _default:
+  default:
 {{- if not .Orderers }}
     orderers: []
 {{- else }}

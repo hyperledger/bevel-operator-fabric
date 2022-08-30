@@ -417,7 +417,7 @@ peers:
 {{ .TlsCACrt | indent 8 }}
 
 channels:
-  _default:
+  default:
     peers:
       "peer":
         endorsingPeer: true
@@ -531,7 +531,7 @@ orderers:
 {{ .OrdTlsCACrt | indent 8 }}
 
 channels:
-  _default:
+  default:
     peers:
       "peer":
         endorsingPeer: true
