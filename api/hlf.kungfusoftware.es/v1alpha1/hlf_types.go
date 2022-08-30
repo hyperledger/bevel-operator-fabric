@@ -1718,9 +1718,15 @@ type FabricMainChannelExternalOrdererOrganization struct {
 	SignRootCert     string   `json:"signRootCert"`
 	OrdererEndpoints []string `json:"ordererEndpoints"`
 }
-
+type OrgCertsRef struct {
+}
+type CARef struct {
+	CAName      string `json:"caName"`
+	CANamespace string `json:"caNamespace"`
+}
 type FabricMainChannelPeerOrganization struct {
-	MSPID       string `json:"mspID"`
+	MSPID string `json:"mspID"`
+
 	CAName      string `json:"caName"`
 	CANamespace string `json:"caNamespace"`
 }

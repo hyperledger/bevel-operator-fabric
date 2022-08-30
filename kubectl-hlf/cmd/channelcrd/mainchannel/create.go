@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
+	"github.com/kfsoftware/hlf-operator/controllers/utils"
 	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/helpers"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -20,16 +21,16 @@ type Options struct {
 	AbsoluteMaxBytes             int
 	PreferredMaxBytes            int
 	EtcdRaftTickInterval         string
-	EtcdRaftElectionTick         uint32
-	EtcdRaftHeartbeatTick        uint32
-	EtcdRaftMaxInflightBlocks    uint32
-	EtcdRaftSnapshotIntervalSize uint32
+	EtcdRaftElectionTick         int
+	EtcdRaftHeartbeatTick        int
+	EtcdRaftMaxInflightBlocks    int
+	EtcdRaftSnapshotIntervalSize int
 	ChannelName                  string
 	AdminPeerOrgs                []string
 	AdminOrdererOrgs             []string
 	PeerOrgs                     []string
-	OrdererOrganizations         []string
-	Consenters                   interface{}
+	OrdererOrgs                  []string
+	Consenters                   []string
 }
 
 func (o Options) Validate() error {
@@ -50,6 +51,10 @@ func (c *createCmd) run() error {
 	if err != nil {
 		return err
 	}
+	clientSet, err := helpers.GetKubeClient()
+	if err != nil {
+		return err
+	}
 	identities := map[string]v1alpha1.FabricMainChannelIdentity{}
 	ordererOrganizations := []v1alpha1.FabricMainChannelOrdererOrganization{}
 	adminPeerOrganizations := []v1alpha1.FabricMainChannelAdminPeerOrganizationSpec{}
@@ -57,42 +62,83 @@ func (c *createCmd) run() error {
 	adminOrdererOrganizations := []v1alpha1.FabricMainChannelAdminOrdererOrganizationSpec{}
 	externalOrdererOrganizations := []v1alpha1.FabricMainChannelExternalOrdererOrganization{}
 	consenters := []v1alpha1.FabricMainChannelConsenter{}
-	//for _, orderer := range c.channelOpts.OrdererOrganizations {
-	//	ordererOrganizations = append(ordererOrganizations, v1alpha1.FabricMainChannelOrdererOrganization{
-	//		MSPID:                  "",
-	//		CAName:                 "",
-	//		CANamespace:            "",
-	//		OrdererEndpoints:       nil,
-	//		OrderersToJoin:         nil,
-	//		ExternalOrderersToJoin: nil,
-	//	})
-	//}
-	//for _, adminPeerOrg := range c.channelOpts.AdminPeerOrgs {
-	//	adminPeerOrganizations = append(adminPeerOrganizations, v1alpha1.FabricMainChannelAdminPeerOrganizationSpec{
-	//		MSPID: adminPeerOrg,
-	//	})
-	//}
-	//for _, peerOrg := range c.channelOpts.PeerOrgs {
-	//	peerOrganizations = append(peerOrganizations, v1alpha1.FabricMainChannelPeerOrganization{
-	//		MSPID:       "",
-	//		CAName:      "",
-	//		CANamespace: "",
-	//	})
-	//}
-	//for _, adminOrdererOrgMSPID := range c.channelOpts.AdminOrdererOrgs {
-	//	adminOrdererOrganizations = append(adminOrdererOrganizations, v1alpha1.FabricMainChannelAdminOrdererOrganizationSpec{
-	//		MSPID: adminOrdererOrgMSPID,
-	//	})
-	//}
-	//
-	//for _, consenter := range c.channelOpts.Consenters {
-	//	consenters = append(consenters, v1alpha1.FabricMainChannelConsenter{
-	//		Host:    "",
-	//		Port:    0,
-	//		TLSCert: "",
-	//	})
-	//}
+	ns := ""
+	orderers, err := helpers.GetClusterOrdererNodes(clientSet, oclient, ns)
+	if err != nil {
+		return err
+	}
+	ordererMap := map[string][]*helpers.ClusterOrdererNode{}
+	for _, orderer := range orderers {
+		if !utils.Contains(c.channelOpts.OrdererOrgs, orderer.Spec.MspID) {
+			continue
+		}
+		tlsCert, err := utils.ParseX509Certificate([]byte(orderer.Status.TlsCert))
+		if err != nil {
+			return err
+		}
+		consenterHost, consenterPort, err := helpers.GetOrdererHostAndPort(
+			clientSet,
+			orderer.Spec,
+			orderer.Status,
+		)
+		if err != nil {
+			return err
+		}
+		consenters = append(consenters, v1alpha1.FabricMainChannelConsenter{
+			Host:    consenterHost,
+			Port:    consenterPort,
+			TLSCert: string(utils.EncodeX509Certificate(tlsCert)),
+		})
+		_, ok := ordererMap[orderer.Spec.MspID]
+		if !ok {
+			ordererMap[orderer.Spec.MspID] = []*helpers.ClusterOrdererNode{}
+		}
+		ordererMap[orderer.Spec.MspID] = append(ordererMap[orderer.Spec.MspID], orderer)
+	}
+	for mspID, nodes := range ordererMap {
+		node := nodes[0]
+		var ordererEndpoints []string
+		for _, ordererNode := range nodes {
+			ordererHost, ordererPort, err := helpers.GetOrdererHostAndPort(clientSet, ordererNode.Spec, ordererNode.Status)
+			if err != nil {
+				return err
+			}
+			ordererEndpoints = append(ordererEndpoints, fmt.Sprintf("%s:%d", ordererHost, ordererPort))
+		}
+		externalOrdererOrganizations = append(externalOrdererOrganizations, v1alpha1.FabricMainChannelExternalOrdererOrganization{
+			MSPID:            mspID,
+			TLSRootCert:      node.Status.TlsCACert,
+			SignRootCert:     node.Status.SignCACert,
+			OrdererEndpoints: ordererEndpoints,
+		})
+	}
+	for _, adminPeerOrg := range c.channelOpts.AdminPeerOrgs {
+		adminPeerOrganizations = append(adminPeerOrganizations, v1alpha1.FabricMainChannelAdminPeerOrganizationSpec{
+			MSPID: adminPeerOrg,
+		})
+	}
 	externalPeerOrganizations := []v1alpha1.FabricMainChannelExternalPeerOrganization{}
+	peerOrgs, _, err := helpers.GetClusterPeers(clientSet, oclient, ns)
+	if err != nil {
+		return err
+	}
+	for _, peerOrg := range peerOrgs {
+		if len(peerOrg.Peers) == 0 {
+			return fmt.Errorf("no peers found for organization %s", peerOrg.MspID)
+		}
+		firstPeer := peerOrg.Peers[0]
+		externalPeerOrganizations = append(externalPeerOrganizations, v1alpha1.FabricMainChannelExternalPeerOrganization{
+			MSPID:        peerOrg.MspID,
+			TLSRootCert:  firstPeer.Status.TlsCACert,
+			SignRootCert: firstPeer.Status.SignCACert,
+		})
+	}
+	for _, adminOrdererOrgMSPID := range c.channelOpts.AdminOrdererOrgs {
+		adminOrdererOrganizations = append(adminOrdererOrganizations, v1alpha1.FabricMainChannelAdminOrdererOrganizationSpec{
+			MSPID: adminOrdererOrgMSPID,
+		})
+	}
+
 	channelConfig := &v1alpha1.FabricMainChannelConfig{
 		Application: &v1alpha1.FabricMainChannelApplicationConfig{
 			Capabilities: c.channelOpts.Capabilities,
@@ -113,10 +159,10 @@ func (c *createCmd) run() error {
 			EtcdRaft: &v1alpha1.FabricMainChannelEtcdRaft{
 				Options: &v1alpha1.FabricMainChannelEtcdRaftOptions{
 					TickInterval:         c.channelOpts.EtcdRaftTickInterval,
-					ElectionTick:         c.channelOpts.EtcdRaftElectionTick,
-					HeartbeatTick:        c.channelOpts.EtcdRaftHeartbeatTick,
-					MaxInflightBlocks:    c.channelOpts.EtcdRaftMaxInflightBlocks,
-					SnapshotIntervalSize: c.channelOpts.EtcdRaftSnapshotIntervalSize,
+					ElectionTick:         uint32(c.channelOpts.EtcdRaftElectionTick),
+					HeartbeatTick:        uint32(c.channelOpts.EtcdRaftHeartbeatTick),
+					MaxInflightBlocks:    uint32(c.channelOpts.EtcdRaftMaxInflightBlocks),
+					SnapshotIntervalSize: uint32(c.channelOpts.EtcdRaftSnapshotIntervalSize),
 				},
 			},
 		},
@@ -179,6 +225,22 @@ func newCreateMainChannelCmd(out io.Writer, errOut io.Writer) *cobra.Command {
 	f := cmd.Flags()
 	f.StringVar(&c.channelOpts.Name, "name", "", "Name of the Fabric Console to create")
 	f.StringSliceVar(&c.channelOpts.Capabilities, "capabilities", []string{"V2_0"}, "Capabilities of the channel")
+	f.StringSliceVar(&c.channelOpts.AdminPeerOrgs, "admin-peer-orgs", []string{}, "MSP IDs of the admin peer organizations")
+	f.StringSliceVar(&c.channelOpts.AdminOrdererOrgs, "admin-orderer-orgs", []string{}, "MSP IDs of the admin orderer organizations")
+	f.StringSliceVar(&c.channelOpts.OrdererOrgs, "orderer-orgs", []string{}, "MSP IDs of the orderer organizations")
+	f.StringSliceVar(&c.channelOpts.PeerOrgs, "peer-orgs", []string{}, "MSP IDs of the peer organizations")
+
+	f.StringVar(&c.channelOpts.ChannelName, "channel-name", "mychannel", "Name of the channel")
+	f.StringVar(&c.channelOpts.BatchTimeout, "batch-timeout", "1s", "Batch timeout")
+	f.IntVar(&c.channelOpts.MaxMessageCount, "max-message-count", 10, "Max message count")
+	f.IntVar(&c.channelOpts.AbsoluteMaxBytes, "absolute-max-bytes", 10, "Absolute max bytes")
+	f.IntVar(&c.channelOpts.PreferredMaxBytes, "preferred-max-bytes", 10, "Preferred max bytes")
+	f.StringVar(&c.channelOpts.EtcdRaftTickInterval, "etcd-raft-tick-interval", "500ms", "Etcd raft tick interval")
+	f.IntVar(&c.channelOpts.EtcdRaftElectionTick, "etcd-raft-election-tick", 10, "Etcd raft election tick")
+	f.IntVar(&c.channelOpts.EtcdRaftHeartbeatTick, "etcd-raft-heartbeat-tick", 1, "Etcd raft heartbeat tick")
+	f.IntVar(&c.channelOpts.EtcdRaftMaxInflightBlocks, "etcd-raft-max-inflight-blocks", 5, "Etcd raft max inflight blocks")
+	f.IntVar(&c.channelOpts.EtcdRaftSnapshotIntervalSize, "etcd-raft-snapshot-interval-size", 16777216, "Etcd raft snapshot interval size")
+
 	f.BoolVarP(&c.channelOpts.Output, "output", "o", false, "Output in yaml")
 	return cmd
 }
