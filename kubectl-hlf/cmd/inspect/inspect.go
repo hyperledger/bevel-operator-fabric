@@ -29,6 +29,7 @@ type inspectCmd struct {
 	format        string
 	namespaces    []string
 	ordererNodes  []string
+	channels      []string
 }
 
 func (c *inspectCmd) validate() error {
@@ -149,26 +150,28 @@ certificateAuthorities:
 {{- end }}
 
 channels:
-  _default:
-{{- if not .Orderers }}
+{{- range $channel := .Channels }}
+  {{ $channel }}:
+{{- if not $.Orderers }}
     orderers: []
 {{- else }}
     orderers:
-{{- range $orderer := .Orderers }}
+{{- range $orderer := $.Orderers }}
       - {{$orderer.Name}}
 {{- end }}
 {{- end }}
-{{- if not .Peers }}
+{{- if not $.Peers }}
     peers: {}
 {{- else }}
     peers:
-{{- range $peer := .Peers }}
+{{- range $peer := $.Peers }}
        {{$peer.Name}}:
         discover: true
         endorsingPeer: true
         chaincodeQuery: true
         ledgerQuery: true
         eventSource: true
+{{- end }}
 {{- end }}
 {{- end }}
 
@@ -241,17 +244,15 @@ func (c *inspectCmd) run(out io.Writer) error {
 		if filterByNS && !utils.Contains(c.namespaces, orderer.ObjectMeta.Namespace) {
 			continue
 		}
+		if filterByOrdererNodes && !utils.Contains(c.ordererNodes, orderer.Name) {
+			continue
+		}
 		if !filterByOrgs {
 			orderers = append(orderers, orderer)
 		} else if filterByOrgs && utils.Contains(c.organizations, orderer.Item.Spec.MspID) {
 			orderers = append(orderers, orderer)
 		}
 	}
-	//log.Infof("Filter by orgs %ordererNode", marshallOrPanic(filterByOrgs))
-	//log.Infof("Cluster orderers for %ordererNode", marshallOrPanic(orderers))
-	//log.Infof("Cluster peers for %ordererNode", marshallOrPanic(peers))
-	//log.Infof("Ord orgs for %ordererNode", marshallOrPanic(ordOrgs))
-	//log.Infof("Peer orgs for %ordererNode", marshallOrPanic(peerOrgs))
 	tmpl, err := template.New("test").Funcs(sprig.HermeticTxtFuncMap()).Parse(tmplGoConfig)
 	if err != nil {
 		return err
@@ -263,6 +264,7 @@ func (c *inspectCmd) run(out io.Writer) error {
 		"Organizations": orgMap,
 		"CertAuths":     certAuths,
 		"Internal":      c.internal,
+		"Channels":      c.channels,
 	})
 	if err != nil {
 		return err
@@ -320,6 +322,7 @@ func NewInspectHLFConfig(out io.Writer) *cobra.Command {
 	f.StringArrayVarP(&c.ordererNodes, "ordererNodes", "", []string{}, "Orderer nodes to export")
 	f.StringVar(&c.format, "format", yamlFormat, "Connection profile output format (yaml/json)")
 	f.StringArrayVarP(&c.namespaces, "namespace", "n", []string{}, "Namespace scope for this request")
+	f.StringArrayVarP(&c.channels, "channels", "c", []string{"_default"}, "Channels for the network config")
 
 	return cmd
 }
