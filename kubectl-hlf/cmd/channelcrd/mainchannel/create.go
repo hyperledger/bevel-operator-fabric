@@ -10,6 +10,7 @@ import (
 	"github.com/spf13/cobra"
 	"io"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"strings"
 )
 
 type Options struct {
@@ -31,6 +32,9 @@ type Options struct {
 	PeerOrgs                     []string
 	OrdererOrgs                  []string
 	Consenters                   []string
+	SecretName                   string
+	SecretNS                     string
+	Identities                   []string
 }
 
 func (o Options) Validate() error {
@@ -56,6 +60,20 @@ func (c *createCmd) run() error {
 		return err
 	}
 	identities := map[string]v1alpha1.FabricMainChannelIdentity{}
+	for _, identity := range c.channelOpts.Identities {
+		chunks := strings.Split(identity, ";")
+		if len(chunks) != 2 {
+			return fmt.Errorf("invalid identity %s, example format <msp_id>;<secret_key>", identity)
+		}
+		mspID := chunks[0]
+		secretKey := chunks[1]
+		identities[mspID] = v1alpha1.FabricMainChannelIdentity{
+			SecretName:      c.channelOpts.SecretName,
+			SecretNamespace: c.channelOpts.SecretNS,
+			SecretKey:       secretKey,
+		}
+
+	}
 	ordererOrganizations := []v1alpha1.FabricMainChannelOrdererOrganization{}
 	adminPeerOrganizations := []v1alpha1.FabricMainChannelAdminPeerOrganizationSpec{}
 	peerOrganizations := []v1alpha1.FabricMainChannelPeerOrganization{}
@@ -105,11 +123,26 @@ func (c *createCmd) run() error {
 			}
 			ordererEndpoints = append(ordererEndpoints, fmt.Sprintf("%s:%d", ordererHost, ordererPort))
 		}
-		externalOrdererOrganizations = append(externalOrdererOrganizations, v1alpha1.FabricMainChannelExternalOrdererOrganization{
-			MSPID:            mspID,
-			TLSRootCert:      node.Status.TlsCACert,
-			SignRootCert:     node.Status.SignCACert,
-			OrdererEndpoints: ordererEndpoints,
+		tlsCACert := node.Status.TlsCACert
+		signCACert := node.Status.SignCACert
+		ordererNodes := []v1alpha1.FabricMainChannelExternalOrdererNode{}
+		for _, ordererNode := range nodes {
+			adminOrdererHost, adminOrdererPort, err := helpers.GetOrdererAdminHostAndPort(clientSet, ordererNode.Spec, ordererNode.Status)
+			if err != nil {
+				return err
+			}
+			ordererNodes = append(ordererNodes, v1alpha1.FabricMainChannelExternalOrdererNode{
+				Host:      adminOrdererHost,
+				AdminPort: adminOrdererPort,
+			})
+		}
+		ordererOrganizations = append(ordererOrganizations, v1alpha1.FabricMainChannelOrdererOrganization{
+			MSPID:                  mspID,
+			TLSCACert:              tlsCACert,
+			SignCACert:             signCACert,
+			OrdererEndpoints:       ordererEndpoints,
+			OrderersToJoin:         []v1alpha1.FabricMainChannelOrdererNode{},
+			ExternalOrderersToJoin: ordererNodes,
 		})
 	}
 	for _, adminPeerOrg := range c.channelOpts.AdminPeerOrgs {
@@ -125,6 +158,9 @@ func (c *createCmd) run() error {
 	for _, peerOrg := range peerOrgs {
 		if len(peerOrg.Peers) == 0 {
 			return fmt.Errorf("no peers found for organization %s", peerOrg.MspID)
+		}
+		if !utils.Contains(c.channelOpts.PeerOrgs, peerOrg.MspID) {
+			continue
 		}
 		firstPeer := peerOrg.Peers[0]
 		externalPeerOrganizations = append(externalPeerOrganizations, v1alpha1.FabricMainChannelExternalPeerOrganization{
@@ -169,7 +205,7 @@ func (c *createCmd) run() error {
 		Capabilities: c.channelOpts.Capabilities,
 		Policies:     nil,
 	}
-	fabricConsole := &v1alpha1.FabricMainChannel{
+	fabricMainChannel := &v1alpha1.FabricMainChannel{
 		TypeMeta: v1.TypeMeta{
 			Kind:       "FabricMainChannel",
 			APIVersion: v1alpha1.GroupVersion.String(),
@@ -191,7 +227,7 @@ func (c *createCmd) run() error {
 		},
 	}
 	if c.channelOpts.Output {
-		ot, err := helpers.MarshallWithoutStatus(&fabricConsole)
+		ot, err := helpers.MarshallWithoutStatus(&fabricMainChannel)
 		if err != nil {
 			return err
 		}
@@ -200,13 +236,13 @@ func (c *createCmd) run() error {
 		ctx := context.Background()
 		_, err = oclient.HlfV1alpha1().FabricMainChannels().Create(
 			ctx,
-			fabricConsole,
+			fabricMainChannel,
 			v1.CreateOptions{},
 		)
 		if err != nil {
 			return err
 		}
-		log.Infof("Console %s created on namespace %s", fabricConsole.Name, fabricConsole.Namespace)
+		log.Infof("MainChannel %s created on namespace %s", fabricMainChannel.Name, fabricMainChannel.Namespace)
 	}
 	return nil
 }
@@ -231,15 +267,19 @@ func newCreateMainChannelCmd(out io.Writer, errOut io.Writer) *cobra.Command {
 	f.StringSliceVar(&c.channelOpts.PeerOrgs, "peer-orgs", []string{}, "MSP IDs of the peer organizations")
 
 	f.StringVar(&c.channelOpts.ChannelName, "channel-name", "mychannel", "Name of the channel")
-	f.StringVar(&c.channelOpts.BatchTimeout, "batch-timeout", "1s", "Batch timeout")
+	f.StringVar(&c.channelOpts.BatchTimeout, "batch-timeout", "2s", "Batch timeout")
 	f.IntVar(&c.channelOpts.MaxMessageCount, "max-message-count", 10, "Max message count")
-	f.IntVar(&c.channelOpts.AbsoluteMaxBytes, "absolute-max-bytes", 10, "Absolute max bytes")
-	f.IntVar(&c.channelOpts.PreferredMaxBytes, "preferred-max-bytes", 10, "Preferred max bytes")
+	f.IntVar(&c.channelOpts.AbsoluteMaxBytes, "absolute-max-bytes", 1048576, "Absolute max bytes")
+	f.IntVar(&c.channelOpts.PreferredMaxBytes, "preferred-max-bytes", 524288, "Preferred max bytes")
 	f.StringVar(&c.channelOpts.EtcdRaftTickInterval, "etcd-raft-tick-interval", "500ms", "Etcd raft tick interval")
 	f.IntVar(&c.channelOpts.EtcdRaftElectionTick, "etcd-raft-election-tick", 10, "Etcd raft election tick")
 	f.IntVar(&c.channelOpts.EtcdRaftHeartbeatTick, "etcd-raft-heartbeat-tick", 1, "Etcd raft heartbeat tick")
 	f.IntVar(&c.channelOpts.EtcdRaftMaxInflightBlocks, "etcd-raft-max-inflight-blocks", 5, "Etcd raft max inflight blocks")
 	f.IntVar(&c.channelOpts.EtcdRaftSnapshotIntervalSize, "etcd-raft-snapshot-interval-size", 16777216, "Etcd raft snapshot interval size")
+
+	f.StringVar(&c.channelOpts.SecretName, "secret-name", "", "Secret name for the identities")
+	f.StringVar(&c.channelOpts.SecretNS, "secret-ns", "", "Secret namespace for the identities")
+	f.StringSliceVar(&c.channelOpts.Identities, "identities", []string{}, "Identity map")
 
 	f.BoolVarP(&c.channelOpts.Output, "output", "o", false, "Output in yaml")
 	return cmd

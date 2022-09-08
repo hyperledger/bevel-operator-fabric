@@ -307,9 +307,11 @@ spec:
                         - namespace
                         type: object
                       type: array
+                    signCACert:
+                      type: string
+                    tlsCACert:
+                      type: string
                   required:
-                  - caName
-                  - caNamespace
                   - externalOrderersToJoin
                   - mspID
                   - ordererEndpoints

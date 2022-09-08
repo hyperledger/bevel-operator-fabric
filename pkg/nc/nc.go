@@ -194,9 +194,15 @@ func GenerateNetworkConfig(channel *hlfv1alpha1.FabricMainChannel, kubeClientset
 		})
 	}
 	for _, ordOrg := range channel.Spec.OrdererOrganizations {
-		fabricCA, err := hlfClientSet.HlfV1alpha1().FabricCAs(ordOrg.CANamespace).Get(ctx, ordOrg.CAName, v1.GetOptions{})
-		if err != nil {
-			return nil, err
+		var tlsCACert string
+		if ordOrg.TLSCACert != "" {
+			tlsCACert = ordOrg.TLSCACert
+		} else {
+			fabricCA, err := hlfClientSet.HlfV1alpha1().FabricCAs(ordOrg.CANamespace).Get(ctx, ordOrg.CAName, v1.GetOptions{})
+			if err != nil {
+				return nil, err
+			}
+			tlsCACert = fabricCA.Status.TLSCACert
 		}
 		org := &Org{
 			MSPID:     ordOrg.MSPID,
@@ -210,7 +216,7 @@ func GenerateNetworkConfig(channel *hlfv1alpha1.FabricMainChannel, kubeClientset
 			ordererNodes = append(ordererNodes, &Orderer{
 				URL:       fmt.Sprintf("grpcs://%s", ordererEndpoint),
 				Name:      ordererName,
-				TLSCACert: fabricCA.Status.TLSCACert,
+				TLSCACert: tlsCACert,
 			})
 		}
 		orgs = append(orgs, org)
