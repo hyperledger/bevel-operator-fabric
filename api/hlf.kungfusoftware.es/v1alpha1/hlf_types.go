@@ -1164,6 +1164,7 @@ type FabricOperationsConsoleSpec struct {
 	Ingress Ingress `json:"ingress"`
 	HostURL string  `json:"hostUrl"`
 }
+
 type Ingress struct {
 	// +kubebuilder:default:=true
 	Enabled bool `json:"enabled"`
@@ -1732,9 +1733,15 @@ type FabricMainChannelPeerOrganization struct {
 }
 
 type FabricMainChannelOrdererOrganization struct {
-	MSPID                  string                                 `json:"mspID"`
-	CAName                 string                                 `json:"caName"`
-	CANamespace            string                                 `json:"caNamespace"`
+	MSPID string `json:"mspID"`
+	// +optional
+	CAName string `json:"caName"`
+	// +optional
+	CANamespace string `json:"caNamespace"`
+	// +optional
+	TLSCACert string `json:"tlsCACert"`
+	// +optional
+	SignCACert             string                                 `json:"signCACert"`
 	OrdererEndpoints       []string                               `json:"ordererEndpoints"`
 	OrderersToJoin         []FabricMainChannelOrdererNode         `json:"orderersToJoin"`
 	ExternalOrderersToJoin []FabricMainChannelExternalOrdererNode `json:"externalOrderersToJoin"`

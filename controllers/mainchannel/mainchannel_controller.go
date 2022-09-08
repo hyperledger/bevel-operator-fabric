@@ -27,7 +27,6 @@ import (
 	mspimpl "github.com/hyperledger/fabric-sdk-go/pkg/msp"
 	"github.com/hyperledger/fabric/protoutil"
 	hlfv1alpha1 "github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
-	"github.com/kfsoftware/hlf-operator/controllers/testutils"
 	"github.com/kfsoftware/hlf-operator/controllers/utils"
 	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/helpers"
 	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/helpers/osnadmin"
@@ -130,20 +129,6 @@ func (r *FabricMainChannelReconciler) Reconcile(ctx context.Context, req ctrl.Re
 		r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, err, false)
 		return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricMainChannel)
 	}
-	var consenters []testutils.Consenter
-	for _, consenter := range fabricMainChannel.Spec.Consenters {
-		tlsCert, err := utils.ParseX509Certificate([]byte(consenter.TLSCert))
-		if err != nil {
-			r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, err, false)
-			return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricMainChannel)
-		}
-		channelConsenter := testutils.CreateConsenter(
-			consenter.Host,
-			consenter.Port,
-			tlsCert,
-		)
-		consenters = append(consenters, channelConsenter)
-	}
 	channelConfig, err := r.mapToConfigTX(fabricMainChannel)
 	if err != nil {
 		r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, err, false)
@@ -161,18 +146,25 @@ func (r *FabricMainChannelReconciler) Reconcile(ctx context.Context, req ctrl.Re
 	}
 	// join orderers
 	for _, ordererOrg := range fabricMainChannel.Spec.OrdererOrganizations {
-		certAuth, err := helpers.GetCertAuthByName(
-			clientSet,
-			hlfClientSet,
-			ordererOrg.CAName,
-			ordererOrg.CANamespace,
-		)
-		if err != nil {
-			r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, err, false)
-			return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricMainChannel)
+		var tlsCACert string
+		if ordererOrg.CAName != "" && ordererOrg.CANamespace != "" {
+			certAuth, err := helpers.GetCertAuthByName(
+				clientSet,
+				hlfClientSet,
+				ordererOrg.CAName,
+				ordererOrg.CANamespace,
+			)
+			if err != nil {
+				r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, err, false)
+				return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricMainChannel)
+			}
+			tlsCACert = certAuth.Status.TLSCACert
+
+		} else if ordererOrg.TLSCACert != "" && ordererOrg.SignCACert != "" {
+			tlsCACert = ordererOrg.TLSCACert
 		}
 		certPool := x509.NewCertPool()
-		ok := certPool.AppendCertsFromPEM([]byte(certAuth.Status.TLSCACert))
+		ok := certPool.AppendCertsFromPEM([]byte(tlsCACert))
 		if !ok {
 			r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, fmt.Errorf("couldn't append certs from org %s", ordererOrg.MSPID), false)
 			return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricMainChannel)
@@ -661,7 +653,7 @@ func (r *FabricMainChannelReconciler) SetupWithManager(mgr ctrl.Manager) error {
 }
 
 func (r *FabricMainChannelReconciler) mapToConfigTX(channel *hlfv1alpha1.FabricMainChannel) (configtx.Channel, error) {
-	var consenters []orderer.Consenter
+	consenters := []orderer.Consenter{}
 	for _, consenter := range channel.Spec.Consenters {
 		tlsCert, err := utils.ParseX509Certificate([]byte(consenter.TLSCert))
 		if err != nil {
@@ -685,24 +677,37 @@ func (r *FabricMainChannelReconciler) mapToConfigTX(channel *hlfv1alpha1.FabricM
 	if err != nil {
 		return configtx.Channel{}, err
 	}
-	var ordererOrgs []configtx.Organization
+	ordererOrgs := []configtx.Organization{}
 	for _, ordererOrg := range channel.Spec.OrdererOrganizations {
-		certAuth, err := helpers.GetCertAuthByName(
-			clientSet,
-			hlfClientSet,
-			ordererOrg.CAName,
-			ordererOrg.CANamespace,
-		)
-		if err != nil {
-			return configtx.Channel{}, err
-		}
-		tlsCACert, err := utils.ParseX509Certificate([]byte(certAuth.Status.TLSCACert))
-		if err != nil {
-			return configtx.Channel{}, err
-		}
-		caCert, err := utils.ParseX509Certificate([]byte(certAuth.Status.CACert))
-		if err != nil {
-			return configtx.Channel{}, err
+		var tlsCACert *x509.Certificate
+		var caCert *x509.Certificate
+		if ordererOrg.CAName != "" && ordererOrg.CANamespace != "" {
+			certAuth, err := helpers.GetCertAuthByName(
+				clientSet,
+				hlfClientSet,
+				ordererOrg.CAName,
+				ordererOrg.CANamespace,
+			)
+			if err != nil {
+				return configtx.Channel{}, err
+			}
+			tlsCACert, err = utils.ParseX509Certificate([]byte(certAuth.Status.TLSCACert))
+			if err != nil {
+				return configtx.Channel{}, err
+			}
+			caCert, err = utils.ParseX509Certificate([]byte(certAuth.Status.CACert))
+			if err != nil {
+				return configtx.Channel{}, err
+			}
+		} else if ordererOrg.TLSCACert != "" && ordererOrg.SignCACert != "" {
+			tlsCACert, err = utils.ParseX509Certificate([]byte(ordererOrg.TLSCACert))
+			if err != nil {
+				return configtx.Channel{}, err
+			}
+			caCert, err = utils.ParseX509Certificate([]byte(ordererOrg.SignCACert))
+			if err != nil {
+				return configtx.Channel{}, err
+			}
 		}
 		ordererOrgs = append(ordererOrgs, r.mapOrdererOrg(ordererOrg.MSPID, ordererOrg.OrdererEndpoints, caCert, tlsCACert))
 	}
@@ -796,7 +801,7 @@ func (r *FabricMainChannelReconciler) mapToConfigTX(channel *hlfv1alpha1.FabricM
 			}
 		}
 	}
-	var peerOrgs []configtx.Organization
+	peerOrgs := []configtx.Organization{}
 	for _, peerOrg := range channel.Spec.PeerOrganizations {
 		certAuth, err := helpers.GetCertAuthByName(
 			clientSet,
