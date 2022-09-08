@@ -30,6 +30,9 @@ type CreateOptions struct {
 }
 
 func (o CreateOptions) Validate() error {
+	if o.MSPID == "" {
+		return fmt.Errorf("--mspid is required")
+	}
 	return nil
 }
 
@@ -64,7 +67,7 @@ func (c *createCmd) run() error {
 	}
 	peers := []v1alpha1.FabricFollowerChannelPeer{}
 	for _, peer := range c.channelOpts.Peers {
-		chunks := strings.Split(peer, ",")
+		chunks := strings.Split(peer, ".")
 		if len(chunks) != 2 {
 			return fmt.Errorf("invalid peer format: %s", peer)
 		}
@@ -150,13 +153,14 @@ func newCreateFollowerChannelCmd(out io.Writer, errOut io.Writer) *cobra.Command
 	}
 	f := cmd.Flags()
 	f.StringVar(&c.channelOpts.Name, "name", "", "Name of the Fabric Console to create")
+	f.StringVar(&c.channelOpts.ChannelName, "channel-name", "", "Name of the channel to join")
 	f.StringVar(&c.channelOpts.MSPID, "mspid", "", "MSPID of the channel")
 	f.StringArrayVar(&c.channelOpts.AnchorPeers, "anchor-peers", []string{}, "Anchor peers of the channel")
-	f.StringArrayVar(&c.channelOpts.OrdererURLs, "orderer-urls", []string{}, "Orderer URLs of the channel")
+	f.StringArrayVar(&c.channelOpts.OrdererURLs, "orderer-urls", []string{}, "Orderer URLs of the channel, e.g grpcs://<host>:<port>")
 	f.StringArrayVar(&c.channelOpts.OrdererCertificates, "orderer-certificates", []string{}, "Orderer certificates of the channel")
 	f.StringArrayVar(&c.channelOpts.Peers, "peers", []string{}, "Peers of the channel")
 	f.StringVar(&c.channelOpts.SecretName, "secret-name", "", "Name of the secret containing the certificate to join and set the anchor peers")
-	f.StringVar(&c.channelOpts.SecretNamespace, "secret-namespace", "", "Namespace of the secret containing the certificate to join and set the anchor peers")
+	f.StringVar(&c.channelOpts.SecretNamespace, "secret-ns", "", "Namespace of the secret containing the certificate to join and set the anchor peers")
 	f.StringVar(&c.channelOpts.SecretKey, "secret-key", "", "Key of the secret containing the certificate to join and set the anchor peers")
 	f.BoolVarP(&c.channelOpts.Output, "output", "o", false, "Output in yaml")
 	return cmd
