@@ -26,13 +26,14 @@ title: Getting started
 
 ## Discord
 
-For discussions and questions, please join the Hyperledger Foundation Discord: 
+For discussions and questions, please join the Hyperledger Foundation Discord:
 
 [https://discord.com/invite/hyperledger](https://discord.com/invite/hyperledger)
 
 Channel is located under `LABS`, named `hlf-operator`.
 
 ## Tutorial Videos
+
 Step by step video tutorials to setup hlf-operator in kubernetes
 
 [![Hyperledger Fabric on Kubernetes](https://img.youtube.com/vi/e04TcJHUI5M/0.jpg)](https://www.youtube.com/playlist?list=PLuAZTZDgj0csRQuNMY8wbYqOCpzggAuMo "Hyperledger Fabric on Kubernetes")
@@ -42,12 +43,12 @@ Step by step video tutorials to setup hlf-operator in kubernetes
 You can watch this video in order to see how to use it to deploy your own network:
 
 [![Hyperledger Fabric on Kubernetes](http://img.youtube.com/vi/namKDeJf5QI/0.jpg)](http://www.youtube.com/watch?v=namKDeJf5QI "Hyperledger Fabric on Kubernetes")
+
 ## Sponsor
 
-|||
-|-|-|
-|![kfs logo](https://avatars.githubusercontent.com/u/74511895?s=200&v=4)|If you want to design and deploy a secure Blockchain network based on the latest version of  Hyperledger Fabric, feel free to contact dviejo@kungfusoftware.es or visit [https://kfs.es/blockchain](https://kfs.es/blockchain)|
-
+|                                                                         |                                                                                                                                                                                                                               |
+| ----------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ![kfs logo](https://avatars.githubusercontent.com/u/74511895?s=200&v=4) | If you want to design and deploy a secure Blockchain network based on the latest version of Hyperledger Fabric, feel free to contact dviejo@kungfusoftware.es or visit [https://kfs.es/blockchain](https://kfs.es/blockchain) |
 
 ## Getting started
 
@@ -75,11 +76,12 @@ kubectl apply -n istio-system -f ./hack/istio-operator.yaml
 
 ### Installing the operator
 
+Add the helm chartrepository:
 
-Add the helm chartrepository: 
 ```bash
-helm repo add kfs https://kfsoftware.github.io/hlf-helm-charts --force-update 
+helm repo add kfs https://kfsoftware.github.io/hlf-helm-charts --force-update
 ```
+
 ```bash
 helm install hlf-operator --version=1.7.0 kfs/hlf-operator
 ```
@@ -87,17 +89,21 @@ helm install hlf-operator --version=1.7.0 kfs/hlf-operator
 ### Installing the Kubectl HLF Plugin
 
 To install the Kubectl HLF Plugin, run the following command:
+
 ```bash
 kubectl krew install hlf
 ```
+
 To update the Kubectl HLF Plugin to the latest version, run the following command:
+
 ```bash
- kubectl krew upgrade hlf 
+ kubectl krew upgrade hlf
 ```
 
 ## Deploy a Peer Organization
 
 ### Setup versions
+
 ```bash
 export PEER_IMAGE=hyperledger/fabric-peer
 export PEER_VERSION=2.4.3
@@ -111,7 +117,7 @@ export ORDERER_VERSION=2.4.3
 
 ```bash
 kubectl hlf ca create --storage-class=standard --capacity=2Gi --name=org1-ca \
-    --enroll-id=enroll --enroll-pw=enrollpw  
+    --enroll-id=enroll --enroll-pw=enrollpw
 kubectl wait --timeout=180s --for=condition=Running fabriccas.hlf.kungfusoftware.es --all
 
 # register user for the peers
@@ -151,34 +157,23 @@ kubectl wait --timeout=180s --for=condition=Running fabricorderernodes.hlf.kungf
 ```
 
 ## Preparing a connection string for the ordering service
+
 ```bash
 kubectl hlf inspect --output ordservice.yaml -o OrdererMSP
 kubectl hlf ca register --name=ord-ca --user=admin --secret=adminpw \
     --type=admin --enroll-id enroll --enroll-secret=enrollpw --mspid=OrdererMSP
 
 kubectl hlf ca enroll --name=ord-ca --user=admin --secret=adminpw --mspid OrdererMSP \
-        --ca-name ca  --output admin-ordservice.yaml 
+        --ca-name ca  --output admin-ordservice.yaml
 ## add user from admin-ordservice.yaml to ordservice.yaml
 kubectl hlf utils adduser --userPath=admin-ordservice.yaml --config=ordservice.yaml --username=admin --mspid=OrdererMSP
 ```
 
-## Create a channel
-```bash
-kubectl hlf channel generate --output=demo.block --name=demo --organizations Org1MSP --ordererOrganizations OrdererMSP
-
-# enroll using the TLS CA
-kubectl hlf ca enroll --name=ord-ca --namespace=default --user=admin --secret=adminpw --mspid OrdererMSP \
-        --ca-name tlsca  --output admin-tls-ordservice.yaml 
-
-kubectl hlf ordnode join --block=demo.block --name=ord-node1 --namespace=default --identity=admin-tls-ordservice.yaml
-
-```
-
-
 ## Preparing a connection string for the peer
+
 ```bash
 kubectl hlf ca register --name=org1-ca --user=admin --secret=adminpw --type=admin \
- --enroll-id enroll --enroll-secret=enrollpw --mspid Org1MSP  
+ --enroll-id enroll --enroll-secret=enrollpw --mspid Org1MSP
 
 kubectl hlf ca enroll --name=org1-ca --user=admin --secret=adminpw --mspid Org1MSP \
         --ca-name ca  --output peer-org1.yaml
@@ -189,27 +184,59 @@ kubectl hlf inspect --output org1.yaml -o Org1MSP -o OrdererMSP
 kubectl hlf utils adduser --userPath=peer-org1.yaml --config=org1.yaml --username=admin --mspid=Org1MSP
 ```
 
+## Create a channel
 
-## Join channel
 ```bash
-kubectl hlf channel join --name=demo --config=org1.yaml \
-    --user=admin -p=org1-peer0.default
+kubectl hlf ca enroll --name=ord-ca --namespace=default --user=admin --secret=adminpw --mspid OrdererMSP \
+        --ca-name tlsca  --output admin-tls-ordservice.yaml
+
+
+kubectl create secret generic wallet --namespace=default \
+        --from-file=peer-org1.yaml=$PWD/peer-org1.yaml \
+        --from-file=admin-tls-ordservice.yaml=$PWD/admin-tls-ordservice.yaml
+
+kubectl hlf channelcrd main create \
+    --channel-name=demo \
+    --name=demo \
+    --orderer-orgs=OrdererMSP \
+    --peer-orgs=Org1MSP \
+    --admin-orderer-orgs=OrdererMSP \
+    --admin-peer-orgs=Org1MSP \
+    --secret-name=wallet \
+    --secret-ns=default \
+    --identities="OrdererMSP;admin-tls-ordservice.yaml" \
+    --identities="Org1MSP;peer-org1.yaml"
 
 ```
+
+## Join channel
+
+```bash
+kubectl get fabricorderernodes ord-node1 -o jsonpath='{.status.tlsCert}' > ./orderer-cert.pem
+kubectl hlf channelcrd follower create \
+    --channel-name=demo \
+    --mspid=Org1MSP \
+    --name="demo-org1msp" \
+    --orderer-certificates="./orderer-cert.pem" \
+    --orderer-urls="grpcs://ord-node1.default:7050" \
+    --anchor-peers="org1-peer0:7051" \
+    --peers="org1-peer0.default" \
+    --secret-name=wallet \
+    --secret-ns=default \
+    --secret-key="org1msp.yaml"
+```
+
 ## Inspect the channel
+
 ```bash
 kubectl hlf channel inspect --channel=demo --config=org1.yaml \
     --user=admin -p=org1-peer0.default > demo.json
 ```
-## Add anchor peer
-```bash
-kubectl hlf channel addanchorpeer --channel=demo --config=org1.yaml \
-    --user=admin --peer=org1-peer0.default 
-
-```
 
 ## See ledger height
+
 In case of error, you may need to add the following to the org1.yaml configuration file:
+
 ```yaml
 channels:
   _default:
@@ -221,14 +248,15 @@ channels:
         chaincodeQuery: true
         ledgerQuery: true
         eventSource: true
-
 ```
+
 ```bash
 kubectl hlf channel top --channel=demo --config=org1.yaml \
     --user=admin -p=org1-peer0.default
 ```
 
 ## Install a chaincode
+
 ```bash
 # remove the code.tar.gz asset-transfer-basic-external.tgz if they exist
 rm code.tar.gz asset-transfer-basic-external.tgz
@@ -261,7 +289,9 @@ kubectl hlf chaincode install --path=./asset-transfer-basic-external.tgz \
 ```
 
 ## Deploy chaincode
+
 The following command will create or update the CRD based on the packageID, chaincode name and image.
+
 ```bash
 kubectl hlf externalchaincode sync --image=kfsoftware/chaincode-external:latest \
     --name=$CHAINCODE_NAME \
@@ -271,13 +301,14 @@ kubectl hlf externalchaincode sync --image=kfsoftware/chaincode-external:latest 
     --replicas=1
 ```
 
-
 ## Query chaincodes installed
+
 ```bash
 kubectl hlf chaincode queryinstalled --config=org1.yaml --user=admin --peer=org1-peer0.default
 ```
 
 ## Approve chaincode
+
 ```bash
 export SEQUENCE=1
 export VERSION="1.0"
@@ -288,14 +319,15 @@ kubectl hlf chaincode approveformyorg --config=org1.yaml --user=admin --peer=org
 ```
 
 ## Commit chaincode
+
 ```bash
 kubectl hlf chaincode commit --config=org1.yaml --user=admin --mspid=Org1MSP \
     --version "$VERSION" --sequence "$SEQUENCE" --name=asset \
     --policy="OR('Org1MSP.member')" --channel=demo
 ```
 
-
 ## Invoke a transaction in the ledger
+
 ```bash
 kubectl hlf chaincode invoke --config=org1.yaml \
     --user=admin --peer=org1-peer0.default \
@@ -304,6 +336,7 @@ kubectl hlf chaincode invoke --config=org1.yaml \
 ```
 
 ## Query the ledger
+
 ```bash
 kubectl hlf chaincode query --config=org1.yaml \
     --user=admin --peer=org1-peer0.default \
@@ -333,14 +366,15 @@ kubectl delete fabricchaincode.hlf.kungfusoftware.es --all-namespaces --all
 ## Troubleshooting
 
 ### Chaincode installation/build error
+
 Chaincode installation/build can fail due to unsupported local kubertenes version such as [minikube](https://github.com/kubernetes/minikube).
 
 ```shell
 $ kubectl hlf chaincode install --path=./fixtures/chaincodes/fabcar/go \
         --config=org1.yaml --language=golang --label=fabcar --user=admin --peer=org1-peer0.default
-        
-Error: Transaction processing for endorser [192.168.49.2:31278]: Chaincode status Code: (500) UNKNOWN. 
-Description: failed to invoke backing implementation of 'InstallChaincode': could not build chaincode: 
+
+Error: Transaction processing for endorser [192.168.49.2:31278]: Chaincode status Code: (500) UNKNOWN.
+Description: failed to invoke backing implementation of 'InstallChaincode': could not build chaincode:
 external builder failed: external builder failed to build: external builder 'my-golang-builder' failed:
 exit status 1
 ```
