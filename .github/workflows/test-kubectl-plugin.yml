@@ -94,15 +94,13 @@ jobs:
           ## add user from admin-ordservice.yaml to ordservice.yaml
           kubectl hlf utils adduser --userPath=admin-ordservice.yaml --config=ordservice.yaml --username=admin --mspid=OrdererMSP
 
-      - name: Create a channel
+      - name: Prepare credentials for orderer
         run: |
           kubectl hlf channel generate --output=demo.block --name=demo --organizations Org1MSP --ordererOrganizations OrdererMSP
 
           # enroll using the TLS CA
           kubectl hlf ca enroll --name=ord-ca --namespace=default --user=admin --secret=adminpw --mspid OrdererMSP \
                   --ca-name tlsca  --output admin-tls-ordservice.yaml 
-
-          kubectl hlf ordnode join --block=demo.block --name=ord-node1 --namespace=default --identity=admin-tls-ordservice.yaml
 
       - name: Prepare connection string for Peer
         run: |
@@ -116,16 +114,44 @@ jobs:
 
           ## add user key and cert to org1.yaml from admin-ordservice.yaml
           kubectl hlf utils adduser --userPath=peer-org1.yaml --config=org1.yaml --username=admin --mspid=Org1MSP
+      - name: Create a channel
+        run: |
+
+          kubectl create secret generic wallet --namespace=default \
+                  --from-file=peer-org1.yaml=$PWD/peer-org1.yaml \
+                  --from-file=admin-tls-ordservice.yaml=$PWD/admin-tls-ordservice.yaml
+
+          kubectl hlf channelcrd main create \
+              --channel-name=demo \
+              --name=demo \
+              --orderer-orgs=OrdererMSP \
+              --peer-orgs=Org1MSP \
+              --admin-orderer-orgs=OrdererMSP \
+              --admin-peer-orgs=Org1MSP \
+              --secret-name=wallet \
+              --secret-ns=default \
+              --identities="OrdererMSP;admin-tls-ordservice.yaml" \
+              --identities="Org1MSP;peer-org1.yaml"
+
+          kubectl wait --timeout=180s --for=condition=Created fabricmainchannels.hlf.kungfusoftware.es --all 
+
 
       - name: Join peers to channel
         run: |
-          sleep 5
-          kubectl hlf channel join --name=demo --config=org1.yaml \
-              --user=admin -p=org1-peer0.default
-      - name: Join anchor peer
-        run: |
-          kubectl hlf channel addanchorpeer --channel=demo --config=org1.yaml \
-              --user=admin --peer=org1-peer0.default 
+          kubectl get fabricorderernodes ord-node1 -o jsonpath='{.status.tlsCert}' > ./orderer-cert.pem
+          kubectl hlf channelcrd follower create \
+              --channel-name=demo \
+              --mspid=Org1MSP \
+              --name="demo-org1msp" \
+              --orderer-certificates="./orderer-cert.pem" \
+              --orderer-urls="grpcs://ord-node1.default:7050" \
+              --anchor-peers="org1-peer0:7051" \
+              --peers="org1-peer0.default" \
+              --secret-name=wallet \
+              --secret-ns=default \
+              --secret-key="org1msp.yaml"
+
+          kubectl wait --timeout=180s --for=condition=Created fabricfollowerchannels.hlf.kungfusoftware.es --all 
       - name: Get channel
         run: |
           sleep 3
@@ -202,6 +228,8 @@ jobs:
           kubectl get fabricpeers.hlf.kungfusoftware.es  -A -o=custom-columns='NAME:metadata.name,NAMESPACE:metadata.namespace,STATE:status.status,MESSAGE:status.message'
           kubectl get fabricorderernodes.hlf.kungfusoftware.es  -A -o=custom-columns='NAME:metadata.name,NAMESPACE:metadata.namespace,STATE:status.status,MESSAGE:status.message'
           kubectl get fabriccas.hlf.kungfusoftware.es -A -o=custom-columns='NAME:metadata.name,NAMESPACE:metadata.namespace,STATE:status.status,MESSAGE:status.message'
+          kubectl get fabricmainchannels.hlf.kungfusoftware.es -A -o=custom-columns='NAME:metadata.name,NAMESPACE:metadata.namespace,STATE:status.status,MESSAGE:status.message'
+          kubectl get fabricfollowerchannels.hlf.kungfusoftware.es -A -o=custom-columns='NAME:metadata.name,NAMESPACE:metadata.namespace,STATE:status.status,MESSAGE:status.message'
 
           POD=$(kubectl get pod -l 'release in (org1-peer0)'  -o jsonpath="{.items[0].metadata.name}")
           kubectl logs $POD -c peer
