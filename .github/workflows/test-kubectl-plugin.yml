@@ -149,7 +149,7 @@ jobs:
               --peers="org1-peer0.default" \
               --secret-name=wallet \
               --secret-ns=default \
-              --secret-key="org1msp.yaml"
+              --secret-key="peer-org1.yaml"
 
           kubectl wait --timeout=180s --for=condition=Created fabricfollowerchannels.hlf.kungfusoftware.es --all 
       - name: Get channel
