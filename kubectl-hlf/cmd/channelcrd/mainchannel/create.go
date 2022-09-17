@@ -37,39 +37,26 @@ type Options struct {
 	Identities                   []string
 }
 
-func (o Options) Validate() error {
-	return nil
-}
-
-type createCmd struct {
-	out         io.Writer
-	errOut      io.Writer
-	channelOpts Options
-}
-
-func (c *createCmd) validate() error {
-	return c.channelOpts.Validate()
-}
-func (c *createCmd) run() error {
+func (o Options) mapToFabricMainChannel() (*v1alpha1.FabricMainChannelSpec, error) {
 	oclient, err := helpers.GetKubeOperatorClient()
 	if err != nil {
-		return err
+		return nil, err
 	}
 	clientSet, err := helpers.GetKubeClient()
 	if err != nil {
-		return err
+		return nil, err
 	}
 	identities := map[string]v1alpha1.FabricMainChannelIdentity{}
-	for _, identity := range c.channelOpts.Identities {
+	for _, identity := range o.Identities {
 		chunks := strings.Split(identity, ";")
 		if len(chunks) != 2 {
-			return fmt.Errorf("invalid identity %s, example format <msp_id>;<secret_key>", identity)
+			return nil, fmt.Errorf("invalid identity %s, example format <msp_id>;<secret_key>", identity)
 		}
 		mspID := chunks[0]
 		secretKey := chunks[1]
 		identities[mspID] = v1alpha1.FabricMainChannelIdentity{
-			SecretName:      c.channelOpts.SecretName,
-			SecretNamespace: c.channelOpts.SecretNS,
+			SecretName:      o.SecretName,
+			SecretNamespace: o.SecretNS,
 			SecretKey:       secretKey,
 		}
 
@@ -83,16 +70,16 @@ func (c *createCmd) run() error {
 	ns := ""
 	orderers, err := helpers.GetClusterOrdererNodes(clientSet, oclient, ns)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	ordererMap := map[string][]*helpers.ClusterOrdererNode{}
 	for _, orderer := range orderers {
-		if !utils.Contains(c.channelOpts.OrdererOrgs, orderer.Spec.MspID) {
+		if !utils.Contains(o.OrdererOrgs, orderer.Spec.MspID) {
 			continue
 		}
 		tlsCert, err := utils.ParseX509Certificate([]byte(orderer.Status.TlsCert))
 		if err != nil {
-			return err
+			return nil, err
 		}
 		consenterHost, consenterPort, err := helpers.GetOrdererHostAndPort(
 			clientSet,
@@ -100,7 +87,7 @@ func (c *createCmd) run() error {
 			orderer.Status,
 		)
 		if err != nil {
-			return err
+			return nil, err
 		}
 		consenters = append(consenters, v1alpha1.FabricMainChannelConsenter{
 			Host:    consenterHost,
@@ -119,7 +106,7 @@ func (c *createCmd) run() error {
 		for _, ordererNode := range nodes {
 			ordererHost, ordererPort, err := helpers.GetOrdererHostAndPort(clientSet, ordererNode.Spec, ordererNode.Status)
 			if err != nil {
-				return err
+				return nil, err
 			}
 			ordererEndpoints = append(ordererEndpoints, fmt.Sprintf("%s:%d", ordererHost, ordererPort))
 		}
@@ -129,7 +116,7 @@ func (c *createCmd) run() error {
 		for _, ordererNode := range nodes {
 			adminOrdererHost, adminOrdererPort, err := helpers.GetOrdererAdminHostAndPort(clientSet, ordererNode.Spec, ordererNode.Status)
 			if err != nil {
-				return err
+				return nil, err
 			}
 			ordererNodes = append(ordererNodes, v1alpha1.FabricMainChannelExternalOrdererNode{
 				Host:      adminOrdererHost,
@@ -145,7 +132,7 @@ func (c *createCmd) run() error {
 			ExternalOrderersToJoin: ordererNodes,
 		})
 	}
-	for _, adminPeerOrg := range c.channelOpts.AdminPeerOrgs {
+	for _, adminPeerOrg := range o.AdminPeerOrgs {
 		adminPeerOrganizations = append(adminPeerOrganizations, v1alpha1.FabricMainChannelAdminPeerOrganizationSpec{
 			MSPID: adminPeerOrg,
 		})
@@ -153,13 +140,13 @@ func (c *createCmd) run() error {
 	externalPeerOrganizations := []v1alpha1.FabricMainChannelExternalPeerOrganization{}
 	peerOrgs, _, err := helpers.GetClusterPeers(clientSet, oclient, ns)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	for _, peerOrg := range peerOrgs {
 		if len(peerOrg.Peers) == 0 {
-			return fmt.Errorf("no peers found for organization %s", peerOrg.MspID)
+			return nil, fmt.Errorf("no peers found for organization %s", peerOrg.MspID)
 		}
-		if !utils.Contains(c.channelOpts.PeerOrgs, peerOrg.MspID) {
+		if !utils.Contains(o.PeerOrgs, peerOrg.MspID) {
 			continue
 		}
 		firstPeer := peerOrg.Peers[0]
@@ -169,7 +156,7 @@ func (c *createCmd) run() error {
 			SignRootCert: firstPeer.Status.SignCACert,
 		})
 	}
-	for _, adminOrdererOrgMSPID := range c.channelOpts.AdminOrdererOrgs {
+	for _, adminOrdererOrgMSPID := range o.AdminOrdererOrgs {
 		adminOrdererOrganizations = append(adminOrdererOrganizations, v1alpha1.FabricMainChannelAdminOrdererOrganizationSpec{
 			MSPID: adminOrdererOrgMSPID,
 		})
@@ -177,33 +164,114 @@ func (c *createCmd) run() error {
 
 	channelConfig := &v1alpha1.FabricMainChannelConfig{
 		Application: &v1alpha1.FabricMainChannelApplicationConfig{
-			Capabilities: c.channelOpts.Capabilities,
+			Capabilities: o.Capabilities,
 			Policies:     nil,
 			ACLs:         nil,
 		},
 		Orderer: &v1alpha1.FabricMainChannelOrdererConfig{
 			OrdererType:  "etcdraft",
-			Capabilities: c.channelOpts.Capabilities,
+			Capabilities: o.Capabilities,
 			Policies:     nil,
-			BatchTimeout: c.channelOpts.BatchTimeout,
+			BatchTimeout: o.BatchTimeout,
 			BatchSize: &v1alpha1.FabricMainChannelOrdererBatchSize{
-				MaxMessageCount:   c.channelOpts.MaxMessageCount,
-				AbsoluteMaxBytes:  c.channelOpts.AbsoluteMaxBytes,
-				PreferredMaxBytes: c.channelOpts.PreferredMaxBytes,
+				MaxMessageCount:   o.MaxMessageCount,
+				AbsoluteMaxBytes:  o.AbsoluteMaxBytes,
+				PreferredMaxBytes: o.PreferredMaxBytes,
 			},
 			State: "STATE_NORMAL",
 			EtcdRaft: &v1alpha1.FabricMainChannelEtcdRaft{
 				Options: &v1alpha1.FabricMainChannelEtcdRaftOptions{
-					TickInterval:         c.channelOpts.EtcdRaftTickInterval,
-					ElectionTick:         uint32(c.channelOpts.EtcdRaftElectionTick),
-					HeartbeatTick:        uint32(c.channelOpts.EtcdRaftHeartbeatTick),
-					MaxInflightBlocks:    uint32(c.channelOpts.EtcdRaftMaxInflightBlocks),
-					SnapshotIntervalSize: uint32(c.channelOpts.EtcdRaftSnapshotIntervalSize),
+					TickInterval:         o.EtcdRaftTickInterval,
+					ElectionTick:         uint32(o.EtcdRaftElectionTick),
+					HeartbeatTick:        uint32(o.EtcdRaftHeartbeatTick),
+					MaxInflightBlocks:    uint32(o.EtcdRaftMaxInflightBlocks),
+					SnapshotIntervalSize: uint32(o.EtcdRaftSnapshotIntervalSize),
 				},
 			},
 		},
-		Capabilities: c.channelOpts.Capabilities,
+		Capabilities: o.Capabilities,
 		Policies:     nil,
+	}
+	fabricMainChannelSpec := &v1alpha1.FabricMainChannelSpec{
+		Name:                         o.ChannelName,
+		Identities:                   identities,
+		AdminPeerOrganizations:       adminPeerOrganizations,
+		PeerOrganizations:            peerOrganizations,
+		ExternalPeerOrganizations:    externalPeerOrganizations,
+		ChannelConfig:                channelConfig,
+		AdminOrdererOrganizations:    adminOrdererOrganizations,
+		OrdererOrganizations:         ordererOrganizations,
+		ExternalOrdererOrganizations: externalOrdererOrganizations,
+		Consenters:                   consenters,
+	}
+	return fabricMainChannelSpec, nil
+}
+func (o Options) Validate() error {
+	if o.Name == "" {
+		return fmt.Errorf("--name is required")
+	}
+	if o.SecretName == "" {
+		return fmt.Errorf("--secret-name is required")
+	}
+	if o.SecretNS == "" {
+		return fmt.Errorf("--secret-ns is required")
+	}
+	if len(o.Identities) == 0 {
+		return fmt.Errorf("--identities is required")
+	}
+	if len(o.AdminPeerOrgs) == 0 {
+		return fmt.Errorf("--admin-peer-orgs is required")
+	}
+	if len(o.AdminOrdererOrgs) == 0 {
+		return fmt.Errorf("--admin-orderer-orgs is required")
+	}
+	if len(o.OrdererOrgs) == 0 {
+		return fmt.Errorf("--orderer-orgs is required")
+	}
+	if len(o.PeerOrgs) == 0 {
+		return fmt.Errorf("--peer-orgs is required")
+	}
+	if len(o.Consenters) == 0 {
+		return fmt.Errorf("--consenters is required")
+	}
+	if o.BatchTimeout == "" {
+		return fmt.Errorf("--batch-timeout is required")
+	}
+	if o.EtcdRaftTickInterval == "" {
+		return fmt.Errorf("--etcdraft-tick-interval is required")
+	}
+	if o.ChannelName == "" {
+		return fmt.Errorf("--channel-name is required")
+	}
+	if len(o.Capabilities) == 0 {
+		return fmt.Errorf("--capabilities is required")
+	}
+	if o.MaxMessageCount == 0 {
+		return fmt.Errorf("--max-message-count is required")
+	}
+	if o.AbsoluteMaxBytes == 0 {
+		return fmt.Errorf("--absolute-max-bytes is required")
+	}
+	return nil
+}
+
+type createCmd struct {
+	out         io.Writer
+	errOut      io.Writer
+	channelOpts Options
+}
+
+func (c *createCmd) validate() error {
+	return c.channelOpts.Validate()
+}
+func (c *createCmd) run() error {
+	oclient, err := helpers.GetKubeOperatorClient()
+	if err != nil {
+		return err
+	}
+	fabricMainChannelSpec, err := c.channelOpts.mapToFabricMainChannel()
+	if err != nil {
+		return err
 	}
 	fabricMainChannel := &v1alpha1.FabricMainChannel{
 		TypeMeta: v1.TypeMeta{
@@ -213,18 +281,7 @@ func (c *createCmd) run() error {
 		ObjectMeta: v1.ObjectMeta{
 			Name: c.channelOpts.Name,
 		},
-		Spec: v1alpha1.FabricMainChannelSpec{
-			Name:                         c.channelOpts.ChannelName,
-			Identities:                   identities,
-			AdminPeerOrganizations:       adminPeerOrganizations,
-			PeerOrganizations:            peerOrganizations,
-			ExternalPeerOrganizations:    externalPeerOrganizations,
-			ChannelConfig:                channelConfig,
-			AdminOrdererOrganizations:    adminOrdererOrganizations,
-			OrdererOrganizations:         ordererOrganizations,
-			ExternalOrdererOrganizations: externalOrdererOrganizations,
-			Consenters:                   consenters,
-		},
+		Spec: *fabricMainChannelSpec,
 	}
 	if c.channelOpts.Output {
 		ot, err := helpers.MarshallWithoutStatus(&fabricMainChannel)
