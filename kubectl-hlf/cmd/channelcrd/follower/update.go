@@ -30,6 +30,33 @@ type UpdateOptions struct {
 }
 
 func (o UpdateOptions) Validate() error {
+	if o.Name == "" {
+		return fmt.Errorf("--name is required")
+	}
+	if o.MSPID == "" {
+		return fmt.Errorf("--msp-id is required")
+	}
+	if o.SecretName == "" {
+		return fmt.Errorf("--secret-name is required")
+	}
+	if o.SecretNamespace == "" {
+		return fmt.Errorf("--secret-namespace is required")
+	}
+	if o.SecretKey == "" {
+		return fmt.Errorf("--secret-key is required")
+	}
+	if len(o.AnchorPeers) == 0 {
+		return fmt.Errorf("--anchor-peers is required")
+	}
+	if len(o.OrdererURLs) == 0 {
+		return fmt.Errorf("--orderer-urls is required")
+	}
+	if len(o.OrdererCertificates) == 0 {
+		return fmt.Errorf("--orderer-certificates is required")
+	}
+	if len(o.Peers) == 0 {
+		return fmt.Errorf("--peers is required")
+	}
 	return nil
 }
 
