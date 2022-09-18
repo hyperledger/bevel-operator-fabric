@@ -12,6 +12,7 @@ func NewChannelFollowerCmd(stdOut io.Writer, stdErr io.Writer) *cobra.Command {
 	}
 	channelCmd.AddCommand(
 		newCreateFollowerChannelCmd(stdOut, stdErr),
+		newUpdateFollowerChannelCmd(stdOut, stdErr),
 		newDeleteFollowerChannelCmd(stdOut, stdErr),
 	)
 	return channelCmd

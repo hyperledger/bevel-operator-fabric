@@ -10,6 +10,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"io"
+	"io/ioutil"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"net"
 	"strconv"
@@ -100,10 +101,14 @@ func (o Options) mapToFabricMainChannel() (*v1alpha1.FabricMainChannelSpec, erro
 			return nil, fmt.Errorf("missing consenter certificate for %s", consenter)
 		}
 		consenterCRT := o.ConsenterCertificates[idx]
+		consenterCRTContents, err := ioutil.ReadFile(consenterCRT)
+		if err != nil {
+			return nil, errors.Wrapf(err, "error reading consenter certificate %s", consenterCRT)
+		}
 		consenters = append(consenters, v1alpha1.FabricMainChannelConsenter{
 			Host:    host,
 			Port:    portNumber,
-			TLSCert: consenterCRT,
+			TLSCert: string(consenterCRTContents),
 		})
 	}
 	for mspID, nodes := range ordererMap {

@@ -49,14 +49,14 @@ func (c *updateCmd) run() error {
 		if err != nil {
 			return err
 		}
-		log.Infof("MainChannel %s created on namespace %s", fabricMainChannel.Name, fabricMainChannel.Namespace)
+		log.Infof("MainChannel %s updated on namespace %s", fabricMainChannel.Name, fabricMainChannel.Namespace)
 	}
 	return nil
 }
 func newUpdateMainChannelCmd(out io.Writer, errOut io.Writer) *cobra.Command {
 	c := updateCmd{out: out, errOut: errOut}
 	cmd := &cobra.Command{
-		Use:   "create",
+		Use:   "update",
 		Short: "Update a main channel",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := c.validate(); err != nil {
@@ -66,12 +66,14 @@ func newUpdateMainChannelCmd(out io.Writer, errOut io.Writer) *cobra.Command {
 		},
 	}
 	f := cmd.Flags()
-	f.StringVar(&c.channelOpts.Name, "name", "", "Name of the Fabric Console to create")
+	f.StringVar(&c.channelOpts.Name, "name", "", "Name of the Fabric Console to update")
 	f.StringSliceVar(&c.channelOpts.Capabilities, "capabilities", []string{"V2_0"}, "Capabilities of the channel")
 	f.StringSliceVar(&c.channelOpts.AdminPeerOrgs, "admin-peer-orgs", []string{}, "MSP IDs of the admin peer organizations")
 	f.StringSliceVar(&c.channelOpts.AdminOrdererOrgs, "admin-orderer-orgs", []string{}, "MSP IDs of the admin orderer organizations")
 	f.StringSliceVar(&c.channelOpts.OrdererOrgs, "orderer-orgs", []string{}, "MSP IDs of the orderer organizations")
 	f.StringSliceVar(&c.channelOpts.PeerOrgs, "peer-orgs", []string{}, "MSP IDs of the peer organizations")
+	f.StringSliceVar(&c.channelOpts.Consenters, "consenters", []string{}, "Consenters of the channel")
+	f.StringSliceVar(&c.channelOpts.ConsenterCertificates, "consenter-certificates", []string{}, "Consenter certificates of the channel")
 
 	f.StringVar(&c.channelOpts.ChannelName, "channel-name", "mychannel", "Name of the channel")
 	f.StringVar(&c.channelOpts.BatchTimeout, "batch-timeout", "2s", "Batch timeout")
