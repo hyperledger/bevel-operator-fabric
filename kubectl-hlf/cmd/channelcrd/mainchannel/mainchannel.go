@@ -12,6 +12,7 @@ func NewChannelMainCmd(stdOut io.Writer, stdErr io.Writer) *cobra.Command {
 	}
 	channelCmd.AddCommand(
 		newCreateMainChannelCmd(stdOut, stdErr),
+		newUpdateMainChannelCmd(stdOut, stdErr),
 		newDeleteMainChannelCmd(stdOut, stdErr),
 	)
 	return channelCmd
