@@ -6,10 +6,13 @@ import (
 	"github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
 	"github.com/kfsoftware/hlf-operator/controllers/utils"
 	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/helpers"
+	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"io"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"net"
+	"strconv"
 	"strings"
 )
 
@@ -32,6 +35,7 @@ type Options struct {
 	PeerOrgs                     []string
 	OrdererOrgs                  []string
 	Consenters                   []string
+	ConsenterCertificates        []string
 	SecretName                   string
 	SecretNS                     string
 	Identities                   []string
@@ -77,28 +81,30 @@ func (o Options) mapToFabricMainChannel() (*v1alpha1.FabricMainChannelSpec, erro
 		if !utils.Contains(o.OrdererOrgs, orderer.Spec.MspID) {
 			continue
 		}
-		tlsCert, err := utils.ParseX509Certificate([]byte(orderer.Status.TlsCert))
-		if err != nil {
-			return nil, err
-		}
-		consenterHost, consenterPort, err := helpers.GetOrdererHostAndPort(
-			clientSet,
-			orderer.Spec,
-			orderer.Status,
-		)
-		if err != nil {
-			return nil, err
-		}
-		consenters = append(consenters, v1alpha1.FabricMainChannelConsenter{
-			Host:    consenterHost,
-			Port:    consenterPort,
-			TLSCert: string(utils.EncodeX509Certificate(tlsCert)),
-		})
 		_, ok := ordererMap[orderer.Spec.MspID]
 		if !ok {
 			ordererMap[orderer.Spec.MspID] = []*helpers.ClusterOrdererNode{}
 		}
 		ordererMap[orderer.Spec.MspID] = append(ordererMap[orderer.Spec.MspID], orderer)
+	}
+	for idx, consenter := range o.Consenters {
+		host, port, err := net.SplitHostPort(consenter)
+		if err != nil {
+			return nil, errors.Wrapf(err, "invalid consenter %s", consenter)
+		}
+		portNumber, err := strconv.Atoi(port)
+		if err != nil {
+			return nil, errors.Wrapf(err, "invalid port %s", port)
+		}
+		if len(o.ConsenterCertificates) <= idx {
+			return nil, fmt.Errorf("missing consenter certificate for %s", consenter)
+		}
+		consenterCRT := o.ConsenterCertificates[idx]
+		consenters = append(consenters, v1alpha1.FabricMainChannelConsenter{
+			Host:    host,
+			Port:    portNumber,
+			TLSCert: consenterCRT,
+		})
 	}
 	for mspID, nodes := range ordererMap {
 		node := nodes[0]
@@ -234,6 +240,9 @@ func (o Options) Validate() error {
 	if len(o.Consenters) == 0 {
 		return fmt.Errorf("--consenters is required")
 	}
+	if len(o.ConsenterCertificates) == 0 {
+		return fmt.Errorf("--consenter-certificates is required")
+	}
 	if o.BatchTimeout == "" {
 		return fmt.Errorf("--batch-timeout is required")
 	}
@@ -322,6 +331,8 @@ func newCreateMainChannelCmd(out io.Writer, errOut io.Writer) *cobra.Command {
 	f.StringSliceVar(&c.channelOpts.AdminOrdererOrgs, "admin-orderer-orgs", []string{}, "MSP IDs of the admin orderer organizations")
 	f.StringSliceVar(&c.channelOpts.OrdererOrgs, "orderer-orgs", []string{}, "MSP IDs of the orderer organizations")
 	f.StringSliceVar(&c.channelOpts.PeerOrgs, "peer-orgs", []string{}, "MSP IDs of the peer organizations")
+	f.StringSliceVar(&c.channelOpts.Consenters, "consenters", []string{}, "Consenters of the channel")
+	f.StringSliceVar(&c.channelOpts.ConsenterCertificates, "consenter-certificates", []string{}, "Consenter certificates of the channel")
 
 	f.StringVar(&c.channelOpts.ChannelName, "channel-name", "mychannel", "Name of the channel")
 	f.StringVar(&c.channelOpts.BatchTimeout, "batch-timeout", "2s", "Batch timeout")

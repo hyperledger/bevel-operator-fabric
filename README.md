@@ -60,19 +60,6 @@ You can watch this video in order to see how to use it to deploy your own networ
 - Kubernetes 1.15+
 - Istio
 
-### Install Istio
-
-```bash
-kubectl apply -f ./hack/istio-operator/crds/*
-helm template ./hack/istio-operator/ \
-  --set hub=docker.io/istio \
-  --set tag=1.8.0 \
-  --set operatorNamespace=istio-operator \
-  --set watchedNamespaces=istio-system | kubectl apply -f -
-
-kubectl create ns istio-system
-kubectl apply -n istio-system -f ./hack/istio-operator.yaml
-```
 
 ### Installing the operator
 

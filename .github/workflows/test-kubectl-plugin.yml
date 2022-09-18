@@ -120,6 +120,7 @@ jobs:
           kubectl create secret generic wallet --namespace=default \
                   --from-file=peer-org1.yaml=$PWD/peer-org1.yaml \
                   --from-file=admin-tls-ordservice.yaml=$PWD/admin-tls-ordservice.yaml
+          kubectl get fabricorderernodes ord-node1 -o jsonpath='{.status.tlsCert}' > ./orderer-cert.pem
 
           kubectl hlf channelcrd main create \
               --channel-name=demo \
@@ -130,6 +131,8 @@ jobs:
               --admin-peer-orgs=Org1MSP \
               --secret-name=wallet \
               --secret-ns=default \
+              --consenters=ord-node1.default:7050 \
+              --consenter-certificates=./orderer-cert.pem \
               --identities="OrdererMSP;admin-tls-ordservice.yaml" \
               --identities="Org1MSP;peer-org1.yaml"
 
