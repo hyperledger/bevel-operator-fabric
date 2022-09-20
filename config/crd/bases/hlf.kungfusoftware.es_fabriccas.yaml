@@ -1005,6 +1005,7 @@ spec:
                       parentServer:
                         properties:
                           caName:
+                            description: FabricCA Name of the organization
                             type: string
                           url:
                             type: string
@@ -1750,6 +1751,7 @@ spec:
                       parentServer:
                         properties:
                           caName:
+                            description: FabricCA Name of the organization
                             type: string
                           url:
                             type: string
