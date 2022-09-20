@@ -46,11 +46,14 @@ spec:
             description: FabricFollowerChannelSpec defines the desired state of FabricFollowerChannel
             properties:
               anchorPeers:
+                description: Anchor peers defined for the current organization
                 items:
                   properties:
                     host:
+                      description: Host of the anchor peer
                       type: string
                     port:
+                      description: Port of the anchor peer
                       type: integer
                   required:
                   - host
@@ -58,13 +61,18 @@ spec:
                   type: object
                 type: array
               hlfIdentity:
+                description: Identity to use to interact with the peers and the orderers
                 properties:
                   secretKey:
+                    description: Key inside the secret that holds the private key
+                      and certificate to interact with the network
                     type: string
                   secretName:
+                    description: Secret name
                     type: string
                   secretNamespace:
                     default: default
+                    description: Secret namespace
                     type: string
                 required:
                 - secretKey
@@ -72,15 +80,20 @@ spec:
                 - secretNamespace
                 type: object
               mspId:
+                description: MSP ID of the organization to join the channel
                 type: string
               name:
+                description: Name of the channel
                 type: string
               orderers:
+                description: Orderers to fetch the configuration block from
                 items:
                   properties:
                     certificate:
+                      description: TLS Certificate of the orderer node
                       type: string
                     url:
+                      description: 'URL of the orderer, e.g.: "grpcs://xxxxx:443"'
                       type: string
                   required:
                   - certificate
@@ -88,11 +101,16 @@ spec:
                   type: object
                 type: array
               peersToJoin:
+                description: Peers to join the channel
                 items:
                   properties:
                     name:
+                      description: FabricPeer Name of the peer inside the kubernetes
+                        cluster
                       type: string
                     namespace:
+                      description: FabricPeer Namespace of the peer inside the kubernetes
+                        cluster
                       type: string
                   required:
                   - name

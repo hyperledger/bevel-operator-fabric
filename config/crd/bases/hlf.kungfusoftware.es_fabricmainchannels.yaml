@@ -46,37 +46,47 @@ spec:
             description: FabricMainChannelSpec defines the desired state of FabricMainChannel
             properties:
               adminOrdererOrganizations:
+                description: Organizations that manage the `orderer` configuration
+                  of the channel
                 items:
                   properties:
                     mspID:
+                      description: MSP ID of the organization
                       type: string
                   required:
                   - mspID
                   type: object
                 type: array
               adminPeerOrganizations:
+                description: Organizations that manage the `application` configuration
+                  of the channel
                 items:
                   properties:
                     mspID:
+                      description: MSP ID of the organization
                       type: string
                   required:
                   - mspID
                   type: object
                 type: array
               channelConfig:
+                description: Configuration about the channel
                 nullable: true
                 properties:
                   application:
+                    description: Application configuration of the channel
                     nullable: true
                     properties:
                       acls:
                         additionalProperties:
                           type: string
+                        description: ACLs of the application channel configuration
                         nullable: true
                         type: object
                       capabilities:
                         default:
                         - V2_0
+                        description: Capabilities of the application channel configuration
                         items:
                           type: string
                         type: array
@@ -86,14 +96,18 @@ spec:
                             modPolicy:
                               type: string
                             rule:
+                              description: Rule of policy
                               type: string
                             type:
+                              description: Type of policy, can only be `ImplicitMeta`
+                                or `Signature`.
                               type: string
                           required:
                           - modPolicy
                           - rule
                           - type
                           type: object
+                        description: Policies of the application channel configuration
                         nullable: true
                         type: object
                     required:
@@ -102,10 +116,12 @@ spec:
                   capabilities:
                     default:
                     - V2_0
+                    description: Capabilities for the channel
                     items:
                       type: string
                     type: array
                   orderer:
+                    description: Orderer configuration of the channel
                     nullable: true
                     properties:
                       batchSize:
@@ -113,14 +129,18 @@ spec:
                         properties:
                           absoluteMaxBytes:
                             default: 1048576
-                            description: default is 1024 * 1024
+                            description: The absolute maximum size of a block, including
+                              all metadata.
                             type: integer
                           maxMessageCount:
                             default: 100
+                            description: The number of transactions that can fit in
+                              a block.
                             type: integer
                           preferredMaxBytes:
                             default: 524288
-                            description: default is 512 * 1024
+                            description: The preferred maximum size of a block, including
+                              all metadata.
                             type: integer
                         required:
                         - absoluteMaxBytes
@@ -129,10 +149,13 @@ spec:
                         type: object
                       batchTimeout:
                         default: 2s
+                        description: Interval of the ordering service to create a
+                          block and send to the peers
                         type: string
                       capabilities:
                         default:
                         - V2_0
+                        description: Capabilities of the channel
                         items:
                           type: string
                         type: array
@@ -148,15 +171,20 @@ spec:
                                 type: integer
                               heartbeatTick:
                                 default: 1
+                                description: HeartbeatTick is the number of ticks
+                                  that must pass between heartbeats
                                 format: int32
                                 type: integer
                               maxInflightBlocks:
                                 default: 5
+                                description: MaxInflightBlocks is the maximum number
+                                  of in-flight blocks that may be sent to followers
+                                  at any given time.
                                 format: int32
                                 type: integer
                               snapshotIntervalSize:
                                 default: 16777216
-                                description: 16 MB
+                                description: Maximum size of each raft snapshot file.
                                 format: int32
                                 type: integer
                               tickInterval:
@@ -172,6 +200,7 @@ spec:
                         type: object
                       ordererType:
                         default: etcdraft
+                        description: OrdererType of the consensus, default "etcdraft"
                         type: string
                       policies:
                         additionalProperties:
@@ -179,18 +208,24 @@ spec:
                             modPolicy:
                               type: string
                             rule:
+                              description: Rule of policy
                               type: string
                             type:
+                              description: Type of policy, can only be `ImplicitMeta`
+                                or `Signature`.
                               type: string
                           required:
                           - modPolicy
                           - rule
                           - type
                           type: object
+                        description: Policies of the orderer section of the channel
                         nullable: true
                         type: object
                       state:
                         default: STATE_NORMAL
+                        description: State about the channel, can only be `STATE_NORMAL`
+                          or `STATE_MAINTENANCE`.
                         type: string
                     required:
                     - batchTimeout
@@ -204,31 +239,42 @@ spec:
                         modPolicy:
                           type: string
                         rule:
+                          description: Rule of policy
                           type: string
                         type:
+                          description: Type of policy, can only be `ImplicitMeta`
+                            or `Signature`.
                           type: string
                       required:
                       - modPolicy
                       - rule
                       - type
                       type: object
+                    description: Policies for the channel
                     nullable: true
                     type: object
                 required:
                 - capabilities
                 type: object
               externalOrdererOrganizations:
+                description: Orderer organizations that are external to the Kubernetes
+                  cluster
                 items:
                   properties:
                     mspID:
+                      description: MSP ID of the organization
                       type: string
                     ordererEndpoints:
+                      description: Orderer endpoints for the organization in the channel
+                        configuration
                       items:
                         type: string
                       type: array
                     signRootCert:
+                      description: Root certificate authority for signing
                       type: string
                     tlsRootCert:
+                      description: TLS Root certificate authority of the orderer organization
                       type: string
                   required:
                   - mspID
@@ -238,13 +284,18 @@ spec:
                   type: object
                 type: array
               externalPeerOrganizations:
+                description: External peer organizations that are inside the kubernetes
+                  cluster
                 items:
                   properties:
                     mspID:
+                      description: MSP ID of the organization
                       type: string
                     signRootCert:
+                      description: Root certificate authority for signing
                       type: string
                     tlsRootCert:
+                      description: TLS Root certificate authority of the orderer organization
                       type: string
                   required:
                   - mspID
@@ -256,33 +307,46 @@ spec:
                 additionalProperties:
                   properties:
                     secretKey:
+                      description: Key inside the secret that holds the private key
+                        and certificate to interact with the network
                       type: string
                     secretName:
+                      description: Secret name
                       type: string
                     secretNamespace:
                       default: default
+                      description: Secret namespace
                       type: string
                   required:
                   - secretKey
                   - secretName
                   - secretNamespace
                   type: object
+                description: HLF Identities to be used to create and manage the channel
                 type: object
               name:
+                description: Name of the channel
                 type: string
               ordererOrganizations:
+                description: External orderer organizations that are inside the kubernetes
+                  cluster
                 items:
                   properties:
                     caName:
+                      description: FabricCA Name of the organization
                       type: string
                     caNamespace:
+                      description: FabricCA Namespace of the organization
                       type: string
                     externalOrderersToJoin:
+                      description: External orderers to be added to the channel
                       items:
                         properties:
                           host:
+                            description: Admin host of the orderer node
                             type: string
                           port:
+                            description: Admin port of the orderer node
                             type: integer
                         required:
                         - host
@@ -290,17 +354,24 @@ spec:
                         type: object
                       type: array
                     mspID:
+                      description: MSP ID of the organization
                       type: string
                     ordererEndpoints:
+                      description: Orderer endpoints for the organization in the channel
+                        configuration
                       items:
                         type: string
                       type: array
                     orderersToJoin:
+                      description: Orderer nodes within the kubernetes cluster to
+                        be added to the channel
                       items:
                         properties:
                           name:
+                            description: Name of the orderer node
                             type: string
                           namespace:
+                            description: Kubernetes namespace of the orderer node
                             type: string
                         required:
                         - name
@@ -308,8 +379,10 @@ spec:
                         type: object
                       type: array
                     signCACert:
+                      description: Root certificate authority for signing
                       type: string
                     tlsCACert:
+                      description: TLS Root certificate authority of the orderer organization
                       type: string
                   required:
                   - externalOrderersToJoin
@@ -319,13 +392,18 @@ spec:
                   type: object
                 type: array
               orderers:
+                description: Consenters are the orderer nodes that are part of the
+                  channel consensus
                 items:
                   properties:
                     host:
+                      description: Orderer host of the consenter
                       type: string
                     port:
+                      description: Orderer port of the consenter
                       type: integer
                     tlsCert:
+                      description: TLS Certificate of the orderer node
                       type: string
                   required:
                   - host
@@ -334,13 +412,18 @@ spec:
                   type: object
                 type: array
               peerOrganizations:
+                description: Peer organizations that are external to the Kubernetes
+                  cluster
                 items:
                   properties:
                     caName:
+                      description: FabricCA Name of the organization
                       type: string
                     caNamespace:
+                      description: FabricCA Namespace of the organization
                       type: string
                     mspID:
+                      description: MSP ID of the organization
                       type: string
                   required:
                   - caName
