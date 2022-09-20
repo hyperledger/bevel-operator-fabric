@@ -1714,9 +1714,10 @@ type FabricMainChannelExternalPeerOrganization struct {
 }
 
 type FabricMainChannelExternalOrdererOrganization struct {
-	MSPID            string   `json:"mspID"`
-	TLSRootCert      string   `json:"tlsRootCert"`
-	SignRootCert     string   `json:"signRootCert"`
+	MSPID        string `json:"mspID"`
+	TLSRootCert  string `json:"tlsRootCert"`
+	SignRootCert string `json:"signRootCert"`
+	// Orderer endpoints for the organization in the channel configuration
 	OrdererEndpoints []string `json:"ordererEndpoints"`
 }
 type OrgCertsRef struct {
