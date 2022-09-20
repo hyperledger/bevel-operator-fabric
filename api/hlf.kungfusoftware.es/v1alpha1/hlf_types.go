@@ -800,7 +800,8 @@ type FabricCAIntermediate struct {
 	ParentServer FabricCAIntermediateParentServer `json:"parentServer"`
 }
 type FabricCAIntermediateParentServer struct {
-	URL    string `json:"url"`
+	URL string `json:"url"`
+	// FabricCA Name of the organization
 	CAName string `json:"caName"`
 }
 type FabricCAIntermediateEnrollment struct {
@@ -1569,73 +1570,96 @@ type FabricMainChannelList struct {
 
 // FabricMainChannelSpec defines the desired state of FabricMainChannel
 type FabricMainChannelSpec struct {
+	// Name of the channel
 	Name string `json:"name"`
-
+	// HLF Identities to be used to create and manage the channel
 	Identities map[string]FabricMainChannelIdentity `json:"identities"`
 
-	AdminPeerOrganizations    []FabricMainChannelAdminPeerOrganizationSpec `json:"adminPeerOrganizations"`
-	PeerOrganizations         []FabricMainChannelPeerOrganization          `json:"peerOrganizations"`
-	ExternalPeerOrganizations []FabricMainChannelExternalPeerOrganization  `json:"externalPeerOrganizations"`
+	// Organizations that manage the `application` configuration of the channel
+	AdminPeerOrganizations []FabricMainChannelAdminPeerOrganizationSpec `json:"adminPeerOrganizations"`
+	// Peer organizations that are external to the Kubernetes cluster
+	PeerOrganizations []FabricMainChannelPeerOrganization `json:"peerOrganizations"`
+	// External peer organizations that are inside the kubernetes cluster
+	ExternalPeerOrganizations []FabricMainChannelExternalPeerOrganization `json:"externalPeerOrganizations"`
 
 	// +nullable
+	// Configuration about the channel
 	ChannelConfig *FabricMainChannelConfig `json:"channelConfig"`
 
-	AdminOrdererOrganizations    []FabricMainChannelAdminOrdererOrganizationSpec `json:"adminOrdererOrganizations"`
-	OrdererOrganizations         []FabricMainChannelOrdererOrganization          `json:"ordererOrganizations"`
-	ExternalOrdererOrganizations []FabricMainChannelExternalOrdererOrganization  `json:"externalOrdererOrganizations"`
+	// Organizations that manage the `orderer` configuration of the channel
+	AdminOrdererOrganizations []FabricMainChannelAdminOrdererOrganizationSpec `json:"adminOrdererOrganizations"`
+	// External orderer organizations that are inside the kubernetes cluster
+	OrdererOrganizations []FabricMainChannelOrdererOrganization `json:"ordererOrganizations"`
+	// Orderer organizations that are external to the Kubernetes cluster
+	ExternalOrdererOrganizations []FabricMainChannelExternalOrdererOrganization `json:"externalOrdererOrganizations"`
 
+	// Consenters are the orderer nodes that are part of the channel consensus
 	Consenters []FabricMainChannelConsenter `json:"orderers"`
 }
 type FabricMainChannelAdminPeerOrganizationSpec struct {
+	// MSP ID of the organization
 	MSPID string `json:"mspID"`
 }
 type FabricMainChannelAdminOrdererOrganizationSpec struct {
+	// MSP ID of the organization
 	MSPID string `json:"mspID"`
 }
 type FabricMainChannelConfig struct {
 	// +nullable
 	// +kubebuilder:validation:Optional
 	// +optional
+	// Application configuration of the channel
 	Application *FabricMainChannelApplicationConfig `json:"application"`
 	// +nullable
 	// +kubebuilder:validation:Optional
 	// +optional
+	// Orderer configuration of the channel
 	Orderer *FabricMainChannelOrdererConfig `json:"orderer"`
+	// Capabilities for the channel
 	// +kubebuilder:default:={"V2_0"}
 	Capabilities []string `json:"capabilities"`
 	// +nullable
 	// +kubebuilder:validation:Optional
 	// +optional
+	// Policies for the channel
 	Policies *map[string]FabricMainChannelPoliciesConfig `json:"policies"`
 }
 
 type FabricMainChannelApplicationConfig struct {
+	// Capabilities of the application channel configuration
 	// +kubebuilder:default:={"V2_0"}
 	Capabilities []string `json:"capabilities"`
 	// +nullable
 	// +kubebuilder:validation:Optional
 	// +optional
+	// Policies of the application channel configuration
 	Policies *map[string]FabricMainChannelPoliciesConfig `json:"policies"`
 	// +nullable
 	// +kubebuilder:validation:Optional
 	// +optional
+	// ACLs of the application channel configuration
 	ACLs *map[string]string `json:"acls"`
 }
 type FabricMainChannelOrdererConfig struct {
+	// OrdererType of the consensus, default "etcdraft"
 	// +kubebuilder:default:="etcdraft"
 	OrdererType string `json:"ordererType"`
+	// Capabilities of the channel
 	// +kubebuilder:default:={"V2_0"}
 	Capabilities []string `json:"capabilities"`
+	// Policies of the orderer section of the channel
 	// +nullable
 	// +kubebuilder:validation:Optional
 	// +optional
 	Policies *map[string]FabricMainChannelPoliciesConfig `json:"policies"`
+	// Interval of the ordering service to create a block and send to the peers
 	// +kubebuilder:default:="2s"
 	BatchTimeout string `json:"batchTimeout"`
 	// +nullable
 	// +kubebuilder:validation:Optional
 	// +optional
 	BatchSize *FabricMainChannelOrdererBatchSize `json:"batchSize"`
+	// State about the channel, can only be `STATE_NORMAL` or `STATE_MAINTENANCE`.
 	// +kubebuilder:default:="STATE_NORMAL"
 	State FabricMainChannelConsensusState `json:"state"`
 	// +nullable
@@ -1656,11 +1680,13 @@ type FabricMainChannelEtcdRaftOptions struct {
 	TickInterval string `json:"tickInterval"`
 	// +kubebuilder:default:=10
 	ElectionTick uint32 `json:"electionTick"`
+	// HeartbeatTick is the number of ticks that must pass between heartbeats
 	// +kubebuilder:default:=1
 	HeartbeatTick uint32 `json:"heartbeatTick"`
+	// MaxInflightBlocks is the maximum number of in-flight blocks that may be sent to followers at any given time.
 	// +kubebuilder:default:=5
 	MaxInflightBlocks uint32 `json:"maxInflightBlocks"`
-	// 16 MB
+	// Maximum size of each raft snapshot file.
 	// +kubebuilder:default:=16777216
 	SnapshotIntervalSize uint32 `json:"snapshotIntervalSize"`
 }
@@ -1673,49 +1699,59 @@ const (
 )
 
 type FabricMainChannelOrdererBatchSize struct {
+	// The number of transactions that can fit in a block.
 	// +kubebuilder:default:=100
 	MaxMessageCount int `json:"maxMessageCount"`
-	// default is 1024 * 1024
+	// The absolute maximum size of a block, including all metadata.
 	// +kubebuilder:default:=1048576
 	AbsoluteMaxBytes int `json:"absoluteMaxBytes"`
-	// default is 512 * 1024
+	// The preferred maximum size of a block, including all metadata.
 	// +kubebuilder:default:=524288
 	PreferredMaxBytes int `json:"preferredMaxBytes"`
 }
 
 type FabricMainChannelPoliciesConfig struct {
-	Type      string `json:"type"`
+	// Type of policy, can only be `ImplicitMeta` or `Signature`.
+	Type string `json:"type"`
+	// Rule of policy
 	Rule      string `json:"rule"`
 	ModPolicy string `json:"modPolicy"`
 }
 
 type FabricMainChannelIdentity struct {
 	// +kubebuilder:default:=default
+	// Secret namespace
 	SecretNamespace string `json:"secretNamespace"`
-	SecretName      string `json:"secretName"`
-	SecretKey       string `json:"secretKey"`
+	// Secret name
+	SecretName string `json:"secretName"`
+	// Key inside the secret that holds the private key and certificate to interact with the network
+	SecretKey string `json:"secretKey"`
 }
 
 type FabricMainChannelConsenter struct {
-	Host    string `json:"host"`
-	Port    int    `json:"port"`
-	TLSCert string `json:"tlsCert"`
-}
-
-type FabricMainChannelOrderer struct {
-	URL     string `json:"url"`
+	// Orderer host of the consenter
+	Host string `json:"host"`
+	// Orderer port of the consenter
+	Port int `json:"port"`
+	// TLS Certificate of the orderer node
 	TLSCert string `json:"tlsCert"`
 }
 
 type FabricMainChannelExternalPeerOrganization struct {
-	MSPID        string `json:"mspID"`
-	TLSRootCert  string `json:"tlsRootCert"`
+	// MSP ID of the organization
+	MSPID string `json:"mspID"`
+	// TLS Root certificate authority of the orderer organization
+	TLSRootCert string `json:"tlsRootCert"`
+	// Root certificate authority for signing
 	SignRootCert string `json:"signRootCert"`
 }
 
 type FabricMainChannelExternalOrdererOrganization struct {
-	MSPID        string `json:"mspID"`
-	TLSRootCert  string `json:"tlsRootCert"`
+	// MSP ID of the organization
+	MSPID string `json:"mspID"`
+	// TLS Root certificate authority of the orderer organization
+	TLSRootCert string `json:"tlsRootCert"`
+	// Root certificate authority for signing
 	SignRootCert string `json:"signRootCert"`
 	// Orderer endpoints for the organization in the channel configuration
 	OrdererEndpoints []string `json:"ordererEndpoints"`
@@ -1723,44 +1759,61 @@ type FabricMainChannelExternalOrdererOrganization struct {
 type OrgCertsRef struct {
 }
 type CARef struct {
-	CAName      string `json:"caName"`
+	CAName string `json:"caName"`
+	// FabricCA Namespace of the organization
 	CANamespace string `json:"caNamespace"`
 }
 type FabricMainChannelPeerOrganization struct {
+	// MSP ID of the organization
 	MSPID string `json:"mspID"`
-
-	CAName      string `json:"caName"`
+	// FabricCA Name of the organization
+	CAName string `json:"caName"`
+	// FabricCA Namespace of the organization
 	CANamespace string `json:"caNamespace"`
 }
 
 type FabricMainChannelOrdererOrganization struct {
+	// MSP ID of the organization
 	MSPID string `json:"mspID"`
 	// +optional
+	// FabricCA Name of the organization
 	CAName string `json:"caName"`
 	// +optional
+	// FabricCA Namespace of the organization
 	CANamespace string `json:"caNamespace"`
 	// +optional
+	// TLS Root certificate authority of the orderer organization
 	TLSCACert string `json:"tlsCACert"`
 	// +optional
-	SignCACert             string                                 `json:"signCACert"`
-	OrdererEndpoints       []string                               `json:"ordererEndpoints"`
-	OrderersToJoin         []FabricMainChannelOrdererNode         `json:"orderersToJoin"`
+	// Root certificate authority for signing
+	SignCACert string `json:"signCACert"`
+	// Orderer endpoints for the organization in the channel configuration
+	OrdererEndpoints []string `json:"ordererEndpoints"`
+	// Orderer nodes within the kubernetes cluster to be added to the channel
+	OrderersToJoin []FabricMainChannelOrdererNode `json:"orderersToJoin"`
+	// External orderers to be added to the channel
 	ExternalOrderersToJoin []FabricMainChannelExternalOrdererNode `json:"externalOrderersToJoin"`
 }
 
 type FabricMainChannelExternalOrdererNode struct {
-	Host      string `json:"host"`
-	AdminPort int    `json:"port"`
+	// Admin host of the orderer node
+	Host string `json:"host"`
+	// Admin port of the orderer node
+	AdminPort int `json:"port"`
 }
 
 type FabricMainChannelOrdererNode struct {
-	Name      string `json:"name"`
+	// Name of the orderer node
+	Name string `json:"name"`
+	// Kubernetes namespace of the orderer node
 	Namespace string `json:"namespace"`
 }
 
 type FabricMainChannelAnchorPeer struct {
+	// Host of the peer
 	Host string `json:"host"`
-	Port int    `json:"port"`
+	// Port of the peer
+	Port int `json:"port"`
 }
 
 // FabricFollowerChannelStatus defines the observed state of FabricFollowerChannel
@@ -1802,32 +1855,47 @@ type FabricFollowerChannelList struct {
 
 // FabricFollowerChannelSpec defines the desired state of FabricFollowerChannel
 type FabricFollowerChannelSpec struct {
-	Name        string                            `json:"name"`
-	MSPID       string                            `json:"mspId"`
-	Orderers    []FabricFollowerChannelOrderer    `json:"orderers"`
-	PeersToJoin []FabricFollowerChannelPeer       `json:"peersToJoin"`
+	// Name of the channel
+	Name string `json:"name"`
+	// MSP ID of the organization to join the channel
+	MSPID string `json:"mspId"`
+	// Orderers to fetch the configuration block from
+	Orderers []FabricFollowerChannelOrderer `json:"orderers"`
+	// Peers to join the channel
+	PeersToJoin []FabricFollowerChannelPeer `json:"peersToJoin"`
+	// Anchor peers defined for the current organization
 	AnchorPeers []FabricFollowerChannelAnchorPeer `json:"anchorPeers"`
-	HLFIdentity HLFIdentity                       `json:"hlfIdentity"`
+	// Identity to use to interact with the peers and the orderers
+	HLFIdentity HLFIdentity `json:"hlfIdentity"`
 }
 
 type FabricFollowerChannelAnchorPeer struct {
+	// Host of the anchor peer
 	Host string `json:"host"`
-	Port int    `json:"port"`
+	// Port of the anchor peer
+	Port int `json:"port"`
 }
 
 type HLFIdentity struct {
+	// Secret name
 	SecretName string `json:"secretName"`
 	// +kubebuilder:default:=default
+	// Secret namespace
 	SecretNamespace string `json:"secretNamespace"`
-	SecretKey       string `json:"secretKey"`
+	// Key inside the secret that holds the private key and certificate to interact with the network
+	SecretKey string `json:"secretKey"`
 }
 type FabricFollowerChannelPeer struct {
-	Name      string `json:"name"`
+	// FabricPeer Name of the peer inside the kubernetes cluster
+	Name string `json:"name"`
+	// FabricPeer Namespace of the peer inside the kubernetes cluster
 	Namespace string `json:"namespace"`
 }
 
 type FabricFollowerChannelOrderer struct {
-	URL         string `json:"url"`
+	// URL of the orderer, e.g.: "grpcs://xxxxx:443"
+	URL string `json:"url"`
+	// TLS Certificate of the orderer node
 	Certificate string `json:"certificate"`
 }
 
