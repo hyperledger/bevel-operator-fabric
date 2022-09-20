@@ -46,7 +46,7 @@ Resource Types:
 <tbody>
 <tr>
 <td>
-<code>apiVersion</code></br>
+<code>apiVersion</code>
 string</td>
 <td>
 <code>
@@ -56,14 +56,14 @@ hlf.kungfusoftware.es/v1alpha1
 </tr>
 <tr>
 <td>
-<code>kind</code></br>
+<code>kind</code>
 string
 </td>
 <td><code>FabricCA</code></td>
 </tr>
 <tr>
 <td>
-<code>metadata</code></br>
+<code>metadata</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#objectmeta-v1-meta">
 Kubernetes meta/v1.ObjectMeta
@@ -77,7 +77,7 @@ Refer to the Kubernetes API documentation for the fields of the
 </tr>
 <tr>
 <td>
-<code>spec</code></br>
+<code>spec</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricCASpec">
 FabricCASpec
@@ -90,7 +90,7 @@ FabricCASpec
 <table>
 <tr>
 <td>
-<code>affinity</code></br>
+<code>affinity</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#affinity-v1-core">
 Kubernetes core/v1.Affinity
@@ -103,7 +103,7 @@ Kubernetes core/v1.Affinity
 </tr>
 <tr>
 <td>
-<code>tolerations</code></br>
+<code>tolerations</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#toleration-v1-core">
 []Kubernetes core/v1.Toleration
@@ -116,7 +116,7 @@ Kubernetes core/v1.Affinity
 </tr>
 <tr>
 <td>
-<code>imagePullSecrets</code></br>
+<code>imagePullSecrets</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#localobjectreference-v1-core">
 []Kubernetes core/v1.LocalObjectReference
@@ -129,7 +129,7 @@ Kubernetes core/v1.Affinity
 </tr>
 <tr>
 <td>
-<code>nodeSelector</code></br>
+<code>nodeSelector</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#nodeselector-v1-core">
 Kubernetes core/v1.NodeSelector
@@ -142,7 +142,7 @@ Kubernetes core/v1.NodeSelector
 </tr>
 <tr>
 <td>
-<code>serviceMonitor</code></br>
+<code>serviceMonitor</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.ServiceMonitor">
 ServiceMonitor
@@ -155,7 +155,7 @@ ServiceMonitor
 </tr>
 <tr>
 <td>
-<code>istio</code></br>
+<code>istio</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricIstio">
 FabricIstio
@@ -168,7 +168,7 @@ FabricIstio
 </tr>
 <tr>
 <td>
-<code>db</code></br>
+<code>db</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricCADatabase">
 FabricCADatabase
@@ -180,7 +180,7 @@ FabricCADatabase
 </tr>
 <tr>
 <td>
-<code>hosts</code></br>
+<code>hosts</code>
 <em>
 []string
 </em>
@@ -191,7 +191,7 @@ FabricCADatabase
 </tr>
 <tr>
 <td>
-<code>service</code></br>
+<code>service</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricCASpecService">
 FabricCASpecService
@@ -203,7 +203,7 @@ FabricCASpecService
 </tr>
 <tr>
 <td>
-<code>image</code></br>
+<code>image</code>
 <em>
 string
 </em>
@@ -213,7 +213,7 @@ string
 </tr>
 <tr>
 <td>
-<code>version</code></br>
+<code>version</code>
 <em>
 string
 </em>
@@ -223,7 +223,7 @@ string
 </tr>
 <tr>
 <td>
-<code>debug</code></br>
+<code>debug</code>
 <em>
 bool
 </em>
@@ -233,7 +233,7 @@ bool
 </tr>
 <tr>
 <td>
-<code>clrSizeLimit</code></br>
+<code>clrSizeLimit</code>
 <em>
 int
 </em>
@@ -243,7 +243,7 @@ int
 </tr>
 <tr>
 <td>
-<code>rootCA</code></br>
+<code>rootCA</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricCATLSConf">
 FabricCATLSConf
@@ -255,7 +255,7 @@ FabricCATLSConf
 </tr>
 <tr>
 <td>
-<code>ca</code></br>
+<code>ca</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricCAItemConf">
 FabricCAItemConf
@@ -267,7 +267,7 @@ FabricCAItemConf
 </tr>
 <tr>
 <td>
-<code>tlsCA</code></br>
+<code>tlsCA</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricCAItemConf">
 FabricCAItemConf
@@ -279,7 +279,7 @@ FabricCAItemConf
 </tr>
 <tr>
 <td>
-<code>cors</code></br>
+<code>cors</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.Cors">
 Cors
@@ -291,7 +291,7 @@ Cors
 </tr>
 <tr>
 <td>
-<code>resources</code></br>
+<code>resources</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#resourcerequirements-v1-core">
 Kubernetes core/v1.ResourceRequirements
@@ -303,7 +303,7 @@ Kubernetes core/v1.ResourceRequirements
 </tr>
 <tr>
 <td>
-<code>storage</code></br>
+<code>storage</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.Storage">
 Storage
@@ -315,7 +315,7 @@ Storage
 </tr>
 <tr>
 <td>
-<code>metrics</code></br>
+<code>metrics</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricCAMetrics">
 FabricCAMetrics
@@ -327,7 +327,7 @@ FabricCAMetrics
 </tr>
 <tr>
 <td>
-<code>env</code></br>
+<code>env</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#envvar-v1-core">
 []Kubernetes core/v1.EnvVar
@@ -339,18 +339,6 @@ FabricCAMetrics
 </td>
 </tr>
 </table>
-</td>
-</tr>
-<tr>
-<td>
-<code>status</code></br>
-<em>
-<a href="#hlf.kungfusoftware.es/v1alpha1.FabricCAStatus">
-FabricCAStatus
-</a>
-</em>
-</td>
-<td>
 </td>
 </tr>
 </tbody>
@@ -370,7 +358,7 @@ FabricCAStatus
 <tbody>
 <tr>
 <td>
-<code>apiVersion</code></br>
+<code>apiVersion</code>
 string</td>
 <td>
 <code>
@@ -380,14 +368,14 @@ hlf.kungfusoftware.es/v1alpha1
 </tr>
 <tr>
 <td>
-<code>kind</code></br>
+<code>kind</code>
 string
 </td>
 <td><code>FabricChaincode</code></td>
 </tr>
 <tr>
 <td>
-<code>metadata</code></br>
+<code>metadata</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#objectmeta-v1-meta">
 Kubernetes meta/v1.ObjectMeta
@@ -401,7 +389,7 @@ Refer to the Kubernetes API documentation for the fields of the
 </tr>
 <tr>
 <td>
-<code>spec</code></br>
+<code>spec</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricChaincodeSpec">
 FabricChaincodeSpec
@@ -414,7 +402,7 @@ FabricChaincodeSpec
 <table>
 <tr>
 <td>
-<code>image</code></br>
+<code>image</code>
 <em>
 string
 </em>
@@ -424,7 +412,7 @@ string
 </tr>
 <tr>
 <td>
-<code>imagePullPolicy</code></br>
+<code>imagePullPolicy</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#pullpolicy-v1-core">
 Kubernetes core/v1.PullPolicy
@@ -436,7 +424,7 @@ Kubernetes core/v1.PullPolicy
 </tr>
 <tr>
 <td>
-<code>packageId</code></br>
+<code>packageId</code>
 <em>
 string
 </em>
@@ -446,7 +434,7 @@ string
 </tr>
 <tr>
 <td>
-<code>imagePullSecrets</code></br>
+<code>imagePullSecrets</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#localobjectreference-v1-core">
 []Kubernetes core/v1.LocalObjectReference
@@ -459,7 +447,7 @@ string
 </tr>
 <tr>
 <td>
-<code>affinity</code></br>
+<code>affinity</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#affinity-v1-core">
 Kubernetes core/v1.Affinity
@@ -472,7 +460,7 @@ Kubernetes core/v1.Affinity
 </tr>
 <tr>
 <td>
-<code>tolerations</code></br>
+<code>tolerations</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#toleration-v1-core">
 []Kubernetes core/v1.Toleration
@@ -485,7 +473,7 @@ Kubernetes core/v1.Affinity
 </tr>
 <tr>
 <td>
-<code>resources</code></br>
+<code>resources</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#resourcerequirements-v1-core">
 Kubernetes core/v1.ResourceRequirements
@@ -498,7 +486,7 @@ Kubernetes core/v1.ResourceRequirements
 </tr>
 <tr>
 <td>
-<code>credentials</code></br>
+<code>credentials</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.TLS">
 TLS
@@ -511,7 +499,7 @@ TLS
 </tr>
 <tr>
 <td>
-<code>replicas</code></br>
+<code>replicas</code>
 <em>
 int
 </em>
@@ -521,7 +509,7 @@ int
 </tr>
 <tr>
 <td>
-<code>env</code></br>
+<code>env</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#envvar-v1-core">
 []Kubernetes core/v1.EnvVar
@@ -533,18 +521,6 @@ int
 </td>
 </tr>
 </table>
-</td>
-</tr>
-<tr>
-<td>
-<code>status</code></br>
-<em>
-<a href="#hlf.kungfusoftware.es/v1alpha1.FabricChaincodeStatus">
-FabricChaincodeStatus
-</a>
-</em>
-</td>
-<td>
 </td>
 </tr>
 </tbody>
@@ -564,7 +540,7 @@ FabricChaincodeStatus
 <tbody>
 <tr>
 <td>
-<code>apiVersion</code></br>
+<code>apiVersion</code>
 string</td>
 <td>
 <code>
@@ -574,14 +550,14 @@ hlf.kungfusoftware.es/v1alpha1
 </tr>
 <tr>
 <td>
-<code>kind</code></br>
+<code>kind</code>
 string
 </td>
 <td><code>FabricExplorer</code></td>
 </tr>
 <tr>
 <td>
-<code>metadata</code></br>
+<code>metadata</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#objectmeta-v1-meta">
 Kubernetes meta/v1.ObjectMeta
@@ -595,7 +571,7 @@ Refer to the Kubernetes API documentation for the fields of the
 </tr>
 <tr>
 <td>
-<code>spec</code></br>
+<code>spec</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricExplorerSpec">
 FabricExplorerSpec
@@ -608,7 +584,7 @@ FabricExplorerSpec
 <table>
 <tr>
 <td>
-<code>resources</code></br>
+<code>resources</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#resourcerequirements-v1-core">
 Kubernetes core/v1.ResourceRequirements
@@ -619,18 +595,6 @@ Kubernetes core/v1.ResourceRequirements
 </td>
 </tr>
 </table>
-</td>
-</tr>
-<tr>
-<td>
-<code>status</code></br>
-<em>
-<a href="#hlf.kungfusoftware.es/v1alpha1.FabricExplorerStatus">
-FabricExplorerStatus
-</a>
-</em>
-</td>
-<td>
 </td>
 </tr>
 </tbody>
@@ -650,7 +614,7 @@ FabricExplorerStatus
 <tbody>
 <tr>
 <td>
-<code>apiVersion</code></br>
+<code>apiVersion</code>
 string</td>
 <td>
 <code>
@@ -660,14 +624,14 @@ hlf.kungfusoftware.es/v1alpha1
 </tr>
 <tr>
 <td>
-<code>kind</code></br>
+<code>kind</code>
 string
 </td>
 <td><code>FabricFollowerChannel</code></td>
 </tr>
 <tr>
 <td>
-<code>metadata</code></br>
+<code>metadata</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#objectmeta-v1-meta">
 Kubernetes meta/v1.ObjectMeta
@@ -681,7 +645,7 @@ Refer to the Kubernetes API documentation for the fields of the
 </tr>
 <tr>
 <td>
-<code>spec</code></br>
+<code>spec</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricFollowerChannelSpec">
 FabricFollowerChannelSpec
@@ -694,27 +658,29 @@ FabricFollowerChannelSpec
 <table>
 <tr>
 <td>
-<code>name</code></br>
+<code>name</code>
 <em>
 string
 </em>
 </td>
 <td>
+<p>Name of the channel</p>
 </td>
 </tr>
 <tr>
 <td>
-<code>mspId</code></br>
+<code>mspId</code>
 <em>
 string
 </em>
 </td>
 <td>
+<p>MSP ID of the organization to join the channel</p>
 </td>
 </tr>
 <tr>
 <td>
-<code>orderers</code></br>
+<code>orderers</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricFollowerChannelOrderer">
 []FabricFollowerChannelOrderer
@@ -722,11 +688,12 @@ string
 </em>
 </td>
 <td>
+<p>Orderers to fetch the configuration block from</p>
 </td>
 </tr>
 <tr>
 <td>
-<code>peersToJoin</code></br>
+<code>peersToJoin</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricFollowerChannelPeer">
 []FabricFollowerChannelPeer
@@ -734,11 +701,12 @@ string
 </em>
 </td>
 <td>
+<p>Peers to join the channel</p>
 </td>
 </tr>
 <tr>
 <td>
-<code>anchorPeers</code></br>
+<code>anchorPeers</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricFollowerChannelAnchorPeer">
 []FabricFollowerChannelAnchorPeer
@@ -746,11 +714,12 @@ string
 </em>
 </td>
 <td>
+<p>Anchor peers defined for the current organization</p>
 </td>
 </tr>
 <tr>
 <td>
-<code>hlfIdentity</code></br>
+<code>hlfIdentity</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.HLFIdentity">
 HLFIdentity
@@ -758,21 +727,10 @@ HLFIdentity
 </em>
 </td>
 <td>
+<p>Identity to use to interact with the peers and the orderers</p>
 </td>
 </tr>
 </table>
-</td>
-</tr>
-<tr>
-<td>
-<code>status</code></br>
-<em>
-<a href="#hlf.kungfusoftware.es/v1alpha1.FabricFollowerChannelStatus">
-FabricFollowerChannelStatus
-</a>
-</em>
-</td>
-<td>
 </td>
 </tr>
 </tbody>
@@ -792,7 +750,7 @@ FabricFollowerChannelStatus
 <tbody>
 <tr>
 <td>
-<code>apiVersion</code></br>
+<code>apiVersion</code>
 string</td>
 <td>
 <code>
@@ -802,14 +760,14 @@ hlf.kungfusoftware.es/v1alpha1
 </tr>
 <tr>
 <td>
-<code>kind</code></br>
+<code>kind</code>
 string
 </td>
 <td><code>FabricMainChannel</code></td>
 </tr>
 <tr>
 <td>
-<code>metadata</code></br>
+<code>metadata</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#objectmeta-v1-meta">
 Kubernetes meta/v1.ObjectMeta
@@ -823,7 +781,7 @@ Refer to the Kubernetes API documentation for the fields of the
 </tr>
 <tr>
 <td>
-<code>spec</code></br>
+<code>spec</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricMainChannelSpec">
 FabricMainChannelSpec
@@ -836,17 +794,18 @@ FabricMainChannelSpec
 <table>
 <tr>
 <td>
-<code>name</code></br>
+<code>name</code>
 <em>
 string
 </em>
 </td>
 <td>
+<p>Name of the channel</p>
 </td>
 </tr>
 <tr>
 <td>
-<code>identities</code></br>
+<code>identities</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricMainChannelIdentity">
 map[string]github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1.FabricMainChannelIdentity
@@ -854,11 +813,12 @@ map[string]github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1
 </em>
 </td>
 <td>
+<p>HLF Identities to be used to create and manage the channel</p>
 </td>
 </tr>
 <tr>
 <td>
-<code>adminPeerOrganizations</code></br>
+<code>adminPeerOrganizations</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricMainChannelAdminPeerOrganizationSpec">
 []FabricMainChannelAdminPeerOrganizationSpec
@@ -866,11 +826,12 @@ map[string]github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1
 </em>
 </td>
 <td>
+<p>Organizations that manage the <code>application</code> configuration of the channel</p>
 </td>
 </tr>
 <tr>
 <td>
-<code>peerOrganizations</code></br>
+<code>peerOrganizations</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricMainChannelPeerOrganization">
 []FabricMainChannelPeerOrganization
@@ -878,11 +839,12 @@ map[string]github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1
 </em>
 </td>
 <td>
+<p>Peer organizations that are external to the Kubernetes cluster</p>
 </td>
 </tr>
 <tr>
 <td>
-<code>externalPeerOrganizations</code></br>
+<code>externalPeerOrganizations</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricMainChannelExternalPeerOrganization">
 []FabricMainChannelExternalPeerOrganization
@@ -890,11 +852,12 @@ map[string]github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1
 </em>
 </td>
 <td>
+<p>External peer organizations that are inside the kubernetes cluster</p>
 </td>
 </tr>
 <tr>
 <td>
-<code>channelConfig</code></br>
+<code>channelConfig</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricMainChannelConfig">
 FabricMainChannelConfig
@@ -902,11 +865,12 @@ FabricMainChannelConfig
 </em>
 </td>
 <td>
+<p>Configuration about the channel</p>
 </td>
 </tr>
 <tr>
 <td>
-<code>adminOrdererOrganizations</code></br>
+<code>adminOrdererOrganizations</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricMainChannelAdminOrdererOrganizationSpec">
 []FabricMainChannelAdminOrdererOrganizationSpec
@@ -914,11 +878,12 @@ FabricMainChannelConfig
 </em>
 </td>
 <td>
+<p>Organizations that manage the <code>orderer</code> configuration of the channel</p>
 </td>
 </tr>
 <tr>
 <td>
-<code>ordererOrganizations</code></br>
+<code>ordererOrganizations</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricMainChannelOrdererOrganization">
 []FabricMainChannelOrdererOrganization
@@ -926,11 +891,12 @@ FabricMainChannelConfig
 </em>
 </td>
 <td>
+<p>External orderer organizations that are inside the kubernetes cluster</p>
 </td>
 </tr>
 <tr>
 <td>
-<code>externalOrdererOrganizations</code></br>
+<code>externalOrdererOrganizations</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricMainChannelExternalOrdererOrganization">
 []FabricMainChannelExternalOrdererOrganization
@@ -938,11 +904,12 @@ FabricMainChannelConfig
 </em>
 </td>
 <td>
+<p>Orderer organizations that are external to the Kubernetes cluster</p>
 </td>
 </tr>
 <tr>
 <td>
-<code>orderers</code></br>
+<code>orderers</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricMainChannelConsenter">
 []FabricMainChannelConsenter
@@ -950,21 +917,10 @@ FabricMainChannelConfig
 </em>
 </td>
 <td>
+<p>Consenters are the orderer nodes that are part of the channel consensus</p>
 </td>
 </tr>
 </table>
-</td>
-</tr>
-<tr>
-<td>
-<code>status</code></br>
-<em>
-<a href="#hlf.kungfusoftware.es/v1alpha1.FabricMainChannelStatus">
-FabricMainChannelStatus
-</a>
-</em>
-</td>
-<td>
 </td>
 </tr>
 </tbody>
@@ -984,7 +940,7 @@ FabricMainChannelStatus
 <tbody>
 <tr>
 <td>
-<code>apiVersion</code></br>
+<code>apiVersion</code>
 string</td>
 <td>
 <code>
@@ -994,14 +950,14 @@ hlf.kungfusoftware.es/v1alpha1
 </tr>
 <tr>
 <td>
-<code>kind</code></br>
+<code>kind</code>
 string
 </td>
 <td><code>FabricNetworkConfig</code></td>
 </tr>
 <tr>
 <td>
-<code>metadata</code></br>
+<code>metadata</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#objectmeta-v1-meta">
 Kubernetes meta/v1.ObjectMeta
@@ -1015,7 +971,7 @@ Refer to the Kubernetes API documentation for the fields of the
 </tr>
 <tr>
 <td>
-<code>spec</code></br>
+<code>spec</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricNetworkConfigSpec">
 FabricNetworkConfigSpec
@@ -1028,7 +984,7 @@ FabricNetworkConfigSpec
 <table>
 <tr>
 <td>
-<code>organization</code></br>
+<code>organization</code>
 <em>
 string
 </em>
@@ -1038,7 +994,7 @@ string
 </tr>
 <tr>
 <td>
-<code>internal</code></br>
+<code>internal</code>
 <em>
 bool
 </em>
@@ -1048,7 +1004,7 @@ bool
 </tr>
 <tr>
 <td>
-<code>organizations</code></br>
+<code>organizations</code>
 <em>
 []string
 </em>
@@ -1058,7 +1014,7 @@ bool
 </tr>
 <tr>
 <td>
-<code>secretName</code></br>
+<code>secretName</code>
 <em>
 string
 </em>
@@ -1067,18 +1023,6 @@ string
 </td>
 </tr>
 </table>
-</td>
-</tr>
-<tr>
-<td>
-<code>status</code></br>
-<em>
-<a href="#hlf.kungfusoftware.es/v1alpha1.FabricNetworkConfigStatus">
-FabricNetworkConfigStatus
-</a>
-</em>
-</td>
-<td>
 </td>
 </tr>
 </tbody>
@@ -1098,7 +1042,7 @@ FabricNetworkConfigStatus
 <tbody>
 <tr>
 <td>
-<code>apiVersion</code></br>
+<code>apiVersion</code>
 string</td>
 <td>
 <code>
@@ -1108,14 +1052,14 @@ hlf.kungfusoftware.es/v1alpha1
 </tr>
 <tr>
 <td>
-<code>kind</code></br>
+<code>kind</code>
 string
 </td>
 <td><code>FabricOperationsConsole</code></td>
 </tr>
 <tr>
 <td>
-<code>metadata</code></br>
+<code>metadata</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#objectmeta-v1-meta">
 Kubernetes meta/v1.ObjectMeta
@@ -1129,7 +1073,7 @@ Refer to the Kubernetes API documentation for the fields of the
 </tr>
 <tr>
 <td>
-<code>spec</code></br>
+<code>spec</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricOperationsConsoleSpec">
 FabricOperationsConsoleSpec
@@ -1142,7 +1086,7 @@ FabricOperationsConsoleSpec
 <table>
 <tr>
 <td>
-<code>auth</code></br>
+<code>auth</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricOperationsConsoleAuth">
 FabricOperationsConsoleAuth
@@ -1154,7 +1098,7 @@ FabricOperationsConsoleAuth
 </tr>
 <tr>
 <td>
-<code>resources</code></br>
+<code>resources</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#resourcerequirements-v1-core">
 Kubernetes core/v1.ResourceRequirements
@@ -1167,7 +1111,7 @@ Kubernetes core/v1.ResourceRequirements
 </tr>
 <tr>
 <td>
-<code>image</code></br>
+<code>image</code>
 <em>
 string
 </em>
@@ -1177,7 +1121,7 @@ string
 </tr>
 <tr>
 <td>
-<code>tag</code></br>
+<code>tag</code>
 <em>
 string
 </em>
@@ -1187,7 +1131,7 @@ string
 </tr>
 <tr>
 <td>
-<code>imagePullPolicy</code></br>
+<code>imagePullPolicy</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#pullpolicy-v1-core">
 Kubernetes core/v1.PullPolicy
@@ -1199,7 +1143,7 @@ Kubernetes core/v1.PullPolicy
 </tr>
 <tr>
 <td>
-<code>tolerations</code></br>
+<code>tolerations</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#toleration-v1-core">
 []Kubernetes core/v1.Toleration
@@ -1212,7 +1156,7 @@ Kubernetes core/v1.PullPolicy
 </tr>
 <tr>
 <td>
-<code>replicas</code></br>
+<code>replicas</code>
 <em>
 int
 </em>
@@ -1222,7 +1166,7 @@ int
 </tr>
 <tr>
 <td>
-<code>couchDB</code></br>
+<code>couchDB</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricOperationsConsoleCouchDB">
 FabricOperationsConsoleCouchDB
@@ -1234,7 +1178,7 @@ FabricOperationsConsoleCouchDB
 </tr>
 <tr>
 <td>
-<code>env</code></br>
+<code>env</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#envvar-v1-core">
 []Kubernetes core/v1.EnvVar
@@ -1247,7 +1191,7 @@ FabricOperationsConsoleCouchDB
 </tr>
 <tr>
 <td>
-<code>imagePullSecrets</code></br>
+<code>imagePullSecrets</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#localobjectreference-v1-core">
 []Kubernetes core/v1.LocalObjectReference
@@ -1260,7 +1204,7 @@ FabricOperationsConsoleCouchDB
 </tr>
 <tr>
 <td>
-<code>affinity</code></br>
+<code>affinity</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#affinity-v1-core">
 Kubernetes core/v1.Affinity
@@ -1273,7 +1217,7 @@ Kubernetes core/v1.Affinity
 </tr>
 <tr>
 <td>
-<code>port</code></br>
+<code>port</code>
 <em>
 int
 </em>
@@ -1283,7 +1227,7 @@ int
 </tr>
 <tr>
 <td>
-<code>config</code></br>
+<code>config</code>
 <em>
 string
 </em>
@@ -1294,7 +1238,7 @@ string
 </tr>
 <tr>
 <td>
-<code>ingress</code></br>
+<code>ingress</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.Ingress">
 Ingress
@@ -1306,7 +1250,7 @@ Ingress
 </tr>
 <tr>
 <td>
-<code>hostUrl</code></br>
+<code>hostUrl</code>
 <em>
 string
 </em>
@@ -1315,18 +1259,6 @@ string
 </td>
 </tr>
 </table>
-</td>
-</tr>
-<tr>
-<td>
-<code>status</code></br>
-<em>
-<a href="#hlf.kungfusoftware.es/v1alpha1.FabricOperationsConsoleStatus">
-FabricOperationsConsoleStatus
-</a>
-</em>
-</td>
-<td>
 </td>
 </tr>
 </tbody>
@@ -1346,7 +1278,7 @@ FabricOperationsConsoleStatus
 <tbody>
 <tr>
 <td>
-<code>apiVersion</code></br>
+<code>apiVersion</code>
 string</td>
 <td>
 <code>
@@ -1356,14 +1288,14 @@ hlf.kungfusoftware.es/v1alpha1
 </tr>
 <tr>
 <td>
-<code>kind</code></br>
+<code>kind</code>
 string
 </td>
 <td><code>FabricOperatorAPI</code></td>
 </tr>
 <tr>
 <td>
-<code>metadata</code></br>
+<code>metadata</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#objectmeta-v1-meta">
 Kubernetes meta/v1.ObjectMeta
@@ -1377,7 +1309,7 @@ Refer to the Kubernetes API documentation for the fields of the
 </tr>
 <tr>
 <td>
-<code>spec</code></br>
+<code>spec</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricOperatorAPISpec">
 FabricOperatorAPISpec
@@ -1390,7 +1322,7 @@ FabricOperatorAPISpec
 <table>
 <tr>
 <td>
-<code>image</code></br>
+<code>image</code>
 <em>
 string
 </em>
@@ -1400,7 +1332,7 @@ string
 </tr>
 <tr>
 <td>
-<code>tag</code></br>
+<code>tag</code>
 <em>
 string
 </em>
@@ -1410,7 +1342,7 @@ string
 </tr>
 <tr>
 <td>
-<code>imagePullPolicy</code></br>
+<code>imagePullPolicy</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#pullpolicy-v1-core">
 Kubernetes core/v1.PullPolicy
@@ -1422,7 +1354,7 @@ Kubernetes core/v1.PullPolicy
 </tr>
 <tr>
 <td>
-<code>istio</code></br>
+<code>istio</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricIstio">
 FabricIstio
@@ -1434,7 +1366,7 @@ FabricIstio
 </tr>
 <tr>
 <td>
-<code>ingress</code></br>
+<code>ingress</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.Ingress">
 Ingress
@@ -1446,7 +1378,7 @@ Ingress
 </tr>
 <tr>
 <td>
-<code>replicas</code></br>
+<code>replicas</code>
 <em>
 int
 </em>
@@ -1456,7 +1388,7 @@ int
 </tr>
 <tr>
 <td>
-<code>auth</code></br>
+<code>auth</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricOperatorAPIAuth">
 FabricOperatorAPIAuth
@@ -1469,7 +1401,7 @@ FabricOperatorAPIAuth
 </tr>
 <tr>
 <td>
-<code>hlfConfig</code></br>
+<code>hlfConfig</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricOperatorAPIHLFConfig">
 FabricOperatorAPIHLFConfig
@@ -1481,7 +1413,7 @@ FabricOperatorAPIHLFConfig
 </tr>
 <tr>
 <td>
-<code>tolerations</code></br>
+<code>tolerations</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#toleration-v1-core">
 []Kubernetes core/v1.Toleration
@@ -1494,7 +1426,7 @@ FabricOperatorAPIHLFConfig
 </tr>
 <tr>
 <td>
-<code>imagePullSecrets</code></br>
+<code>imagePullSecrets</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#localobjectreference-v1-core">
 []Kubernetes core/v1.LocalObjectReference
@@ -1507,7 +1439,7 @@ FabricOperatorAPIHLFConfig
 </tr>
 <tr>
 <td>
-<code>env</code></br>
+<code>env</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#envvar-v1-core">
 []Kubernetes core/v1.EnvVar
@@ -1520,7 +1452,7 @@ FabricOperatorAPIHLFConfig
 </tr>
 <tr>
 <td>
-<code>affinity</code></br>
+<code>affinity</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#affinity-v1-core">
 Kubernetes core/v1.Affinity
@@ -1533,7 +1465,7 @@ Kubernetes core/v1.Affinity
 </tr>
 <tr>
 <td>
-<code>resources</code></br>
+<code>resources</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#resourcerequirements-v1-core">
 Kubernetes core/v1.ResourceRequirements
@@ -1545,18 +1477,6 @@ Kubernetes core/v1.ResourceRequirements
 </td>
 </tr>
 </table>
-</td>
-</tr>
-<tr>
-<td>
-<code>status</code></br>
-<em>
-<a href="#hlf.kungfusoftware.es/v1alpha1.FabricOperatorAPIStatus">
-FabricOperatorAPIStatus
-</a>
-</em>
-</td>
-<td>
 </td>
 </tr>
 </tbody>
@@ -1576,7 +1496,7 @@ FabricOperatorAPIStatus
 <tbody>
 <tr>
 <td>
-<code>apiVersion</code></br>
+<code>apiVersion</code>
 string</td>
 <td>
 <code>
@@ -1586,14 +1506,14 @@ hlf.kungfusoftware.es/v1alpha1
 </tr>
 <tr>
 <td>
-<code>kind</code></br>
+<code>kind</code>
 string
 </td>
 <td><code>FabricOperatorUI</code></td>
 </tr>
 <tr>
 <td>
-<code>metadata</code></br>
+<code>metadata</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#objectmeta-v1-meta">
 Kubernetes meta/v1.ObjectMeta
@@ -1607,7 +1527,7 @@ Refer to the Kubernetes API documentation for the fields of the
 </tr>
 <tr>
 <td>
-<code>spec</code></br>
+<code>spec</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricOperatorUISpec">
 FabricOperatorUISpec
@@ -1620,7 +1540,7 @@ FabricOperatorUISpec
 <table>
 <tr>
 <td>
-<code>image</code></br>
+<code>image</code>
 <em>
 string
 </em>
@@ -1630,7 +1550,7 @@ string
 </tr>
 <tr>
 <td>
-<code>tag</code></br>
+<code>tag</code>
 <em>
 string
 </em>
@@ -1640,7 +1560,7 @@ string
 </tr>
 <tr>
 <td>
-<code>imagePullPolicy</code></br>
+<code>imagePullPolicy</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#pullpolicy-v1-core">
 Kubernetes core/v1.PullPolicy
@@ -1652,7 +1572,7 @@ Kubernetes core/v1.PullPolicy
 </tr>
 <tr>
 <td>
-<code>logoUrl</code></br>
+<code>logoUrl</code>
 <em>
 string
 </em>
@@ -1662,7 +1582,7 @@ string
 </tr>
 <tr>
 <td>
-<code>auth</code></br>
+<code>auth</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricOperatorUIAuth">
 FabricOperatorUIAuth
@@ -1675,7 +1595,7 @@ FabricOperatorUIAuth
 </tr>
 <tr>
 <td>
-<code>tolerations</code></br>
+<code>tolerations</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#toleration-v1-core">
 []Kubernetes core/v1.Toleration
@@ -1688,7 +1608,7 @@ FabricOperatorUIAuth
 </tr>
 <tr>
 <td>
-<code>replicas</code></br>
+<code>replicas</code>
 <em>
 int
 </em>
@@ -1698,7 +1618,7 @@ int
 </tr>
 <tr>
 <td>
-<code>ingress</code></br>
+<code>ingress</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.Ingress">
 Ingress
@@ -1710,7 +1630,7 @@ Ingress
 </tr>
 <tr>
 <td>
-<code>apiUrl</code></br>
+<code>apiUrl</code>
 <em>
 string
 </em>
@@ -1720,7 +1640,7 @@ string
 </tr>
 <tr>
 <td>
-<code>imagePullSecrets</code></br>
+<code>imagePullSecrets</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#localobjectreference-v1-core">
 []Kubernetes core/v1.LocalObjectReference
@@ -1733,7 +1653,7 @@ string
 </tr>
 <tr>
 <td>
-<code>env</code></br>
+<code>env</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#envvar-v1-core">
 []Kubernetes core/v1.EnvVar
@@ -1746,7 +1666,7 @@ string
 </tr>
 <tr>
 <td>
-<code>affinity</code></br>
+<code>affinity</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#affinity-v1-core">
 Kubernetes core/v1.Affinity
@@ -1759,7 +1679,7 @@ Kubernetes core/v1.Affinity
 </tr>
 <tr>
 <td>
-<code>resources</code></br>
+<code>resources</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#resourcerequirements-v1-core">
 Kubernetes core/v1.ResourceRequirements
@@ -1771,18 +1691,6 @@ Kubernetes core/v1.ResourceRequirements
 </td>
 </tr>
 </table>
-</td>
-</tr>
-<tr>
-<td>
-<code>status</code></br>
-<em>
-<a href="#hlf.kungfusoftware.es/v1alpha1.FabricOperatorUIStatus">
-FabricOperatorUIStatus
-</a>
-</em>
-</td>
-<td>
 </td>
 </tr>
 </tbody>
@@ -1802,7 +1710,7 @@ FabricOperatorUIStatus
 <tbody>
 <tr>
 <td>
-<code>apiVersion</code></br>
+<code>apiVersion</code>
 string</td>
 <td>
 <code>
@@ -1812,14 +1720,14 @@ hlf.kungfusoftware.es/v1alpha1
 </tr>
 <tr>
 <td>
-<code>kind</code></br>
+<code>kind</code>
 string
 </td>
 <td><code>FabricOrdererNode</code></td>
 </tr>
 <tr>
 <td>
-<code>metadata</code></br>
+<code>metadata</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#objectmeta-v1-meta">
 Kubernetes meta/v1.ObjectMeta
@@ -1833,7 +1741,7 @@ Refer to the Kubernetes API documentation for the fields of the
 </tr>
 <tr>
 <td>
-<code>spec</code></br>
+<code>spec</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricOrdererNodeSpec">
 FabricOrdererNodeSpec
@@ -1846,7 +1754,7 @@ FabricOrdererNodeSpec
 <table>
 <tr>
 <td>
-<code>tolerations</code></br>
+<code>tolerations</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#toleration-v1-core">
 []Kubernetes core/v1.Toleration
@@ -1859,7 +1767,7 @@ FabricOrdererNodeSpec
 </tr>
 <tr>
 <td>
-<code>grpcProxy</code></br>
+<code>grpcProxy</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.GRPCProxy">
 GRPCProxy
@@ -1872,7 +1780,7 @@ GRPCProxy
 </tr>
 <tr>
 <td>
-<code>affinity</code></br>
+<code>affinity</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#affinity-v1-core">
 Kubernetes core/v1.Affinity
@@ -1885,7 +1793,7 @@ Kubernetes core/v1.Affinity
 </tr>
 <tr>
 <td>
-<code>updateCertificateTime</code></br>
+<code>updateCertificateTime</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#time-v1-meta">
 Kubernetes meta/v1.Time
@@ -1898,7 +1806,7 @@ Kubernetes meta/v1.Time
 </tr>
 <tr>
 <td>
-<code>serviceMonitor</code></br>
+<code>serviceMonitor</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.ServiceMonitor">
 ServiceMonitor
@@ -1911,7 +1819,7 @@ ServiceMonitor
 </tr>
 <tr>
 <td>
-<code>hostAliases</code></br>
+<code>hostAliases</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#hostalias-v1-core">
 []Kubernetes core/v1.HostAlias
@@ -1924,7 +1832,7 @@ ServiceMonitor
 </tr>
 <tr>
 <td>
-<code>nodeSelector</code></br>
+<code>nodeSelector</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#nodeselector-v1-core">
 Kubernetes core/v1.NodeSelector
@@ -1937,7 +1845,7 @@ Kubernetes core/v1.NodeSelector
 </tr>
 <tr>
 <td>
-<code>resources</code></br>
+<code>resources</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#resourcerequirements-v1-core">
 Kubernetes core/v1.ResourceRequirements
@@ -1949,7 +1857,7 @@ Kubernetes core/v1.ResourceRequirements
 </tr>
 <tr>
 <td>
-<code>replicas</code></br>
+<code>replicas</code>
 <em>
 int
 </em>
@@ -1959,7 +1867,7 @@ int
 </tr>
 <tr>
 <td>
-<code>image</code></br>
+<code>image</code>
 <em>
 string
 </em>
@@ -1969,7 +1877,7 @@ string
 </tr>
 <tr>
 <td>
-<code>tag</code></br>
+<code>tag</code>
 <em>
 string
 </em>
@@ -1979,7 +1887,7 @@ string
 </tr>
 <tr>
 <td>
-<code>pullPolicy</code></br>
+<code>pullPolicy</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#pullpolicy-v1-core">
 Kubernetes core/v1.PullPolicy
@@ -1991,7 +1899,7 @@ Kubernetes core/v1.PullPolicy
 </tr>
 <tr>
 <td>
-<code>mspID</code></br>
+<code>mspID</code>
 <em>
 string
 </em>
@@ -2001,7 +1909,7 @@ string
 </tr>
 <tr>
 <td>
-<code>imagePullSecrets</code></br>
+<code>imagePullSecrets</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#localobjectreference-v1-core">
 []Kubernetes core/v1.LocalObjectReference
@@ -2014,7 +1922,7 @@ string
 </tr>
 <tr>
 <td>
-<code>genesis</code></br>
+<code>genesis</code>
 <em>
 string
 </em>
@@ -2024,7 +1932,7 @@ string
 </tr>
 <tr>
 <td>
-<code>bootstrapMethod</code></br>
+<code>bootstrapMethod</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.BootstrapMethod">
 BootstrapMethod
@@ -2036,7 +1944,7 @@ BootstrapMethod
 </tr>
 <tr>
 <td>
-<code>channelParticipationEnabled</code></br>
+<code>channelParticipationEnabled</code>
 <em>
 bool
 </em>
@@ -2046,7 +1954,7 @@ bool
 </tr>
 <tr>
 <td>
-<code>storage</code></br>
+<code>storage</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.Storage">
 Storage
@@ -2058,7 +1966,7 @@ Storage
 </tr>
 <tr>
 <td>
-<code>service</code></br>
+<code>service</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.OrdererNodeService">
 OrdererNodeService
@@ -2070,7 +1978,7 @@ OrdererNodeService
 </tr>
 <tr>
 <td>
-<code>secret</code></br>
+<code>secret</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.Secret">
 Secret
@@ -2083,7 +1991,7 @@ Secret
 </tr>
 <tr>
 <td>
-<code>istio</code></br>
+<code>istio</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricIstio">
 FabricIstio
@@ -2096,7 +2004,7 @@ FabricIstio
 </tr>
 <tr>
 <td>
-<code>adminIstio</code></br>
+<code>adminIstio</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricIstio">
 FabricIstio
@@ -2109,7 +2017,7 @@ FabricIstio
 </tr>
 <tr>
 <td>
-<code>env</code></br>
+<code>env</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#envvar-v1-core">
 []Kubernetes core/v1.EnvVar
@@ -2121,18 +2029,6 @@ FabricIstio
 </td>
 </tr>
 </table>
-</td>
-</tr>
-<tr>
-<td>
-<code>status</code></br>
-<em>
-<a href="#hlf.kungfusoftware.es/v1alpha1.FabricOrdererNodeStatus">
-FabricOrdererNodeStatus
-</a>
-</em>
-</td>
-<td>
 </td>
 </tr>
 </tbody>
@@ -2152,7 +2048,7 @@ FabricOrdererNodeStatus
 <tbody>
 <tr>
 <td>
-<code>apiVersion</code></br>
+<code>apiVersion</code>
 string</td>
 <td>
 <code>
@@ -2162,14 +2058,14 @@ hlf.kungfusoftware.es/v1alpha1
 </tr>
 <tr>
 <td>
-<code>kind</code></br>
+<code>kind</code>
 string
 </td>
 <td><code>FabricOrderingService</code></td>
 </tr>
 <tr>
 <td>
-<code>metadata</code></br>
+<code>metadata</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#objectmeta-v1-meta">
 Kubernetes meta/v1.ObjectMeta
@@ -2183,7 +2079,7 @@ Refer to the Kubernetes API documentation for the fields of the
 </tr>
 <tr>
 <td>
-<code>spec</code></br>
+<code>spec</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricOrderingServiceSpec">
 FabricOrderingServiceSpec
@@ -2196,7 +2092,7 @@ FabricOrderingServiceSpec
 <table>
 <tr>
 <td>
-<code>image</code></br>
+<code>image</code>
 <em>
 string
 </em>
@@ -2206,7 +2102,7 @@ string
 </tr>
 <tr>
 <td>
-<code>tag</code></br>
+<code>tag</code>
 <em>
 string
 </em>
@@ -2216,7 +2112,7 @@ string
 </tr>
 <tr>
 <td>
-<code>mspID</code></br>
+<code>mspID</code>
 <em>
 string
 </em>
@@ -2226,7 +2122,7 @@ string
 </tr>
 <tr>
 <td>
-<code>enrollment</code></br>
+<code>enrollment</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.OrdererEnrollment">
 OrdererEnrollment
@@ -2238,7 +2134,7 @@ OrdererEnrollment
 </tr>
 <tr>
 <td>
-<code>nodes</code></br>
+<code>nodes</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.OrdererNode">
 []OrdererNode
@@ -2250,7 +2146,7 @@ OrdererEnrollment
 </tr>
 <tr>
 <td>
-<code>service</code></br>
+<code>service</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.OrdererService">
 OrdererService
@@ -2262,7 +2158,7 @@ OrdererService
 </tr>
 <tr>
 <td>
-<code>storage</code></br>
+<code>storage</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.Storage">
 Storage
@@ -2274,7 +2170,7 @@ Storage
 </tr>
 <tr>
 <td>
-<code>systemChannel</code></br>
+<code>systemChannel</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.OrdererSystemChannel">
 OrdererSystemChannel
@@ -2285,18 +2181,6 @@ OrdererSystemChannel
 </td>
 </tr>
 </table>
-</td>
-</tr>
-<tr>
-<td>
-<code>status</code></br>
-<em>
-<a href="#hlf.kungfusoftware.es/v1alpha1.FabricOrderingServiceStatus">
-FabricOrderingServiceStatus
-</a>
-</em>
-</td>
-<td>
 </td>
 </tr>
 </tbody>
@@ -2316,7 +2200,7 @@ FabricOrderingServiceStatus
 <tbody>
 <tr>
 <td>
-<code>apiVersion</code></br>
+<code>apiVersion</code>
 string</td>
 <td>
 <code>
@@ -2326,14 +2210,14 @@ hlf.kungfusoftware.es/v1alpha1
 </tr>
 <tr>
 <td>
-<code>kind</code></br>
+<code>kind</code>
 string
 </td>
 <td><code>FabricPeer</code></td>
 </tr>
 <tr>
 <td>
-<code>metadata</code></br>
+<code>metadata</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#objectmeta-v1-meta">
 Kubernetes meta/v1.ObjectMeta
@@ -2347,7 +2231,7 @@ Refer to the Kubernetes API documentation for the fields of the
 </tr>
 <tr>
 <td>
-<code>spec</code></br>
+<code>spec</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricPeerSpec">
 FabricPeerSpec
@@ -2360,7 +2244,7 @@ FabricPeerSpec
 <table>
 <tr>
 <td>
-<code>updateCertificateTime</code></br>
+<code>updateCertificateTime</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#time-v1-meta">
 Kubernetes meta/v1.Time
@@ -2373,7 +2257,7 @@ Kubernetes meta/v1.Time
 </tr>
 <tr>
 <td>
-<code>affinity</code></br>
+<code>affinity</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#affinity-v1-core">
 Kubernetes core/v1.Affinity
@@ -2386,7 +2270,7 @@ Kubernetes core/v1.Affinity
 </tr>
 <tr>
 <td>
-<code>serviceMonitor</code></br>
+<code>serviceMonitor</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.ServiceMonitor">
 ServiceMonitor
@@ -2399,7 +2283,7 @@ ServiceMonitor
 </tr>
 <tr>
 <td>
-<code>hostAliases</code></br>
+<code>hostAliases</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#hostalias-v1-core">
 []Kubernetes core/v1.HostAlias
@@ -2412,7 +2296,7 @@ ServiceMonitor
 </tr>
 <tr>
 <td>
-<code>nodeSelector</code></br>
+<code>nodeSelector</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#nodeselector-v1-core">
 Kubernetes core/v1.NodeSelector
@@ -2425,7 +2309,7 @@ Kubernetes core/v1.NodeSelector
 </tr>
 <tr>
 <td>
-<code>couchDBexporter</code></br>
+<code>couchDBexporter</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricPeerCouchdbExporter">
 FabricPeerCouchdbExporter
@@ -2438,7 +2322,7 @@ FabricPeerCouchdbExporter
 </tr>
 <tr>
 <td>
-<code>grpcProxy</code></br>
+<code>grpcProxy</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.GRPCProxy">
 GRPCProxy
@@ -2451,7 +2335,7 @@ GRPCProxy
 </tr>
 <tr>
 <td>
-<code>replicas</code></br>
+<code>replicas</code>
 <em>
 int
 </em>
@@ -2461,7 +2345,7 @@ int
 </tr>
 <tr>
 <td>
-<code>dockerSocketPath</code></br>
+<code>dockerSocketPath</code>
 <em>
 string
 </em>
@@ -2471,7 +2355,7 @@ string
 </tr>
 <tr>
 <td>
-<code>image</code></br>
+<code>image</code>
 <em>
 string
 </em>
@@ -2481,7 +2365,7 @@ string
 </tr>
 <tr>
 <td>
-<code>externalBuilders</code></br>
+<code>externalBuilders</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.ExternalBuilder">
 []ExternalBuilder
@@ -2494,7 +2378,7 @@ string
 </tr>
 <tr>
 <td>
-<code>istio</code></br>
+<code>istio</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricIstio">
 FabricIstio
@@ -2507,7 +2391,7 @@ FabricIstio
 </tr>
 <tr>
 <td>
-<code>gossip</code></br>
+<code>gossip</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricPeerSpecGossip">
 FabricPeerSpecGossip
@@ -2519,7 +2403,7 @@ FabricPeerSpecGossip
 </tr>
 <tr>
 <td>
-<code>externalEndpoint</code></br>
+<code>externalEndpoint</code>
 <em>
 string
 </em>
@@ -2529,7 +2413,7 @@ string
 </tr>
 <tr>
 <td>
-<code>tag</code></br>
+<code>tag</code>
 <em>
 string
 </em>
@@ -2539,7 +2423,7 @@ string
 </tr>
 <tr>
 <td>
-<code>imagePullPolicy</code></br>
+<code>imagePullPolicy</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#pullpolicy-v1-core">
 Kubernetes core/v1.PullPolicy
@@ -2551,7 +2435,7 @@ Kubernetes core/v1.PullPolicy
 </tr>
 <tr>
 <td>
-<code>external_chaincode_builder</code></br>
+<code>external_chaincode_builder</code>
 <em>
 bool
 </em>
@@ -2561,7 +2445,7 @@ bool
 </tr>
 <tr>
 <td>
-<code>couchdb</code></br>
+<code>couchdb</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricPeerCouchDB">
 FabricPeerCouchDB
@@ -2573,7 +2457,7 @@ FabricPeerCouchDB
 </tr>
 <tr>
 <td>
-<code>fsServer</code></br>
+<code>fsServer</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricFSServer">
 FabricFSServer
@@ -2586,7 +2470,7 @@ FabricFSServer
 </tr>
 <tr>
 <td>
-<code>imagePullSecrets</code></br>
+<code>imagePullSecrets</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#localobjectreference-v1-core">
 []Kubernetes core/v1.LocalObjectReference
@@ -2599,7 +2483,7 @@ FabricFSServer
 </tr>
 <tr>
 <td>
-<code>mspID</code></br>
+<code>mspID</code>
 <em>
 string
 </em>
@@ -2609,7 +2493,7 @@ string
 </tr>
 <tr>
 <td>
-<code>secret</code></br>
+<code>secret</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.Secret">
 Secret
@@ -2621,7 +2505,7 @@ Secret
 </tr>
 <tr>
 <td>
-<code>service</code></br>
+<code>service</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.PeerService">
 PeerService
@@ -2633,7 +2517,7 @@ PeerService
 </tr>
 <tr>
 <td>
-<code>stateDb</code></br>
+<code>stateDb</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.StateDB">
 StateDB
@@ -2645,7 +2529,7 @@ StateDB
 </tr>
 <tr>
 <td>
-<code>storage</code></br>
+<code>storage</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricPeerStorage">
 FabricPeerStorage
@@ -2657,7 +2541,7 @@ FabricPeerStorage
 </tr>
 <tr>
 <td>
-<code>discovery</code></br>
+<code>discovery</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricPeerDiscovery">
 FabricPeerDiscovery
@@ -2669,7 +2553,7 @@ FabricPeerDiscovery
 </tr>
 <tr>
 <td>
-<code>logging</code></br>
+<code>logging</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricPeerLogging">
 FabricPeerLogging
@@ -2681,7 +2565,7 @@ FabricPeerLogging
 </tr>
 <tr>
 <td>
-<code>resources</code></br>
+<code>resources</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricPeerResources">
 FabricPeerResources
@@ -2693,7 +2577,7 @@ FabricPeerResources
 </tr>
 <tr>
 <td>
-<code>hosts</code></br>
+<code>hosts</code>
 <em>
 []string
 </em>
@@ -2703,7 +2587,7 @@ FabricPeerResources
 </tr>
 <tr>
 <td>
-<code>tolerations</code></br>
+<code>tolerations</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#toleration-v1-core">
 []Kubernetes core/v1.Toleration
@@ -2716,7 +2600,7 @@ FabricPeerResources
 </tr>
 <tr>
 <td>
-<code>env</code></br>
+<code>env</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#envvar-v1-core">
 []Kubernetes core/v1.EnvVar
@@ -2728,18 +2612,6 @@ FabricPeerResources
 </td>
 </tr>
 </table>
-</td>
-</tr>
-<tr>
-<td>
-<code>status</code></br>
-<em>
-<a href="#hlf.kungfusoftware.es/v1alpha1.FabricPeerStatus">
-FabricPeerStatus
-</a>
-</em>
-</td>
-<td>
 </td>
 </tr>
 </tbody>
@@ -2762,7 +2634,7 @@ FabricPeerStatus
 <tbody>
 <tr>
 <td>
-<code>V2_0</code></br>
+<code>V2_0</code>
 <em>
 bool
 </em>
@@ -2773,7 +2645,7 @@ bool
 </tbody>
 </table>
 <h3 id="hlf.kungfusoftware.es/v1alpha1.BootstrapMethod">BootstrapMethod
-(<code>string</code> alias)</p></h3>
+(<code>string</code> alias)</h3>
 <p>
 (<em>Appears on:</em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricOrdererNodeSpec">FabricOrdererNodeSpec</a>)
@@ -2794,7 +2666,7 @@ bool
 <tbody>
 <tr>
 <td>
-<code>host</code></br>
+<code>host</code>
 <em>
 string
 </em>
@@ -2804,7 +2676,7 @@ string
 </tr>
 <tr>
 <td>
-<code>cert</code></br>
+<code>cert</code>
 <em>
 string
 </em>
@@ -2814,7 +2686,7 @@ string
 </tr>
 <tr>
 <td>
-<code>user</code></br>
+<code>user</code>
 <em>
 string
 </em>
@@ -2824,7 +2696,7 @@ string
 </tr>
 <tr>
 <td>
-<code>password</code></br>
+<code>password</code>
 <em>
 string
 </em>
@@ -2848,7 +2720,7 @@ string
 <tbody>
 <tr>
 <td>
-<code>caName</code></br>
+<code>caName</code>
 <em>
 string
 </em>
@@ -2858,12 +2730,13 @@ string
 </tr>
 <tr>
 <td>
-<code>caNamespace</code></br>
+<code>caNamespace</code>
 <em>
 string
 </em>
 </td>
 <td>
+<p>FabricCA Namespace of the organization</p>
 </td>
 </tr>
 </tbody>
@@ -2887,7 +2760,7 @@ string
 <tbody>
 <tr>
 <td>
-<code>cacert</code></br>
+<code>cacert</code>
 <em>
 string
 </em>
@@ -2915,7 +2788,7 @@ string
 <tbody>
 <tr>
 <td>
-<code>V2_0</code></br>
+<code>V2_0</code>
 <em>
 bool
 </em>
@@ -2943,7 +2816,7 @@ bool
 <tbody>
 <tr>
 <td>
-<code>batchTimeout</code></br>
+<code>batchTimeout</code>
 <em>
 string
 </em>
@@ -2953,7 +2826,7 @@ string
 </tr>
 <tr>
 <td>
-<code>maxMessageCount</code></br>
+<code>maxMessageCount</code>
 <em>
 int
 </em>
@@ -2963,7 +2836,7 @@ int
 </tr>
 <tr>
 <td>
-<code>absoluteMaxBytes</code></br>
+<code>absoluteMaxBytes</code>
 <em>
 int
 </em>
@@ -2973,7 +2846,7 @@ int
 </tr>
 <tr>
 <td>
-<code>preferredMaxBytes</code></br>
+<code>preferredMaxBytes</code>
 <em>
 int
 </em>
@@ -2983,7 +2856,7 @@ int
 </tr>
 <tr>
 <td>
-<code>ordererCapabilities</code></br>
+<code>ordererCapabilities</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.OrdererCapabilities">
 OrdererCapabilities
@@ -2995,7 +2868,7 @@ OrdererCapabilities
 </tr>
 <tr>
 <td>
-<code>applicationCapabilities</code></br>
+<code>applicationCapabilities</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.ApplicationCapabilities">
 ApplicationCapabilities
@@ -3007,7 +2880,7 @@ ApplicationCapabilities
 </tr>
 <tr>
 <td>
-<code>channelCapabilities</code></br>
+<code>channelCapabilities</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.ChannelCapabilities">
 ChannelCapabilities
@@ -3019,7 +2892,7 @@ ChannelCapabilities
 </tr>
 <tr>
 <td>
-<code>snapshotIntervalSize</code></br>
+<code>snapshotIntervalSize</code>
 <em>
 int
 </em>
@@ -3029,7 +2902,7 @@ int
 </tr>
 <tr>
 <td>
-<code>tickInterval</code></br>
+<code>tickInterval</code>
 <em>
 string
 </em>
@@ -3039,7 +2912,7 @@ string
 </tr>
 <tr>
 <td>
-<code>electionTick</code></br>
+<code>electionTick</code>
 <em>
 int
 </em>
@@ -3049,7 +2922,7 @@ int
 </tr>
 <tr>
 <td>
-<code>heartbeatTick</code></br>
+<code>heartbeatTick</code>
 <em>
 int
 </em>
@@ -3059,7 +2932,7 @@ int
 </tr>
 <tr>
 <td>
-<code>maxInflightBlocks</code></br>
+<code>maxInflightBlocks</code>
 <em>
 int
 </em>
@@ -3088,7 +2961,7 @@ int
 <tbody>
 <tr>
 <td>
-<code>cahost</code></br>
+<code>cahost</code>
 <em>
 string
 </em>
@@ -3098,7 +2971,7 @@ string
 </tr>
 <tr>
 <td>
-<code>caname</code></br>
+<code>caname</code>
 <em>
 string
 </em>
@@ -3108,7 +2981,7 @@ string
 </tr>
 <tr>
 <td>
-<code>caport</code></br>
+<code>caport</code>
 <em>
 int
 </em>
@@ -3118,7 +2991,7 @@ int
 </tr>
 <tr>
 <td>
-<code>catls</code></br>
+<code>catls</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.Catls">
 Catls
@@ -3130,7 +3003,7 @@ Catls
 </tr>
 <tr>
 <td>
-<code>enrollid</code></br>
+<code>enrollid</code>
 <em>
 string
 </em>
@@ -3140,7 +3013,7 @@ string
 </tr>
 <tr>
 <td>
-<code>enrollsecret</code></br>
+<code>enrollsecret</code>
 <em>
 string
 </em>
@@ -3164,7 +3037,7 @@ string
 <tbody>
 <tr>
 <td>
-<code>type</code></br>
+<code>type</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.ConditionType">
 ConditionType
@@ -3176,19 +3049,7 @@ ConditionType
 </tr>
 <tr>
 <td>
-<code>status</code></br>
-<em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#conditionstatus-v1-core">
-Kubernetes core/v1.ConditionStatus
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>reason</code></br>
+<code>reason</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.ConditionReason">
 ConditionReason
@@ -3200,7 +3061,7 @@ ConditionReason
 </tr>
 <tr>
 <td>
-<code>message</code></br>
+<code>message</code>
 <em>
 string
 </em>
@@ -3210,7 +3071,7 @@ string
 </tr>
 <tr>
 <td>
-<code>lastTransitionTime</code></br>
+<code>lastTransitionTime</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#time-v1-meta">
 Kubernetes meta/v1.Time
@@ -3223,7 +3084,7 @@ Kubernetes meta/v1.Time
 </tbody>
 </table>
 <h3 id="hlf.kungfusoftware.es/v1alpha1.ConditionReason">ConditionReason
-(<code>string</code> alias)</p></h3>
+(<code>string</code> alias)</h3>
 <p>
 (<em>Appears on:</em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.Condition">Condition</a>)
@@ -3235,7 +3096,7 @@ concise output, such as one-line kubectl get output, and in summarizing
 occurrences of causes.</p>
 </p>
 <h3 id="hlf.kungfusoftware.es/v1alpha1.ConditionType">ConditionType
-(<code>string</code> alias)</p></h3>
+(<code>string</code> alias)</h3>
 <p>
 (<em>Appears on:</em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.Condition">Condition</a>)
@@ -3265,7 +3126,7 @@ case is probably the norm, so the condition should be called &ldquo;Invalid&rdqu
 <tbody>
 <tr>
 <td>
-<code>enabled</code></br>
+<code>enabled</code>
 <em>
 bool
 </em>
@@ -3275,7 +3136,7 @@ bool
 </tr>
 <tr>
 <td>
-<code>origins</code></br>
+<code>origins</code>
 <em>
 []string
 </em>
@@ -3304,7 +3165,7 @@ bool
 <tbody>
 <tr>
 <td>
-<code>hosts</code></br>
+<code>hosts</code>
 <em>
 []string
 </em>
@@ -3315,7 +3176,7 @@ bool
 </tr>
 <tr>
 <td>
-<code>cn</code></br>
+<code>cn</code>
 <em>
 string
 </em>
@@ -3327,7 +3188,7 @@ string
 </tbody>
 </table>
 <h3 id="hlf.kungfusoftware.es/v1alpha1.DeploymentStatus">DeploymentStatus
-(<code>string</code> alias)</p></h3>
+(<code>string</code> alias)</h3>
 <p>
 (<em>Appears on:</em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricCAStatus">FabricCAStatus</a>, 
@@ -3363,7 +3224,7 @@ string
 <tbody>
 <tr>
 <td>
-<code>component</code></br>
+<code>component</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.Component">
 Component
@@ -3375,7 +3236,7 @@ Component
 </tr>
 <tr>
 <td>
-<code>tls</code></br>
+<code>tls</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.TLS">
 TLS
@@ -3405,7 +3266,7 @@ TLS
 <tbody>
 <tr>
 <td>
-<code>name</code></br>
+<code>name</code>
 <em>
 string
 </em>
@@ -3415,7 +3276,7 @@ string
 </tr>
 <tr>
 <td>
-<code>path</code></br>
+<code>path</code>
 <em>
 string
 </em>
@@ -3425,7 +3286,7 @@ string
 </tr>
 <tr>
 <td>
-<code>propagateEnvironment</code></br>
+<code>propagateEnvironment</code>
 <em>
 []string
 </em>
@@ -3454,7 +3315,7 @@ string
 <tbody>
 <tr>
 <td>
-<code>name</code></br>
+<code>name</code>
 <em>
 string
 </em>
@@ -3464,7 +3325,7 @@ string
 </tr>
 <tr>
 <td>
-<code>departments</code></br>
+<code>departments</code>
 <em>
 []string
 </em>
@@ -3492,7 +3353,7 @@ string
 <tbody>
 <tr>
 <td>
-<code>default</code></br>
+<code>default</code>
 <em>
 string
 </em>
@@ -3502,7 +3363,7 @@ string
 </tr>
 <tr>
 <td>
-<code>sw</code></br>
+<code>sw</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricCABCCSPSW">
 FabricCABCCSPSW
@@ -3532,7 +3393,7 @@ FabricCABCCSPSW
 <tbody>
 <tr>
 <td>
-<code>hash</code></br>
+<code>hash</code>
 <em>
 string
 </em>
@@ -3542,7 +3403,7 @@ string
 </tr>
 <tr>
 <td>
-<code>security</code></br>
+<code>security</code>
 <em>
 string
 </em>
@@ -3570,7 +3431,7 @@ string
 <tbody>
 <tr>
 <td>
-<code>identities</code></br>
+<code>identities</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricCACFGIdentities">
 FabricCACFGIdentities
@@ -3582,7 +3443,7 @@ FabricCACFGIdentities
 </tr>
 <tr>
 <td>
-<code>affiliations</code></br>
+<code>affiliations</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricCACFGAffilitions">
 FabricCACFGAffilitions
@@ -3612,7 +3473,7 @@ FabricCACFGAffilitions
 <tbody>
 <tr>
 <td>
-<code>allowRemove</code></br>
+<code>allowRemove</code>
 <em>
 bool
 </em>
@@ -3640,7 +3501,7 @@ bool
 <tbody>
 <tr>
 <td>
-<code>allowRemove</code></br>
+<code>allowRemove</code>
 <em>
 bool
 </em>
@@ -3668,7 +3529,7 @@ bool
 <tbody>
 <tr>
 <td>
-<code>expiry</code></br>
+<code>expiry</code>
 <em>
 string
 </em>
@@ -3696,7 +3557,7 @@ string
 <tbody>
 <tr>
 <td>
-<code>cn</code></br>
+<code>cn</code>
 <em>
 string
 </em>
@@ -3706,7 +3567,7 @@ string
 </tr>
 <tr>
 <td>
-<code>hosts</code></br>
+<code>hosts</code>
 <em>
 []string
 </em>
@@ -3716,7 +3577,7 @@ string
 </tr>
 <tr>
 <td>
-<code>names</code></br>
+<code>names</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricCANames">
 []FabricCANames
@@ -3728,7 +3589,7 @@ string
 </tr>
 <tr>
 <td>
-<code>ca</code></br>
+<code>ca</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricCACSRCA">
 FabricCACSRCA
@@ -3758,7 +3619,7 @@ FabricCACSRCA
 <tbody>
 <tr>
 <td>
-<code>expiry</code></br>
+<code>expiry</code>
 <em>
 string
 </em>
@@ -3768,7 +3629,7 @@ string
 </tr>
 <tr>
 <td>
-<code>pathLength</code></br>
+<code>pathLength</code>
 <em>
 int
 </em>
@@ -3796,7 +3657,7 @@ int
 <tbody>
 <tr>
 <td>
-<code>type</code></br>
+<code>type</code>
 <em>
 string
 </em>
@@ -3807,7 +3668,7 @@ string
 </tr>
 <tr>
 <td>
-<code>cert_file</code></br>
+<code>cert_file</code>
 <em>
 []string
 </em>
@@ -3835,7 +3696,7 @@ string
 <tbody>
 <tr>
 <td>
-<code>key</code></br>
+<code>key</code>
 <em>
 string
 </em>
@@ -3845,7 +3706,7 @@ string
 </tr>
 <tr>
 <td>
-<code>cert</code></br>
+<code>cert</code>
 <em>
 string
 </em>
@@ -3855,7 +3716,7 @@ string
 </tr>
 <tr>
 <td>
-<code>chain</code></br>
+<code>chain</code>
 <em>
 string
 </em>
@@ -3883,7 +3744,7 @@ string
 <tbody>
 <tr>
 <td>
-<code>type</code></br>
+<code>type</code>
 <em>
 string
 </em>
@@ -3893,7 +3754,7 @@ string
 </tr>
 <tr>
 <td>
-<code>datasource</code></br>
+<code>datasource</code>
 <em>
 string
 </em>
@@ -3921,7 +3782,7 @@ string
 <tbody>
 <tr>
 <td>
-<code>name</code></br>
+<code>name</code>
 <em>
 string
 </em>
@@ -3931,7 +3792,7 @@ string
 </tr>
 <tr>
 <td>
-<code>pass</code></br>
+<code>pass</code>
 <em>
 string
 </em>
@@ -3941,7 +3802,7 @@ string
 </tr>
 <tr>
 <td>
-<code>type</code></br>
+<code>type</code>
 <em>
 string
 </em>
@@ -3951,7 +3812,7 @@ string
 </tr>
 <tr>
 <td>
-<code>affiliation</code></br>
+<code>affiliation</code>
 <em>
 string
 </em>
@@ -3961,7 +3822,7 @@ string
 </tr>
 <tr>
 <td>
-<code>attrs</code></br>
+<code>attrs</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricCAIdentityAttrs">
 FabricCAIdentityAttrs
@@ -3991,7 +3852,7 @@ FabricCAIdentityAttrs
 <tbody>
 <tr>
 <td>
-<code>hf.Registrar.Roles</code></br>
+<code>hf.Registrar.Roles</code>
 <em>
 string
 </em>
@@ -4001,7 +3862,7 @@ string
 </tr>
 <tr>
 <td>
-<code>hf.Registrar.DelegateRoles</code></br>
+<code>hf.Registrar.DelegateRoles</code>
 <em>
 string
 </em>
@@ -4011,7 +3872,7 @@ string
 </tr>
 <tr>
 <td>
-<code>hf.Registrar.Attributes</code></br>
+<code>hf.Registrar.Attributes</code>
 <em>
 string
 </em>
@@ -4021,7 +3882,7 @@ string
 </tr>
 <tr>
 <td>
-<code>hf.Revoker</code></br>
+<code>hf.Revoker</code>
 <em>
 bool
 </em>
@@ -4031,7 +3892,7 @@ bool
 </tr>
 <tr>
 <td>
-<code>hf.IntermediateCA</code></br>
+<code>hf.IntermediateCA</code>
 <em>
 bool
 </em>
@@ -4041,7 +3902,7 @@ bool
 </tr>
 <tr>
 <td>
-<code>hf.GenCRL</code></br>
+<code>hf.GenCRL</code>
 <em>
 bool
 </em>
@@ -4051,7 +3912,7 @@ bool
 </tr>
 <tr>
 <td>
-<code>hf.AffiliationMgr</code></br>
+<code>hf.AffiliationMgr</code>
 <em>
 bool
 </em>
@@ -4079,7 +3940,7 @@ bool
 <tbody>
 <tr>
 <td>
-<code>parentServer</code></br>
+<code>parentServer</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricCAIntermediateParentServer">
 FabricCAIntermediateParentServer
@@ -4105,7 +3966,7 @@ FabricCAIntermediateParentServer
 <tbody>
 <tr>
 <td>
-<code>hosts</code></br>
+<code>hosts</code>
 <em>
 string
 </em>
@@ -4115,7 +3976,7 @@ string
 </tr>
 <tr>
 <td>
-<code>profile</code></br>
+<code>profile</code>
 <em>
 string
 </em>
@@ -4125,7 +3986,7 @@ string
 </tr>
 <tr>
 <td>
-<code>label</code></br>
+<code>label</code>
 <em>
 string
 </em>
@@ -4153,7 +4014,7 @@ string
 <tbody>
 <tr>
 <td>
-<code>url</code></br>
+<code>url</code>
 <em>
 string
 </em>
@@ -4163,12 +4024,13 @@ string
 </tr>
 <tr>
 <td>
-<code>caName</code></br>
+<code>caName</code>
 <em>
 string
 </em>
 </td>
 <td>
+<p>FabricCA Name of the organization</p>
 </td>
 </tr>
 </tbody>
@@ -4187,7 +4049,7 @@ string
 <tbody>
 <tr>
 <td>
-<code>certFiles</code></br>
+<code>certFiles</code>
 <em>
 []string
 </em>
@@ -4197,7 +4059,7 @@ string
 </tr>
 <tr>
 <td>
-<code>client</code></br>
+<code>client</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricCAIntermediateTLSClient">
 FabricCAIntermediateTLSClient
@@ -4227,7 +4089,7 @@ FabricCAIntermediateTLSClient
 <tbody>
 <tr>
 <td>
-<code>certFile</code></br>
+<code>certFile</code>
 <em>
 string
 </em>
@@ -4237,7 +4099,7 @@ string
 </tr>
 <tr>
 <td>
-<code>keyFile</code></br>
+<code>keyFile</code>
 <em>
 string
 </em>
@@ -4265,7 +4127,7 @@ string
 <tbody>
 <tr>
 <td>
-<code>name</code></br>
+<code>name</code>
 <em>
 string
 </em>
@@ -4275,7 +4137,7 @@ string
 </tr>
 <tr>
 <td>
-<code>cfg</code></br>
+<code>cfg</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricCACFG">
 FabricCACFG
@@ -4287,7 +4149,7 @@ FabricCACFG
 </tr>
 <tr>
 <td>
-<code>subject</code></br>
+<code>subject</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricCASubject">
 FabricCASubject
@@ -4299,7 +4161,7 @@ FabricCASubject
 </tr>
 <tr>
 <td>
-<code>csr</code></br>
+<code>csr</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricCACSR">
 FabricCACSR
@@ -4311,7 +4173,7 @@ FabricCACSR
 </tr>
 <tr>
 <td>
-<code>signing</code></br>
+<code>signing</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricCASigning">
 FabricCASigning
@@ -4324,7 +4186,7 @@ FabricCASigning
 </tr>
 <tr>
 <td>
-<code>crl</code></br>
+<code>crl</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricCACRL">
 FabricCACRL
@@ -4336,7 +4198,7 @@ FabricCACRL
 </tr>
 <tr>
 <td>
-<code>registry</code></br>
+<code>registry</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricCARegistry">
 FabricCARegistry
@@ -4348,7 +4210,7 @@ FabricCARegistry
 </tr>
 <tr>
 <td>
-<code>intermediate</code></br>
+<code>intermediate</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricCAIntermediate">
 FabricCAIntermediate
@@ -4360,7 +4222,7 @@ FabricCAIntermediate
 </tr>
 <tr>
 <td>
-<code>bccsp</code></br>
+<code>bccsp</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricCABCCSP">
 FabricCABCCSP
@@ -4372,7 +4234,7 @@ FabricCABCCSP
 </tr>
 <tr>
 <td>
-<code>affiliations</code></br>
+<code>affiliations</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricCAAffiliation">
 []FabricCAAffiliation
@@ -4385,7 +4247,7 @@ FabricCABCCSP
 </tr>
 <tr>
 <td>
-<code>ca</code></br>
+<code>ca</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricCACrypto">
 FabricCACrypto
@@ -4398,7 +4260,7 @@ FabricCACrypto
 </tr>
 <tr>
 <td>
-<code>tlsCa</code></br>
+<code>tlsCa</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricTLSCACrypto">
 FabricTLSCACrypto
@@ -4429,7 +4291,7 @@ FabricTLSCACrypto
 <tbody>
 <tr>
 <td>
-<code>provider</code></br>
+<code>provider</code>
 <em>
 string
 </em>
@@ -4439,7 +4301,7 @@ string
 </tr>
 <tr>
 <td>
-<code>statsd</code></br>
+<code>statsd</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricCAMetricsStatsd">
 FabricCAMetricsStatsd
@@ -4470,7 +4332,7 @@ FabricCAMetricsStatsd
 <tbody>
 <tr>
 <td>
-<code>network</code></br>
+<code>network</code>
 <em>
 string
 </em>
@@ -4480,18 +4342,7 @@ string
 </tr>
 <tr>
 <td>
-<code>address</code></br>
-<em>
-string
-</em>
-</td>
-<td>
-<em>(Optional)</em>
-</td>
-</tr>
-<tr>
-<td>
-<code>writeInterval</code></br>
+<code>address</code>
 <em>
 string
 </em>
@@ -4502,7 +4353,18 @@ string
 </tr>
 <tr>
 <td>
-<code>prefix</code></br>
+<code>writeInterval</code>
+<em>
+string
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+</td>
+</tr>
+<tr>
+<td>
+<code>prefix</code>
 <em>
 string
 </em>
@@ -4531,7 +4393,7 @@ string
 <tbody>
 <tr>
 <td>
-<code>C</code></br>
+<code>C</code>
 <em>
 string
 </em>
@@ -4541,7 +4403,7 @@ string
 </tr>
 <tr>
 <td>
-<code>ST</code></br>
+<code>ST</code>
 <em>
 string
 </em>
@@ -4551,7 +4413,7 @@ string
 </tr>
 <tr>
 <td>
-<code>O</code></br>
+<code>O</code>
 <em>
 string
 </em>
@@ -4561,7 +4423,7 @@ string
 </tr>
 <tr>
 <td>
-<code>L</code></br>
+<code>L</code>
 <em>
 string
 </em>
@@ -4571,7 +4433,7 @@ string
 </tr>
 <tr>
 <td>
-<code>OU</code></br>
+<code>OU</code>
 <em>
 string
 </em>
@@ -4599,7 +4461,7 @@ string
 <tbody>
 <tr>
 <td>
-<code>max_enrollments</code></br>
+<code>max_enrollments</code>
 <em>
 int
 </em>
@@ -4609,7 +4471,7 @@ int
 </tr>
 <tr>
 <td>
-<code>identities</code></br>
+<code>identities</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricCAIdentity">
 []FabricCAIdentity
@@ -4639,7 +4501,7 @@ int
 <tbody>
 <tr>
 <td>
-<code>default</code></br>
+<code>default</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricCASigningDefault">
 FabricCASigningDefault
@@ -4651,7 +4513,7 @@ FabricCASigningDefault
 </tr>
 <tr>
 <td>
-<code>profiles</code></br>
+<code>profiles</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricCASigningProfiles">
 FabricCASigningProfiles
@@ -4681,7 +4543,7 @@ FabricCASigningProfiles
 <tbody>
 <tr>
 <td>
-<code>expiry</code></br>
+<code>expiry</code>
 <em>
 string
 </em>
@@ -4691,7 +4553,7 @@ string
 </tr>
 <tr>
 <td>
-<code>usage</code></br>
+<code>usage</code>
 <em>
 []string
 </em>
@@ -4719,7 +4581,7 @@ string
 <tbody>
 <tr>
 <td>
-<code>ca</code></br>
+<code>ca</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricCASigningSignProfile">
 FabricCASigningSignProfile
@@ -4731,7 +4593,7 @@ FabricCASigningSignProfile
 </tr>
 <tr>
 <td>
-<code>tls</code></br>
+<code>tls</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricCASigningTLSProfile">
 FabricCASigningTLSProfile
@@ -4761,7 +4623,7 @@ FabricCASigningTLSProfile
 <tbody>
 <tr>
 <td>
-<code>usage</code></br>
+<code>usage</code>
 <em>
 []string
 </em>
@@ -4771,7 +4633,7 @@ FabricCASigningTLSProfile
 </tr>
 <tr>
 <td>
-<code>expiry</code></br>
+<code>expiry</code>
 <em>
 string
 </em>
@@ -4781,7 +4643,7 @@ string
 </tr>
 <tr>
 <td>
-<code>caconstraint</code></br>
+<code>caconstraint</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricCASigningSignProfileConstraint">
 FabricCASigningSignProfileConstraint
@@ -4811,7 +4673,7 @@ FabricCASigningSignProfileConstraint
 <tbody>
 <tr>
 <td>
-<code>isCA</code></br>
+<code>isCA</code>
 <em>
 bool
 </em>
@@ -4821,7 +4683,7 @@ bool
 </tr>
 <tr>
 <td>
-<code>maxPathLen</code></br>
+<code>maxPathLen</code>
 <em>
 int
 </em>
@@ -4849,7 +4711,7 @@ int
 <tbody>
 <tr>
 <td>
-<code>usage</code></br>
+<code>usage</code>
 <em>
 []string
 </em>
@@ -4859,7 +4721,7 @@ int
 </tr>
 <tr>
 <td>
-<code>expiry</code></br>
+<code>expiry</code>
 <em>
 string
 </em>
@@ -4888,7 +4750,7 @@ string
 <tbody>
 <tr>
 <td>
-<code>affinity</code></br>
+<code>affinity</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#affinity-v1-core">
 Kubernetes core/v1.Affinity
@@ -4901,7 +4763,7 @@ Kubernetes core/v1.Affinity
 </tr>
 <tr>
 <td>
-<code>tolerations</code></br>
+<code>tolerations</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#toleration-v1-core">
 []Kubernetes core/v1.Toleration
@@ -4914,7 +4776,7 @@ Kubernetes core/v1.Affinity
 </tr>
 <tr>
 <td>
-<code>imagePullSecrets</code></br>
+<code>imagePullSecrets</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#localobjectreference-v1-core">
 []Kubernetes core/v1.LocalObjectReference
@@ -4927,7 +4789,7 @@ Kubernetes core/v1.Affinity
 </tr>
 <tr>
 <td>
-<code>nodeSelector</code></br>
+<code>nodeSelector</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#nodeselector-v1-core">
 Kubernetes core/v1.NodeSelector
@@ -4940,7 +4802,7 @@ Kubernetes core/v1.NodeSelector
 </tr>
 <tr>
 <td>
-<code>serviceMonitor</code></br>
+<code>serviceMonitor</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.ServiceMonitor">
 ServiceMonitor
@@ -4953,7 +4815,7 @@ ServiceMonitor
 </tr>
 <tr>
 <td>
-<code>istio</code></br>
+<code>istio</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricIstio">
 FabricIstio
@@ -4966,7 +4828,7 @@ FabricIstio
 </tr>
 <tr>
 <td>
-<code>db</code></br>
+<code>db</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricCADatabase">
 FabricCADatabase
@@ -4978,7 +4840,7 @@ FabricCADatabase
 </tr>
 <tr>
 <td>
-<code>hosts</code></br>
+<code>hosts</code>
 <em>
 []string
 </em>
@@ -4989,7 +4851,7 @@ FabricCADatabase
 </tr>
 <tr>
 <td>
-<code>service</code></br>
+<code>service</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricCASpecService">
 FabricCASpecService
@@ -5001,7 +4863,7 @@ FabricCASpecService
 </tr>
 <tr>
 <td>
-<code>image</code></br>
+<code>image</code>
 <em>
 string
 </em>
@@ -5011,7 +4873,7 @@ string
 </tr>
 <tr>
 <td>
-<code>version</code></br>
+<code>version</code>
 <em>
 string
 </em>
@@ -5021,7 +4883,7 @@ string
 </tr>
 <tr>
 <td>
-<code>debug</code></br>
+<code>debug</code>
 <em>
 bool
 </em>
@@ -5031,7 +4893,7 @@ bool
 </tr>
 <tr>
 <td>
-<code>clrSizeLimit</code></br>
+<code>clrSizeLimit</code>
 <em>
 int
 </em>
@@ -5041,7 +4903,7 @@ int
 </tr>
 <tr>
 <td>
-<code>rootCA</code></br>
+<code>rootCA</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricCATLSConf">
 FabricCATLSConf
@@ -5053,7 +4915,7 @@ FabricCATLSConf
 </tr>
 <tr>
 <td>
-<code>ca</code></br>
+<code>ca</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricCAItemConf">
 FabricCAItemConf
@@ -5065,7 +4927,7 @@ FabricCAItemConf
 </tr>
 <tr>
 <td>
-<code>tlsCA</code></br>
+<code>tlsCA</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricCAItemConf">
 FabricCAItemConf
@@ -5077,7 +4939,7 @@ FabricCAItemConf
 </tr>
 <tr>
 <td>
-<code>cors</code></br>
+<code>cors</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.Cors">
 Cors
@@ -5089,7 +4951,7 @@ Cors
 </tr>
 <tr>
 <td>
-<code>resources</code></br>
+<code>resources</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#resourcerequirements-v1-core">
 Kubernetes core/v1.ResourceRequirements
@@ -5101,7 +4963,7 @@ Kubernetes core/v1.ResourceRequirements
 </tr>
 <tr>
 <td>
-<code>storage</code></br>
+<code>storage</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.Storage">
 Storage
@@ -5113,7 +4975,7 @@ Storage
 </tr>
 <tr>
 <td>
-<code>metrics</code></br>
+<code>metrics</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricCAMetrics">
 FabricCAMetrics
@@ -5125,7 +4987,7 @@ FabricCAMetrics
 </tr>
 <tr>
 <td>
-<code>env</code></br>
+<code>env</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#envvar-v1-core">
 []Kubernetes core/v1.EnvVar
@@ -5156,7 +5018,7 @@ FabricCAMetrics
 <tbody>
 <tr>
 <td>
-<code>type</code></br>
+<code>type</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#servicetype-v1-core">
 Kubernetes core/v1.ServiceType
@@ -5187,7 +5049,7 @@ Kubernetes core/v1.ServiceType
 <tbody>
 <tr>
 <td>
-<code>conditions</code></br>
+<code>conditions</code>
 <em>
 github.com/kfsoftware/hlf-operator/pkg/status.Conditions
 </em>
@@ -5197,7 +5059,7 @@ github.com/kfsoftware/hlf-operator/pkg/status.Conditions
 </tr>
 <tr>
 <td>
-<code>message</code></br>
+<code>message</code>
 <em>
 string
 </em>
@@ -5207,20 +5069,7 @@ string
 </tr>
 <tr>
 <td>
-<code>status</code></br>
-<em>
-<a href="#hlf.kungfusoftware.es/v1alpha1.DeploymentStatus">
-DeploymentStatus
-</a>
-</em>
-</td>
-<td>
-<p>Status of the FabricCA</p>
-</td>
-</tr>
-<tr>
-<td>
-<code>nodePort</code></br>
+<code>nodePort</code>
 <em>
 int
 </em>
@@ -5231,7 +5080,7 @@ int
 </tr>
 <tr>
 <td>
-<code>tls_cert</code></br>
+<code>tls_cert</code>
 <em>
 string
 </em>
@@ -5242,7 +5091,7 @@ string
 </tr>
 <tr>
 <td>
-<code>ca_cert</code></br>
+<code>ca_cert</code>
 <em>
 string
 </em>
@@ -5253,7 +5102,7 @@ string
 </tr>
 <tr>
 <td>
-<code>tlsca_cert</code></br>
+<code>tlsca_cert</code>
 <em>
 string
 </em>
@@ -5283,7 +5132,7 @@ string
 <tbody>
 <tr>
 <td>
-<code>cn</code></br>
+<code>cn</code>
 <em>
 string
 </em>
@@ -5293,7 +5142,7 @@ string
 </tr>
 <tr>
 <td>
-<code>C</code></br>
+<code>C</code>
 <em>
 string
 </em>
@@ -5303,7 +5152,7 @@ string
 </tr>
 <tr>
 <td>
-<code>ST</code></br>
+<code>ST</code>
 <em>
 string
 </em>
@@ -5313,7 +5162,7 @@ string
 </tr>
 <tr>
 <td>
-<code>O</code></br>
+<code>O</code>
 <em>
 string
 </em>
@@ -5323,7 +5172,7 @@ string
 </tr>
 <tr>
 <td>
-<code>L</code></br>
+<code>L</code>
 <em>
 string
 </em>
@@ -5333,7 +5182,7 @@ string
 </tr>
 <tr>
 <td>
-<code>OU</code></br>
+<code>OU</code>
 <em>
 string
 </em>
@@ -5361,7 +5210,7 @@ string
 <tbody>
 <tr>
 <td>
-<code>subject</code></br>
+<code>subject</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricCASubject">
 FabricCASubject
@@ -5392,7 +5241,7 @@ FabricCASubject
 <tbody>
 <tr>
 <td>
-<code>image</code></br>
+<code>image</code>
 <em>
 string
 </em>
@@ -5402,7 +5251,7 @@ string
 </tr>
 <tr>
 <td>
-<code>imagePullPolicy</code></br>
+<code>imagePullPolicy</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#pullpolicy-v1-core">
 Kubernetes core/v1.PullPolicy
@@ -5414,7 +5263,7 @@ Kubernetes core/v1.PullPolicy
 </tr>
 <tr>
 <td>
-<code>packageId</code></br>
+<code>packageId</code>
 <em>
 string
 </em>
@@ -5424,7 +5273,7 @@ string
 </tr>
 <tr>
 <td>
-<code>imagePullSecrets</code></br>
+<code>imagePullSecrets</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#localobjectreference-v1-core">
 []Kubernetes core/v1.LocalObjectReference
@@ -5437,7 +5286,7 @@ string
 </tr>
 <tr>
 <td>
-<code>affinity</code></br>
+<code>affinity</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#affinity-v1-core">
 Kubernetes core/v1.Affinity
@@ -5450,7 +5299,7 @@ Kubernetes core/v1.Affinity
 </tr>
 <tr>
 <td>
-<code>tolerations</code></br>
+<code>tolerations</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#toleration-v1-core">
 []Kubernetes core/v1.Toleration
@@ -5463,7 +5312,7 @@ Kubernetes core/v1.Affinity
 </tr>
 <tr>
 <td>
-<code>resources</code></br>
+<code>resources</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#resourcerequirements-v1-core">
 Kubernetes core/v1.ResourceRequirements
@@ -5476,7 +5325,7 @@ Kubernetes core/v1.ResourceRequirements
 </tr>
 <tr>
 <td>
-<code>credentials</code></br>
+<code>credentials</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.TLS">
 TLS
@@ -5489,7 +5338,7 @@ TLS
 </tr>
 <tr>
 <td>
-<code>replicas</code></br>
+<code>replicas</code>
 <em>
 int
 </em>
@@ -5499,7 +5348,7 @@ int
 </tr>
 <tr>
 <td>
-<code>env</code></br>
+<code>env</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#envvar-v1-core">
 []Kubernetes core/v1.EnvVar
@@ -5531,7 +5380,7 @@ int
 <tbody>
 <tr>
 <td>
-<code>conditions</code></br>
+<code>conditions</code>
 <em>
 github.com/kfsoftware/hlf-operator/pkg/status.Conditions
 </em>
@@ -5541,25 +5390,12 @@ github.com/kfsoftware/hlf-operator/pkg/status.Conditions
 </tr>
 <tr>
 <td>
-<code>message</code></br>
+<code>message</code>
 <em>
 string
 </em>
 </td>
 <td>
-</td>
-</tr>
-<tr>
-<td>
-<code>status</code></br>
-<em>
-<a href="#hlf.kungfusoftware.es/v1alpha1.DeploymentStatus">
-DeploymentStatus
-</a>
-</em>
-</td>
-<td>
-<p>Status of the FabricChaincode</p>
 </td>
 </tr>
 </tbody>
@@ -5583,7 +5419,7 @@ DeploymentStatus
 <tbody>
 <tr>
 <td>
-<code>resources</code></br>
+<code>resources</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#resourcerequirements-v1-core">
 Kubernetes core/v1.ResourceRequirements
@@ -5614,7 +5450,7 @@ Kubernetes core/v1.ResourceRequirements
 <tbody>
 <tr>
 <td>
-<code>conditions</code></br>
+<code>conditions</code>
 <em>
 github.com/kfsoftware/hlf-operator/pkg/status.Conditions
 </em>
@@ -5624,25 +5460,12 @@ github.com/kfsoftware/hlf-operator/pkg/status.Conditions
 </tr>
 <tr>
 <td>
-<code>message</code></br>
+<code>message</code>
 <em>
 string
 </em>
 </td>
 <td>
-</td>
-</tr>
-<tr>
-<td>
-<code>status</code></br>
-<em>
-<a href="#hlf.kungfusoftware.es/v1alpha1.DeploymentStatus">
-DeploymentStatus
-</a>
-</em>
-</td>
-<td>
-<p>Status of the FabricCA</p>
 </td>
 </tr>
 </tbody>
@@ -5665,7 +5488,7 @@ DeploymentStatus
 <tbody>
 <tr>
 <td>
-<code>image</code></br>
+<code>image</code>
 <em>
 string
 </em>
@@ -5675,7 +5498,7 @@ string
 </tr>
 <tr>
 <td>
-<code>tag</code></br>
+<code>tag</code>
 <em>
 string
 </em>
@@ -5685,7 +5508,7 @@ string
 </tr>
 <tr>
 <td>
-<code>pullPolicy</code></br>
+<code>pullPolicy</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#pullpolicy-v1-core">
 Kubernetes core/v1.PullPolicy
@@ -5715,22 +5538,24 @@ Kubernetes core/v1.PullPolicy
 <tbody>
 <tr>
 <td>
-<code>host</code></br>
+<code>host</code>
 <em>
 string
 </em>
 </td>
 <td>
+<p>Host of the anchor peer</p>
 </td>
 </tr>
 <tr>
 <td>
-<code>port</code></br>
+<code>port</code>
 <em>
 int
 </em>
 </td>
 <td>
+<p>Port of the anchor peer</p>
 </td>
 </tr>
 </tbody>
@@ -5753,22 +5578,24 @@ int
 <tbody>
 <tr>
 <td>
-<code>url</code></br>
+<code>url</code>
 <em>
 string
 </em>
 </td>
 <td>
+<p>URL of the orderer, e.g.: &ldquo;grpcs://xxxxx:443&rdquo;</p>
 </td>
 </tr>
 <tr>
 <td>
-<code>certificate</code></br>
+<code>certificate</code>
 <em>
 string
 </em>
 </td>
 <td>
+<p>TLS Certificate of the orderer node</p>
 </td>
 </tr>
 </tbody>
@@ -5791,22 +5618,24 @@ string
 <tbody>
 <tr>
 <td>
-<code>name</code></br>
+<code>name</code>
 <em>
 string
 </em>
 </td>
 <td>
+<p>FabricPeer Name of the peer inside the kubernetes cluster</p>
 </td>
 </tr>
 <tr>
 <td>
-<code>namespace</code></br>
+<code>namespace</code>
 <em>
 string
 </em>
 </td>
 <td>
+<p>FabricPeer Namespace of the peer inside the kubernetes cluster</p>
 </td>
 </tr>
 </tbody>
@@ -5830,27 +5659,29 @@ string
 <tbody>
 <tr>
 <td>
-<code>name</code></br>
+<code>name</code>
 <em>
 string
 </em>
 </td>
 <td>
+<p>Name of the channel</p>
 </td>
 </tr>
 <tr>
 <td>
-<code>mspId</code></br>
+<code>mspId</code>
 <em>
 string
 </em>
 </td>
 <td>
+<p>MSP ID of the organization to join the channel</p>
 </td>
 </tr>
 <tr>
 <td>
-<code>orderers</code></br>
+<code>orderers</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricFollowerChannelOrderer">
 []FabricFollowerChannelOrderer
@@ -5858,11 +5689,12 @@ string
 </em>
 </td>
 <td>
+<p>Orderers to fetch the configuration block from</p>
 </td>
 </tr>
 <tr>
 <td>
-<code>peersToJoin</code></br>
+<code>peersToJoin</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricFollowerChannelPeer">
 []FabricFollowerChannelPeer
@@ -5870,11 +5702,12 @@ string
 </em>
 </td>
 <td>
+<p>Peers to join the channel</p>
 </td>
 </tr>
 <tr>
 <td>
-<code>anchorPeers</code></br>
+<code>anchorPeers</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricFollowerChannelAnchorPeer">
 []FabricFollowerChannelAnchorPeer
@@ -5882,11 +5715,12 @@ string
 </em>
 </td>
 <td>
+<p>Anchor peers defined for the current organization</p>
 </td>
 </tr>
 <tr>
 <td>
-<code>hlfIdentity</code></br>
+<code>hlfIdentity</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.HLFIdentity">
 HLFIdentity
@@ -5894,6 +5728,7 @@ HLFIdentity
 </em>
 </td>
 <td>
+<p>Identity to use to interact with the peers and the orderers</p>
 </td>
 </tr>
 </tbody>
@@ -5917,7 +5752,7 @@ HLFIdentity
 <tbody>
 <tr>
 <td>
-<code>conditions</code></br>
+<code>conditions</code>
 <em>
 github.com/kfsoftware/hlf-operator/pkg/status.Conditions
 </em>
@@ -5927,25 +5762,12 @@ github.com/kfsoftware/hlf-operator/pkg/status.Conditions
 </tr>
 <tr>
 <td>
-<code>message</code></br>
+<code>message</code>
 <em>
 string
 </em>
 </td>
 <td>
-</td>
-</tr>
-<tr>
-<td>
-<code>status</code></br>
-<em>
-<a href="#hlf.kungfusoftware.es/v1alpha1.DeploymentStatus">
-DeploymentStatus
-</a>
-</em>
-</td>
-<td>
-<p>Status of the FabricCA</p>
 </td>
 </tr>
 </tbody>
@@ -5972,7 +5794,7 @@ DeploymentStatus
 <tbody>
 <tr>
 <td>
-<code>port</code></br>
+<code>port</code>
 <em>
 int
 </em>
@@ -5983,7 +5805,7 @@ int
 </tr>
 <tr>
 <td>
-<code>hosts</code></br>
+<code>hosts</code>
 <em>
 []string
 </em>
@@ -5994,7 +5816,7 @@ int
 </tr>
 <tr>
 <td>
-<code>ingressGateway</code></br>
+<code>ingressGateway</code>
 <em>
 string
 </em>
@@ -6022,12 +5844,13 @@ string
 <tbody>
 <tr>
 <td>
-<code>mspID</code></br>
+<code>mspID</code>
 <em>
 string
 </em>
 </td>
 <td>
+<p>MSP ID of the organization</p>
 </td>
 </tr>
 </tbody>
@@ -6050,12 +5873,13 @@ string
 <tbody>
 <tr>
 <td>
-<code>mspID</code></br>
+<code>mspID</code>
 <em>
 string
 </em>
 </td>
 <td>
+<p>MSP ID of the organization</p>
 </td>
 </tr>
 </tbody>
@@ -6074,22 +5898,24 @@ string
 <tbody>
 <tr>
 <td>
-<code>host</code></br>
+<code>host</code>
 <em>
 string
 </em>
 </td>
 <td>
+<p>Host of the peer</p>
 </td>
 </tr>
 <tr>
 <td>
-<code>port</code></br>
+<code>port</code>
 <em>
 int
 </em>
 </td>
 <td>
+<p>Port of the peer</p>
 </td>
 </tr>
 </tbody>
@@ -6112,17 +5938,18 @@ int
 <tbody>
 <tr>
 <td>
-<code>capabilities</code></br>
+<code>capabilities</code>
 <em>
 []string
 </em>
 </td>
 <td>
+<p>Capabilities of the application channel configuration</p>
 </td>
 </tr>
 <tr>
 <td>
-<code>policies</code></br>
+<code>policies</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.map[string]github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1.FabricMainChannelPoliciesConfig">
 map[string]github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1.FabricMainChannelPoliciesConfig
@@ -6131,17 +5958,19 @@ map[string]github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1
 </td>
 <td>
 <em>(Optional)</em>
+<p>Policies of the application channel configuration</p>
 </td>
 </tr>
 <tr>
 <td>
-<code>acls</code></br>
+<code>acls</code>
 <em>
 map[string]string
 </em>
 </td>
 <td>
 <em>(Optional)</em>
+<p>ACLs of the application channel configuration</p>
 </td>
 </tr>
 </tbody>
@@ -6164,7 +5993,7 @@ map[string]string
 <tbody>
 <tr>
 <td>
-<code>application</code></br>
+<code>application</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricMainChannelApplicationConfig">
 FabricMainChannelApplicationConfig
@@ -6173,11 +6002,12 @@ FabricMainChannelApplicationConfig
 </td>
 <td>
 <em>(Optional)</em>
+<p>Application configuration of the channel</p>
 </td>
 </tr>
 <tr>
 <td>
-<code>orderer</code></br>
+<code>orderer</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricMainChannelOrdererConfig">
 FabricMainChannelOrdererConfig
@@ -6186,21 +6016,23 @@ FabricMainChannelOrdererConfig
 </td>
 <td>
 <em>(Optional)</em>
+<p>Orderer configuration of the channel</p>
 </td>
 </tr>
 <tr>
 <td>
-<code>capabilities</code></br>
+<code>capabilities</code>
 <em>
 []string
 </em>
 </td>
 <td>
+<p>Capabilities for the channel</p>
 </td>
 </tr>
 <tr>
 <td>
-<code>policies</code></br>
+<code>policies</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.map[string]github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1.FabricMainChannelPoliciesConfig">
 map[string]github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1.FabricMainChannelPoliciesConfig
@@ -6209,12 +6041,13 @@ map[string]github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1
 </td>
 <td>
 <em>(Optional)</em>
+<p>Policies for the channel</p>
 </td>
 </tr>
 </tbody>
 </table>
 <h3 id="hlf.kungfusoftware.es/v1alpha1.FabricMainChannelConsensusState">FabricMainChannelConsensusState
-(<code>string</code> alias)</p></h3>
+(<code>string</code> alias)</h3>
 <p>
 (<em>Appears on:</em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricMainChannelOrdererConfig">FabricMainChannelOrdererConfig</a>)
@@ -6239,32 +6072,35 @@ map[string]github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1
 <tbody>
 <tr>
 <td>
-<code>host</code></br>
+<code>host</code>
 <em>
 string
 </em>
 </td>
 <td>
+<p>Orderer host of the consenter</p>
 </td>
 </tr>
 <tr>
 <td>
-<code>port</code></br>
+<code>port</code>
 <em>
 int
 </em>
 </td>
 <td>
+<p>Orderer port of the consenter</p>
 </td>
 </tr>
 <tr>
 <td>
-<code>tlsCert</code></br>
+<code>tlsCert</code>
 <em>
 string
 </em>
 </td>
 <td>
+<p>TLS Certificate of the orderer node</p>
 </td>
 </tr>
 </tbody>
@@ -6287,7 +6123,7 @@ string
 <tbody>
 <tr>
 <td>
-<code>options</code></br>
+<code>options</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricMainChannelEtcdRaftOptions">
 FabricMainChannelEtcdRaftOptions
@@ -6318,7 +6154,7 @@ FabricMainChannelEtcdRaftOptions
 <tbody>
 <tr>
 <td>
-<code>tickInterval</code></br>
+<code>tickInterval</code>
 <em>
 string
 </em>
@@ -6328,7 +6164,7 @@ string
 </tr>
 <tr>
 <td>
-<code>electionTick</code></br>
+<code>electionTick</code>
 <em>
 uint32
 </em>
@@ -6338,33 +6174,35 @@ uint32
 </tr>
 <tr>
 <td>
-<code>heartbeatTick</code></br>
+<code>heartbeatTick</code>
 <em>
 uint32
 </em>
 </td>
 <td>
+<p>HeartbeatTick is the number of ticks that must pass between heartbeats</p>
 </td>
 </tr>
 <tr>
 <td>
-<code>maxInflightBlocks</code></br>
+<code>maxInflightBlocks</code>
 <em>
 uint32
 </em>
 </td>
 <td>
+<p>MaxInflightBlocks is the maximum number of in-flight blocks that may be sent to followers at any given time.</p>
 </td>
 </tr>
 <tr>
 <td>
-<code>snapshotIntervalSize</code></br>
+<code>snapshotIntervalSize</code>
 <em>
 uint32
 </em>
 </td>
 <td>
-<p>16 MB</p>
+<p>Maximum size of each raft snapshot file.</p>
 </td>
 </tr>
 </tbody>
@@ -6387,22 +6225,24 @@ uint32
 <tbody>
 <tr>
 <td>
-<code>host</code></br>
+<code>host</code>
 <em>
 string
 </em>
 </td>
 <td>
+<p>Admin host of the orderer node</p>
 </td>
 </tr>
 <tr>
 <td>
-<code>port</code></br>
+<code>port</code>
 <em>
 int
 </em>
 </td>
 <td>
+<p>Admin port of the orderer node</p>
 </td>
 </tr>
 </tbody>
@@ -6425,37 +6265,40 @@ int
 <tbody>
 <tr>
 <td>
-<code>mspID</code></br>
+<code>mspID</code>
 <em>
 string
 </em>
 </td>
 <td>
+<p>MSP ID of the organization</p>
 </td>
 </tr>
 <tr>
 <td>
-<code>tlsRootCert</code></br>
+<code>tlsRootCert</code>
 <em>
 string
 </em>
 </td>
 <td>
+<p>TLS Root certificate authority of the orderer organization</p>
 </td>
 </tr>
 <tr>
 <td>
-<code>signRootCert</code></br>
+<code>signRootCert</code>
 <em>
 string
 </em>
 </td>
 <td>
+<p>Root certificate authority for signing</p>
 </td>
 </tr>
 <tr>
 <td>
-<code>ordererEndpoints</code></br>
+<code>ordererEndpoints</code>
 <em>
 []string
 </em>
@@ -6484,32 +6327,35 @@ string
 <tbody>
 <tr>
 <td>
-<code>mspID</code></br>
+<code>mspID</code>
 <em>
 string
 </em>
 </td>
 <td>
+<p>MSP ID of the organization</p>
 </td>
 </tr>
 <tr>
 <td>
-<code>tlsRootCert</code></br>
+<code>tlsRootCert</code>
 <em>
 string
 </em>
 </td>
 <td>
+<p>TLS Root certificate authority of the orderer organization</p>
 </td>
 </tr>
 <tr>
 <td>
-<code>signRootCert</code></br>
+<code>signRootCert</code>
 <em>
 string
 </em>
 </td>
 <td>
+<p>Root certificate authority for signing</p>
 </td>
 </tr>
 </tbody>
@@ -6532,66 +6378,35 @@ string
 <tbody>
 <tr>
 <td>
-<code>secretNamespace</code></br>
+<code>secretNamespace</code>
 <em>
 string
 </em>
 </td>
 <td>
+<p>Secret namespace</p>
 </td>
 </tr>
 <tr>
 <td>
-<code>secretName</code></br>
+<code>secretName</code>
 <em>
 string
 </em>
 </td>
 <td>
+<p>Secret name</p>
 </td>
 </tr>
 <tr>
 <td>
-<code>secretKey</code></br>
+<code>secretKey</code>
 <em>
 string
 </em>
 </td>
 <td>
-</td>
-</tr>
-</tbody>
-</table>
-<h3 id="hlf.kungfusoftware.es/v1alpha1.FabricMainChannelOrderer">FabricMainChannelOrderer
-</h3>
-<p>
-</p>
-<table>
-<thead>
-<tr>
-<th>Field</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<code>url</code></br>
-<em>
-string
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>tlsCert</code></br>
-<em>
-string
-</em>
-</td>
-<td>
+<p>Key inside the secret that holds the private key and certificate to interact with the network</p>
 </td>
 </tr>
 </tbody>
@@ -6614,34 +6429,35 @@ string
 <tbody>
 <tr>
 <td>
-<code>maxMessageCount</code></br>
+<code>maxMessageCount</code>
 <em>
 int
 </em>
 </td>
 <td>
+<p>The number of transactions that can fit in a block.</p>
 </td>
 </tr>
 <tr>
 <td>
-<code>absoluteMaxBytes</code></br>
+<code>absoluteMaxBytes</code>
 <em>
 int
 </em>
 </td>
 <td>
-<p>default is 1024 * 1024</p>
+<p>The absolute maximum size of a block, including all metadata.</p>
 </td>
 </tr>
 <tr>
 <td>
-<code>preferredMaxBytes</code></br>
+<code>preferredMaxBytes</code>
 <em>
 int
 </em>
 </td>
 <td>
-<p>default is 512 * 1024</p>
+<p>The preferred maximum size of a block, including all metadata.</p>
 </td>
 </tr>
 </tbody>
@@ -6664,27 +6480,29 @@ int
 <tbody>
 <tr>
 <td>
-<code>ordererType</code></br>
+<code>ordererType</code>
 <em>
 string
 </em>
 </td>
 <td>
+<p>OrdererType of the consensus, default &ldquo;etcdraft&rdquo;</p>
 </td>
 </tr>
 <tr>
 <td>
-<code>capabilities</code></br>
+<code>capabilities</code>
 <em>
 []string
 </em>
 </td>
 <td>
+<p>Capabilities of the channel</p>
 </td>
 </tr>
 <tr>
 <td>
-<code>policies</code></br>
+<code>policies</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.map[string]github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1.FabricMainChannelPoliciesConfig">
 map[string]github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1.FabricMainChannelPoliciesConfig
@@ -6693,21 +6511,23 @@ map[string]github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1
 </td>
 <td>
 <em>(Optional)</em>
+<p>Policies of the orderer section of the channel</p>
 </td>
 </tr>
 <tr>
 <td>
-<code>batchTimeout</code></br>
+<code>batchTimeout</code>
 <em>
 string
 </em>
 </td>
 <td>
+<p>Interval of the ordering service to create a block and send to the peers</p>
 </td>
 </tr>
 <tr>
 <td>
-<code>batchSize</code></br>
+<code>batchSize</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricMainChannelOrdererBatchSize">
 FabricMainChannelOrdererBatchSize
@@ -6720,7 +6540,7 @@ FabricMainChannelOrdererBatchSize
 </tr>
 <tr>
 <td>
-<code>state</code></br>
+<code>state</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricMainChannelConsensusState">
 FabricMainChannelConsensusState
@@ -6728,11 +6548,12 @@ FabricMainChannelConsensusState
 </em>
 </td>
 <td>
+<p>State about the channel, can only be <code>STATE_NORMAL</code> or <code>STATE_MAINTENANCE</code>.</p>
 </td>
 </tr>
 <tr>
 <td>
-<code>etcdRaft</code></br>
+<code>etcdRaft</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricMainChannelEtcdRaft">
 FabricMainChannelEtcdRaft
@@ -6763,22 +6584,24 @@ FabricMainChannelEtcdRaft
 <tbody>
 <tr>
 <td>
-<code>name</code></br>
+<code>name</code>
 <em>
 string
 </em>
 </td>
 <td>
+<p>Name of the orderer node</p>
 </td>
 </tr>
 <tr>
 <td>
-<code>namespace</code></br>
+<code>namespace</code>
 <em>
 string
 </em>
 </td>
 <td>
+<p>Kubernetes namespace of the orderer node</p>
 </td>
 </tr>
 </tbody>
@@ -6801,71 +6624,77 @@ string
 <tbody>
 <tr>
 <td>
-<code>mspID</code></br>
+<code>mspID</code>
 <em>
 string
 </em>
 </td>
 <td>
+<p>MSP ID of the organization</p>
 </td>
 </tr>
 <tr>
 <td>
-<code>caName</code></br>
-<em>
-string
-</em>
-</td>
-<td>
-<em>(Optional)</em>
-</td>
-</tr>
-<tr>
-<td>
-<code>caNamespace</code></br>
+<code>caName</code>
 <em>
 string
 </em>
 </td>
 <td>
 <em>(Optional)</em>
+<p>FabricCA Name of the organization</p>
 </td>
 </tr>
 <tr>
 <td>
-<code>tlsCACert</code></br>
+<code>caNamespace</code>
 <em>
 string
 </em>
 </td>
 <td>
 <em>(Optional)</em>
+<p>FabricCA Namespace of the organization</p>
 </td>
 </tr>
 <tr>
 <td>
-<code>signCACert</code></br>
+<code>tlsCACert</code>
 <em>
 string
 </em>
 </td>
 <td>
 <em>(Optional)</em>
+<p>TLS Root certificate authority of the orderer organization</p>
 </td>
 </tr>
 <tr>
 <td>
-<code>ordererEndpoints</code></br>
+<code>signCACert</code>
+<em>
+string
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>Root certificate authority for signing</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>ordererEndpoints</code>
 <em>
 []string
 </em>
 </td>
 <td>
+<p>Orderer endpoints for the organization in the channel configuration</p>
 </td>
 </tr>
 <tr>
 <td>
-<code>orderersToJoin</code></br>
+<code>orderersToJoin</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricMainChannelOrdererNode">
 []FabricMainChannelOrdererNode
@@ -6873,11 +6702,12 @@ string
 </em>
 </td>
 <td>
+<p>Orderer nodes within the kubernetes cluster to be added to the channel</p>
 </td>
 </tr>
 <tr>
 <td>
-<code>externalOrderersToJoin</code></br>
+<code>externalOrderersToJoin</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricMainChannelExternalOrdererNode">
 []FabricMainChannelExternalOrdererNode
@@ -6885,6 +6715,7 @@ string
 </em>
 </td>
 <td>
+<p>External orderers to be added to the channel</p>
 </td>
 </tr>
 </tbody>
@@ -6907,32 +6738,35 @@ string
 <tbody>
 <tr>
 <td>
-<code>mspID</code></br>
+<code>mspID</code>
 <em>
 string
 </em>
 </td>
 <td>
+<p>MSP ID of the organization</p>
 </td>
 </tr>
 <tr>
 <td>
-<code>caName</code></br>
+<code>caName</code>
 <em>
 string
 </em>
 </td>
 <td>
+<p>FabricCA Name of the organization</p>
 </td>
 </tr>
 <tr>
 <td>
-<code>caNamespace</code></br>
+<code>caNamespace</code>
 <em>
 string
 </em>
 </td>
 <td>
+<p>FabricCA Namespace of the organization</p>
 </td>
 </tr>
 </tbody>
@@ -6951,27 +6785,29 @@ string
 <tbody>
 <tr>
 <td>
-<code>type</code></br>
+<code>type</code>
 <em>
 string
 </em>
 </td>
 <td>
+<p>Type of policy, can only be <code>ImplicitMeta</code> or <code>Signature</code>.</p>
 </td>
 </tr>
 <tr>
 <td>
-<code>rule</code></br>
+<code>rule</code>
 <em>
 string
 </em>
 </td>
 <td>
+<p>Rule of policy</p>
 </td>
 </tr>
 <tr>
 <td>
-<code>modPolicy</code></br>
+<code>modPolicy</code>
 <em>
 string
 </em>
@@ -7000,17 +6836,18 @@ string
 <tbody>
 <tr>
 <td>
-<code>name</code></br>
+<code>name</code>
 <em>
 string
 </em>
 </td>
 <td>
+<p>Name of the channel</p>
 </td>
 </tr>
 <tr>
 <td>
-<code>identities</code></br>
+<code>identities</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricMainChannelIdentity">
 map[string]github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1.FabricMainChannelIdentity
@@ -7018,11 +6855,12 @@ map[string]github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1
 </em>
 </td>
 <td>
+<p>HLF Identities to be used to create and manage the channel</p>
 </td>
 </tr>
 <tr>
 <td>
-<code>adminPeerOrganizations</code></br>
+<code>adminPeerOrganizations</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricMainChannelAdminPeerOrganizationSpec">
 []FabricMainChannelAdminPeerOrganizationSpec
@@ -7030,11 +6868,12 @@ map[string]github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1
 </em>
 </td>
 <td>
+<p>Organizations that manage the <code>application</code> configuration of the channel</p>
 </td>
 </tr>
 <tr>
 <td>
-<code>peerOrganizations</code></br>
+<code>peerOrganizations</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricMainChannelPeerOrganization">
 []FabricMainChannelPeerOrganization
@@ -7042,11 +6881,12 @@ map[string]github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1
 </em>
 </td>
 <td>
+<p>Peer organizations that are external to the Kubernetes cluster</p>
 </td>
 </tr>
 <tr>
 <td>
-<code>externalPeerOrganizations</code></br>
+<code>externalPeerOrganizations</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricMainChannelExternalPeerOrganization">
 []FabricMainChannelExternalPeerOrganization
@@ -7054,11 +6894,12 @@ map[string]github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1
 </em>
 </td>
 <td>
+<p>External peer organizations that are inside the kubernetes cluster</p>
 </td>
 </tr>
 <tr>
 <td>
-<code>channelConfig</code></br>
+<code>channelConfig</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricMainChannelConfig">
 FabricMainChannelConfig
@@ -7066,11 +6907,12 @@ FabricMainChannelConfig
 </em>
 </td>
 <td>
+<p>Configuration about the channel</p>
 </td>
 </tr>
 <tr>
 <td>
-<code>adminOrdererOrganizations</code></br>
+<code>adminOrdererOrganizations</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricMainChannelAdminOrdererOrganizationSpec">
 []FabricMainChannelAdminOrdererOrganizationSpec
@@ -7078,11 +6920,12 @@ FabricMainChannelConfig
 </em>
 </td>
 <td>
+<p>Organizations that manage the <code>orderer</code> configuration of the channel</p>
 </td>
 </tr>
 <tr>
 <td>
-<code>ordererOrganizations</code></br>
+<code>ordererOrganizations</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricMainChannelOrdererOrganization">
 []FabricMainChannelOrdererOrganization
@@ -7090,11 +6933,12 @@ FabricMainChannelConfig
 </em>
 </td>
 <td>
+<p>External orderer organizations that are inside the kubernetes cluster</p>
 </td>
 </tr>
 <tr>
 <td>
-<code>externalOrdererOrganizations</code></br>
+<code>externalOrdererOrganizations</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricMainChannelExternalOrdererOrganization">
 []FabricMainChannelExternalOrdererOrganization
@@ -7102,11 +6946,12 @@ FabricMainChannelConfig
 </em>
 </td>
 <td>
+<p>Orderer organizations that are external to the Kubernetes cluster</p>
 </td>
 </tr>
 <tr>
 <td>
-<code>orderers</code></br>
+<code>orderers</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricMainChannelConsenter">
 []FabricMainChannelConsenter
@@ -7114,6 +6959,7 @@ FabricMainChannelConfig
 </em>
 </td>
 <td>
+<p>Consenters are the orderer nodes that are part of the channel consensus</p>
 </td>
 </tr>
 </tbody>
@@ -7137,7 +6983,7 @@ FabricMainChannelConfig
 <tbody>
 <tr>
 <td>
-<code>conditions</code></br>
+<code>conditions</code>
 <em>
 github.com/kfsoftware/hlf-operator/pkg/status.Conditions
 </em>
@@ -7147,25 +6993,12 @@ github.com/kfsoftware/hlf-operator/pkg/status.Conditions
 </tr>
 <tr>
 <td>
-<code>message</code></br>
+<code>message</code>
 <em>
 string
 </em>
 </td>
 <td>
-</td>
-</tr>
-<tr>
-<td>
-<code>status</code></br>
-<em>
-<a href="#hlf.kungfusoftware.es/v1alpha1.DeploymentStatus">
-DeploymentStatus
-</a>
-</em>
-</td>
-<td>
-<p>Status of the FabricCA</p>
 </td>
 </tr>
 </tbody>
@@ -7189,7 +7022,7 @@ DeploymentStatus
 <tbody>
 <tr>
 <td>
-<code>organization</code></br>
+<code>organization</code>
 <em>
 string
 </em>
@@ -7199,7 +7032,7 @@ string
 </tr>
 <tr>
 <td>
-<code>internal</code></br>
+<code>internal</code>
 <em>
 bool
 </em>
@@ -7209,7 +7042,7 @@ bool
 </tr>
 <tr>
 <td>
-<code>organizations</code></br>
+<code>organizations</code>
 <em>
 []string
 </em>
@@ -7219,7 +7052,7 @@ bool
 </tr>
 <tr>
 <td>
-<code>secretName</code></br>
+<code>secretName</code>
 <em>
 string
 </em>
@@ -7248,7 +7081,7 @@ string
 <tbody>
 <tr>
 <td>
-<code>conditions</code></br>
+<code>conditions</code>
 <em>
 github.com/kfsoftware/hlf-operator/pkg/status.Conditions
 </em>
@@ -7258,25 +7091,12 @@ github.com/kfsoftware/hlf-operator/pkg/status.Conditions
 </tr>
 <tr>
 <td>
-<code>message</code></br>
+<code>message</code>
 <em>
 string
 </em>
 </td>
 <td>
-</td>
-</tr>
-<tr>
-<td>
-<code>status</code></br>
-<em>
-<a href="#hlf.kungfusoftware.es/v1alpha1.DeploymentStatus">
-DeploymentStatus
-</a>
-</em>
-</td>
-<td>
-<p>Status of the FabricNetworkConfig</p>
 </td>
 </tr>
 </tbody>
@@ -7299,7 +7119,7 @@ DeploymentStatus
 <tbody>
 <tr>
 <td>
-<code>scheme</code></br>
+<code>scheme</code>
 <em>
 string
 </em>
@@ -7309,7 +7129,7 @@ string
 </tr>
 <tr>
 <td>
-<code>username</code></br>
+<code>username</code>
 <em>
 string
 </em>
@@ -7319,7 +7139,7 @@ string
 </tr>
 <tr>
 <td>
-<code>password</code></br>
+<code>password</code>
 <em>
 string
 </em>
@@ -7348,7 +7168,7 @@ string
 <tbody>
 <tr>
 <td>
-<code>image</code></br>
+<code>image</code>
 <em>
 string
 </em>
@@ -7358,7 +7178,7 @@ string
 </tr>
 <tr>
 <td>
-<code>tag</code></br>
+<code>tag</code>
 <em>
 string
 </em>
@@ -7368,7 +7188,7 @@ string
 </tr>
 <tr>
 <td>
-<code>username</code></br>
+<code>username</code>
 <em>
 string
 </em>
@@ -7378,7 +7198,7 @@ string
 </tr>
 <tr>
 <td>
-<code>password</code></br>
+<code>password</code>
 <em>
 string
 </em>
@@ -7388,7 +7208,7 @@ string
 </tr>
 <tr>
 <td>
-<code>storage</code></br>
+<code>storage</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.Storage">
 Storage
@@ -7400,7 +7220,7 @@ Storage
 </tr>
 <tr>
 <td>
-<code>resources</code></br>
+<code>resources</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#resourcerequirements-v1-core">
 Kubernetes core/v1.ResourceRequirements
@@ -7413,7 +7233,7 @@ Kubernetes core/v1.ResourceRequirements
 </tr>
 <tr>
 <td>
-<code>imagePullSecrets</code></br>
+<code>imagePullSecrets</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#localobjectreference-v1-core">
 []Kubernetes core/v1.LocalObjectReference
@@ -7426,7 +7246,7 @@ Kubernetes core/v1.ResourceRequirements
 </tr>
 <tr>
 <td>
-<code>affinity</code></br>
+<code>affinity</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#affinity-v1-core">
 Kubernetes core/v1.Affinity
@@ -7439,7 +7259,7 @@ Kubernetes core/v1.Affinity
 </tr>
 <tr>
 <td>
-<code>tolerations</code></br>
+<code>tolerations</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#toleration-v1-core">
 []Kubernetes core/v1.Toleration
@@ -7452,7 +7272,7 @@ Kubernetes core/v1.Affinity
 </tr>
 <tr>
 <td>
-<code>imagePullPolicy</code></br>
+<code>imagePullPolicy</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#pullpolicy-v1-core">
 Kubernetes core/v1.PullPolicy
@@ -7483,7 +7303,7 @@ Kubernetes core/v1.PullPolicy
 <tbody>
 <tr>
 <td>
-<code>auth</code></br>
+<code>auth</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricOperationsConsoleAuth">
 FabricOperationsConsoleAuth
@@ -7495,7 +7315,7 @@ FabricOperationsConsoleAuth
 </tr>
 <tr>
 <td>
-<code>resources</code></br>
+<code>resources</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#resourcerequirements-v1-core">
 Kubernetes core/v1.ResourceRequirements
@@ -7508,7 +7328,7 @@ Kubernetes core/v1.ResourceRequirements
 </tr>
 <tr>
 <td>
-<code>image</code></br>
+<code>image</code>
 <em>
 string
 </em>
@@ -7518,7 +7338,7 @@ string
 </tr>
 <tr>
 <td>
-<code>tag</code></br>
+<code>tag</code>
 <em>
 string
 </em>
@@ -7528,7 +7348,7 @@ string
 </tr>
 <tr>
 <td>
-<code>imagePullPolicy</code></br>
+<code>imagePullPolicy</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#pullpolicy-v1-core">
 Kubernetes core/v1.PullPolicy
@@ -7540,7 +7360,7 @@ Kubernetes core/v1.PullPolicy
 </tr>
 <tr>
 <td>
-<code>tolerations</code></br>
+<code>tolerations</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#toleration-v1-core">
 []Kubernetes core/v1.Toleration
@@ -7553,7 +7373,7 @@ Kubernetes core/v1.PullPolicy
 </tr>
 <tr>
 <td>
-<code>replicas</code></br>
+<code>replicas</code>
 <em>
 int
 </em>
@@ -7563,7 +7383,7 @@ int
 </tr>
 <tr>
 <td>
-<code>couchDB</code></br>
+<code>couchDB</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricOperationsConsoleCouchDB">
 FabricOperationsConsoleCouchDB
@@ -7575,7 +7395,7 @@ FabricOperationsConsoleCouchDB
 </tr>
 <tr>
 <td>
-<code>env</code></br>
+<code>env</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#envvar-v1-core">
 []Kubernetes core/v1.EnvVar
@@ -7588,7 +7408,7 @@ FabricOperationsConsoleCouchDB
 </tr>
 <tr>
 <td>
-<code>imagePullSecrets</code></br>
+<code>imagePullSecrets</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#localobjectreference-v1-core">
 []Kubernetes core/v1.LocalObjectReference
@@ -7601,7 +7421,7 @@ FabricOperationsConsoleCouchDB
 </tr>
 <tr>
 <td>
-<code>affinity</code></br>
+<code>affinity</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#affinity-v1-core">
 Kubernetes core/v1.Affinity
@@ -7614,7 +7434,7 @@ Kubernetes core/v1.Affinity
 </tr>
 <tr>
 <td>
-<code>port</code></br>
+<code>port</code>
 <em>
 int
 </em>
@@ -7624,7 +7444,7 @@ int
 </tr>
 <tr>
 <td>
-<code>config</code></br>
+<code>config</code>
 <em>
 string
 </em>
@@ -7635,7 +7455,7 @@ string
 </tr>
 <tr>
 <td>
-<code>ingress</code></br>
+<code>ingress</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.Ingress">
 Ingress
@@ -7647,7 +7467,7 @@ Ingress
 </tr>
 <tr>
 <td>
-<code>hostUrl</code></br>
+<code>hostUrl</code>
 <em>
 string
 </em>
@@ -7676,7 +7496,7 @@ string
 <tbody>
 <tr>
 <td>
-<code>conditions</code></br>
+<code>conditions</code>
 <em>
 github.com/kfsoftware/hlf-operator/pkg/status.Conditions
 </em>
@@ -7686,25 +7506,12 @@ github.com/kfsoftware/hlf-operator/pkg/status.Conditions
 </tr>
 <tr>
 <td>
-<code>message</code></br>
+<code>message</code>
 <em>
 string
 </em>
 </td>
 <td>
-</td>
-</tr>
-<tr>
-<td>
-<code>status</code></br>
-<em>
-<a href="#hlf.kungfusoftware.es/v1alpha1.DeploymentStatus">
-DeploymentStatus
-</a>
-</em>
-</td>
-<td>
-<p>Status of the FabricCA</p>
 </td>
 </tr>
 </tbody>
@@ -7727,7 +7534,7 @@ DeploymentStatus
 <tbody>
 <tr>
 <td>
-<code>oidcJWKS</code></br>
+<code>oidcJWKS</code>
 <em>
 string
 </em>
@@ -7737,7 +7544,7 @@ string
 </tr>
 <tr>
 <td>
-<code>oidcIssuer</code></br>
+<code>oidcIssuer</code>
 <em>
 string
 </em>
@@ -7765,7 +7572,7 @@ string
 <tbody>
 <tr>
 <td>
-<code>mspID</code></br>
+<code>mspID</code>
 <em>
 string
 </em>
@@ -7775,7 +7582,7 @@ string
 </tr>
 <tr>
 <td>
-<code>user</code></br>
+<code>user</code>
 <em>
 string
 </em>
@@ -7785,7 +7592,7 @@ string
 </tr>
 <tr>
 <td>
-<code>networkConfig</code></br>
+<code>networkConfig</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricOperatorAPINetworkConfig">
 FabricOperatorAPINetworkConfig
@@ -7815,7 +7622,7 @@ FabricOperatorAPINetworkConfig
 <tbody>
 <tr>
 <td>
-<code>secretName</code></br>
+<code>secretName</code>
 <em>
 string
 </em>
@@ -7825,7 +7632,7 @@ string
 </tr>
 <tr>
 <td>
-<code>key</code></br>
+<code>key</code>
 <em>
 string
 </em>
@@ -7854,7 +7661,7 @@ string
 <tbody>
 <tr>
 <td>
-<code>image</code></br>
+<code>image</code>
 <em>
 string
 </em>
@@ -7864,7 +7671,7 @@ string
 </tr>
 <tr>
 <td>
-<code>tag</code></br>
+<code>tag</code>
 <em>
 string
 </em>
@@ -7874,7 +7681,7 @@ string
 </tr>
 <tr>
 <td>
-<code>imagePullPolicy</code></br>
+<code>imagePullPolicy</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#pullpolicy-v1-core">
 Kubernetes core/v1.PullPolicy
@@ -7886,7 +7693,7 @@ Kubernetes core/v1.PullPolicy
 </tr>
 <tr>
 <td>
-<code>istio</code></br>
+<code>istio</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricIstio">
 FabricIstio
@@ -7898,7 +7705,7 @@ FabricIstio
 </tr>
 <tr>
 <td>
-<code>ingress</code></br>
+<code>ingress</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.Ingress">
 Ingress
@@ -7910,7 +7717,7 @@ Ingress
 </tr>
 <tr>
 <td>
-<code>replicas</code></br>
+<code>replicas</code>
 <em>
 int
 </em>
@@ -7920,7 +7727,7 @@ int
 </tr>
 <tr>
 <td>
-<code>auth</code></br>
+<code>auth</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricOperatorAPIAuth">
 FabricOperatorAPIAuth
@@ -7933,7 +7740,7 @@ FabricOperatorAPIAuth
 </tr>
 <tr>
 <td>
-<code>hlfConfig</code></br>
+<code>hlfConfig</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricOperatorAPIHLFConfig">
 FabricOperatorAPIHLFConfig
@@ -7945,7 +7752,7 @@ FabricOperatorAPIHLFConfig
 </tr>
 <tr>
 <td>
-<code>tolerations</code></br>
+<code>tolerations</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#toleration-v1-core">
 []Kubernetes core/v1.Toleration
@@ -7958,7 +7765,7 @@ FabricOperatorAPIHLFConfig
 </tr>
 <tr>
 <td>
-<code>imagePullSecrets</code></br>
+<code>imagePullSecrets</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#localobjectreference-v1-core">
 []Kubernetes core/v1.LocalObjectReference
@@ -7971,7 +7778,7 @@ FabricOperatorAPIHLFConfig
 </tr>
 <tr>
 <td>
-<code>env</code></br>
+<code>env</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#envvar-v1-core">
 []Kubernetes core/v1.EnvVar
@@ -7984,7 +7791,7 @@ FabricOperatorAPIHLFConfig
 </tr>
 <tr>
 <td>
-<code>affinity</code></br>
+<code>affinity</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#affinity-v1-core">
 Kubernetes core/v1.Affinity
@@ -7997,7 +7804,7 @@ Kubernetes core/v1.Affinity
 </tr>
 <tr>
 <td>
-<code>resources</code></br>
+<code>resources</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#resourcerequirements-v1-core">
 Kubernetes core/v1.ResourceRequirements
@@ -8029,7 +7836,7 @@ Kubernetes core/v1.ResourceRequirements
 <tbody>
 <tr>
 <td>
-<code>conditions</code></br>
+<code>conditions</code>
 <em>
 github.com/kfsoftware/hlf-operator/pkg/status.Conditions
 </em>
@@ -8039,25 +7846,12 @@ github.com/kfsoftware/hlf-operator/pkg/status.Conditions
 </tr>
 <tr>
 <td>
-<code>message</code></br>
+<code>message</code>
 <em>
 string
 </em>
 </td>
 <td>
-</td>
-</tr>
-<tr>
-<td>
-<code>status</code></br>
-<em>
-<a href="#hlf.kungfusoftware.es/v1alpha1.DeploymentStatus">
-DeploymentStatus
-</a>
-</em>
-</td>
-<td>
-<p>Status of the FabricCA</p>
 </td>
 </tr>
 </tbody>
@@ -8080,7 +7874,7 @@ DeploymentStatus
 <tbody>
 <tr>
 <td>
-<code>oidcAuthority</code></br>
+<code>oidcAuthority</code>
 <em>
 string
 </em>
@@ -8090,7 +7884,7 @@ string
 </tr>
 <tr>
 <td>
-<code>oidcClientId</code></br>
+<code>oidcClientId</code>
 <em>
 string
 </em>
@@ -8100,7 +7894,7 @@ string
 </tr>
 <tr>
 <td>
-<code>oidcScope</code></br>
+<code>oidcScope</code>
 <em>
 string
 </em>
@@ -8129,7 +7923,7 @@ string
 <tbody>
 <tr>
 <td>
-<code>image</code></br>
+<code>image</code>
 <em>
 string
 </em>
@@ -8139,7 +7933,7 @@ string
 </tr>
 <tr>
 <td>
-<code>tag</code></br>
+<code>tag</code>
 <em>
 string
 </em>
@@ -8149,7 +7943,7 @@ string
 </tr>
 <tr>
 <td>
-<code>imagePullPolicy</code></br>
+<code>imagePullPolicy</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#pullpolicy-v1-core">
 Kubernetes core/v1.PullPolicy
@@ -8161,7 +7955,7 @@ Kubernetes core/v1.PullPolicy
 </tr>
 <tr>
 <td>
-<code>logoUrl</code></br>
+<code>logoUrl</code>
 <em>
 string
 </em>
@@ -8171,7 +7965,7 @@ string
 </tr>
 <tr>
 <td>
-<code>auth</code></br>
+<code>auth</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricOperatorUIAuth">
 FabricOperatorUIAuth
@@ -8184,7 +7978,7 @@ FabricOperatorUIAuth
 </tr>
 <tr>
 <td>
-<code>tolerations</code></br>
+<code>tolerations</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#toleration-v1-core">
 []Kubernetes core/v1.Toleration
@@ -8197,7 +7991,7 @@ FabricOperatorUIAuth
 </tr>
 <tr>
 <td>
-<code>replicas</code></br>
+<code>replicas</code>
 <em>
 int
 </em>
@@ -8207,7 +8001,7 @@ int
 </tr>
 <tr>
 <td>
-<code>ingress</code></br>
+<code>ingress</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.Ingress">
 Ingress
@@ -8219,7 +8013,7 @@ Ingress
 </tr>
 <tr>
 <td>
-<code>apiUrl</code></br>
+<code>apiUrl</code>
 <em>
 string
 </em>
@@ -8229,7 +8023,7 @@ string
 </tr>
 <tr>
 <td>
-<code>imagePullSecrets</code></br>
+<code>imagePullSecrets</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#localobjectreference-v1-core">
 []Kubernetes core/v1.LocalObjectReference
@@ -8242,7 +8036,7 @@ string
 </tr>
 <tr>
 <td>
-<code>env</code></br>
+<code>env</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#envvar-v1-core">
 []Kubernetes core/v1.EnvVar
@@ -8255,7 +8049,7 @@ string
 </tr>
 <tr>
 <td>
-<code>affinity</code></br>
+<code>affinity</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#affinity-v1-core">
 Kubernetes core/v1.Affinity
@@ -8268,7 +8062,7 @@ Kubernetes core/v1.Affinity
 </tr>
 <tr>
 <td>
-<code>resources</code></br>
+<code>resources</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#resourcerequirements-v1-core">
 Kubernetes core/v1.ResourceRequirements
@@ -8300,7 +8094,7 @@ Kubernetes core/v1.ResourceRequirements
 <tbody>
 <tr>
 <td>
-<code>conditions</code></br>
+<code>conditions</code>
 <em>
 github.com/kfsoftware/hlf-operator/pkg/status.Conditions
 </em>
@@ -8310,25 +8104,12 @@ github.com/kfsoftware/hlf-operator/pkg/status.Conditions
 </tr>
 <tr>
 <td>
-<code>message</code></br>
+<code>message</code>
 <em>
 string
 </em>
 </td>
 <td>
-</td>
-</tr>
-<tr>
-<td>
-<code>status</code></br>
-<em>
-<a href="#hlf.kungfusoftware.es/v1alpha1.DeploymentStatus">
-DeploymentStatus
-</a>
-</em>
-</td>
-<td>
-<p>Status of the FabricCA</p>
 </td>
 </tr>
 </tbody>
@@ -8352,7 +8133,7 @@ DeploymentStatus
 <tbody>
 <tr>
 <td>
-<code>tolerations</code></br>
+<code>tolerations</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#toleration-v1-core">
 []Kubernetes core/v1.Toleration
@@ -8365,7 +8146,7 @@ DeploymentStatus
 </tr>
 <tr>
 <td>
-<code>grpcProxy</code></br>
+<code>grpcProxy</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.GRPCProxy">
 GRPCProxy
@@ -8378,7 +8159,7 @@ GRPCProxy
 </tr>
 <tr>
 <td>
-<code>affinity</code></br>
+<code>affinity</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#affinity-v1-core">
 Kubernetes core/v1.Affinity
@@ -8391,7 +8172,7 @@ Kubernetes core/v1.Affinity
 </tr>
 <tr>
 <td>
-<code>updateCertificateTime</code></br>
+<code>updateCertificateTime</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#time-v1-meta">
 Kubernetes meta/v1.Time
@@ -8404,7 +8185,7 @@ Kubernetes meta/v1.Time
 </tr>
 <tr>
 <td>
-<code>serviceMonitor</code></br>
+<code>serviceMonitor</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.ServiceMonitor">
 ServiceMonitor
@@ -8417,7 +8198,7 @@ ServiceMonitor
 </tr>
 <tr>
 <td>
-<code>hostAliases</code></br>
+<code>hostAliases</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#hostalias-v1-core">
 []Kubernetes core/v1.HostAlias
@@ -8430,7 +8211,7 @@ ServiceMonitor
 </tr>
 <tr>
 <td>
-<code>nodeSelector</code></br>
+<code>nodeSelector</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#nodeselector-v1-core">
 Kubernetes core/v1.NodeSelector
@@ -8443,7 +8224,7 @@ Kubernetes core/v1.NodeSelector
 </tr>
 <tr>
 <td>
-<code>resources</code></br>
+<code>resources</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#resourcerequirements-v1-core">
 Kubernetes core/v1.ResourceRequirements
@@ -8455,7 +8236,7 @@ Kubernetes core/v1.ResourceRequirements
 </tr>
 <tr>
 <td>
-<code>replicas</code></br>
+<code>replicas</code>
 <em>
 int
 </em>
@@ -8465,7 +8246,7 @@ int
 </tr>
 <tr>
 <td>
-<code>image</code></br>
+<code>image</code>
 <em>
 string
 </em>
@@ -8475,7 +8256,7 @@ string
 </tr>
 <tr>
 <td>
-<code>tag</code></br>
+<code>tag</code>
 <em>
 string
 </em>
@@ -8485,7 +8266,7 @@ string
 </tr>
 <tr>
 <td>
-<code>pullPolicy</code></br>
+<code>pullPolicy</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#pullpolicy-v1-core">
 Kubernetes core/v1.PullPolicy
@@ -8497,7 +8278,7 @@ Kubernetes core/v1.PullPolicy
 </tr>
 <tr>
 <td>
-<code>mspID</code></br>
+<code>mspID</code>
 <em>
 string
 </em>
@@ -8507,7 +8288,7 @@ string
 </tr>
 <tr>
 <td>
-<code>imagePullSecrets</code></br>
+<code>imagePullSecrets</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#localobjectreference-v1-core">
 []Kubernetes core/v1.LocalObjectReference
@@ -8520,7 +8301,7 @@ string
 </tr>
 <tr>
 <td>
-<code>genesis</code></br>
+<code>genesis</code>
 <em>
 string
 </em>
@@ -8530,7 +8311,7 @@ string
 </tr>
 <tr>
 <td>
-<code>bootstrapMethod</code></br>
+<code>bootstrapMethod</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.BootstrapMethod">
 BootstrapMethod
@@ -8542,7 +8323,7 @@ BootstrapMethod
 </tr>
 <tr>
 <td>
-<code>channelParticipationEnabled</code></br>
+<code>channelParticipationEnabled</code>
 <em>
 bool
 </em>
@@ -8552,7 +8333,7 @@ bool
 </tr>
 <tr>
 <td>
-<code>storage</code></br>
+<code>storage</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.Storage">
 Storage
@@ -8564,7 +8345,7 @@ Storage
 </tr>
 <tr>
 <td>
-<code>service</code></br>
+<code>service</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.OrdererNodeService">
 OrdererNodeService
@@ -8576,7 +8357,7 @@ OrdererNodeService
 </tr>
 <tr>
 <td>
-<code>secret</code></br>
+<code>secret</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.Secret">
 Secret
@@ -8589,7 +8370,7 @@ Secret
 </tr>
 <tr>
 <td>
-<code>istio</code></br>
+<code>istio</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricIstio">
 FabricIstio
@@ -8602,7 +8383,7 @@ FabricIstio
 </tr>
 <tr>
 <td>
-<code>adminIstio</code></br>
+<code>adminIstio</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricIstio">
 FabricIstio
@@ -8615,7 +8396,7 @@ FabricIstio
 </tr>
 <tr>
 <td>
-<code>env</code></br>
+<code>env</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#envvar-v1-core">
 []Kubernetes core/v1.EnvVar
@@ -8647,7 +8428,7 @@ FabricIstio
 <tbody>
 <tr>
 <td>
-<code>conditions</code></br>
+<code>conditions</code>
 <em>
 github.com/kfsoftware/hlf-operator/pkg/status.Conditions
 </em>
@@ -8657,19 +8438,7 @@ github.com/kfsoftware/hlf-operator/pkg/status.Conditions
 </tr>
 <tr>
 <td>
-<code>status</code></br>
-<em>
-<a href="#hlf.kungfusoftware.es/v1alpha1.DeploymentStatus">
-DeploymentStatus
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>lastCertificateUpdate</code></br>
+<code>lastCertificateUpdate</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#time-v1-meta">
 Kubernetes meta/v1.Time
@@ -8682,7 +8451,7 @@ Kubernetes meta/v1.Time
 </tr>
 <tr>
 <td>
-<code>signCert</code></br>
+<code>signCert</code>
 <em>
 string
 </em>
@@ -8693,7 +8462,7 @@ string
 </tr>
 <tr>
 <td>
-<code>tlsCert</code></br>
+<code>tlsCert</code>
 <em>
 string
 </em>
@@ -8704,7 +8473,7 @@ string
 </tr>
 <tr>
 <td>
-<code>signCaCert</code></br>
+<code>signCaCert</code>
 <em>
 string
 </em>
@@ -8715,7 +8484,7 @@ string
 </tr>
 <tr>
 <td>
-<code>tlsCaCert</code></br>
+<code>tlsCaCert</code>
 <em>
 string
 </em>
@@ -8726,7 +8495,7 @@ string
 </tr>
 <tr>
 <td>
-<code>tlsAdminCert</code></br>
+<code>tlsAdminCert</code>
 <em>
 string
 </em>
@@ -8737,7 +8506,7 @@ string
 </tr>
 <tr>
 <td>
-<code>operationsPort</code></br>
+<code>operationsPort</code>
 <em>
 int
 </em>
@@ -8748,7 +8517,7 @@ int
 </tr>
 <tr>
 <td>
-<code>adminPort</code></br>
+<code>adminPort</code>
 <em>
 int
 </em>
@@ -8759,7 +8528,7 @@ int
 </tr>
 <tr>
 <td>
-<code>port</code></br>
+<code>port</code>
 <em>
 int
 </em>
@@ -8770,7 +8539,7 @@ int
 </tr>
 <tr>
 <td>
-<code>message</code></br>
+<code>message</code>
 <em>
 string
 </em>
@@ -8800,7 +8569,7 @@ string
 <tbody>
 <tr>
 <td>
-<code>image</code></br>
+<code>image</code>
 <em>
 string
 </em>
@@ -8810,7 +8579,7 @@ string
 </tr>
 <tr>
 <td>
-<code>tag</code></br>
+<code>tag</code>
 <em>
 string
 </em>
@@ -8820,7 +8589,7 @@ string
 </tr>
 <tr>
 <td>
-<code>mspID</code></br>
+<code>mspID</code>
 <em>
 string
 </em>
@@ -8830,7 +8599,7 @@ string
 </tr>
 <tr>
 <td>
-<code>enrollment</code></br>
+<code>enrollment</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.OrdererEnrollment">
 OrdererEnrollment
@@ -8842,7 +8611,7 @@ OrdererEnrollment
 </tr>
 <tr>
 <td>
-<code>nodes</code></br>
+<code>nodes</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.OrdererNode">
 []OrdererNode
@@ -8854,7 +8623,7 @@ OrdererEnrollment
 </tr>
 <tr>
 <td>
-<code>service</code></br>
+<code>service</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.OrdererService">
 OrdererService
@@ -8866,7 +8635,7 @@ OrdererService
 </tr>
 <tr>
 <td>
-<code>storage</code></br>
+<code>storage</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.Storage">
 Storage
@@ -8878,7 +8647,7 @@ Storage
 </tr>
 <tr>
 <td>
-<code>systemChannel</code></br>
+<code>systemChannel</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.OrdererSystemChannel">
 OrdererSystemChannel
@@ -8909,21 +8678,9 @@ OrdererSystemChannel
 <tbody>
 <tr>
 <td>
-<code>conditions</code></br>
+<code>conditions</code>
 <em>
 github.com/kfsoftware/hlf-operator/pkg/status.Conditions
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>status</code></br>
-<em>
-<a href="#hlf.kungfusoftware.es/v1alpha1.DeploymentStatus">
-DeploymentStatus
-</a>
 </em>
 </td>
 <td>
@@ -8949,7 +8706,7 @@ DeploymentStatus
 <tbody>
 <tr>
 <td>
-<code>user</code></br>
+<code>user</code>
 <em>
 string
 </em>
@@ -8959,7 +8716,7 @@ string
 </tr>
 <tr>
 <td>
-<code>password</code></br>
+<code>password</code>
 <em>
 string
 </em>
@@ -8969,7 +8726,7 @@ string
 </tr>
 <tr>
 <td>
-<code>image</code></br>
+<code>image</code>
 <em>
 string
 </em>
@@ -8979,7 +8736,7 @@ string
 </tr>
 <tr>
 <td>
-<code>tag</code></br>
+<code>tag</code>
 <em>
 string
 </em>
@@ -8989,7 +8746,7 @@ string
 </tr>
 <tr>
 <td>
-<code>pullPolicy</code></br>
+<code>pullPolicy</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#pullpolicy-v1-core">
 Kubernetes core/v1.PullPolicy
@@ -9001,7 +8758,7 @@ Kubernetes core/v1.PullPolicy
 </tr>
 <tr>
 <td>
-<code>externalCouchDB</code></br>
+<code>externalCouchDB</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricPeerExternalCouchDB">
 FabricPeerExternalCouchDB
@@ -9032,7 +8789,7 @@ FabricPeerExternalCouchDB
 <tbody>
 <tr>
 <td>
-<code>enabled</code></br>
+<code>enabled</code>
 <em>
 bool
 </em>
@@ -9042,7 +8799,7 @@ bool
 </tr>
 <tr>
 <td>
-<code>image</code></br>
+<code>image</code>
 <em>
 string
 </em>
@@ -9052,7 +8809,7 @@ string
 </tr>
 <tr>
 <td>
-<code>tag</code></br>
+<code>tag</code>
 <em>
 string
 </em>
@@ -9062,7 +8819,7 @@ string
 </tr>
 <tr>
 <td>
-<code>imagePullPolicy</code></br>
+<code>imagePullPolicy</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#pullpolicy-v1-core">
 Kubernetes core/v1.PullPolicy
@@ -9092,7 +8849,7 @@ Kubernetes core/v1.PullPolicy
 <tbody>
 <tr>
 <td>
-<code>period</code></br>
+<code>period</code>
 <em>
 string
 </em>
@@ -9102,7 +8859,7 @@ string
 </tr>
 <tr>
 <td>
-<code>touchPeriod</code></br>
+<code>touchPeriod</code>
 <em>
 string
 </em>
@@ -9130,7 +8887,7 @@ string
 <tbody>
 <tr>
 <td>
-<code>enabled</code></br>
+<code>enabled</code>
 <em>
 bool
 </em>
@@ -9140,7 +8897,7 @@ bool
 </tr>
 <tr>
 <td>
-<code>host</code></br>
+<code>host</code>
 <em>
 string
 </em>
@@ -9150,7 +8907,7 @@ string
 </tr>
 <tr>
 <td>
-<code>port</code></br>
+<code>port</code>
 <em>
 int
 </em>
@@ -9178,7 +8935,7 @@ int
 <tbody>
 <tr>
 <td>
-<code>level</code></br>
+<code>level</code>
 <em>
 string
 </em>
@@ -9188,7 +8945,7 @@ string
 </tr>
 <tr>
 <td>
-<code>peer</code></br>
+<code>peer</code>
 <em>
 string
 </em>
@@ -9198,7 +8955,7 @@ string
 </tr>
 <tr>
 <td>
-<code>cauthdsl</code></br>
+<code>cauthdsl</code>
 <em>
 string
 </em>
@@ -9208,7 +8965,7 @@ string
 </tr>
 <tr>
 <td>
-<code>gossip</code></br>
+<code>gossip</code>
 <em>
 string
 </em>
@@ -9218,7 +8975,7 @@ string
 </tr>
 <tr>
 <td>
-<code>grpc</code></br>
+<code>grpc</code>
 <em>
 string
 </em>
@@ -9228,7 +8985,7 @@ string
 </tr>
 <tr>
 <td>
-<code>ledger</code></br>
+<code>ledger</code>
 <em>
 string
 </em>
@@ -9238,7 +8995,7 @@ string
 </tr>
 <tr>
 <td>
-<code>msp</code></br>
+<code>msp</code>
 <em>
 string
 </em>
@@ -9248,7 +9005,7 @@ string
 </tr>
 <tr>
 <td>
-<code>policies</code></br>
+<code>policies</code>
 <em>
 string
 </em>
@@ -9276,7 +9033,7 @@ string
 <tbody>
 <tr>
 <td>
-<code>peer</code></br>
+<code>peer</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#resourcerequirements-v1-core">
 Kubernetes core/v1.ResourceRequirements
@@ -9288,7 +9045,7 @@ Kubernetes core/v1.ResourceRequirements
 </tr>
 <tr>
 <td>
-<code>couchdb</code></br>
+<code>couchdb</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#resourcerequirements-v1-core">
 Kubernetes core/v1.ResourceRequirements
@@ -9300,7 +9057,7 @@ Kubernetes core/v1.ResourceRequirements
 </tr>
 <tr>
 <td>
-<code>chaincode</code></br>
+<code>chaincode</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#resourcerequirements-v1-core">
 Kubernetes core/v1.ResourceRequirements
@@ -9312,7 +9069,7 @@ Kubernetes core/v1.ResourceRequirements
 </tr>
 <tr>
 <td>
-<code>couchdbExporter</code></br>
+<code>couchdbExporter</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#resourcerequirements-v1-core">
 Kubernetes core/v1.ResourceRequirements
@@ -9325,7 +9082,7 @@ Kubernetes core/v1.ResourceRequirements
 </tr>
 <tr>
 <td>
-<code>proxy</code></br>
+<code>proxy</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#resourcerequirements-v1-core">
 Kubernetes core/v1.ResourceRequirements
@@ -9357,7 +9114,7 @@ Kubernetes core/v1.ResourceRequirements
 <tbody>
 <tr>
 <td>
-<code>updateCertificateTime</code></br>
+<code>updateCertificateTime</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#time-v1-meta">
 Kubernetes meta/v1.Time
@@ -9370,7 +9127,7 @@ Kubernetes meta/v1.Time
 </tr>
 <tr>
 <td>
-<code>affinity</code></br>
+<code>affinity</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#affinity-v1-core">
 Kubernetes core/v1.Affinity
@@ -9383,7 +9140,7 @@ Kubernetes core/v1.Affinity
 </tr>
 <tr>
 <td>
-<code>serviceMonitor</code></br>
+<code>serviceMonitor</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.ServiceMonitor">
 ServiceMonitor
@@ -9396,7 +9153,7 @@ ServiceMonitor
 </tr>
 <tr>
 <td>
-<code>hostAliases</code></br>
+<code>hostAliases</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#hostalias-v1-core">
 []Kubernetes core/v1.HostAlias
@@ -9409,7 +9166,7 @@ ServiceMonitor
 </tr>
 <tr>
 <td>
-<code>nodeSelector</code></br>
+<code>nodeSelector</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#nodeselector-v1-core">
 Kubernetes core/v1.NodeSelector
@@ -9422,7 +9179,7 @@ Kubernetes core/v1.NodeSelector
 </tr>
 <tr>
 <td>
-<code>couchDBexporter</code></br>
+<code>couchDBexporter</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricPeerCouchdbExporter">
 FabricPeerCouchdbExporter
@@ -9435,7 +9192,7 @@ FabricPeerCouchdbExporter
 </tr>
 <tr>
 <td>
-<code>grpcProxy</code></br>
+<code>grpcProxy</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.GRPCProxy">
 GRPCProxy
@@ -9448,7 +9205,7 @@ GRPCProxy
 </tr>
 <tr>
 <td>
-<code>replicas</code></br>
+<code>replicas</code>
 <em>
 int
 </em>
@@ -9458,7 +9215,7 @@ int
 </tr>
 <tr>
 <td>
-<code>dockerSocketPath</code></br>
+<code>dockerSocketPath</code>
 <em>
 string
 </em>
@@ -9468,7 +9225,7 @@ string
 </tr>
 <tr>
 <td>
-<code>image</code></br>
+<code>image</code>
 <em>
 string
 </em>
@@ -9478,7 +9235,7 @@ string
 </tr>
 <tr>
 <td>
-<code>externalBuilders</code></br>
+<code>externalBuilders</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.ExternalBuilder">
 []ExternalBuilder
@@ -9491,7 +9248,7 @@ string
 </tr>
 <tr>
 <td>
-<code>istio</code></br>
+<code>istio</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricIstio">
 FabricIstio
@@ -9504,7 +9261,7 @@ FabricIstio
 </tr>
 <tr>
 <td>
-<code>gossip</code></br>
+<code>gossip</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricPeerSpecGossip">
 FabricPeerSpecGossip
@@ -9516,7 +9273,7 @@ FabricPeerSpecGossip
 </tr>
 <tr>
 <td>
-<code>externalEndpoint</code></br>
+<code>externalEndpoint</code>
 <em>
 string
 </em>
@@ -9526,7 +9283,7 @@ string
 </tr>
 <tr>
 <td>
-<code>tag</code></br>
+<code>tag</code>
 <em>
 string
 </em>
@@ -9536,7 +9293,7 @@ string
 </tr>
 <tr>
 <td>
-<code>imagePullPolicy</code></br>
+<code>imagePullPolicy</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#pullpolicy-v1-core">
 Kubernetes core/v1.PullPolicy
@@ -9548,7 +9305,7 @@ Kubernetes core/v1.PullPolicy
 </tr>
 <tr>
 <td>
-<code>external_chaincode_builder</code></br>
+<code>external_chaincode_builder</code>
 <em>
 bool
 </em>
@@ -9558,7 +9315,7 @@ bool
 </tr>
 <tr>
 <td>
-<code>couchdb</code></br>
+<code>couchdb</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricPeerCouchDB">
 FabricPeerCouchDB
@@ -9570,7 +9327,7 @@ FabricPeerCouchDB
 </tr>
 <tr>
 <td>
-<code>fsServer</code></br>
+<code>fsServer</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricFSServer">
 FabricFSServer
@@ -9583,7 +9340,7 @@ FabricFSServer
 </tr>
 <tr>
 <td>
-<code>imagePullSecrets</code></br>
+<code>imagePullSecrets</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#localobjectreference-v1-core">
 []Kubernetes core/v1.LocalObjectReference
@@ -9596,7 +9353,7 @@ FabricFSServer
 </tr>
 <tr>
 <td>
-<code>mspID</code></br>
+<code>mspID</code>
 <em>
 string
 </em>
@@ -9606,7 +9363,7 @@ string
 </tr>
 <tr>
 <td>
-<code>secret</code></br>
+<code>secret</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.Secret">
 Secret
@@ -9618,7 +9375,7 @@ Secret
 </tr>
 <tr>
 <td>
-<code>service</code></br>
+<code>service</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.PeerService">
 PeerService
@@ -9630,7 +9387,7 @@ PeerService
 </tr>
 <tr>
 <td>
-<code>stateDb</code></br>
+<code>stateDb</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.StateDB">
 StateDB
@@ -9642,7 +9399,7 @@ StateDB
 </tr>
 <tr>
 <td>
-<code>storage</code></br>
+<code>storage</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricPeerStorage">
 FabricPeerStorage
@@ -9654,7 +9411,7 @@ FabricPeerStorage
 </tr>
 <tr>
 <td>
-<code>discovery</code></br>
+<code>discovery</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricPeerDiscovery">
 FabricPeerDiscovery
@@ -9666,7 +9423,7 @@ FabricPeerDiscovery
 </tr>
 <tr>
 <td>
-<code>logging</code></br>
+<code>logging</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricPeerLogging">
 FabricPeerLogging
@@ -9678,7 +9435,7 @@ FabricPeerLogging
 </tr>
 <tr>
 <td>
-<code>resources</code></br>
+<code>resources</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricPeerResources">
 FabricPeerResources
@@ -9690,7 +9447,7 @@ FabricPeerResources
 </tr>
 <tr>
 <td>
-<code>hosts</code></br>
+<code>hosts</code>
 <em>
 []string
 </em>
@@ -9700,7 +9457,7 @@ FabricPeerResources
 </tr>
 <tr>
 <td>
-<code>tolerations</code></br>
+<code>tolerations</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#toleration-v1-core">
 []Kubernetes core/v1.Toleration
@@ -9713,7 +9470,7 @@ FabricPeerResources
 </tr>
 <tr>
 <td>
-<code>env</code></br>
+<code>env</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#envvar-v1-core">
 []Kubernetes core/v1.EnvVar
@@ -9744,7 +9501,7 @@ FabricPeerResources
 <tbody>
 <tr>
 <td>
-<code>externalEndpoint</code></br>
+<code>externalEndpoint</code>
 <em>
 string
 </em>
@@ -9754,7 +9511,7 @@ string
 </tr>
 <tr>
 <td>
-<code>bootstrap</code></br>
+<code>bootstrap</code>
 <em>
 string
 </em>
@@ -9764,7 +9521,7 @@ string
 </tr>
 <tr>
 <td>
-<code>endpoint</code></br>
+<code>endpoint</code>
 <em>
 string
 </em>
@@ -9774,7 +9531,7 @@ string
 </tr>
 <tr>
 <td>
-<code>useLeaderElection</code></br>
+<code>useLeaderElection</code>
 <em>
 bool
 </em>
@@ -9784,7 +9541,7 @@ bool
 </tr>
 <tr>
 <td>
-<code>orgLeader</code></br>
+<code>orgLeader</code>
 <em>
 bool
 </em>
@@ -9813,7 +9570,7 @@ bool
 <tbody>
 <tr>
 <td>
-<code>conditions</code></br>
+<code>conditions</code>
 <em>
 github.com/kfsoftware/hlf-operator/pkg/status.Conditions
 </em>
@@ -9823,7 +9580,7 @@ github.com/kfsoftware/hlf-operator/pkg/status.Conditions
 </tr>
 <tr>
 <td>
-<code>message</code></br>
+<code>message</code>
 <em>
 string
 </em>
@@ -9833,19 +9590,7 @@ string
 </tr>
 <tr>
 <td>
-<code>status</code></br>
-<em>
-<a href="#hlf.kungfusoftware.es/v1alpha1.DeploymentStatus">
-DeploymentStatus
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>lastCertificateUpdate</code></br>
+<code>lastCertificateUpdate</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#time-v1-meta">
 Kubernetes meta/v1.Time
@@ -9858,7 +9603,7 @@ Kubernetes meta/v1.Time
 </tr>
 <tr>
 <td>
-<code>signCert</code></br>
+<code>signCert</code>
 <em>
 string
 </em>
@@ -9869,7 +9614,7 @@ string
 </tr>
 <tr>
 <td>
-<code>tlsCert</code></br>
+<code>tlsCert</code>
 <em>
 string
 </em>
@@ -9880,7 +9625,7 @@ string
 </tr>
 <tr>
 <td>
-<code>tlsCaCert</code></br>
+<code>tlsCaCert</code>
 <em>
 string
 </em>
@@ -9891,7 +9636,7 @@ string
 </tr>
 <tr>
 <td>
-<code>signCaCert</code></br>
+<code>signCaCert</code>
 <em>
 string
 </em>
@@ -9902,7 +9647,7 @@ string
 </tr>
 <tr>
 <td>
-<code>port</code></br>
+<code>port</code>
 <em>
 int
 </em>
@@ -9931,7 +9676,7 @@ int
 <tbody>
 <tr>
 <td>
-<code>couchdb</code></br>
+<code>couchdb</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.Storage">
 Storage
@@ -9943,7 +9688,7 @@ Storage
 </tr>
 <tr>
 <td>
-<code>peer</code></br>
+<code>peer</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.Storage">
 Storage
@@ -9955,7 +9700,7 @@ Storage
 </tr>
 <tr>
 <td>
-<code>chaincode</code></br>
+<code>chaincode</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.Storage">
 Storage
@@ -9985,7 +9730,7 @@ Storage
 <tbody>
 <tr>
 <td>
-<code>key</code></br>
+<code>key</code>
 <em>
 string
 </em>
@@ -9995,7 +9740,7 @@ string
 </tr>
 <tr>
 <td>
-<code>cert</code></br>
+<code>cert</code>
 <em>
 string
 </em>
@@ -10005,7 +9750,7 @@ string
 </tr>
 <tr>
 <td>
-<code>clientAuth</code></br>
+<code>clientAuth</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricCAClientAuth">
 FabricCAClientAuth
@@ -10036,7 +9781,7 @@ FabricCAClientAuth
 <tbody>
 <tr>
 <td>
-<code>enabled</code></br>
+<code>enabled</code>
 <em>
 bool
 </em>
@@ -10046,7 +9791,7 @@ bool
 </tr>
 <tr>
 <td>
-<code>image</code></br>
+<code>image</code>
 <em>
 string
 </em>
@@ -10056,7 +9801,7 @@ string
 </tr>
 <tr>
 <td>
-<code>tag</code></br>
+<code>tag</code>
 <em>
 string
 </em>
@@ -10066,7 +9811,7 @@ string
 </tr>
 <tr>
 <td>
-<code>istio</code></br>
+<code>istio</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricIstio">
 FabricIstio
@@ -10078,7 +9823,7 @@ FabricIstio
 </tr>
 <tr>
 <td>
-<code>imagePullPolicy</code></br>
+<code>imagePullPolicy</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#pullpolicy-v1-core">
 Kubernetes core/v1.PullPolicy
@@ -10090,7 +9835,7 @@ Kubernetes core/v1.PullPolicy
 </tr>
 <tr>
 <td>
-<code>resources</code></br>
+<code>resources</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#resourcerequirements-v1-core">
 Kubernetes core/v1.ResourceRequirements
@@ -10102,7 +9847,7 @@ Kubernetes core/v1.ResourceRequirements
 </tr>
 <tr>
 <td>
-<code>imagePullSecrets</code></br>
+<code>imagePullSecrets</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#localobjectreference-v1-core">
 []Kubernetes core/v1.LocalObjectReference
@@ -10133,32 +9878,35 @@ Kubernetes core/v1.ResourceRequirements
 <tbody>
 <tr>
 <td>
-<code>secretName</code></br>
+<code>secretName</code>
 <em>
 string
 </em>
 </td>
 <td>
+<p>Secret name</p>
 </td>
 </tr>
 <tr>
 <td>
-<code>secretNamespace</code></br>
+<code>secretNamespace</code>
 <em>
 string
 </em>
 </td>
 <td>
+<p>Secret namespace</p>
 </td>
 </tr>
 <tr>
 <td>
-<code>secretKey</code></br>
+<code>secretKey</code>
 <em>
 string
 </em>
 </td>
 <td>
+<p>Key inside the secret that holds the private key and certificate to interact with the network</p>
 </td>
 </tr>
 </tbody>
@@ -10183,7 +9931,7 @@ string
 <tbody>
 <tr>
 <td>
-<code>enabled</code></br>
+<code>enabled</code>
 <em>
 bool
 </em>
@@ -10193,7 +9941,7 @@ bool
 </tr>
 <tr>
 <td>
-<code>className</code></br>
+<code>className</code>
 <em>
 string
 </em>
@@ -10203,7 +9951,7 @@ string
 </tr>
 <tr>
 <td>
-<code>annotations</code></br>
+<code>annotations</code>
 <em>
 map[string]string
 </em>
@@ -10213,7 +9961,7 @@ map[string]string
 </tr>
 <tr>
 <td>
-<code>tls</code></br>
+<code>tls</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#ingresstls-v1beta1-networking">
 []Kubernetes networking/v1beta1.IngressTLS
@@ -10225,7 +9973,7 @@ map[string]string
 </tr>
 <tr>
 <td>
-<code>hosts</code></br>
+<code>hosts</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.IngressHost">
 []IngressHost
@@ -10255,7 +10003,7 @@ map[string]string
 <tbody>
 <tr>
 <td>
-<code>host</code></br>
+<code>host</code>
 <em>
 string
 </em>
@@ -10265,7 +10013,7 @@ string
 </tr>
 <tr>
 <td>
-<code>paths</code></br>
+<code>paths</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.IngressPath">
 []IngressPath
@@ -10295,7 +10043,7 @@ string
 <tbody>
 <tr>
 <td>
-<code>path</code></br>
+<code>path</code>
 <em>
 string
 </em>
@@ -10305,7 +10053,7 @@ string
 </tr>
 <tr>
 <td>
-<code>pathType</code></br>
+<code>pathType</code>
 <em>
 string
 </em>
@@ -10316,7 +10064,7 @@ string
 </tbody>
 </table>
 <h3 id="hlf.kungfusoftware.es/v1alpha1.MetricsProvider">MetricsProvider
-(<code>string</code> alias)</p></h3>
+(<code>string</code> alias)</h3>
 <p>
 </p>
 <h3 id="hlf.kungfusoftware.es/v1alpha1.OrdererCapabilities">OrdererCapabilities
@@ -10337,7 +10085,7 @@ string
 <tbody>
 <tr>
 <td>
-<code>V2_0</code></br>
+<code>V2_0</code>
 <em>
 bool
 </em>
@@ -10365,7 +10113,7 @@ bool
 <tbody>
 <tr>
 <td>
-<code>component</code></br>
+<code>component</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.Component">
 Component
@@ -10377,7 +10125,7 @@ Component
 </tr>
 <tr>
 <td>
-<code>tls</code></br>
+<code>tls</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.TLS">
 TLS
@@ -10407,7 +10155,7 @@ TLS
 <tbody>
 <tr>
 <td>
-<code>id</code></br>
+<code>id</code>
 <em>
 string
 </em>
@@ -10417,7 +10165,7 @@ string
 </tr>
 <tr>
 <td>
-<code>host</code></br>
+<code>host</code>
 <em>
 string
 </em>
@@ -10428,7 +10176,7 @@ string
 </tr>
 <tr>
 <td>
-<code>port</code></br>
+<code>port</code>
 <em>
 int
 </em>
@@ -10439,7 +10187,7 @@ int
 </tr>
 <tr>
 <td>
-<code>enrollment</code></br>
+<code>enrollment</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.OrdererNodeEnrollment">
 OrdererNodeEnrollment
@@ -10469,7 +10217,7 @@ OrdererNodeEnrollment
 <tbody>
 <tr>
 <td>
-<code>tls</code></br>
+<code>tls</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.OrdererNodeEnrollmentTLS">
 OrdererNodeEnrollmentTLS
@@ -10499,7 +10247,7 @@ OrdererNodeEnrollmentTLS
 <tbody>
 <tr>
 <td>
-<code>csr</code></br>
+<code>csr</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.Csr">
 Csr
@@ -10530,7 +10278,7 @@ Csr
 <tbody>
 <tr>
 <td>
-<code>type</code></br>
+<code>type</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#servicetype-v1-core">
 Kubernetes core/v1.ServiceType
@@ -10542,7 +10290,7 @@ Kubernetes core/v1.ServiceType
 </tr>
 <tr>
 <td>
-<code>nodePortOperations</code></br>
+<code>nodePortOperations</code>
 <em>
 int
 </em>
@@ -10552,7 +10300,7 @@ int
 </tr>
 <tr>
 <td>
-<code>nodePortRequest</code></br>
+<code>nodePortRequest</code>
 <em>
 int
 </em>
@@ -10580,7 +10328,7 @@ int
 <tbody>
 <tr>
 <td>
-<code>type</code></br>
+<code>type</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.ServiceType">
 ServiceType
@@ -10610,7 +10358,7 @@ ServiceType
 <tbody>
 <tr>
 <td>
-<code>name</code></br>
+<code>name</code>
 <em>
 string
 </em>
@@ -10620,7 +10368,7 @@ string
 </tr>
 <tr>
 <td>
-<code>config</code></br>
+<code>config</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.ChannelConfig">
 ChannelConfig
@@ -10654,7 +10402,7 @@ ChannelConfig
 <tbody>
 <tr>
 <td>
-<code>type</code></br>
+<code>type</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#servicetype-v1-core">
 Kubernetes core/v1.ServiceType
@@ -10685,7 +10433,7 @@ Kubernetes core/v1.ServiceType
 <tbody>
 <tr>
 <td>
-<code>enrollment</code></br>
+<code>enrollment</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.Enrollment">
 Enrollment
@@ -10711,7 +10459,7 @@ Enrollment
 <tbody>
 <tr>
 <td>
-<code>type</code></br>
+<code>type</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.ServiceType">
 ServiceType
@@ -10743,7 +10491,7 @@ ServiceType
 <tbody>
 <tr>
 <td>
-<code>enabled</code></br>
+<code>enabled</code>
 <em>
 bool
 </em>
@@ -10753,7 +10501,7 @@ bool
 </tr>
 <tr>
 <td>
-<code>labels</code></br>
+<code>labels</code>
 <em>
 map[string]string
 </em>
@@ -10764,7 +10512,7 @@ map[string]string
 </tr>
 <tr>
 <td>
-<code>sampleLimit</code></br>
+<code>sampleLimit</code>
 <em>
 int
 </em>
@@ -10774,7 +10522,7 @@ int
 </tr>
 <tr>
 <td>
-<code>interval</code></br>
+<code>interval</code>
 <em>
 string
 </em>
@@ -10784,7 +10532,7 @@ string
 </tr>
 <tr>
 <td>
-<code>scrapeTimeout</code></br>
+<code>scrapeTimeout</code>
 <em>
 string
 </em>
@@ -10795,7 +10543,7 @@ string
 </tbody>
 </table>
 <h3 id="hlf.kungfusoftware.es/v1alpha1.ServiceType">ServiceType
-(<code>string</code> alias)</p></h3>
+(<code>string</code> alias)</h3>
 <p>
 (<em>Appears on:</em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.OrdererService">OrdererService</a>, 
@@ -10804,7 +10552,7 @@ string
 <p>
 </p>
 <h3 id="hlf.kungfusoftware.es/v1alpha1.StateDB">StateDB
-(<code>string</code> alias)</p></h3>
+(<code>string</code> alias)</h3>
 <p>
 (<em>Appears on:</em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricPeerSpec">FabricPeerSpec</a>)
@@ -10833,7 +10581,7 @@ string
 <tbody>
 <tr>
 <td>
-<code>size</code></br>
+<code>size</code>
 <em>
 string
 </em>
@@ -10843,7 +10591,7 @@ string
 </tr>
 <tr>
 <td>
-<code>storageClass</code></br>
+<code>storageClass</code>
 <em>
 string
 </em>
@@ -10854,7 +10602,7 @@ string
 </tr>
 <tr>
 <td>
-<code>accessMode</code></br>
+<code>accessMode</code>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#persistentvolumeaccessmode-v1-core">
 Kubernetes core/v1.PersistentVolumeAccessMode
@@ -10886,7 +10634,7 @@ Kubernetes core/v1.PersistentVolumeAccessMode
 <tbody>
 <tr>
 <td>
-<code>cahost</code></br>
+<code>cahost</code>
 <em>
 string
 </em>
@@ -10896,7 +10644,7 @@ string
 </tr>
 <tr>
 <td>
-<code>caname</code></br>
+<code>caname</code>
 <em>
 string
 </em>
@@ -10906,7 +10654,7 @@ string
 </tr>
 <tr>
 <td>
-<code>caport</code></br>
+<code>caport</code>
 <em>
 int
 </em>
@@ -10916,7 +10664,7 @@ int
 </tr>
 <tr>
 <td>
-<code>catls</code></br>
+<code>catls</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.Catls">
 Catls
@@ -10928,7 +10676,7 @@ Catls
 </tr>
 <tr>
 <td>
-<code>csr</code></br>
+<code>csr</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.Csr">
 Csr
@@ -10941,7 +10689,7 @@ Csr
 </tr>
 <tr>
 <td>
-<code>enrollid</code></br>
+<code>enrollid</code>
 <em>
 string
 </em>
@@ -10951,7 +10699,7 @@ string
 </tr>
 <tr>
 <td>
-<code>enrollsecret</code></br>
+<code>enrollsecret</code>
 <em>
 string
 </em>
@@ -10964,5 +10712,5 @@ string
 <hr/>
 <p><em>
 Generated with <code>gen-crd-api-reference-docs</code>
-on git commit <code>212241b</code>.
+on git commit <code>2d27d35</code>.
 </em></p>
