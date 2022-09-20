@@ -98,6 +98,7 @@ func (c *createCmd) run(args []string) error {
 			Hosts:          c.ordererOpts.AdminHosts,
 			IngressGateway: ingressGateway,
 		}
+		csrHosts = append(csrHosts, c.ordererOpts.AdminHosts...)
 	}
 	caHost := k8sIP
 	if c.ordererOpts.CAHost != "" {
