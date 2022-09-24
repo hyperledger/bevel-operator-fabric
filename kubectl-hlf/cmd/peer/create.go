@@ -7,6 +7,7 @@ import (
 	"github.com/pkg/errors"
 	"io"
 	"k8s.io/apimachinery/pkg/api/resource"
+	"strings"
 
 	"github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
 	"github.com/kfsoftware/hlf-operator/controllers/utils"
@@ -34,6 +35,7 @@ type Options struct {
 	CAName                          string
 	EnrollID                        string
 	Hosts                           []string
+	HostAliases                     []string
 	BootstrapPeers                  []string
 	Leader                          bool
 	Output                          bool
@@ -197,6 +199,21 @@ func (c *createCmd) run() error {
 		Enrollsecret: c.peerOpts.EnrollPW,
 	}
 
+	var hostAliases []corev1.HostAlias
+	for _, hostAlias := range c.peerOpts.HostAliases {
+		ipAndNames := strings.Split(hostAlias, ":")
+		if len(ipAndNames) == 2 {
+			aliases := strings.Split(ipAndNames[1], ",")
+			if len(aliases) > 0 {
+				hostAliases = append(hostAliases, corev1.HostAlias{IP: ipAndNames[0], Hostnames: aliases})
+			} else {
+				log.Warningf("ingnoring host-alias [%s]: must be in format <ip>:<alias1>,<alias2>...", hostAlias)
+			}
+		} else {
+			log.Warningf("ingnoring host-alias [%s]: must be in format <ip>:<alias1>,<alias2>...", hostAlias)
+		}
+	}
+
 	fabricPeer := &v1alpha1.FabricPeer{
 		TypeMeta: v1.TypeMeta{
 			Kind:       "FabricPeer",
@@ -208,7 +225,7 @@ func (c *createCmd) run() error {
 		},
 		Spec: v1alpha1.FabricPeerSpec{
 			ServiceMonitor:           nil,
-			HostAliases:              nil,
+			HostAliases:              hostAliases,
 			Replicas:                 1,
 			DockerSocketPath:         "",
 			Image:                    c.peerOpts.Image,
@@ -420,6 +437,7 @@ func newCreatePeerCmd(out io.Writer, errOut io.Writer) *cobra.Command {
 	f.BoolVarP(&c.peerOpts.Output, "output", "o", false, "Output in yaml")
 	f.BoolVarP(&c.peerOpts.KubernetesBuilder, "k8s-builder", "", false, "Enable kubernetes builder (deprecated)")
 	f.BoolVarP(&c.peerOpts.ExternalChaincodeServiceBuilder, "external-service-builder", "", true, "External chaincode service builder enabled(only use in 2.4.1+)")
+	f.StringArrayVarP(&c.peerOpts.HostAliases, "host-aliases", "", []string{}, "Host aliases (e.g.: \"1.2.3.4:osn1.example.com,osn2.example.com\")")
 
 	f.StringVarP(&c.peerOpts.CouchDBImage, "couchdb-repository", "", helpers.DefaultCouchDBImage, "CouchDB image")
 	f.StringVarP(&c.peerOpts.CouchDBTag, "couchdb-tag", "", helpers.DefaultCouchDBVersion, "CouchDB version")

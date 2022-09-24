@@ -12,6 +12,7 @@ import (
 	"io"
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"strings"
 )
 
 type OrdererOptions struct {
@@ -26,6 +27,7 @@ type OrdererOptions struct {
 	EnrollPW       string
 	CAName         string
 	Hosts          []string
+	HostAliases    []string
 	Output         bool
 	IngressGateway string
 	IngressPort    int
@@ -108,6 +110,20 @@ func (c *createCmd) run(args []string) error {
 	if c.ordererOpts.CAPort != 0 {
 		caPort = c.ordererOpts.CAPort
 	}
+	var hostAliases []corev1.HostAlias
+	for _, hostAlias := range c.ordererOpts.HostAliases {
+		ipAndNames := strings.Split(hostAlias, ":")
+		if len(ipAndNames) == 2 {
+			aliases := strings.Split(ipAndNames[1], ",")
+			if len(aliases) > 0 {
+				hostAliases = append(hostAliases, corev1.HostAlias{IP: ipAndNames[0], Hostnames: aliases})
+			} else {
+				log.Warningf("ingnoring host-alias [%s]: must be in format <ip>:<alias1>,<alias2>...", hostAlias)
+			}
+		} else {
+			log.Warningf("ingnoring host-alias [%s]: must be in format <ip>:<alias1>,<alias2>...", hostAlias)
+		}
+	}
 	fabricOrderer := &v1alpha1.FabricOrdererNode{
 		TypeMeta: v1.TypeMeta{
 			Kind:       "FabricOrdererNode",
@@ -119,7 +135,7 @@ func (c *createCmd) run(args []string) error {
 		},
 		Spec: v1alpha1.FabricOrdererNodeSpec{
 			ServiceMonitor:              nil,
-			HostAliases:                 []corev1.HostAlias{},
+			HostAliases:                 hostAliases,
 			Resources:                   corev1.ResourceRequirements{},
 			Replicas:                    1,
 			Image:                       c.ordererOpts.Image,
@@ -219,5 +235,6 @@ func newCreateOrdererNodeCmd(out io.Writer, errOut io.Writer) *cobra.Command {
 	f.StringArrayVarP(&c.ordererOpts.Hosts, "hosts", "", []string{}, "Hosts")
 	f.StringArrayVarP(&c.ordererOpts.AdminHosts, "admin-hosts", "", []string{}, "Hosts for the admin API(introduced in v2.3)")
 	f.BoolVarP(&c.ordererOpts.Output, "output", "o", false, "Output in yaml")
+	f.StringArrayVarP(&c.ordererOpts.HostAliases, "host-aliases", "", []string{}, "Host aliases (e.g.: \"1.2.3.4:osn2.example.com,peer1.example.com\")")
 	return cmd
 }
