@@ -205,6 +205,21 @@ func (r *FabricFollowerChannelReconciler) Reconcile(ctx context.Context, req ctr
 			return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricFollowerChannel)
 		}
 	}
+	for _, peer := range fabricFollowerChannel.Spec.ExternalPeersToJoin {
+		r.Log.Info(fmt.Sprintf("Joining peer %s", peer.URL))
+		err = resClient.JoinChannel(
+			fabricFollowerChannel.Spec.Name,
+			resmgmt.WithTargetEndpoints(peer.URL),
+		)
+		if err != nil {
+			if strings.Contains(err.Error(), "already exists") {
+				r.Log.Info(fmt.Sprintf("Peer %s already joined channel %s", peer.URL, fabricFollowerChannel.Spec.Name))
+				continue
+			}
+			r.setConditionStatus(ctx, fabricFollowerChannel, hlfv1alpha1.FailedStatus, false, err, false)
+			return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricFollowerChannel)
+		}
+	}
 
 	// set anchor peers
 	block, err := resClient.QueryConfigBlockFromOrderer(fabricFollowerChannel.Spec.Name)

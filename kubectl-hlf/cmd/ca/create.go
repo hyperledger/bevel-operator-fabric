@@ -27,6 +27,8 @@ type Options struct {
 	IngressGateway string
 	IngressPort    int
 	Hosts          []string
+	DBType         string
+	DBDataSource   string
 }
 
 func (o Options) Validate() error {
@@ -102,8 +104,8 @@ func (c *createCmd) run(args []string) error {
 		},
 		Spec: v1alpha1.FabricCASpec{
 			Database: v1alpha1.FabricCADatabase{
-				Type:       "sqlite3",
-				Datasource: "fabric-ca-server.db",
+				Type:       c.caOpts.DBType,
+				Datasource: c.caOpts.DBDataSource,
 			},
 			Hosts: hosts,
 			Service: v1alpha1.FabricCASpecService{
@@ -289,6 +291,9 @@ func newCreateCACmd(out io.Writer, errOut io.Writer) *cobra.Command {
 	f.StringVarP(&c.caOpts.Image, "image", "i", helpers.DefaultCAImage, "Image of the Fabric CA")
 	f.StringVarP(&c.caOpts.EnrollID, "enroll-id", "", "enroll", "Enroll ID of the CA")
 	f.StringVarP(&c.caOpts.EnrollSecret, "enroll-pw", "", "enrollpw", "Enroll secret of the CA")
+	f.StringVarP(&c.caOpts.DBType, "db.type", "", "sqlite3", "Database type of the CA")
+	f.StringVarP(&c.caOpts.DBDataSource, "db.datasource", "", "fabric-ca-server.db", "Database datasource of the CA")
+
 	f.BoolVarP(&c.caOpts.Output, "output", "o", false, "Output in yaml")
 	f.StringArrayVarP(&c.caOpts.Hosts, "hosts", "", []string{}, "Hosts for Istio")
 	f.StringVarP(&c.caOpts.IngressGateway, "istio-ingressgateway", "", "ingressgateway", "Istio ingress gateway name")

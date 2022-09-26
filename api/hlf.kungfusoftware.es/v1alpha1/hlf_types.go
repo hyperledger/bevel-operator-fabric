@@ -1863,6 +1863,8 @@ type FabricFollowerChannelSpec struct {
 	Orderers []FabricFollowerChannelOrderer `json:"orderers"`
 	// Peers to join the channel
 	PeersToJoin []FabricFollowerChannelPeer `json:"peersToJoin"`
+	// Peers to join the channel
+	ExternalPeersToJoin []FabricFollowerChannelExternalPeer `json:"externalPeersToJoin"`
 	// Anchor peers defined for the current organization
 	AnchorPeers []FabricFollowerChannelAnchorPeer `json:"anchorPeers"`
 	// Identity to use to interact with the peers and the orderers
@@ -1884,6 +1886,12 @@ type HLFIdentity struct {
 	SecretNamespace string `json:"secretNamespace"`
 	// Key inside the secret that holds the private key and certificate to interact with the network
 	SecretKey string `json:"secretKey"`
+}
+type FabricFollowerChannelExternalPeer struct {
+	// FabricPeer URL of the peer
+	URL string `json:"url"`
+	// FabricPeer TLS CA certificate of the peer
+	TLSCACert string `json:"tlsCACert"`
 }
 type FabricFollowerChannelPeer struct {
 	// FabricPeer Name of the peer inside the kubernetes cluster

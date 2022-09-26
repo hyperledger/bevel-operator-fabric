@@ -60,6 +60,21 @@ spec:
                   - port
                   type: object
                 type: array
+              externalPeersToJoin:
+                description: Peers to join the channel
+                items:
+                  properties:
+                    tlsCACert:
+                      description: FabricPeer TLS CA certificate of the peer
+                      type: string
+                    url:
+                      description: FabricPeer URL of the peer
+                      type: string
+                  required:
+                  - tlsCACert
+                  - url
+                  type: object
+                type: array
               hlfIdentity:
                 description: Identity to use to interact with the peers and the orderers
                 properties:
@@ -119,6 +134,7 @@ spec:
                 type: array
             required:
             - anchorPeers
+            - externalPeersToJoin
             - hlfIdentity
             - mspId
             - name

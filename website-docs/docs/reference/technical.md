@@ -706,6 +706,19 @@ string
 </tr>
 <tr>
 <td>
+<code>externalPeersToJoin</code>
+<em>
+<a href="#hlf.kungfusoftware.es/v1alpha1.FabricFollowerChannelExternalPeer">
+[]FabricFollowerChannelExternalPeer
+</a>
+</em>
+</td>
+<td>
+<p>Peers to join the channel</p>
+</td>
+</tr>
+<tr>
+<td>
 <code>anchorPeers</code>
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricFollowerChannelAnchorPeer">
@@ -5560,6 +5573,46 @@ int
 </tr>
 </tbody>
 </table>
+<h3 id="hlf.kungfusoftware.es/v1alpha1.FabricFollowerChannelExternalPeer">FabricFollowerChannelExternalPeer
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#hlf.kungfusoftware.es/v1alpha1.FabricFollowerChannelSpec">FabricFollowerChannelSpec</a>)
+</p>
+<p>
+</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>url</code>
+<em>
+string
+</em>
+</td>
+<td>
+<p>FabricPeer URL of the peer</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>tlsCACert</code>
+<em>
+string
+</em>
+</td>
+<td>
+<p>FabricPeer TLS CA certificate of the peer</p>
+</td>
+</tr>
+</tbody>
+</table>
 <h3 id="hlf.kungfusoftware.es/v1alpha1.FabricFollowerChannelOrderer">FabricFollowerChannelOrderer
 </h3>
 <p>
@@ -5698,6 +5751,19 @@ string
 <em>
 <a href="#hlf.kungfusoftware.es/v1alpha1.FabricFollowerChannelPeer">
 []FabricFollowerChannelPeer
+</a>
+</em>
+</td>
+<td>
+<p>Peers to join the channel</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>externalPeersToJoin</code>
+<em>
+<a href="#hlf.kungfusoftware.es/v1alpha1.FabricFollowerChannelExternalPeer">
+[]FabricFollowerChannelExternalPeer
 </a>
 </em>
 </td>
@@ -10712,5 +10778,5 @@ string
 <hr/>
 <p><em>
 Generated with <code>gen-crd-api-reference-docs</code>
-on git commit <code>2d27d35</code>.
+on git commit <code>c64c8b7</code>.
 </em></p>

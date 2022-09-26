@@ -353,6 +353,15 @@ func GenerateNetworkConfigForFollower(channel *hlfv1alpha1.FabricFollowerChannel
 			TLSCACert: fabricPeer.Status.TlsCACert,
 		})
 	}
+	for _, peer := range channel.Spec.ExternalPeersToJoin {
+		peerName := peer.URL
+		org.Peers = append(org.Peers, peerName)
+		peers = append(peers, &Peer{
+			Name:      peerName,
+			URL:       peer.URL,
+			TLSCACert: peer.TLSCACert,
+		})
+	}
 	orgs = append(orgs, org)
 	for _, orderer := range channel.Spec.Orderers {
 		ordererNodes = append(ordererNodes, &Orderer{
