@@ -21,7 +21,7 @@ jobs:
         uses: helm/kind-action@v1.2.0
       - name: Install operator
         run: |
-          go get -u sigs.k8s.io/controller-tools
+          go install sigs.k8s.io/controller-tools/cmd/controller-gen@v0.8.0
           make generate manifests install
 
       - name: Test
