@@ -46,7 +46,9 @@ jobs:
           helm install hlf-operator --version=1.8.0-beta5 kfs/hlf-operator --set image.repository="${IMAGE}" --set image.tag="${TAG}" --set image.pullPolicy="IfNotPresent"
 
       - name: Install operator CRDs
-        run: make generate manifests install
+        run: |
+          go get -u sigs.k8s.io/controller-tools
+          make generate manifests install
 
       - name: Create Peer org
         run: |

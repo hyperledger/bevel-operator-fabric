@@ -20,7 +20,10 @@ jobs:
       - name: Create k8s Kind Cluster
         uses: helm/kind-action@v1.2.0
       - name: Install operator
-        run: make generate manifests install
+        run: |
+          go get -u sigs.k8s.io/controller-tools
+          make generate manifests install
+
       - name: Test
         run: make test
       - name: Show information
