@@ -135,12 +135,13 @@ func (c *createCmd) run() error {
 			Name: c.channelOpts.Name,
 		},
 		Spec: v1alpha1.FabricFollowerChannelSpec{
-			Name:        c.channelOpts.ChannelName,
-			MSPID:       c.channelOpts.MSPID,
-			Orderers:    orderers,
-			PeersToJoin: peers,
-			AnchorPeers: anchorPeers,
-			HLFIdentity: identity,
+			Name:                c.channelOpts.ChannelName,
+			MSPID:               c.channelOpts.MSPID,
+			Orderers:            orderers,
+			PeersToJoin:         peers,
+			ExternalPeersToJoin: []v1alpha1.FabricFollowerChannelExternalPeer{},
+			AnchorPeers:         anchorPeers,
+			HLFIdentity:         identity,
 		},
 	}
 	if c.channelOpts.Output {
