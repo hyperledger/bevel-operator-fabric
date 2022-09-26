@@ -36,7 +36,7 @@ kubectl hlf ca enroll --name=$CA_NAME --namespace=$CA_NAMESPACE \
 
 ## Create secret
 
-We need to create a secret for the operator to use the certificates to create the channel and update th-e channel configuration.
+We need to create a secret for the operator to use the certificates to create the channel and update the channel configuration.
 
 ```bash
 kubectl create secret generic wallet --namespace=default \

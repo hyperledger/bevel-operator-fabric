@@ -18,5 +18,3 @@ kubectl hlf channelcrd follower create \
     --secret-ns=default \
     --secret-key="peer-org1.yaml"
 ```
-
-

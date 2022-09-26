@@ -18,6 +18,7 @@ package v1alpha1
 
 import (
 	"fmt"
+
 	"github.com/kfsoftware/hlf-operator/pkg/status"
 	"k8s.io/api/networking/v1beta1"
 	kubeclock "k8s.io/apimachinery/pkg/util/clock"
@@ -1887,6 +1888,7 @@ type HLFIdentity struct {
 	// Key inside the secret that holds the private key and certificate to interact with the network
 	SecretKey string `json:"secretKey"`
 }
+
 type FabricFollowerChannelExternalPeer struct {
 	// FabricPeer URL of the peer
 	URL string `json:"url"`
