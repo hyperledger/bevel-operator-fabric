@@ -70,12 +70,14 @@ func (c *createCmd) run(args []string) error {
 		Hosts:          []string{},
 		IngressGateway: ingressGateway,
 	}
+	serviceType := corev1.ServiceTypeNodePort
 	if len(c.caOpts.Hosts) > 0 {
 		istio = &v1alpha1.FabricIstio{
 			Port:           ingressPort,
 			Hosts:          c.caOpts.Hosts,
 			IngressGateway: ingressGateway,
 		}
+		serviceType = corev1.ServiceTypeClusterIP
 	}
 
 	hosts := []string{
@@ -102,7 +104,7 @@ func (c *createCmd) run(args []string) error {
 			},
 			Hosts: hosts,
 			Service: v1alpha1.FabricCASpecService{
-				ServiceType: "NodePort",
+				ServiceType: serviceType,
 			},
 			Image:        c.caOpts.Image,
 			Version:      c.caOpts.Version,

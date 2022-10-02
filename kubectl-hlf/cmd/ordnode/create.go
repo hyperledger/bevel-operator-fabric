@@ -102,10 +102,11 @@ func (c *createCmd) run(args []string) error {
 		}
 	}
 	caHost := k8sIP
-	if c.ordererOpts.CAHost != "" {
-		caHost = c.ordererOpts.CAHost
-	}
 	caPort := certAuth.Status.NodePort
+	if len(certAuth.Spec.Istio.Hosts) > 0 {
+		caHost = certAuth.Spec.Istio.Hosts[0]
+		caPort = certAuth.Spec.Istio.Port
+	}
 	if c.ordererOpts.CAPort != 0 {
 		caPort = c.ordererOpts.CAPort
 	}

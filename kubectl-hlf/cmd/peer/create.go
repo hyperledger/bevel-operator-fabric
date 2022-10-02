@@ -170,10 +170,16 @@ func (c *createCmd) run() error {
 		couchDB.Tag = c.peerOpts.CouchDBTag
 	}
 	caHost := k8sIP
+	caPort := certAuth.Status.NodePort
+	serviceType := corev1.ServiceTypeNodePort
+	if len(certAuth.Spec.Istio.Hosts) > 0 {
+		caHost = certAuth.Spec.Istio.Hosts[0]
+		caPort = certAuth.Spec.Istio.Port
+		serviceType = corev1.ServiceTypeClusterIP
+	}
 	if c.peerOpts.CAHost != "" {
 		caHost = c.peerOpts.CAHost
 	}
-	caPort := certAuth.Status.NodePort
 	if c.peerOpts.CAPort != 0 {
 		caPort = c.peerOpts.CAPort
 	}
@@ -254,7 +260,7 @@ func (c *createCmd) run() error {
 				},
 			},
 			Service: v1alpha1.PeerService{
-				Type: "NodePort",
+				Type: serviceType,
 			},
 			StateDb: v1alpha1.StateDB(c.peerOpts.StateDB),
 			Storage: v1alpha1.FabricPeerStorage{
