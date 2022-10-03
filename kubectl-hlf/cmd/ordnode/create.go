@@ -103,9 +103,11 @@ func (c *createCmd) run(args []string) error {
 	}
 	caHost := k8sIP
 	caPort := certAuth.Status.NodePort
+	serviceType := corev1.ServiceTypeNodePort
 	if len(certAuth.Spec.Istio.Hosts) > 0 {
 		caHost = certAuth.Spec.Istio.Hosts[0]
 		caPort = certAuth.Spec.Istio.Port
+		serviceType = corev1.ServiceTypeClusterIP
 	}
 	if c.ordererOpts.CAPort != 0 {
 		caPort = c.ordererOpts.CAPort
@@ -151,7 +153,7 @@ func (c *createCmd) run(args []string) error {
 				AccessMode:   "ReadWriteOnce",
 			},
 			Service: v1alpha1.OrdererNodeService{
-				Type: "NodePort",
+				Type: serviceType,
 			},
 			Secret: &v1alpha1.Secret{
 				Enrollment: v1alpha1.Enrollment{
