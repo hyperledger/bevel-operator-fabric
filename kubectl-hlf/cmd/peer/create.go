@@ -123,6 +123,9 @@ func (c *createCmd) run() error {
 	}
 	csrHosts = append(csrHosts, c.peerOpts.Name)
 	csrHosts = append(csrHosts, fmt.Sprintf("%s.%s", c.peerOpts.Name, c.peerOpts.NS))
+	if len(c.peerOpts.Hosts) > 0 {
+		csrHosts = append(csrHosts, c.peerOpts.Hosts...)
+	}
 	var externalBuilders []v1alpha1.ExternalBuilder
 	if c.peerOpts.ExternalChaincodeServiceBuilder {
 		externalBuilders = append(externalBuilders, v1alpha1.ExternalBuilder{
