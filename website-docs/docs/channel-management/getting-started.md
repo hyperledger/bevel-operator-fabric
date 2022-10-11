@@ -10,7 +10,7 @@ CA_NAME=ord-ca
 CA_NAMESPACE=default
 CA_MSPID=OrdererMSP
 CA_TYPE=tlsca # can be `ca` or `tlsca`
-kubectl hlf ca register --name=ord-ca --user=admin --secret=adminpw --type=admin \
+kubectl hlf ca register --name=$CA_NAME --namespace=$CA_NAMESPACE --user=admin --secret=adminpw --type=admin \
  --enroll-id enroll --enroll-secret=enrollpw --mspid OrdererMSP
 
 kubectl hlf ca enroll --name=$CA_NAME --namespace=$CA_NAMESPACE \
@@ -25,7 +25,7 @@ CA_NAME=org1-ca
 CA_NAMESPACE=default
 CA_MSPID=Org1MSP
 CA_TYPE=ca # can be `ca` or `tlsca`
-kubectl hlf ca register --name=org1-ca --user=admin --secret=adminpw --type=admin \
+kubectl hlf ca register --name=$CA_NAME --namespace=$CA_NAMESPACE --user=admin --secret=adminpw --type=admin \
  --enroll-id enroll --enroll-secret=enrollpw --mspid Org1MSP
 
 kubectl hlf ca enroll --name=$CA_NAME --namespace=$CA_NAMESPACE \
@@ -68,7 +68,8 @@ kubectl hlf channelcrd main create \
     --consenters=ord-node1.default:7050 \
     --consenter-certificates=./orderer-cert.pem \
     --identities="OrdererMSP;admin-tls-ordservice.yaml" \
-    --identities="Org1MSP;peer-org1.yaml"
+    --identities="Org1MSP;peer-org1.yaml" \
+    --consenters=ord-node1.default:7050 --consenter-certificates="orderer0-tls-cert.pem"
 
 ```
 
