@@ -114,8 +114,6 @@ peers:
     url: grpcs://{{ $peer.PublicURL }}
 {{ end }}
     grpcOptions:
-      hostnameOverride: ""
-      ssl-target-name-override: ""
       allow-insecure: false
     tlsCACerts:
       pem: |
