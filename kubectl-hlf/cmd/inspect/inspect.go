@@ -102,7 +102,7 @@ orderers:
 {{- end }}
 
 {{- if not .Peers }}
-peers: []
+peers: {}
 {{- else }}
 peers:
   {{- range $peer := .Peers }}
