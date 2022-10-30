@@ -31,8 +31,6 @@ module.exports = {
     ],
     "Channel management": [
       "channel-management/getting-started",
-      "channel-management/mainchannel",
-      "channel-management/followerchannel",
       "channel-management/manage",
     ],
     "Kubectl Plugin": ["kubectl-plugin/installation", "kubectl-plugin/upgrade"],

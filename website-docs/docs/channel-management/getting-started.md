@@ -3,8 +3,36 @@ id: getting-started
 title: Getting started
 ---
 
+There are two types of resources to manage a channel:
 
-## Enroll the orderer CA
+- FabricMainChannel
+- FabricFollowerChannel
+
+### FabricMainChannel
+
+This resource creates and manages the channel configuration, including:
+
+- Configuration
+- Peer organizations
+- Orderer organizations
+
+### FabricFollowerChannel
+
+This resource joins the channel and manages the channel configuration, including:
+
+- Anchor peers
+- Peers to join
+
+### Wallet
+
+For every resource we need a wallet to interact with the network.
+
+The FabricMainChannel requires a wallet with the admin identity of the orderer organization and the peer organizations that will manage the channel.
+
+The FabricFollowerChannel requires a wallet with the admin identity of the peer organization.
+
+## Enroll the orderer admin organization
+
 ```bash
 CA_NAME=ord-ca
 CA_NAMESPACE=default
@@ -15,7 +43,7 @@ kubectl hlf ca register --name=$CA_NAME --namespace=$CA_NAMESPACE --user=admin -
 
 kubectl hlf ca enroll --name=$CA_NAME --namespace=$CA_NAMESPACE \
     --user=admin --secret=adminpw --mspid $CA_MSPID \
-    --ca-name $CA_TYPE  --output orderermsp.yaml 
+    --ca-name $CA_TYPE  --output orderermsp.yaml
 ```
 
 ## Enroll the admin peer organization
@@ -30,9 +58,8 @@ kubectl hlf ca register --name=$CA_NAME --namespace=$CA_NAMESPACE --user=admin -
 
 kubectl hlf ca enroll --name=$CA_NAME --namespace=$CA_NAMESPACE \
     --user=admin --secret=adminpw --mspid $CA_MSPID \
-    --ca-name $CA_TYPE  --output org1msp.yaml 
+    --ca-name $CA_TYPE  --output org1msp.yaml
 ```
-
 
 ## Create secret
 
@@ -73,9 +100,8 @@ kubectl hlf channelcrd main create \
 
 ```
 
-
-
 ## Join the channel for Org1MSP
+
 First, we need to obtain the orderer TLS certificate, this would need to be performed for each orderer that is in the consenters list.
 
 ```bash
@@ -84,6 +110,7 @@ kubectl get fabricorderernodes ord-node1 \
 ```
 
 Second, we create the main channel CRD and apply it.
+
 ```bash
 kubectl hlf channelcrd follower create \
     --channel-name=demo \
