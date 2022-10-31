@@ -1,6 +1,5 @@
 package tests
 
-
 import (
 	hlfv1alpha1 "github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
 	"github.com/kfsoftware/hlf-operator/controllers/ca"
@@ -37,7 +36,6 @@ func TestAPIs(t *testing.T) {
 		[]Reporter{printer.NewlineReporter{}},
 	)
 }
-
 
 var cfg *rest.Config
 var K8sClient client.Client
@@ -133,7 +131,7 @@ var _ = BeforeSuite(func(done Done) {
 	}()
 	mgrSyncCtx, mgrSyncCtxCancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer mgrSyncCtxCancel()
-	if synced := k8sManager.GetCache().WaitForCacheSync(mgrSyncCtx.Done()); !synced {
+	if synced := k8sManager.GetCache().WaitForCacheSync(mgrSyncCtx); !synced {
 		fmt.Println("Failed to sync")
 	}
 	K8sClient = k8sManager.GetClient()
@@ -156,4 +154,3 @@ var _ = AfterSuite(func() {
 	err := testEnv.Stop()
 	Expect(err).ToNot(HaveOccurred())
 })
-

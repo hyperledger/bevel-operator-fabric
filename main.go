@@ -20,7 +20,9 @@ import (
 	"flag"
 	"github.com/kfsoftware/hlf-operator/controllers/chaincode"
 	"github.com/kfsoftware/hlf-operator/controllers/console"
+	"github.com/kfsoftware/hlf-operator/controllers/followerchannel"
 	"github.com/kfsoftware/hlf-operator/controllers/hlfmetrics"
+	"github.com/kfsoftware/hlf-operator/controllers/mainchannel"
 	"github.com/kfsoftware/hlf-operator/controllers/networkconfig"
 	"github.com/kfsoftware/hlf-operator/controllers/operatorapi"
 	"github.com/kfsoftware/hlf-operator/controllers/operatorui"
@@ -217,6 +219,26 @@ func main() {
 		Config: mgr.GetConfig(),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "FabricNetworkConfig")
+		os.Exit(1)
+	}
+
+	if err = (&mainchannel.FabricMainChannelReconciler{
+		Client: mgr.GetClient(),
+		Log:    ctrl.Log.WithName("controllers").WithName("FabricMainChannel"),
+		Scheme: mgr.GetScheme(),
+		Config: mgr.GetConfig(),
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "FabricMainChannel")
+		os.Exit(1)
+	}
+
+	if err = (&followerchannel.FabricFollowerChannelReconciler{
+		Client: mgr.GetClient(),
+		Log:    ctrl.Log.WithName("controllers").WithName("FabricFollowerChannel"),
+		Scheme: mgr.GetScheme(),
+		Config: mgr.GetConfig(),
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "FabricFollowerChannel")
 		os.Exit(1)
 	}
 

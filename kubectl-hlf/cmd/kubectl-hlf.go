@@ -4,6 +4,7 @@ import (
 	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/ca"
 	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/chaincode"
 	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/channel"
+	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/channelcrd"
 	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/console"
 	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/externalchaincode"
 	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/fop"
@@ -50,6 +51,7 @@ func NewCmdHLF() *cobra.Command {
 		console.NewConsoleCmd(cmd.OutOrStdout(), cmd.ErrOrStderr()),
 		operatorapi.NewOperatorAPICMD(cmd.OutOrStdout(), cmd.ErrOrStderr()),
 		operatorui.NewOperatorUICMD(cmd.OutOrStdout(), cmd.ErrOrStderr()),
+		channelcrd.NewChannelCRDCmd(cmd.OutOrStdout(), cmd.ErrOrStderr()),
 	)
 	return cmd
 }

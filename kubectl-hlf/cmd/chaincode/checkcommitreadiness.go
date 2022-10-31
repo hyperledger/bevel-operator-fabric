@@ -97,7 +97,7 @@ func (c *queryCheckCommitReadiness) run(out io.Writer) error {
 	data := [][]string{}
 	for mspID, approved := range chaincode.Approvals {
 		isApproved := "false"
-		if !approved {
+		if approved {
 			isApproved = "true"
 		}
 		data = append(data, []string{mspID, isApproved})

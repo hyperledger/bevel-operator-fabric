@@ -71,27 +71,7 @@ data:
     registry:
     {{- toYaml .Values.tlsCA.registry | nindent 6 }}
     signing:
-        default:
-          usage:
-            - digital signature
-          expiry: 8760h
-        profiles:
-          ca:
-             usage:
-               - cert sign
-               - crl sign
-             expiry: 43800h
-             caconstraint:
-               isca: true
-               maxpathlen: 0
-          tls:
-             usage:
-                - signing
-                - key encipherment
-                - server auth
-                - client auth
-                - key agreement
-             expiry: 8760h
+    {{- toYaml .Values.tlsCA.signing | nindent 6 }}
 
     operations:
       # host and port for the operations server

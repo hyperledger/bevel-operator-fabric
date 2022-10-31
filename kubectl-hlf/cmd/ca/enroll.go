@@ -31,6 +31,7 @@ type EnrollOptions struct {
 	WalletPath string
 	WalletUser string
 	Attributes string
+	CAURL      string
 }
 
 func (o EnrollOptions) Validate() error {
@@ -60,9 +61,14 @@ func (c *enrollCmd) run(args []string) error {
 	if err != nil {
 		return err
 	}
-	url, err := helpers.GetURLForCA(certAuth)
-	if err != nil {
-		return err
+	var url string
+	if c.enrollOpts.CAURL != "" {
+		url = c.enrollOpts.CAURL
+	} else {
+		url, err = helpers.GetURLForCA(certAuth)
+		if err != nil {
+			return err
+		}
 	}
 	log.Debugf("CA URL=%s", url)
 	var attributes []*api.AttributeRequest
@@ -169,6 +175,7 @@ func newCAEnrollCmd(out io.Writer, errOut io.Writer) *cobra.Command {
 	f.StringVarP(&c.enrollOpts.WalletUser, "wallet-user", "", "", "Wallet user name for the identity stored in the wallet")
 	f.StringSliceVarP(&c.enrollOpts.Hosts, "hosts", "", []string{}, "Hosts")
 	f.StringVarP(&c.enrollOpts.Attributes, "attributes", "", "", "Attributes of the user")
+	f.StringVarP(&c.enrollOpts.CAURL, "ca-url", "", "", "Fabric CA URL")
 
 	f.StringVar(&c.fileOutput, "output", "", "output file")
 

@@ -32,11 +32,12 @@ type Consenter struct {
 type channelStore struct {
 }
 type CreateChannelOptions struct {
-	consenters  []Consenter
-	peerOrgs    []PeerOrg
-	ordererOrgs []OrdererOrg
-	name        string
-	batchSize   *orderer.BatchSize
+	consenters    []Consenter
+	peerOrgs      []PeerOrg
+	ordererOrgs   []OrdererOrg
+	name          string
+	batchSize     *orderer.BatchSize
+	batchDuration *time.Duration
 }
 
 func (o CreateChannelOptions) validate() error {
@@ -69,6 +70,11 @@ func WithConsenters(consenters ...Consenter) ChannelOption {
 func WithOrdererOrgs(ordererOrgs ...OrdererOrg) ChannelOption {
 	return func(o *CreateChannelOptions) {
 		o.ordererOrgs = ordererOrgs
+	}
+}
+func WithBatchTimeout(batchTimeout time.Duration) ChannelOption {
+	return func(o *CreateChannelOptions) {
+		o.batchDuration = &batchTimeout
 	}
 }
 func WithBatchSize(batchSize *orderer.BatchSize) ChannelOption {
@@ -234,6 +240,14 @@ func (s channelStore) GetApplicationChannelBlock(ctx context.Context, opts ...Ch
 				Rule: "MAJORITY Admins",
 			},
 		},
+	}
+	if o.batchSize != nil {
+		channelConfig.Orderer.BatchSize.MaxMessageCount = o.batchSize.MaxMessageCount
+		channelConfig.Orderer.BatchSize.AbsoluteMaxBytes = o.batchSize.AbsoluteMaxBytes
+		channelConfig.Orderer.BatchSize.PreferredMaxBytes = o.batchSize.PreferredMaxBytes
+	}
+	if o.batchDuration != nil {
+		channelConfig.Orderer.BatchTimeout = *o.batchDuration
 	}
 	channelID := o.name
 	genesisBlock, err := configtx.NewApplicationChannelGenesisBlock(channelConfig, channelID)
