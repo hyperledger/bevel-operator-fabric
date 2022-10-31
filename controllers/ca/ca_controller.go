@@ -12,8 +12,9 @@ import (
 	"encoding/json"
 	"encoding/pem"
 	"fmt"
+	"github.com/go-logr/logr"
 	"github.com/kfsoftware/hlf-operator/controllers/hlfmetrics"
-	"github.com/operator-framework/operator-lib/status"
+	"github.com/kfsoftware/hlf-operator/pkg/status"
 	"helm.sh/helm/v3/pkg/cli"
 	"k8s.io/kubernetes/pkg/api/v1/pod"
 
@@ -24,7 +25,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/go-logr/logr"
 	hlfv1alpha1 "github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
 	"github.com/kfsoftware/hlf-operator/controllers/utils"
 	"github.com/pkg/errors"
@@ -298,8 +298,69 @@ func mapCRDItemConfToChart(conf hlfv1alpha1.FabricCAItemConf) FabricCAChartItemC
 			},
 		})
 	}
+	affiliations := []Affiliation{}
+	for _, affiliation := range conf.Affiliations {
+		affiliations = append(affiliations, Affiliation{
+			Name:        affiliation.Name,
+			Departments: affiliation.Departments,
+		})
+	}
+	var signing FabricCASigning
+	if conf.Signing != nil {
+		signing = FabricCASigning{
+			Default: FabricCASigningDefault{
+				Expiry: conf.Signing.Default.Expiry,
+				Usage:  conf.Signing.Default.Usage,
+			},
+			Profiles: FabricCASigningProfiles{
+				CA: FabricCASigningSignProfile{
+					Usage:  conf.Signing.Profiles.CA.Usage,
+					Expiry: conf.Signing.Profiles.CA.Expiry,
+					CAConstraint: FabricCASigningSignProfileConstraint{
+						IsCA:       conf.Signing.Profiles.CA.CAConstraint.IsCA,
+						MaxPathLen: conf.Signing.Profiles.CA.CAConstraint.MaxPathLen,
+					},
+				},
+				TLS: FabricCASigningTLSProfile{
+					Usage:  conf.Signing.Profiles.TLS.Usage,
+					Expiry: conf.Signing.Profiles.TLS.Expiry,
+				},
+			},
+		}
+	} else {
+		signing = FabricCASigning{
+			Default: FabricCASigningDefault{
+				Expiry: "8760h",
+				Usage:  []string{"digital signature"},
+			},
+			Profiles: FabricCASigningProfiles{
+				CA: FabricCASigningSignProfile{
+					Usage: []string{
+						"cert sign",
+						"crl sign",
+					},
+					Expiry: "43800h",
+					CAConstraint: FabricCASigningSignProfileConstraint{
+						IsCA:       true,
+						MaxPathLen: 0,
+					},
+				},
+				TLS: FabricCASigningTLSProfile{
+					Usage: []string{
+						"signing",
+						"key encipherment",
+						"server auth",
+						"client auth",
+						"key agreement",
+					},
+					Expiry: "8760h",
+				},
+			},
+		}
+	}
 	item := FabricCAChartItemConf{
-		Name: conf.Name,
+		Name:    conf.Name,
+		Signing: signing,
 		CFG: FabricCAChartCFG{
 			Identities:   FabricCAChartCFGIdentities{AllowRemove: conf.CFG.Identities.AllowRemove},
 			Affiliations: FabricCAChartCFGAffilitions{AllowRemove: conf.CFG.Affiliations.AllowRemove},
@@ -324,7 +385,7 @@ func mapCRDItemConfToChart(conf hlfv1alpha1.FabricCAItemConf) FabricCAChartItemC
 				CAName: conf.Intermediate.ParentServer.CAName,
 			},
 		},
-		Affiliations: []Affiliation{},
+		Affiliations: affiliations,
 		BCCSP: FabricCAChartBCCSP{
 			Default: conf.BCCSP.Default,
 			SW: FabricCAChartBCCSPSW{
@@ -754,6 +815,7 @@ func Reconcile(
 		}
 		fca := hlf.DeepCopy()
 		fca.Status.Status = s.Status
+		fca.Status.Message = ""
 		fca.Status.TlsCert = s.TlsCert
 		fca.Status.TLSCACert = s.TLSCACert
 		fca.Status.CACert = s.CACert
@@ -906,7 +968,7 @@ func setConditionStatus(p *hlfv1alpha1.FabricCA, conditionType hlfv1alpha1.Deplo
 // +kubebuilder:rbac:groups=hlf.kungfusoftware.es,resources=fabriccas,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=hlf.kungfusoftware.es,resources=fabriccas/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=hlf.kungfusoftware.es,resources=fabriccas/finalizers,verbs=update
-func (r *FabricCAReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
+func (r *FabricCAReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 
 	ns := req.Namespace
 	cfg, err := newActionCfg(r.Log, r.Config, ns)

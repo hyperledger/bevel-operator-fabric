@@ -11,7 +11,7 @@ import (
 	"github.com/kfsoftware/hlf-operator/controllers/utils"
 	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/helpers"
 	operatorv1 "github.com/kfsoftware/hlf-operator/pkg/client/clientset/versioned"
-	"github.com/operator-framework/operator-lib/status"
+	"github.com/kfsoftware/hlf-operator/pkg/status"
 	log "github.com/sirupsen/logrus"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -103,8 +103,6 @@ peers:
     url: grpcs://{{ $peer.PublicURL }}
 {{ end }}
     grpcOptions:
-      hostnameOverride: ""
-      ssl-target-name-override: ""
       allow-insecure: false
     tlsCACerts:
       pem: |
@@ -195,8 +193,7 @@ func (r *FabricNetworkConfigReconciler) addFinalizer(reqLogger logr.Logger, m *h
 // +kubebuilder:rbac:groups=hlf.kungfusoftware.es,resources=fabricnetworkconfigs,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=hlf.kungfusoftware.es,resources=fabricnetworkconfigs/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=hlf.kungfusoftware.es,resources=fabricnetworkconfigs/finalizers,verbs=get;update;patch
-func (r *FabricNetworkConfigReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
-	ctx := context.Background()
+func (r *FabricNetworkConfigReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	reqLogger := r.Log.WithValues("hlf", req.NamespacedName)
 	fabricNetworkConfig := &hlfv1alpha1.FabricNetworkConfig{}
 	//releaseName := req.Name

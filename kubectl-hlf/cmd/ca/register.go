@@ -21,6 +21,7 @@ type RegisterOptions struct {
 	EnrollID     string
 	EnrollSecret string
 	Attributes   string
+	CAURL        string
 }
 
 func (o RegisterOptions) Validate() error {
@@ -49,9 +50,14 @@ func (c *registerCmd) run(args []string) error {
 	if err != nil {
 		return err
 	}
-	url, err := helpers.GetURLForCA(certAuth)
-	if err != nil {
-		return err
+	var url string
+	if c.caOpts.CAURL != "" {
+		url = c.caOpts.CAURL
+	} else {
+		url, err = helpers.GetURLForCA(certAuth)
+		if err != nil {
+			return err
+		}
 	}
 	attrMap := make(map[string]string)
 	attributeList := strings.Split(c.caOpts.Attributes, ",")
@@ -110,6 +116,7 @@ func newCARegisterCmd(out io.Writer, errOut io.Writer) *cobra.Command {
 	f.StringVarP(&c.caOpts.Type, "type", "", "", "Type of the identity to create (peer/client/orderer/admin)")
 	f.StringVarP(&c.caOpts.MspID, "mspid", "", "", "MSP ID of the organization")
 	f.StringVarP(&c.caOpts.Attributes, "attributes", "", "", "Attributes of the user")
+	f.StringVarP(&c.caOpts.CAURL, "ca-url", "", "", "Fabric CA URL")
 
 	return cmd
 }

@@ -17,7 +17,7 @@ import (
 	"github.com/hyperledger/fabric-sdk-go/pkg/fab/resource"
 	"github.com/kfsoftware/hlf-operator/controllers/testutils"
 	operatorv1 "github.com/kfsoftware/hlf-operator/pkg/client/clientset/versioned"
-	"github.com/operator-framework/operator-lib/status"
+	"github.com/kfsoftware/hlf-operator/pkg/status"
 	"helm.sh/helm/v3/pkg/cli"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -398,8 +398,7 @@ func (r *FabricOrderingServiceReconciler) addFinalizer(reqLogger logr.Logger, m 
 // +kubebuilder:rbac:groups=hlf.kungfusoftware.es,resources=fabricorderingservices,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=hlf.kungfusoftware.es,resources=fabricorderingservices/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=hlf.kungfusoftware.es,resources=fabricorderingservices/finalizers,verbs=get;update;patch
-func (r *FabricOrderingServiceReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
-	ctx := context.Background()
+func (r *FabricOrderingServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	reqLogger := r.Log.WithValues("hlf", req.NamespacedName)
 	fabricOrderer := &hlfv1alpha1.FabricOrderingService{}
 	releaseName := req.Name

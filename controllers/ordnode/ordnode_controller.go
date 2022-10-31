@@ -13,7 +13,7 @@ import (
 	"github.com/kfsoftware/hlf-operator/controllers/certs"
 	"github.com/kfsoftware/hlf-operator/controllers/hlfmetrics"
 	"github.com/kfsoftware/hlf-operator/controllers/utils"
-	"github.com/operator-framework/operator-lib/status"
+	"github.com/kfsoftware/hlf-operator/pkg/status"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"helm.sh/helm/v3/pkg/action"
@@ -89,8 +89,7 @@ func (r *FabricOrdererNodeReconciler) addFinalizer(reqLogger logr.Logger, m *hlf
 // +kubebuilder:rbac:groups=hlf.kungfusoftware.es,resources=fabricorderernodes,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=hlf.kungfusoftware.es,resources=fabricorderernodes/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=hlf.kungfusoftware.es,resources=fabricorderernodes/finalizers,verbs=get;update;patch
-func (r *FabricOrdererNodeReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
-	ctx := context.Background()
+func (r *FabricOrdererNodeReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	reqLogger := r.Log.WithValues("hlf", req.NamespacedName)
 	fabricOrdererNode := &hlfv1alpha1.FabricOrdererNode{}
 	releaseName := req.Name
@@ -195,6 +194,7 @@ func (r *FabricOrdererNodeReconciler) Reconcile(req ctrl.Request) (ctrl.Result, 
 		}
 		fOrderer := fabricOrdererNode.DeepCopy()
 		fOrderer.Status.Status = s.Status
+		fOrderer.Status.Message = ""
 		fOrderer.Status.NodePort = s.NodePort
 		fOrderer.Status.TlsCert = s.TlsCert
 		fOrderer.Status.SignCert = s.SignCert
