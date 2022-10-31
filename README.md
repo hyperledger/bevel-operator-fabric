@@ -336,7 +336,7 @@ kubectl hlf ca register --name=ord-ca --user=orderer --secret=ordererpw \
     --type=orderer --enroll-id enroll --enroll-secret=enrollpw --mspid=OrdererMSP --ca-url="https://ord-ca.localho.st:443"
 
 ```
-### Desplegar orderer
+### Deploy orderer
 
 ```bash
 kubectl hlf ordnode create --image=$ORDERER_IMAGE --version=$ORDERER_VERSION \
@@ -378,7 +378,6 @@ kubectl hlf inspect --output ordservice.yaml -o OrdererMSP
 ```bash
 kubectl hlf ca register --name=ord-ca --user=admin --secret=adminpw \
     --type=admin --enroll-id enroll --enroll-secret=enrollpw --mspid=OrdererMSP
-
 ```
 
 3. Get the certificates using the certificate
@@ -394,21 +393,49 @@ kubectl hlf ca enroll --name=ord-ca --user=admin --secret=adminpw --mspid Ordere
 kubectl hlf utils adduser --userPath=admin-ordservice.yaml --config=ordservice.yaml --username=admin --mspid=OrdererMSP
 ```
 
+## Create channel
+
+To create the channel we need to first create the wallet secret, which will contain the identities used by the operator to manage the channel
+
+### Register and enrolling OrdererMSP identity
+
 ```bash
+# register
+kubectl hlf ca register --name=ord-ca --user=admin --secret=adminpw \
+    --type=admin --enroll-id enroll --enroll-secret=enrollpw --mspid=OrdererMSP
+
+# enroll
+
 kubectl hlf ca enroll --name=ord-ca --namespace=default \
     --user=admin --secret=adminpw --mspid OrdererMSP \
     --ca-name tlsca  --output orderermsp.yaml
+```
 
+
+### Register and enrolling Org1MSP identity
+
+```bash
+# register
+kubectl hlf ca register --name=org1-ca --namespace=default --user=admin --secret=adminpw \
+    --type=admin --enroll-id enroll --enroll-secret=enrollpw --mspid=Org1MSP
+
+# enroll
 kubectl hlf ca enroll --name=org1-ca --namespace=default \
     --user=admin --secret=adminpw --mspid Org1MSP \
     --ca-name ca  --output org1msp.yaml
+
+```
+
+### Create the secret
+
+```bash
 
 kubectl create secret generic wallet --namespace=default \
         --from-file=org1msp.yaml=$PWD/org1msp.yaml \
         --from-file=orderermsp.yaml=$PWD/orderermsp.yaml
 ```
 
-Create the channel
+### Create main channel
 
 ```bash
 export PEER_ORG_SIGN_CERT=$(kubectl get fabriccas org1-ca -o=jsonpath='{.status.ca_cert}')
