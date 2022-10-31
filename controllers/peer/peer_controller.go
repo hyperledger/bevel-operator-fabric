@@ -421,6 +421,7 @@ func (r *FabricPeerReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 
 		fPeer := fabricPeer.DeepCopy()
 		fPeer.Status.Status = s.Status
+		fPeer.Status.Message = ""
 		fPeer.Status.TlsCert = s.TlsCert
 		fPeer.Status.TlsCACert = s.TlsCACert
 		fPeer.Status.SignCert = s.SignCert

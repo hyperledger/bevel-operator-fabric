@@ -815,6 +815,7 @@ func Reconcile(
 		}
 		fca := hlf.DeepCopy()
 		fca.Status.Status = s.Status
+		fca.Status.Message = ""
 		fca.Status.TlsCert = s.TlsCert
 		fca.Status.TLSCACert = s.TLSCACert
 		fca.Status.CACert = s.CACert

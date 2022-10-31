@@ -194,6 +194,7 @@ func (r *FabricOrdererNodeReconciler) Reconcile(ctx context.Context, req ctrl.Re
 		}
 		fOrderer := fabricOrdererNode.DeepCopy()
 		fOrderer.Status.Status = s.Status
+		fOrderer.Status.Message = ""
 		fOrderer.Status.NodePort = s.NodePort
 		fOrderer.Status.TlsCert = s.TlsCert
 		fOrderer.Status.SignCert = s.SignCert
