@@ -450,7 +450,7 @@ kind: FabricMainChannel
 metadata:
   name: demo
 spec:
-  name: demo2
+  name: demo
   adminOrdererOrganizations:
     - mspID: OrdererMSP
   adminPeerOrganizations:
@@ -537,7 +537,8 @@ spec:
     secretName: wallet
     secretNamespace: default
   mspId: Org1MSP
-  name: demo2
+  name: demo
+  externalPeersToJoin: []
   orderers:
     - certificate: |
 ${ORDERER0_TLS_CERT}
@@ -655,14 +656,14 @@ export VERSION="1.0"
 kubectl hlf chaincode approveformyorg --config=org1.yaml --user=admin --peer=org1-peer0.default \
     --package-id=$PACKAGE_ID \
     --version "$VERSION" --sequence "$SEQUENCE" --name=asset \
-    --policy="OR('Org1MSP.member')" --channel=demo2
+    --policy="OR('Org1MSP.member')" --channel=demo
 ```
 
 ## Commit chaincode
 ```bash
 kubectl hlf chaincode commit --config=org1.yaml --user=admin --mspid=Org1MSP \
     --version "$VERSION" --sequence "$SEQUENCE" --name=asset \
-    --policy="OR('Org1MSP.member')" --channel=demo2
+    --policy="OR('Org1MSP.member')" --channel=demo
 ```
 
 
@@ -670,7 +671,7 @@ kubectl hlf chaincode commit --config=org1.yaml --user=admin --mspid=Org1MSP \
 ```bash
 kubectl hlf chaincode invoke --config=org1.yaml \
     --user=admin --peer=org1-peer0.default \
-    --chaincode=asset --channel=demo2 \
+    --chaincode=asset --channel=demo \
     --fcn=initLedger -a '[]'
 ```
 
@@ -678,7 +679,7 @@ kubectl hlf chaincode invoke --config=org1.yaml \
 ```bash
 kubectl hlf chaincode query --config=org1.yaml \
     --user=admin --peer=org1-peer0.default \
-    --chaincode=asset --channel=demo2 \
+    --chaincode=asset --channel=demo \
     --fcn=GetAllAssets -a '[]'
 ```
 
