@@ -301,7 +301,7 @@ kubectl wait --timeout=180s --for=condition=Running fabricpeers.hlf.kungfusoftwa
 Check that the peer is deployed and works:
 
 ```bash
-curl -vik https://peer0-org1.localho.st:443
+openssl s_client -connect peer0-org1.localho.st:443
 ```
 
 ## Deploy an `Orderer` organization
@@ -354,7 +354,7 @@ kubectl get pods
 ```
 
 ```bash
-curl -vik https://orderer0-ord.localho.st:443
+openssl s_client -connect orderer0-ord.localho.st:443
 ```
 
 

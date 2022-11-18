@@ -17,10 +17,10 @@ const (
 	DefaultOperationsConsoleVersion = "latest"
 
 	DefaultOperationsOperatorUIImage   = "ghcr.io/kfsoftware/hlf-operator-ui"
-	DefaultOperationsOperatorUIVersion = "0.0.10"
+	DefaultOperationsOperatorUIVersion = "0.0.16"
 
 	DefaultOperationsOperatorAPIImage   = "ghcr.io/kfsoftware/hlf-operator-api"
-	DefaultOperationsOperatorAPIVersion = "v0.0.10"
+	DefaultOperationsOperatorAPIVersion = "v0.0.16"
 
 	DefaultFSServerImage   = "quay.io/kfsoftware/fs-peer"
 	DefaultFSServerVersion = "amd64-2.2.0-0.0.1"
