@@ -46,6 +46,7 @@ type Options struct {
 	CouchDBPassword                 string
 	CAPort                          int
 	CAHost                          string
+	ImagePullSecrets                []string
 }
 
 func (o Options) Validate() error {
@@ -223,6 +224,15 @@ func (c *createCmd) run() error {
 		}
 	}
 
+	var imagePullSecrets []corev1.LocalObjectReference
+	if len(c.peerOpts.ImagePullSecrets) > 0 {
+		for _, v := range c.peerOpts.ImagePullSecrets {
+			imagePullSecrets = append(imagePullSecrets, corev1.LocalObjectReference{
+				Name: v,
+			})
+		}
+	}
+
 	fabricPeer := &v1alpha1.FabricPeer{
 		TypeMeta: v1.TypeMeta{
 			Kind:       "FabricPeer",
@@ -238,6 +248,7 @@ func (c *createCmd) run() error {
 			Replicas:                 1,
 			DockerSocketPath:         "",
 			Image:                    c.peerOpts.Image,
+			ImagePullSecrets:         imagePullSecrets,
 			ExternalChaincodeBuilder: kubernetesBuilder,
 			ExternalBuilders:         externalBuilders,
 			Istio:                    istio,
@@ -447,6 +458,7 @@ func newCreatePeerCmd(out io.Writer, errOut io.Writer) *cobra.Command {
 	f.BoolVarP(&c.peerOpts.KubernetesBuilder, "k8s-builder", "", false, "Enable kubernetes builder (deprecated)")
 	f.BoolVarP(&c.peerOpts.ExternalChaincodeServiceBuilder, "external-service-builder", "", true, "External chaincode service builder enabled(only use in 2.4.1+)")
 	f.StringArrayVarP(&c.peerOpts.HostAliases, "host-aliases", "", []string{}, "Host aliases (e.g.: \"1.2.3.4:osn1.example.com,osn2.example.com\")")
+	f.StringArrayVarP(&c.peerOpts.ImagePullSecrets, "image-pull-secrets", "s", []string{}, "Image Pull Secrets for the Peer Image")
 
 	f.StringVarP(&c.peerOpts.CouchDBImage, "couchdb-repository", "", helpers.DefaultCouchDBImage, "CouchDB image")
 	f.StringVarP(&c.peerOpts.CouchDBTag, "couchdb-tag", "", helpers.DefaultCouchDBVersion, "CouchDB version")
