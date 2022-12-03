@@ -16,24 +16,25 @@ import (
 )
 
 type OrdererOptions struct {
-	Name           string
-	StorageClass   string
-	Capacity       string
-	NS             string
-	Image          string
-	Version        string
-	MspID          string
-	EnrollID       string
-	EnrollPW       string
-	CAName         string
-	Hosts          []string
-	HostAliases    []string
-	Output         bool
-	IngressGateway string
-	IngressPort    int
-	AdminHosts     []string
-	CAHost         string
-	CAPort         int
+	Name             string
+	StorageClass     string
+	Capacity         string
+	NS               string
+	Image            string
+	Version          string
+	MspID            string
+	EnrollID         string
+	EnrollPW         string
+	CAName           string
+	Hosts            []string
+	HostAliases      []string
+	Output           bool
+	IngressGateway   string
+	IngressPort      int
+	AdminHosts       []string
+	CAHost           string
+	CAPort           int
+	ImagePullSecrets []string
 }
 
 func (o OrdererOptions) Validate() error {
@@ -49,7 +50,7 @@ type createCmd struct {
 func (c *createCmd) validate() error {
 	return c.ordererOpts.Validate()
 }
-func (c *createCmd) run(args []string) error {
+func (c *createCmd) run(_ []string) error {
 	oclient, err := helpers.GetKubeOperatorClient()
 	if err != nil {
 		return err
@@ -123,6 +124,15 @@ func (c *createCmd) run(args []string) error {
 			log.Warningf("ingnoring host-alias [%s]: must be in format <ip>:<alias1>,<alias2>...", hostAlias)
 		}
 	}
+	var imagePullSecrets []corev1.LocalObjectReference
+	if len(c.ordererOpts.ImagePullSecrets) > 0 {
+		for _, v := range c.ordererOpts.ImagePullSecrets {
+			imagePullSecrets = append(imagePullSecrets, corev1.LocalObjectReference{
+				Name: v,
+			})
+		}
+	}
+
 	fabricOrderer := &v1alpha1.FabricOrdererNode{
 		TypeMeta: v1.TypeMeta{
 			Kind:       "FabricOrdererNode",
@@ -138,6 +148,7 @@ func (c *createCmd) run(args []string) error {
 			Resources:                   corev1.ResourceRequirements{},
 			Replicas:                    1,
 			Image:                       c.ordererOpts.Image,
+			ImagePullSecrets:            imagePullSecrets,
 			Tag:                         c.ordererOpts.Version,
 			PullPolicy:                  corev1.PullAlways,
 			MspID:                       c.ordererOpts.MspID,
@@ -235,5 +246,6 @@ func newCreateOrdererNodeCmd(out io.Writer, errOut io.Writer) *cobra.Command {
 	f.StringArrayVarP(&c.ordererOpts.AdminHosts, "admin-hosts", "", []string{}, "Hosts for the admin API(introduced in v2.3)")
 	f.BoolVarP(&c.ordererOpts.Output, "output", "o", false, "Output in yaml")
 	f.StringArrayVarP(&c.ordererOpts.HostAliases, "host-aliases", "", []string{}, "Host aliases (e.g.: \"1.2.3.4:osn2.example.com,peer1.example.com\")")
+	f.StringArrayVarP(&c.ordererOpts.ImagePullSecrets, "image-pull-secrets", "s", []string{}, "Image Pull Secrets for the Orderer Image")
 	return cmd
 }

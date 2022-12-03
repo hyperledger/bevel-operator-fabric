@@ -14,18 +14,19 @@ import (
 )
 
 type Options struct {
-	Name           string
-	StorageClass   string
-	Capacity       string
-	NS             string
-	Image          string
-	Version        string
-	EnrollID       string
-	EnrollSecret   string
-	Output         bool
-	IngressGateway string
-	IngressPort    int
-	Hosts          []string
+	Name             string
+	StorageClass     string
+	Capacity         string
+	NS               string
+	Image            string
+	Version          string
+	EnrollID         string
+	EnrollSecret     string
+	Output           bool
+	IngressGateway   string
+	IngressPort      int
+	Hosts            []string
+	ImagePullSecrets []string
 }
 
 func (o Options) Validate() error {
@@ -41,7 +42,7 @@ type createCmd struct {
 func (c *createCmd) validate() error {
 	return c.caOpts.Validate()
 }
-func (c *createCmd) run(args []string) error {
+func (c *createCmd) run(_ []string) error {
 	oclient, err := helpers.GetKubeOperatorClient()
 	if err != nil {
 		return err
@@ -78,6 +79,15 @@ func (c *createCmd) run(args []string) error {
 		}
 	}
 
+	var imagePullSecrets []corev1.LocalObjectReference
+	if len(c.caOpts.ImagePullSecrets) > 0 {
+		for _, v := range c.caOpts.ImagePullSecrets {
+			imagePullSecrets = append(imagePullSecrets, corev1.LocalObjectReference{
+				Name: v,
+			})
+		}
+	}
+
 	hosts := []string{
 		"localhost",
 		c.caOpts.Name,
@@ -104,11 +114,12 @@ func (c *createCmd) run(args []string) error {
 			Service: v1alpha1.FabricCASpecService{
 				ServiceType: "NodePort",
 			},
-			Image:        c.caOpts.Image,
-			Version:      c.caOpts.Version,
-			Debug:        false,
-			Istio:        istio,
-			CLRSizeLimit: 512000,
+			Image:            c.caOpts.Image,
+			ImagePullSecrets: imagePullSecrets,
+			Version:          c.caOpts.Version,
+			Debug:            false,
+			Istio:            istio,
+			CLRSizeLimit:     512000,
 			TLS: v1alpha1.FabricCATLSConf{
 				Subject: v1alpha1.FabricCASubject{
 					CN: "ca",
@@ -291,5 +302,6 @@ func newCreateCACmd(out io.Writer, errOut io.Writer) *cobra.Command {
 	f.StringArrayVarP(&c.caOpts.Hosts, "hosts", "", []string{}, "Hosts for Istio")
 	f.StringVarP(&c.caOpts.IngressGateway, "istio-ingressgateway", "", "ingressgateway", "Istio ingress gateway name")
 	f.IntVarP(&c.caOpts.IngressPort, "istio-port", "", 443, "Istio ingress port")
+	f.StringArrayVarP(&c.caOpts.ImagePullSecrets, "image-pull-secrets", "s", []string{}, "Image Pull Secrets for the CA Image")
 	return cmd
 }

@@ -29,6 +29,7 @@ type Options struct {
 	InitialAdmin         string
 	HostURL              string
 	TLSSecretName        string
+	ImagePullSecrets     []string
 }
 
 func (o Options) Validate() error {
@@ -82,6 +83,15 @@ func (c *createCmd) run() error {
 			},
 		}
 	}
+	var imagePullSecrets []corev1.LocalObjectReference
+	if len(c.consoleOpts.ImagePullSecrets) > 0 {
+		for _, v := range c.consoleOpts.ImagePullSecrets {
+			imagePullSecrets = append(imagePullSecrets, corev1.LocalObjectReference{
+				Name: v,
+			})
+		}
+	}
+
 	fabricConsole := &v1alpha1.FabricOperationsConsole{
 		TypeMeta: v1.TypeMeta{
 			Kind:       "FabricOperationsConsole",
@@ -126,7 +136,7 @@ func (c *createCmd) run() error {
 				ImagePullPolicy:  "Always",
 			},
 			Env:              []corev1.EnvVar{},
-			ImagePullSecrets: []corev1.LocalObjectReference{},
+			ImagePullSecrets: imagePullSecrets,
 			Affinity:         &corev1.Affinity{},
 			Port:             3000,
 			Config:           "",
@@ -182,5 +192,6 @@ func newCreateConsoleCmd(out io.Writer, errOut io.Writer) *cobra.Command {
 	f.IntVarP(&c.consoleOpts.IngressPort, "istio-port", "", 443, "Istio ingress port")
 	f.StringArrayVarP(&c.consoleOpts.Hosts, "hosts", "", []string{}, "External hosts")
 	f.BoolVarP(&c.consoleOpts.Output, "output", "o", false, "Output in yaml")
+	f.StringArrayVarP(&c.consoleOpts.ImagePullSecrets, "image-pull-secrets", "s", []string{}, "Image Pull Secrets for the Console Image")
 	return cmd
 }
