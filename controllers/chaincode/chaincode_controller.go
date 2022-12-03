@@ -10,7 +10,7 @@ import (
 	hlfv1alpha1 "github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
 	"github.com/kfsoftware/hlf-operator/controllers/certs"
 	"github.com/kfsoftware/hlf-operator/controllers/utils"
-	"github.com/operator-framework/operator-lib/status"
+	"github.com/kfsoftware/hlf-operator/pkg/status"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	appsv1 "k8s.io/api/apps/v1"
@@ -256,8 +256,7 @@ func (r FabricChaincodeReconciler) getCryptoMaterial(ctx context.Context, labels
 // +kubebuilder:rbac:groups=hlf.kungfusoftware.es,resources=fabricchaincodes,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=hlf.kungfusoftware.es,resources=fabricchaincodes/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=hlf.kungfusoftware.es,resources=fabricchaincodes/finalizers,verbs=get;update;patch
-func (r *FabricChaincodeReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
-	ctx := context.Background()
+func (r *FabricChaincodeReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	reqLogger := r.Log.WithValues("hlf", req.NamespacedName)
 	fabricChaincode := &hlfv1alpha1.FabricChaincode{}
 	//releaseName := req.Name
@@ -291,7 +290,7 @@ func (r *FabricChaincodeReconciler) Reconcile(req ctrl.Request) (ctrl.Result, er
 			return ctrl.Result{}, err
 		}
 	}
-	log.Infof("Chaincode %s reconciled", req.NamespacedName)
+	r.Log.Info(fmt.Sprintf("Chaincode %s reconciled", req.NamespacedName))
 	ns := req.Namespace
 	if ns == "" {
 		ns = "default"
@@ -313,8 +312,8 @@ func (r *FabricChaincodeReconciler) Reconcile(req ctrl.Request) (ctrl.Result, er
 	}
 	deploymentName := fmt.Sprintf("%s", fabricChaincode.Name)
 	serviceName := fmt.Sprintf("%s", fabricChaincode.Name)
-
-	chaincodeAddress := "0.0.0.0:7052"
+	chaincodePort := 7052
+	chaincodeAddress := fmt.Sprintf("0.0.0.0:%d", chaincodePort)
 	envVars := []corev1.EnvVar{
 		{
 			Name:  "CHAINCODE_ID",
@@ -411,6 +410,36 @@ func (r *FabricChaincodeReconciler) Reconcile(req ctrl.Request) (ctrl.Result, er
 				Image:           fabricChaincode.Spec.Image,
 				ImagePullPolicy: fabricChaincode.Spec.ImagePullPolicy,
 				VolumeMounts:    volumeMounts,
+				LivenessProbe: &corev1.Probe{
+					ProbeHandler: corev1.ProbeHandler{
+						TCPSocket: &corev1.TCPSocketAction{
+							Port: intstr.IntOrString{
+								Type:   intstr.Int,
+								IntVal: int32(chaincodePort),
+							},
+						},
+					},
+					InitialDelaySeconds: 5,
+					TimeoutSeconds:      1,
+					PeriodSeconds:       5,
+					SuccessThreshold:    1,
+					FailureThreshold:    3,
+				},
+				ReadinessProbe: &corev1.Probe{
+					ProbeHandler: corev1.ProbeHandler{
+						TCPSocket: &corev1.TCPSocketAction{
+							Port: intstr.IntOrString{
+								Type:   intstr.Int,
+								IntVal: int32(chaincodePort),
+							},
+						},
+					},
+					InitialDelaySeconds: 5,
+					TimeoutSeconds:      1,
+					PeriodSeconds:       5,
+					SuccessThreshold:    1,
+					FailureThreshold:    3,
+				},
 			},
 		},
 		EphemeralContainers: nil,
@@ -476,7 +505,7 @@ func (r *FabricChaincodeReconciler) Reconcile(req ctrl.Request) (ctrl.Result, er
 			metav1.UpdateOptions{},
 		)
 		if err != nil {
-			err = errors.New("failed to update the deployment")
+			err = errors.Wrapf(err, "failed to update the deployment")
 			r.setConditionStatus(ctx, fabricChaincode, hlfv1alpha1.FailedStatus, false, err, false)
 			return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricChaincode)
 		}
@@ -487,7 +516,7 @@ func (r *FabricChaincodeReconciler) Reconcile(req ctrl.Request) (ctrl.Result, er
 	}
 	defaultServiceIPFamily := corev1.IPv4Protocol
 	serviceSpec := corev1.ServiceSpec{
-		IPFamily: &defaultServiceIPFamily,
+		IPFamilies: []corev1.IPFamily{defaultServiceIPFamily},
 		Ports: []corev1.ServicePort{
 			{
 				Name:       "chaincode",

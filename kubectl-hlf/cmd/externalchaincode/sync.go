@@ -25,7 +25,7 @@ type syncExternalChaincodeCmd struct {
 
 	replicas int
 
-	tlsRequired bool
+	tlsRequired     bool
 	ImagePullSecret []string
 }
 
@@ -64,18 +64,22 @@ func (c syncExternalChaincodeCmd) getFabricChaincodeSpec(ctx context.Context) (v
 		ImagePullPolicy:  corev1.PullAlways,
 		PackageID:        c.packageID,
 		ImagePullSecrets: []corev1.LocalObjectReference{},
+		Affinity:         nil,
+		Tolerations:      []corev1.Toleration{},
+		Resources:        nil,
 		Credentials:      nil,
 		Replicas:         c.replicas,
+		Env:              []corev1.EnvVar{},
 	}
 
-	if len(c.ImagePullSecret)>0{
-		imagePullSecret :=[]corev1.LocalObjectReference{}
+	if len(c.ImagePullSecret) > 0 {
+		imagePullSecret := []corev1.LocalObjectReference{}
 		for _, v := range c.ImagePullSecret {
 			imagePullSecret = append(imagePullSecret, corev1.LocalObjectReference{
 				Name: v,
 			})
 		}
-			fabricChaincodeSpec.ImagePullSecrets=imagePullSecret
+		fabricChaincodeSpec.ImagePullSecrets = imagePullSecret
 	}
 	oclient, err := helpers.GetKubeOperatorClient()
 	if err != nil {

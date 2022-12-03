@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"k8s.io/apimachinery/pkg/api/resource"
 
 	"github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
 	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/helpers"
@@ -14,18 +15,20 @@ import (
 )
 
 type Options struct {
-	Name             string
-	StorageClass     string
-	Capacity         string
-	NS               string
-	Image            string
-	Version          string
-	EnrollID         string
-	EnrollSecret     string
-	Output           bool
-	IngressGateway   string
-	IngressPort      int
-	Hosts            []string
+	Name           string
+	StorageClass   string
+	Capacity       string
+	NS             string
+	Image          string
+	Version        string
+	EnrollID       string
+	EnrollSecret   string
+	Output         bool
+	IngressGateway string
+	IngressPort    int
+	Hosts          []string
+	DBType         string
+	DBDataSource   string
 	ImagePullSecrets []string
 }
 
@@ -71,12 +74,14 @@ func (c *createCmd) run(_ []string) error {
 		Hosts:          []string{},
 		IngressGateway: ingressGateway,
 	}
+	serviceType := corev1.ServiceTypeNodePort
 	if len(c.caOpts.Hosts) > 0 {
 		istio = &v1alpha1.FabricIstio{
 			Port:           ingressPort,
 			Hosts:          c.caOpts.Hosts,
 			IngressGateway: ingressGateway,
 		}
+		serviceType = corev1.ServiceTypeClusterIP
 	}
 
 	var imagePullSecrets []corev1.LocalObjectReference
@@ -96,6 +101,10 @@ func (c *createCmd) run(_ []string) error {
 	hosts = append(hosts, c.caOpts.Hosts...)
 	csrHosts := []string{"localhost"}
 	csrHosts = append(csrHosts, c.caOpts.Hosts...)
+	caResources, err := getDefaultCAResources()
+	if err != nil {
+		return err
+	}
 	fabricCA := &v1alpha1.FabricCA{
 		TypeMeta: v1.TypeMeta{
 			Kind:       "FabricCA",
@@ -107,12 +116,12 @@ func (c *createCmd) run(_ []string) error {
 		},
 		Spec: v1alpha1.FabricCASpec{
 			Database: v1alpha1.FabricCADatabase{
-				Type:       "sqlite3",
-				Datasource: "fabric-ca-server.db",
+				Type:       c.caOpts.DBType,
+				Datasource: c.caOpts.DBDataSource,
 			},
 			Hosts: hosts,
 			Service: v1alpha1.FabricCASpecService{
-				ServiceType: "NodePort",
+				ServiceType: serviceType,
 			},
 			Image:            c.caOpts.Image,
 			ImagePullSecrets: imagePullSecrets,
@@ -234,10 +243,7 @@ func (c *createCmd) run(_ []string) error {
 				Enabled: false,
 				Origins: []string{},
 			},
-			Resources: corev1.ResourceRequirements{
-				Requests: corev1.ResourceList{},
-				Limits:   corev1.ResourceList{},
-			},
+			Resources: caResources,
 			Storage: v1alpha1.Storage{
 				Size:         c.caOpts.Capacity,
 				StorageClass: c.caOpts.StorageClass,
@@ -298,10 +304,42 @@ func newCreateCACmd(out io.Writer, errOut io.Writer) *cobra.Command {
 	f.StringVarP(&c.caOpts.Image, "image", "i", helpers.DefaultCAImage, "Image of the Fabric CA")
 	f.StringVarP(&c.caOpts.EnrollID, "enroll-id", "", "enroll", "Enroll ID of the CA")
 	f.StringVarP(&c.caOpts.EnrollSecret, "enroll-pw", "", "enrollpw", "Enroll secret of the CA")
+	f.StringVarP(&c.caOpts.DBType, "db.type", "", "sqlite3", "Database type of the CA")
+	f.StringVarP(&c.caOpts.DBDataSource, "db.datasource", "", "fabric-ca-server.db", "Database datasource of the CA")
+
 	f.BoolVarP(&c.caOpts.Output, "output", "o", false, "Output in yaml")
 	f.StringArrayVarP(&c.caOpts.Hosts, "hosts", "", []string{}, "Hosts for Istio")
 	f.StringVarP(&c.caOpts.IngressGateway, "istio-ingressgateway", "", "ingressgateway", "Istio ingress gateway name")
 	f.IntVarP(&c.caOpts.IngressPort, "istio-port", "", 443, "Istio ingress port")
 	f.StringArrayVarP(&c.caOpts.ImagePullSecrets, "image-pull-secrets", "s", []string{}, "Image Pull Secrets for the CA Image")
 	return cmd
+}
+
+func getDefaultCAResources() (corev1.ResourceRequirements, error) {
+	requestCpu, err := resource.ParseQuantity("10m")
+	if err != nil {
+		return corev1.ResourceRequirements{}, err
+	}
+	requestMemory, err := resource.ParseQuantity("128Mi")
+	if err != nil {
+		return corev1.ResourceRequirements{}, err
+	}
+	limitsCpu, err := resource.ParseQuantity("300m")
+	if err != nil {
+		return corev1.ResourceRequirements{}, err
+	}
+	limitsMemory, err := resource.ParseQuantity("256Mi")
+	if err != nil {
+		return corev1.ResourceRequirements{}, err
+	}
+	return corev1.ResourceRequirements{
+		Requests: corev1.ResourceList{
+			corev1.ResourceCPU:    requestCpu,
+			corev1.ResourceMemory: requestMemory,
+		},
+		Limits: corev1.ResourceList{
+			corev1.ResourceCPU:    limitsCpu,
+			corev1.ResourceMemory: limitsMemory,
+		},
+	}, nil
 }

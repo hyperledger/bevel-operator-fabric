@@ -16,8 +16,9 @@ func httpClient(caCertPool *x509.CertPool, tlsClientCert tls.Certificate) *http.
 	return &http.Client{
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{
-				RootCAs:      caCertPool,
-				Certificates: []tls.Certificate{tlsClientCert},
+				RootCAs:            caCertPool,
+				Certificates:       []tls.Certificate{tlsClientCert},
+				InsecureSkipVerify: true,
 			},
 		},
 	}

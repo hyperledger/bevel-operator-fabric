@@ -100,6 +100,5 @@ func newQueryChaincodeCMD(out io.Writer, errOut io.Writer) *cobra.Command {
 	cmd.MarkPersistentFlagRequired("config")
 	cmd.MarkPersistentFlagRequired("chaincode")
 	cmd.MarkPersistentFlagRequired("fcn")
-	cmd.MarkPersistentFlagRequired("args")
 	return cmd
 }

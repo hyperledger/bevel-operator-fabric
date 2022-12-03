@@ -1,9 +1,6 @@
 module.exports = {
   someSidebar1: {
-    Operator: [
-      "intro",
-      "getting-started",
-    ],
+    Operator: ["intro", "getting-started"],
     "Operator Guide": [
       "operator-guide/state-db",
       "operator-guide/monitoring",
@@ -32,8 +29,13 @@ module.exports = {
       "chaincode-deployment/external-chaincode-as-a-service",
       "chaincode-deployment/k8s-builder",
     ],
-    "Kubectl Plugin": ["kubectl-plugin/installation"],
+    "Channel management": [
+      "channel-management/getting-started",
+      "channel-management/manage",
+    ],
+    "Kubectl Plugin": ["kubectl-plugin/installation", "kubectl-plugin/upgrade"],
     CouchDB: ["couchdb/external-couchdb", "couchdb/custom-image"],
+    Reference: ["reference/reference"],
     "GRPC Proxy": ["grpc-proxy/enable-peers", "grpc-proxy/enable-orderers"],
     "Operations Console": [
       "operations-console/getting-started",
@@ -47,6 +49,5 @@ module.exports = {
       "operator-ui/deploy-operator-ui",
       "operator-ui/deploy-operator-api",
     ],
-
   },
 };

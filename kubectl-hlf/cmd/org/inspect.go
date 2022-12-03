@@ -2,6 +2,7 @@ package org
 
 import (
 	"bytes"
+	"fmt"
 	"github.com/Masterminds/sprig/v3"
 	"github.com/kfsoftware/hlf-operator/controllers/utils"
 	log "github.com/kfsoftware/hlf-operator/internal/github.com/hyperledger/fabric-ca/sdkpatch/logbridge"
@@ -17,6 +18,7 @@ import (
 
 type InspectOptions struct {
 	Orgs       []string
+	CAs        []string
 	OutputPath string
 }
 
@@ -112,7 +114,69 @@ func (c *inspectCmd) run(args []string) error {
 	if err != nil {
 		return err
 	}
+	cas, err := helpers.GetClusterCAs(clientSet, oclient, "")
+	if err != nil {
+		return err
+	}
 	orgMap := map[string]OrganizationItem{}
+	for _, ca := range cas {
+		for _, caNameAndNS := range c.caOpts.CAs {
+			chunks := strings.Split(caNameAndNS, ";")
+			if len(chunks) != 2 {
+				return fmt.Errorf("invalid ca name and namespace: %s", caNameAndNS)
+			}
+			mspID := chunks[1]
+			if !(ca.Name == chunks[0]) {
+				continue
+			}
+			orgPath := path.Join(baseOutputPath, "peerOrganizations", mspID)
+			mspPath := path.Join(orgPath, "msp")
+			mspCaCerts := path.Join(mspPath, "cacerts")
+			mspTLSCaCerts := path.Join(mspPath, "tlscacerts")
+
+			err = os.MkdirAll(mspCaCerts, os.ModePerm)
+			if err != nil {
+				return err
+			}
+			err = os.MkdirAll(mspTLSCaCerts, os.ModePerm)
+			if err != nil {
+				return err
+			}
+			mspCACertPath := path.Join(mspCaCerts, "ca.pem")
+			err = ioutil.WriteFile(mspCACertPath, []byte(ca.Status.CACert), os.ModePerm)
+			if err != nil {
+				return err
+			}
+			mspTLSCACertPath := path.Join(mspTLSCaCerts, "tlsca.pem")
+			err = ioutil.WriteFile(mspTLSCACertPath, []byte(ca.Status.TLSCACert), os.ModePerm)
+			if err != nil {
+				return err
+			}
+			nodeOusContent := `
+NodeOUs:
+  Enable: true
+  ClientOUIdentifier:
+    Certificate: cacerts/ca.pem
+    OrganizationalUnitIdentifier: client
+  PeerOUIdentifier:
+    Certificate: cacerts/ca.pem
+    OrganizationalUnitIdentifier: peer
+  AdminOUIdentifier:
+    Certificate: cacerts/ca.pem
+    OrganizationalUnitIdentifier: admin
+  OrdererOUIdentifier:
+    Certificate: cacerts/ca.pem
+    OrganizationalUnitIdentifier: orderer
+`
+			nodeOusPath := path.Join(mspPath, "config.yaml")
+			err = ioutil.WriteFile(nodeOusPath, []byte(nodeOusContent), os.ModePerm)
+			if err != nil {
+				return err
+			}
+			orgMap[mspID] = OrganizationItem{MPSDir: mspPath}
+		}
+
+	}
 	for _, peerOrg := range peerOrgs {
 		firstPeer := peerOrg.Peers[0]
 		if !utils.Contains(c.caOpts.Orgs, firstPeer.MSPID) {
@@ -206,6 +270,7 @@ func newOrgInspectCmd(out io.Writer, errOut io.Writer) *cobra.Command {
 	}
 	f := cmd.Flags()
 	f.StringSliceVarP(&c.caOpts.Orgs, "orgs", "o", []string{}, "Organizations to inspect")
+	f.StringSliceVarP(&c.caOpts.CAs, "cas", "", []string{}, `Certification authorities to add (orgs without peers) Example: --cas=ca-org1.default;Org1MSP`)
 	f.StringVarP(&c.caOpts.OutputPath, "output-path", "", "", "Output path")
 
 	return cmd
