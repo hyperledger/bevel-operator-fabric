@@ -59,10 +59,10 @@ func (c *queryApprovedCmd) run(out io.Writer) error {
 		},
 		resmgmt.WithTargetEndpoints(peerName),
 	)
-	signaturePolicyBytes,err := json.Marshal(chaincode.SignaturePolicy)
+	signaturePolicyBytes, err := json.Marshal(chaincode.SignaturePolicy)
 	if err != nil {
-        return err
-    }
+		return err
+	}
 	data := [][]string{
 		{chaincode.Name, chaincode.PackageID, chaincode.Version, fmt.Sprint(chaincode.Sequence), string(signaturePolicyBytes)}}
 	table := tablewriter.NewWriter(out)

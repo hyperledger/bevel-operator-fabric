@@ -189,6 +189,16 @@ func (c *inspectCmd) run(out io.Writer) error {
 	if err != nil {
 		return err
 	}
+	filterByOrgs := len(c.organizations) > 0
+	filterByNS := len(c.namespaces) > 0
+	filterByOrdererNodes := len(c.ordererNodes) > 0
+	var certAuthsFiltered []*helpers.ClusterCA
+	for _, certAuth := range certAuths {
+		if filterByNS && !utils.Contains(c.namespaces, certAuth.Namespace) {
+			continue
+		}
+		certAuthsFiltered = append(certAuthsFiltered, certAuth)
+	}
 	clusterOrderersNodes, err := helpers.GetClusterOrdererNodes(clientSet, oclient, "")
 	if err != nil {
 		return err
@@ -197,12 +207,10 @@ func (c *inspectCmd) run(out io.Writer) error {
 	if err != nil {
 		return err
 	}
-	filterByOrgs := len(c.organizations) > 0
-	filterByNS := len(c.namespaces) > 0
-	filterByOrdererNodes := len(c.ordererNodes) > 0
+
 	orgMap := map[string]*helpers.Organization{}
 	for _, ordererNode := range clusterOrderersNodes {
-		if filterByNS && !utils.Contains(c.namespaces, ordererNode.ObjectMeta.Namespace) {
+		if filterByNS && !utils.Contains(c.namespaces, ordererNode.Namespace) {
 			continue
 		}
 		if filterByOrdererNodes && !utils.Contains(c.ordererNodes, ordererNode.Name) {
@@ -229,17 +237,17 @@ func (c *inspectCmd) run(out io.Writer) error {
 	}
 	var peers []*helpers.ClusterPeer
 	for _, peer := range clusterPeers {
-		if filterByNS && !utils.Contains(c.namespaces, peer.ObjectMeta.Namespace) {
+		if filterByNS && !utils.Contains(c.namespaces, peer.Namespace) {
 			continue
 		}
-		if filterByOrgs && utils.Contains(c.organizations, peer.MSPID) {
+		if (filterByOrgs && utils.Contains(c.organizations, peer.MSPID)) || !filterByOrgs {
 			peers = append(peers, peer)
 		}
 	}
 
 	var orderers []*helpers.ClusterOrdererNode
 	for _, orderer := range clusterOrderersNodes {
-		if filterByNS && !utils.Contains(c.namespaces, orderer.ObjectMeta.Namespace) {
+		if filterByNS && !utils.Contains(c.namespaces, orderer.Namespace) {
 			continue
 		}
 		if filterByOrdererNodes && !utils.Contains(c.ordererNodes, orderer.Name) {
@@ -260,7 +268,7 @@ func (c *inspectCmd) run(out io.Writer) error {
 		"Peers":         peers,
 		"Orderers":      orderers,
 		"Organizations": orgMap,
-		"CertAuths":     certAuths,
+		"CertAuths":     certAuthsFiltered,
 		"Internal":      c.internal,
 		"Channels":      c.channels,
 	})
