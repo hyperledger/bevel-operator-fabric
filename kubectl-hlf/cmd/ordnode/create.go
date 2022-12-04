@@ -250,6 +250,6 @@ func newCreateOrdererNodeCmd(out io.Writer, errOut io.Writer) *cobra.Command {
 	f.StringArrayVarP(&c.ordererOpts.AdminHosts, "admin-hosts", "", []string{}, "Hosts for the admin API(introduced in v2.3)")
 	f.BoolVarP(&c.ordererOpts.Output, "output", "o", false, "Output in yaml")
 	f.StringArrayVarP(&c.ordererOpts.HostAliases, "host-aliases", "", []string{}, "Host aliases (e.g.: \"1.2.3.4:osn2.example.com,peer1.example.com\")")
-	f.StringArrayVarP(&c.ordererOpts.ImagePullSecrets, "image-pull-secrets", "s", []string{}, "Image Pull Secrets for the Peer Image")
+	f.StringArrayVarP(&c.ordererOpts.ImagePullSecrets, "image-pull-secrets", "", []string{}, "Image Pull Secrets for the Peer Image")
 	return cmd
 }

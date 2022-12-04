@@ -192,6 +192,6 @@ func newCreateConsoleCmd(out io.Writer, errOut io.Writer) *cobra.Command {
 	f.IntVarP(&c.consoleOpts.IngressPort, "istio-port", "", 443, "Istio ingress port")
 	f.StringArrayVarP(&c.consoleOpts.Hosts, "hosts", "", []string{}, "External hosts")
 	f.BoolVarP(&c.consoleOpts.Output, "output", "o", false, "Output in yaml")
-	f.StringArrayVarP(&c.consoleOpts.ImagePullSecrets, "image-pull-secrets", "s", []string{}, "Image Pull Secrets for the Peer Image")
+	f.StringArrayVarP(&c.consoleOpts.ImagePullSecrets, "image-pull-secrets", "", []string{}, "Image Pull Secrets for the Peer Image")
 	return cmd
 }

@@ -311,7 +311,7 @@ func newCreateCACmd(out io.Writer, errOut io.Writer) *cobra.Command {
 	f.StringArrayVarP(&c.caOpts.Hosts, "hosts", "", []string{}, "Hosts for Istio")
 	f.StringVarP(&c.caOpts.IngressGateway, "istio-ingressgateway", "", "ingressgateway", "Istio ingress gateway name")
 	f.IntVarP(&c.caOpts.IngressPort, "istio-port", "", 443, "Istio ingress port")
-	f.StringArrayVarP(&c.caOpts.ImagePullSecrets, "image-pull-secrets", "s", []string{}, "Image Pull Secrets for the CA Image")
+	f.StringArrayVarP(&c.caOpts.ImagePullSecrets, "image-pull-secrets", "", []string{}, "Image Pull Secrets for the CA Image")
 	return cmd
 }
 
