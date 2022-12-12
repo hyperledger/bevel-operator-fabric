@@ -110,6 +110,9 @@ func (c *createCmd) run(args []string) error {
 		caPort = certAuth.Spec.Istio.Port
 		serviceType = corev1.ServiceTypeClusterIP
 	}
+	if c.ordererOpts.CAHost != "" {
+		caHost = c.ordererOpts.CAHost
+	}
 	if c.ordererOpts.CAPort != 0 {
 		caPort = c.ordererOpts.CAPort
 	}

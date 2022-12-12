@@ -33,6 +33,9 @@ func (o UpdateOptions) Validate() error {
 	if o.Name == "" {
 		return fmt.Errorf("--name is required")
 	}
+	if o.ChannelName == "" {
+		return fmt.Errorf("--channel-name is required")
+	}
 	if o.MSPID == "" {
 		return fmt.Errorf("--msp-id is required")
 	}
@@ -170,6 +173,7 @@ func newUpdateFollowerChannelCmd(out io.Writer, errOut io.Writer) *cobra.Command
 	}
 	f := cmd.Flags()
 	f.StringVar(&c.channelOpts.Name, "name", "", "Name of the Fabric Console to update")
+	f.StringVar(&c.channelOpts.ChannelName, "channel-name", "", "Name of the channel to join")
 	f.StringVar(&c.channelOpts.MSPID, "mspid", "", "MSPID of the channel")
 	f.StringArrayVar(&c.channelOpts.AnchorPeers, "anchor-peers", []string{}, "Anchor peers of the channel")
 	f.StringArrayVar(&c.channelOpts.OrdererURLs, "orderer-urls", []string{}, "Orderer URLs of the channel")
