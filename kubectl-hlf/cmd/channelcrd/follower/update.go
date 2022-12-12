@@ -22,6 +22,7 @@ type UpdateOptions struct {
 	AnchorPeers         []string
 	SecretName          string
 	SecretNamespace     string
+	SecretNS            string
 	SecretKey           string
 	ChannelName         string
 	Peers               []string
@@ -33,14 +34,17 @@ func (o UpdateOptions) Validate() error {
 	if o.Name == "" {
 		return fmt.Errorf("--name is required")
 	}
+	if o.ChannelName == "" {
+		return fmt.Errorf("--channel-name is required")
+	}
 	if o.MSPID == "" {
 		return fmt.Errorf("--msp-id is required")
 	}
 	if o.SecretName == "" {
 		return fmt.Errorf("--secret-name is required")
 	}
-	if o.SecretNamespace == "" {
-		return fmt.Errorf("--secret-namespace is required")
+	if o.SecretNamespace == "" || o.SecretNS != "" {
+		return fmt.Errorf("--secret-namespace or --secret-ns is required")
 	}
 	if o.SecretKey == "" {
 		return fmt.Errorf("--secret-key is required")
@@ -121,9 +125,15 @@ func (c *updateCmd) run() error {
 			Port: portNumber,
 		})
 	}
+	var ns string
+	if c.channelOpts.SecretNS != "" {
+		ns = c.channelOpts.SecretNS
+	} else {
+		ns = c.channelOpts.SecretNamespace
+	}
 	identity := v1alpha1.HLFIdentity{
 		SecretName:      c.channelOpts.SecretName,
-		SecretNamespace: c.channelOpts.SecretNamespace,
+		SecretNamespace: ns,
 		SecretKey:       c.channelOpts.SecretKey,
 	}
 	fabricFollowerChannel, err := oclient.HlfV1alpha1().FabricFollowerChannels().Get(context.TODO(), c.channelOpts.Name, v1.GetOptions{})
@@ -170,6 +180,7 @@ func newUpdateFollowerChannelCmd(out io.Writer, errOut io.Writer) *cobra.Command
 	}
 	f := cmd.Flags()
 	f.StringVar(&c.channelOpts.Name, "name", "", "Name of the Fabric Console to update")
+	f.StringVar(&c.channelOpts.ChannelName, "channel-name", "", "Name of the channel to join")
 	f.StringVar(&c.channelOpts.MSPID, "mspid", "", "MSPID of the channel")
 	f.StringArrayVar(&c.channelOpts.AnchorPeers, "anchor-peers", []string{}, "Anchor peers of the channel")
 	f.StringArrayVar(&c.channelOpts.OrdererURLs, "orderer-urls", []string{}, "Orderer URLs of the channel")
@@ -177,6 +188,7 @@ func newUpdateFollowerChannelCmd(out io.Writer, errOut io.Writer) *cobra.Command
 	f.StringArrayVar(&c.channelOpts.Peers, "peers", []string{}, "Peers of the channel")
 	f.StringVar(&c.channelOpts.SecretName, "secret-name", "", "Name of the secret containing the certificate to join and set the anchor peers")
 	f.StringVar(&c.channelOpts.SecretNamespace, "secret-namespace", "", "Namespace of the secret containing the certificate to join and set the anchor peers")
+	f.StringVar(&c.channelOpts.SecretNS, "secret-ns", "", "Namespace of the secret containing the certificate to join and set the anchor peers")
 	f.StringVar(&c.channelOpts.SecretKey, "secret-key", "", "Key of the secret containing the certificate to join and set the anchor peers")
 	f.BoolVarP(&c.channelOpts.Output, "output", "o", false, "Output in yaml")
 	return cmd

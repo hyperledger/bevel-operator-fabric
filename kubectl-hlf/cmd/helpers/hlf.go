@@ -37,6 +37,7 @@ type ClusterCA struct {
 	EnrollID   string
 	EnrollPWD  string
 	Item       hlfv1alpha1.FabricCA
+	Namespace  string
 }
 
 func (c ClusterCA) GetFullName() string {
@@ -60,6 +61,7 @@ type ClusterOrdererNode struct {
 	Spec       hlfv1alpha1.FabricOrdererNodeSpec
 	Status     hlfv1alpha1.FabricOrdererNodeStatus
 	Item       hlfv1alpha1.FabricOrdererNode
+	Namespace  string
 }
 
 type ClusterPeer struct {
@@ -74,6 +76,7 @@ type ClusterPeer struct {
 	Identity   Identity
 	MSPID      string
 	ObjectMeta v1.ObjectMeta
+	Namespace  string
 }
 type Identity struct {
 	Key  string
@@ -99,6 +102,7 @@ func MapClusterCA(clientSet *kubernetes.Clientset, certAuth hlfv1alpha1.FabricCA
 		Spec:       certAuth.Spec,
 		Status:     certAuth.Status,
 		Name:       certauthName,
+		Namespace:  certAuth.Namespace,
 		PublicURL:  publicURL,
 		PrivateURL: privateURL,
 		EnrollID:   enrollId,
@@ -116,6 +120,7 @@ func MapClusterPeer(clientSet *kubernetes.Clientset, peer hlfv1alpha1.FabricPeer
 	return &ClusterPeer{
 		Name:       peer.FullName(),
 		ObjectMeta: peer.ObjectMeta,
+		Namespace:  peer.Namespace,
 		Object:     peer,
 		Spec:       peer.Spec,
 		Status:     peer.Status,
@@ -134,6 +139,7 @@ func MapClusterOrdererNode(clientSet *kubernetes.Clientset, ordNode hlfv1alpha1.
 	privateURL := GetOrdererPrivateURL(ordNode)
 	return &ClusterOrdererNode{
 		Name:       ordNode.FullName(),
+		Namespace:  ordNode.Namespace,
 		ObjectMeta: ordNode.ObjectMeta,
 		Spec:       ordNode.Spec,
 		Status:     ordNode.Status,
@@ -268,6 +274,7 @@ func GetClusterOrdererNodes(
 			ordererNodes,
 			&ClusterOrdererNode{
 				Name:       ordNode.FullName(),
+				Namespace:  ordNode.Namespace,
 				PublicURL:  publicURL,
 				PrivateURL: privateURL,
 				Spec:       ordNode.Spec,

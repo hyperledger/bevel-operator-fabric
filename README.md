@@ -218,7 +218,7 @@ export ORDERER_VERSION=2.4.6
 
 
 
-### Configurar DNS interno
+### Configure Internal DNS
 
 ```bash
 CLUSTER_IP=$(kubectl -n istio-system get svc istio-ingressgateway -o json | jq -r .spec.clusterIP)
@@ -301,7 +301,7 @@ kubectl wait --timeout=180s --for=condition=Running fabricpeers.hlf.kungfusoftwa
 Check that the peer is deployed and works:
 
 ```bash
-curl -vik https://peer0-org1.localho.st:443
+openssl s_client -connect peer0-org1.localho.st:443
 ```
 
 ## Deploy an `Orderer` organization
@@ -354,7 +354,7 @@ kubectl get pods
 ```
 
 ```bash
-curl -vik https://orderer0-ord.localho.st:443
+openssl s_client -connect orderer0-ord.localho.st:443
 ```
 
 

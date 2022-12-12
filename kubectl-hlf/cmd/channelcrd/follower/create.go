@@ -164,6 +164,7 @@ func (c *createCmd) run() error {
 	}
 	return nil
 }
+
 func newCreateFollowerChannelCmd(out io.Writer, errOut io.Writer) *cobra.Command {
 	c := createCmd{out: out, errOut: errOut}
 	cmd := &cobra.Command{
