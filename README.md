@@ -218,7 +218,7 @@ export ORDERER_VERSION=2.4.6
 
 
 
-### Configurar DNS interno
+### Configure Internal DNS
 
 ```bash
 CLUSTER_IP=$(kubectl -n istio-system get svc istio-ingressgateway -o json | jq -r .spec.clusterIP)
