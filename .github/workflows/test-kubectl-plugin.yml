@@ -143,8 +143,6 @@ jobs:
 
           kubectl wait --timeout=180s --for=condition=Created fabricmainchannels.hlf.kungfusoftware.es --all 
 
-          kubectl get 
-
 
       - name: Join peers to channel
         run: |
