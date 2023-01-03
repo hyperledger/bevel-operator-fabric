@@ -202,6 +202,8 @@ export PEER_VERSION=2.4.6
 export ORDERER_IMAGE=hyperledger/fabric-orderer
 export ORDERER_VERSION=2.4.6
 
+export CA_IMAGE=hyperledger/fabric-ca             
+export CA_VERSION=1.5.6-beta2
 ```
 
 
@@ -213,6 +215,9 @@ export PEER_VERSION=2.4.6
 
 export ORDERER_IMAGE=bswamina/fabric-orderer
 export ORDERER_VERSION=2.4.6
+
+export CA_IMAGE=hyperledger/fabric-ca             
+export CA_VERSION=1.5.6-beta2
 
 ```
 
@@ -262,7 +267,7 @@ EOF
 
 ```bash
 
-kubectl hlf ca create --storage-class=standard --capacity=1Gi --name=org1-ca \
+kubectl hlf ca create  --image=$CA_IMAGE --version=$CA_VERSION --storage-class=standard --capacity=1Gi --name=org1-ca \
     --enroll-id=enroll --enroll-pw=enrollpw --hosts=org1-ca.localho.st --istio-port=443
 
 kubectl wait --timeout=180s --for=condition=Running fabriccas.hlf.kungfusoftware.es --all
@@ -316,7 +321,7 @@ To deploy an `Orderer` organization we have to:
 
 ```bash
 
-kubectl hlf ca create --storage-class=standard --capacity=1Gi --name=ord-ca \
+kubectl hlf ca create  --image=$CA_IMAGE --version=$CA_VERSION --storage-class=standard --capacity=1Gi --name=ord-ca \
     --enroll-id=enroll --enroll-pw=enrollpw --hosts=ord-ca.localho.st --istio-port=443
 
 kubectl wait --timeout=180s --for=condition=Running fabriccas.hlf.kungfusoftware.es --all
@@ -701,6 +706,8 @@ kubectl delete fabricorderernodes.hlf.kungfusoftware.es --all-namespaces --all
 kubectl delete fabricpeers.hlf.kungfusoftware.es --all-namespaces --all
 kubectl delete fabriccas.hlf.kungfusoftware.es --all-namespaces --all
 kubectl delete fabricchaincode.hlf.kungfusoftware.es --all-namespaces --all
+kubectl delete fabricmainchannels --all-namespaces --all
+kubectl delete fabricfollowerchannels --all-namespaces --all
 ```
 
 ## Troubleshooting
