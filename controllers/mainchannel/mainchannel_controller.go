@@ -520,11 +520,27 @@ func (r *FabricMainChannelReconciler) Reconcile(ctx context.Context, req ctrl.Re
 		}
 		log.Infof("Application configuration updated with transaction ID: %s", saveChannelResponse.TransactionID)
 	}
-	r.Log.Info(fmt.Sprintf("Waiting 3 seconds for orderers to reconcile %s", fabricMainChannel.Name))
-	time.Sleep(3 * time.Second)
-	ordererChannelBlock, err = resClient.QueryConfigBlockFromOrderer(fabricMainChannel.Spec.Name, resmgmtOptions...)
-	if err != nil {
-		r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, errors.Wrapf(err, "error fetching block from orderer"), false)
+	r.Log.Info(fmt.Sprintf("fetching block every 1 second waiting for orderers to reconcile %s", fabricMainChannel.Name))
+	ordererChannelCh := make(chan *common.Block, 1)
+	go func() {
+		for {
+			ordererChannelBlock, err = resClient.QueryConfigBlockFromOrderer(fabricMainChannel.Spec.Name, resmgmtOptions...)
+			if err != nil {
+				r.Log.Error(err, "error querying orderer channel")
+				time.Sleep(1 * time.Second)
+			} else {
+				ordererChannelCh <- ordererChannelBlock
+				break
+			}
+		}
+	}()
+	select {
+	case res := <-ordererChannelCh:
+		ordererChannelBlock = res
+	case <-time.After(12 * time.Second):
+		err = errors.New("timeout querying orderer channel")
+		r.Log.Error(err, "error querying orderer channel")
+		r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, err, false)
 		return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricMainChannel)
 	}
 	cmnConfig, err := resource.ExtractConfigFromBlock(ordererChannelBlock)
