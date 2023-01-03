@@ -43,7 +43,7 @@ jobs:
       - name: Deploy operator
         run: |
           helm repo add kfs https://kfsoftware.github.io/hlf-helm-charts --force-update
-          helm install hlf-operator --version=1.8.0-beta5 kfs/hlf-operator --set image.repository="${IMAGE}" --set image.tag="${TAG}" --set image.pullPolicy="IfNotPresent"
+          helm install hlf-operator --version=1.8.0 kfs/hlf-operator --set image.repository="${IMAGE}" --set image.tag="${TAG}" --set image.pullPolicy="IfNotPresent"
 
       - name: Install operator CRDs
         run: |
@@ -53,12 +53,12 @@ jobs:
       - name: Create Peer org
         run: |
           export PEER_IMAGE=hyperledger/fabric-peer
-          export PEER_VERSION=2.4.3
+          export PEER_VERSION=2.4.6
 
-          export ORDERER_IMAGE=hyperledger/fabric-orderer
-          export ORDERER_VERSION=2.4.3
+          export CA_IMAGE=hyperledger/fabric-ca
+          export CA_VERSION=1.5.6-beta2
 
-          kubectl hlf ca create --storage-class=standard --capacity=2Gi --name=org1-ca \
+          kubectl hlf ca create --image=$CA_IMAGE --version=$CA_VERSION --storage-class=standard --capacity=2Gi --name=org1-ca \
               --enroll-id=enroll --enroll-pw=enrollpw  
           kubectl wait --timeout=180s --for=condition=Running fabriccas.hlf.kungfusoftware.es --all    
 
@@ -73,9 +73,12 @@ jobs:
       - name: Create Orderer Org
         run: |
           export ORDERER_IMAGE=hyperledger/fabric-orderer
-          export ORDERER_VERSION=2.4.3
+          export ORDERER_VERSION=2.4.6
 
-          kubectl hlf ca create --storage-class=standard --capacity=2Gi --name=ord-ca \
+          export CA_IMAGE=hyperledger/fabric-ca
+          export CA_VERSION=1.5.6-beta2
+
+          kubectl hlf ca create --image=$CA_IMAGE --version=$CA_VERSION --storage-class=standard --capacity=2Gi --name=ord-ca \
               --enroll-id=enroll --enroll-pw=enrollpw
           kubectl wait --timeout=180s --for=condition=Running fabriccas.hlf.kungfusoftware.es --all
           kubectl hlf ca register --name=ord-ca --user=orderer --secret=ordererpw \
@@ -235,6 +238,8 @@ jobs:
           kubectl get fabriccas.hlf.kungfusoftware.es -A -o=custom-columns='NAME:metadata.name,NAMESPACE:metadata.namespace,STATE:status.status,MESSAGE:status.message'
           kubectl get fabricmainchannels.hlf.kungfusoftware.es -A -o=custom-columns='NAME:metadata.name,NAMESPACE:metadata.namespace,STATE:status.status,MESSAGE:status.message'
           kubectl get fabricfollowerchannels.hlf.kungfusoftware.es -A -o=custom-columns='NAME:metadata.name,NAMESPACE:metadata.namespace,STATE:status.status,MESSAGE:status.message'
+
+          kubectl get fabricmainchannels  -o yaml
 
           POD=$(kubectl get pod -l 'release in (org1-peer0)'  -o jsonpath="{.items[0].metadata.name}")
           kubectl logs $POD -c peer
