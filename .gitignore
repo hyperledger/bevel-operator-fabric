@@ -33,3 +33,4 @@ dist/
 /hlf-operator
 /kubectl-hlf/hlf-operator
 node_modules
+istio-*
