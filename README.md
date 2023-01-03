@@ -96,7 +96,7 @@ To install helm: [https://helm.sh/docs/intro/install/](https://helm.sh/docs/intr
 ```bash
 helm repo add kfs https://kfsoftware.github.io/hlf-helm-charts --force-update
 
-helm install hlf-operator --version=1.8.0 kfs/hlf-operator
+helm install hlf-operator --version=1.8.2 kfs/hlf-operator
 ```
 
 
@@ -202,7 +202,7 @@ export PEER_VERSION=2.4.6
 export ORDERER_IMAGE=hyperledger/fabric-orderer
 export ORDERER_VERSION=2.4.6
 
-export CA_IMAGE=hyperledger/fabric-ca             
+export CA_IMAGE=hyperledger/fabric-ca
 export CA_VERSION=1.5.6-beta2
 ```
 
@@ -307,6 +307,7 @@ Check that the peer is deployed and works:
 
 ```bash
 openssl s_client -connect peer0-org1.localho.st:443
+openssl s_client -connect peer1-org1.localho.st:443
 ```
 
 ## Deploy an `Orderer` organization
