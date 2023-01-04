@@ -118,8 +118,10 @@ jobs:
                 outboundTrafficPolicy:
                   mode: ALLOW_ANY
               profile: default
-              
+
           EOF
+
+          kubectl wait --timeout=180s --for=jsonpath='{.status.status}'=HEALTHY istiooperator istio-gateway --namespace=istio-system
 
       - name: Configure DNS in Kubernetes
         run: |
