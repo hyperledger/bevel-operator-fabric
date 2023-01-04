@@ -25,7 +25,7 @@ jobs:
         uses: helm/kind-action@v1.4.0
         with:
           cluster_name: kind
-          node_image: kindest/node:v1.22.7
+          node_image: kindest/node:v1.25.0
           config: .github/kind-config.yaml
 
       - name: Install kubectl plugin
@@ -163,6 +163,9 @@ jobs:
                   loadbalance
               }
           EOF
+
+          kubectl get configmap coredns -n kube-system -o yaml
+
       - name: Create Peer org
         run: |
           export PEER_IMAGE=hyperledger/fabric-peer
