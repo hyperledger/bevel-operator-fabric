@@ -25,7 +25,7 @@ jobs:
         uses: helm/kind-action@v1.4.0
         with:
           cluster_name: kind
-          node_image: kindest/node:v1.25.0
+          node_image: kindest/node:v1.22.7
           config: .github/kind-config.yaml
 
       - name: Install kubectl plugin
