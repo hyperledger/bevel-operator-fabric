@@ -121,6 +121,8 @@ jobs:
 
           EOF
 
+          sleep 2
+
           kubectl wait --timeout=180s --for=jsonpath='{.status.status}'=HEALTHY istiooperator istio-gateway --namespace=istio-system
 
       - name: Configure DNS in Kubernetes
