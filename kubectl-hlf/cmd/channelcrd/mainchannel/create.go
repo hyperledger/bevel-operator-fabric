@@ -125,10 +125,8 @@ func (o Options) mapToFabricMainChannel() (*v1alpha1.FabricMainChannelSpec, erro
 		signCACert := node.Status.SignCACert
 		ordererNodes := []v1alpha1.FabricMainChannelExternalOrdererNode{}
 		for _, ordererNode := range nodes {
-			adminOrdererHost, adminOrdererPort, err := helpers.GetOrdererAdminHostAndPort(clientSet, ordererNode.Spec, ordererNode.Status)
-			if err != nil {
-				return nil, err
-			}
+			adminOrdererHost := ordererNode.Name
+			adminOrdererPort := 7053
 			ordererNodes = append(ordererNodes, v1alpha1.FabricMainChannelExternalOrdererNode{
 				Host:      adminOrdererHost,
 				AdminPort: adminOrdererPort,

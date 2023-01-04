@@ -3,6 +3,7 @@ package inspect
 import (
 	"bytes"
 	"fmt"
+	log "github.com/kfsoftware/hlf-operator/internal/github.com/hyperledger/fabric-ca/sdkpatch/logbridge"
 	"io"
 	"io/ioutil"
 	"sigs.k8s.io/yaml"
@@ -207,7 +208,7 @@ func (c *inspectCmd) run(out io.Writer) error {
 	if err != nil {
 		return err
 	}
-
+	log.Infof("Found %d organizations", len(peerOrgs))
 	orgMap := map[string]*helpers.Organization{}
 	for _, ordererNode := range clusterOrderersNodes {
 		if filterByNS && !utils.Contains(c.namespaces, ordererNode.Namespace) {
@@ -231,7 +232,9 @@ func (c *inspectCmd) run(out io.Writer) error {
 		}
 	}
 	for _, v := range peerOrgs {
-		if filterByOrgs && utils.Contains(c.organizations, v.MspID) {
+		if !filterByOrgs {
+			orgMap[v.MspID] = v
+		} else if filterByOrgs && utils.Contains(c.organizations, v.MspID) {
 			orgMap[v.MspID] = v
 		}
 	}
