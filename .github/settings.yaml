@@ -1,0 +1,14 @@
+repository:
+  name: hlf-operator
+  description: Hyperledger Fabric Kubernetes operator - Hyperledger Fabric operator for Kubernetes (v2.3+)
+  homepage: https://github.com/hyperledger-labs/hlf-operator
+  default_branch: main
+  has_downloads: true
+  has_issues: true
+  has_projects: true
+  has_wiki: false
+  archived: false
+  private: false
+  allow_squash_merge: true
+  allow_merge_commit: true
+  allow_rebase_merge: true
