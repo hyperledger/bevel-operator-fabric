@@ -1,5 +1,5 @@
 repository:
-  name: hlf-operator
+  name: bevel-operator-fabric
   description: Hyperledger Fabric Kubernetes operator - Hyperledger Fabric operator for Kubernetes (v2.3+)
   homepage: https://github.com/hyperledger/bevel-operator-fabric
   default_branch: main
