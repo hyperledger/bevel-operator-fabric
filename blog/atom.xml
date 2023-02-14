@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
-    <id>https://labs.hyperledger.org/blog</id>
+    <id>https://hyperledger.github.io/blog</id>
     <title>Hyperledger Fabric Operator Blog</title>
     <updated>2015-10-25T23:29:00.000Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
-    <link rel="alternate" href="https://labs.hyperledger.org/blog"/>
+    <link rel="alternate" href="https://hyperledger.github.io/blog"/>
     <subtitle>Hyperledger Fabric Operator Blog</subtitle>
-    <icon>https://labs.hyperledger.org/img/favicon.png</icon>
+    <icon>https://hyperledger.github.io/img/favicon.png</icon>
 </feed>
