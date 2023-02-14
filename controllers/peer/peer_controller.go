@@ -401,7 +401,8 @@ func (r *FabricPeerReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 					r.setConditionStatus(ctx, fabricPeer, hlfv1alpha1.FailedStatus, false, err, false)
 					return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricPeer)
 				}
-				lastTimeCertsRenewed = fabricPeer.Spec.UpdateCertificateTime
+				now := v1.NewTime(time.Now().Add(time.Minute * 5)) // to avoid the upgrade certs to be triggered again
+				lastTimeCertsRenewed = &now
 			}
 		} else if fabricPeer.Status.LastCertificateUpdate == nil && fabricPeer.Spec.UpdateCertificateTime != nil {
 			log.Infof("Trying to upgrade certs")

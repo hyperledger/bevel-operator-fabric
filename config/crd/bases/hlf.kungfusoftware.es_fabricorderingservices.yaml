@@ -70,6 +70,20 @@ spec:
                       enrollsecret:
                         minLength: 1
                         type: string
+                      external:
+                        nullable: true
+                        properties:
+                          certificateKey:
+                            type: string
+                          privateKeyKey:
+                            type: string
+                          secretName:
+                            type: string
+                        required:
+                        - certificateKey
+                        - privateKeyKey
+                        - secretName
+                        type: object
                     required:
                     - cahost
                     - caname

@@ -3,7 +3,7 @@ package inspect
 import (
 	"bytes"
 	"fmt"
-	log "github.com/kfsoftware/hlf-operator/internal/github.com/hyperledger/fabric-ca/sdkpatch/logbridge"
+	log "github.com/sirupsen/logrus"
 	"io"
 	"io/ioutil"
 	"sigs.k8s.io/yaml"

@@ -18,6 +18,7 @@ package main
 
 import (
 	"flag"
+	"github.com/amplitude/analytics-go/amplitude"
 	"github.com/kfsoftware/hlf-operator/controllers/chaincode"
 	"github.com/kfsoftware/hlf-operator/controllers/console"
 	"github.com/kfsoftware/hlf-operator/controllers/followerchannel"
@@ -70,6 +71,19 @@ func main() {
 		"Enable leader election for controller manager. "+
 			"Enabling this will ensure there is only one active controller manager.")
 	flag.Parse()
+	// Pass a Config struct
+	// to initialize a Client struct
+	// which implements Client interface
+	os.Getenv("API_KEY")
+	analytics := amplitude.NewClient(
+		amplitude.NewConfig("569cfca546698061cf130f97745afca6"),
+	)
+	// Track events in your application
+	analytics.Track(amplitude.Event{
+		UserID:          "user-id",
+		EventType:       "Start operator",
+		EventProperties: map[string]interface{}{"source": "notification"},
+	})
 
 	ctrl.SetLogger(zap.New(zap.UseDevMode(true)))
 	kubeContext, exists := os.LookupEnv("KUBECONTEXT")

@@ -1,7 +1,7 @@
 package ca
 
 import (
-	"github.com/hyperledger/fabric-sdk-go/pkg/msp/api"
+	"github.com/hyperledger/fabric-ca/api"
 	"github.com/pkg/errors"
 	"io"
 	"strings"
