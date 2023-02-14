@@ -1,19 +1,20 @@
 package chaincode
 
 import (
+	"github.com/hyperledger/fabric-sdk-go/third_party/github.com/hyperledger/fabric/common/policydsl"
+	"io"
+	"os"
+	"time"
+
 	"github.com/hyperledger/fabric-protos-go/common"
 	pb "github.com/hyperledger/fabric-protos-go/peer"
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/resmgmt"
 	"github.com/hyperledger/fabric-sdk-go/pkg/common/providers/fab"
 	"github.com/hyperledger/fabric-sdk-go/pkg/core/config"
 	"github.com/hyperledger/fabric-sdk-go/pkg/fabsdk"
-	"github.com/kfsoftware/hlf-operator/internal/github.com/hyperledger/fabric/common/policydsl"
 	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/helpers"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"io"
-	"io/ioutil"
-	"time"
 )
 
 type approveChaincodeCmd struct {
@@ -71,7 +72,7 @@ func (c *approveChaincodeCmd) run() error {
 	var collectionConfigs []*pb.CollectionConfig
 
 	if c.collectionsConfig != "" {
-		collectionBytes, err := ioutil.ReadFile(c.collectionsConfig)
+		collectionBytes, err := os.ReadFile(c.collectionsConfig)
 		if err != nil {
 			return err
 		}
@@ -83,6 +84,7 @@ func (c *approveChaincodeCmd) run() error {
 	if len(collectionConfigs) == 0 {
 		collectionConfigs = nil
 	}
+
 	txID, err := resClient.LifecycleApproveCC(
 		c.channelName,
 		resmgmt.LifecycleApproveCCRequest{

@@ -18,7 +18,6 @@ package v1alpha1
 
 import (
 	"fmt"
-
 	"github.com/kfsoftware/hlf-operator/pkg/status"
 	"k8s.io/api/networking/v1beta1"
 	kubeclock "k8s.io/apimachinery/pkg/util/clock"
@@ -312,6 +311,15 @@ type Component struct {
 	Enrollid string `json:"enrollid"`
 	// +kubebuilder:validation:MinLength=1
 	Enrollsecret string `json:"enrollsecret"`
+
+	// +optional
+	// +nullable
+	External *ExternalCertificate `json:"external"`
+}
+type ExternalCertificate struct {
+	SecretName     string `json:"secretName"`
+	CertificateKey string `json:"certificateKey"`
+	PrivateKeyKey  string `json:"privateKeyKey"`
 }
 
 func (c *Component) CAUrl() string {
