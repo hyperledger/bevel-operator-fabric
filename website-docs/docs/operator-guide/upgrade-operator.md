@@ -23,4 +23,4 @@ helm upgrade hlf-operator --values=values.yaml --version=$NEW_VERSION kfs/hlf-op
 ```
 
 
-After upgrading the operator, make sure it starts and there are no errors, in case there are and you don't know how to fix it, please, open an [issue in Github](https://github.com/hyperledger-labs/hlf-operator/issues/new)
+After upgrading the operator, make sure it starts and there are no errors, in case there are and you don't know how to fix it, please, open an [issue in Github](https://github.com/hyperledger/bevel-operator-fabric/issues/new)
