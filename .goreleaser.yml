@@ -5,8 +5,8 @@ project_name: hlf-operator
 release:
   name_template: "Version {{.Version}}"
   github:
-    owner: hyperledger-labs
-    name: hlf-operator
+    owner: hyperledger
+    name: bevel-operator-fabric
   extra_files:
     - glob: "*.minisig"
     - glob: "*.zip"
