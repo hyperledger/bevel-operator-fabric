@@ -57,12 +57,15 @@ archives:
     name_template: "{{ .ProjectName }}_{{ .Tag }}_{{ .Os }}_{{ .Arch }}"
     allow_different_binary_count: true
 
-dockers:
+dockers: 
   -
     # GOOS of the built binary that should be used.
     goos: linux
     # GOARCH of the built binary that should be used.
-    goarch: amd64
+    goarch: 
+      - amd64
+      - arm64
+      - arm
     dockerfile: Dockerfile
     image_templates:
       - "quay.io/kfsoftware/hlf-operator:{{ .Tag }}"
