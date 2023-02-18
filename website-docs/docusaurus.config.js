@@ -96,7 +96,7 @@ module.exports = {
           items: [
             {
               label: "Stack Overflow",
-              href: "https://stackoverflow.com/questions/tagged/hlf-operator",
+              href: "https://stackoverflow.com/questions/tagged/bevel-operator-fabric",
             },
             {
               label: "Github Issues",
