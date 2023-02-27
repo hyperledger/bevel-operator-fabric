@@ -74,14 +74,17 @@ func main() {
 	flag.StringVar(&metricsAddr, "metrics-addr", ":8090", "The address the metric endpoint binds to.")
 	flag.DurationVar(&autoRenewOrdererCertificatesDelta, "auto-renew-orderer-certificates-delta", 15*24*time.Hour, "The delta to renew orderer certificates before expiration. Default is 15 days.")
 	flag.DurationVar(&autoRenewPeerCertificatesDelta, "auto-renew-peer-certificates-delta", 15*24*time.Hour, "The delta to renew peer certificates before expiration. Default is 15 days.")
-	flag.BoolVar(&autoRenewCertificatesPeerEnabled, "auto-renew-certificates", false, "Enable auto renew certificates for orderer and peer nodes. Default is false.")
-	flag.BoolVar(&autoRenewCertificatesOrdererEnabled, "auto-renew-certificates", false, "Enable auto renew certificates for orderer and peer nodes. Default is false.")
+	flag.BoolVar(&autoRenewCertificatesPeerEnabled, "auto-renew-peer-certificates", false, "Enable auto renew certificates for orderer and peer nodes. Default is false.")
+	flag.BoolVar(&autoRenewCertificatesOrdererEnabled, "auto-renew-orderer-certificates", false, "Enable auto renew certificates for orderer and peer nodes. Default is false.")
 	flag.BoolVar(&enableLeaderElection, "enable-leader-election", false,
 		"Enable leader election for controller manager. "+
 			"Enabling this will ensure there is only one active controller manager.")
 	flag.Parse()
 
-	os.Getenv("HLF_OPERATOR_AUTO_RENEW_CERTIFICATES")
+	log.Infof("Auto renew peer certificates enabled: %t", autoRenewCertificatesPeerEnabled)
+	log.Infof("Auto renew orderer certificates enabled: %t", autoRenewCertificatesOrdererEnabled)
+	log.Infof("Auto renew peer certificates delta: %s", autoRenewPeerCertificatesDelta)
+	log.Infof("Auto renew orderer certificates delta: %s", autoRenewOrdererCertificatesDelta)
 	// Pass a Config struct
 	// to initialize a Client struct
 	// which implements Client interface
