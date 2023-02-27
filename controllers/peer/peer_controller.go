@@ -48,10 +48,12 @@ import (
 // FabricPeerReconciler reconciles a FabricPeer object
 type FabricPeerReconciler struct {
 	client.Client
-	ChartPath string
-	Log       logr.Logger
-	Scheme    *runtime.Scheme
-	Config    *rest.Config
+	ChartPath                  string
+	Log                        logr.Logger
+	Scheme                     *runtime.Scheme
+	Config                     *rest.Config
+	AutoRenewCertificates      bool
+	AutoRenewCertificatesDelta time.Duration
 }
 
 func (r *FabricPeerReconciler) addFinalizer(reqLogger logr.Logger, m *hlfv1alpha1.FabricPeer) error {
@@ -386,24 +388,32 @@ func (r *FabricPeerReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 			return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricPeer)
 		}
 		lastTimeCertsRenewed := fabricPeer.Status.LastCertificateUpdate
-		if fabricPeer.Status.LastCertificateUpdate != nil {
-			lastCertificateUpdate := fabricPeer.Status.LastCertificateUpdate.Time
-			if fabricPeer.Spec.UpdateCertificateTime.Time.After(lastCertificateUpdate) {
-				// must update the certificates and block until it's done
-				// scale down to zero replicas
-				// wait for the deployment to scale down
-				// update the certs
-				// scale up the peer
-				log.Infof("Trying to upgrade certs")
-				err := r.updateCerts(req, fabricPeer, clientSet, releaseName, svc, ctx, cfg, ns)
-				if err != nil {
-					log.Errorf("Error renewing certs: %v", err)
-					r.setConditionStatus(ctx, fabricPeer, hlfv1alpha1.FailedStatus, false, err, false)
-					return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricPeer)
-				}
-				now := v1.NewTime(time.Now().Add(time.Minute * 5)) // to avoid the upgrade certs to be triggered again
-				lastTimeCertsRenewed = &now
+		certificatesNeedToBeRenewed := false
+		if fabricPeer.Status.LastCertificateUpdate != nil && fabricPeer.Spec.UpdateCertificateTime.Time.After(lastTimeCertsRenewed.Time) {
+			certificatesNeedToBeRenewed = true
+		}
+		tlsCert, _, _, err := getExistingTLSCrypto(clientSet, chartName, ns)
+		if err != nil {
+			return ctrl.Result{}, err
+		}
+		if r.AutoRenewCertificates && tlsCert.NotAfter.Before(time.Now().Add(r.AutoRenewCertificatesDelta)) {
+			certificatesNeedToBeRenewed = true
+		}
+		if certificatesNeedToBeRenewed {
+			// must update the certificates and block until it's done
+			// scale down to zero replicas
+			// wait for the deployment to scale down
+			// update the certs
+			// scale up the peer
+			log.Infof("Trying to upgrade certs")
+			err := r.updateCerts(req, fabricPeer, clientSet, releaseName, svc, ctx, cfg, ns)
+			if err != nil {
+				log.Errorf("Error renewing certs: %v", err)
+				r.setConditionStatus(ctx, fabricPeer, hlfv1alpha1.FailedStatus, false, err, false)
+				return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricPeer)
 			}
+			now := v1.NewTime(time.Now().Add(time.Minute * 5)) // to avoid the upgrade certs to be triggered again
+			lastTimeCertsRenewed = &now
 		} else if fabricPeer.Status.LastCertificateUpdate == nil && fabricPeer.Spec.UpdateCertificateTime != nil {
 			log.Infof("Trying to upgrade certs")
 			err := r.updateCerts(req, fabricPeer, clientSet, releaseName, svc, ctx, cfg, ns)
@@ -453,7 +463,9 @@ func (r *FabricPeerReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 				RequeueAfter: 10 * time.Second,
 			}, nil
 		case hlfv1alpha1.RunningStatus:
-			return ctrl.Result{}, nil
+			return ctrl.Result{
+				RequeueAfter: 10 * time.Minute,
+			}, nil
 		default:
 			return ctrl.Result{
 				RequeueAfter: 2 * time.Second,
