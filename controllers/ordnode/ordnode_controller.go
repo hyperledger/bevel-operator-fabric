@@ -42,10 +42,12 @@ import (
 // FabricOrdererNodeReconciler reconciles a FabricOrdererNode object
 type FabricOrdererNodeReconciler struct {
 	client.Client
-	ChartPath string
-	Log       logr.Logger
-	Scheme    *runtime.Scheme
-	Config    *rest.Config
+	ChartPath                  string
+	Log                        logr.Logger
+	Scheme                     *runtime.Scheme
+	Config                     *rest.Config
+	AutoRenewCertificates      bool
+	AutoRenewCertificatesDelta time.Duration
 }
 
 const ordererNodeFinalizer = "finalizer.orderernode.hlf.kungfusoftware.es"
@@ -146,30 +148,35 @@ func (r *FabricOrdererNodeReconciler) Reconcile(ctx context.Context, req ctrl.Re
 	}
 	if exists {
 		// update
-
-		log.Printf("Status hasn't changed, skipping update")
-
 		lastTimeCertsRenewed := fabricOrdererNode.Status.LastCertificateUpdate
-		if fabricOrdererNode.Status.LastCertificateUpdate != nil {
-			if fabricOrdererNode.Status.LastCertificateUpdate != nil {
-				lastCertificateUpdate := fabricOrdererNode.Status.LastCertificateUpdate.Time
-				if fabricOrdererNode.Spec.UpdateCertificateTime.Time.After(lastCertificateUpdate) {
-					// must update the certificates and block until it's done
-					// scale down to zero replicas
-					// wait for the deployment to scale down
-					// update the certs
-					// scale up the peer
-					log.Infof("Trying to upgrade certs")
-					err := r.updateCerts(req, fabricOrdererNode, clientSet, releaseName, ctx, cfg, ns)
-					if err != nil {
-						log.Errorf("Error renewing certs: %v", err)
-						r.setConditionStatus(ctx, fabricOrdererNode, hlfv1alpha1.FailedStatus, false, err, false)
-						return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricOrdererNode)
-					}
-					newTime := v1.NewTime(time.Now().Add(time.Minute * 5)) // to avoid duplicate updates
-					lastTimeCertsRenewed = &newTime
-				}
+		certificatesNeedToBeRenewed := false
+		if fabricOrdererNode.Status.LastCertificateUpdate != nil && fabricOrdererNode.Spec.UpdateCertificateTime.Time.After(fabricOrdererNode.Status.LastCertificateUpdate.Time) {
+			certificatesNeedToBeRenewed = true
+		}
+		// renew certificate 15 days before
+		tlsCert, _, _, err := getExistingTLSCrypto(clientSet, releaseName, ns)
+		if err != nil {
+			return ctrl.Result{}, err
+		}
+		if r.AutoRenewCertificates && tlsCert.NotAfter.Before(time.Now().Add(r.AutoRenewCertificatesDelta)) {
+			certificatesNeedToBeRenewed = true
+		}
+		log.Infof("Last time certs were updated: %v, they need to be renewed: %v", lastTimeCertsRenewed, certificatesNeedToBeRenewed)
+		if certificatesNeedToBeRenewed {
+			// must update the certificates and block until it's done
+			// scale down to zero replicas
+			// wait for the deployment to scale down
+			// update the certs
+			// scale up the peer
+			log.Infof("Trying to upgrade certs")
+			err := r.updateCerts(req, fabricOrdererNode, clientSet, releaseName, ctx, cfg, ns)
+			if err != nil {
+				log.Errorf("Error renewing certs: %v", err)
+				r.setConditionStatus(ctx, fabricOrdererNode, hlfv1alpha1.FailedStatus, false, err, false)
+				return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricOrdererNode)
 			}
+			newTime := v1.NewTime(time.Now().Add(time.Minute * 5)) // to avoid duplicate updates
+			lastTimeCertsRenewed = &newTime
 		} else if fabricOrdererNode.Status.LastCertificateUpdate == nil && fabricOrdererNode.Spec.UpdateCertificateTime != nil {
 			log.Infof("Trying to upgrade certs")
 			err := r.updateCerts(req, fabricOrdererNode, clientSet, releaseName, ctx, cfg, ns)
@@ -211,7 +218,6 @@ func (r *FabricOrdererNodeReconciler) Reconcile(ctx context.Context, req ctrl.Re
 			Type:   status.ConditionType(s.Status),
 			Status: "True",
 		})
-
 		if !reflect.DeepEqual(fOrderer.Status, fabricOrdererNode.Status) {
 			if err := r.Status().Update(ctx, fOrderer); err != nil {
 				log.Errorf("Error updating the status: %v", err)
@@ -226,7 +232,9 @@ func (r *FabricOrdererNodeReconciler) Reconcile(ctx context.Context, req ctrl.Re
 				RequeueAfter: 10 * time.Second,
 			}, nil
 		case hlfv1alpha1.RunningStatus:
-			return ctrl.Result{}, nil
+			return ctrl.Result{
+				RequeueAfter: 10 * time.Minute,
+			}, nil
 		case hlfv1alpha1.FailedStatus:
 			log.Infof("Orderer %s in failed status", fabricOrdererNode.Name)
 			return ctrl.Result{

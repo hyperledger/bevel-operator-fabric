@@ -61,6 +61,12 @@ spec:
             items:
               - key: 'config.yaml'
                 path: 'config.yaml'
+        - name: config
+          configMap:
+            name: '{{ include "hlf-ordnode.fullname" . }}--orderer--core'
+            items:
+              - key: 'orderer.yaml'
+                path: 'orderer.yaml'
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
       {{- toYaml . | nindent 8 }}
@@ -173,6 +179,9 @@ spec:
               name: cacert
             - mountPath: /var/hyperledger/admin_msp/cacerts
               name: cacert
+            - mountPath: /var/hyperledger/fabric/config
+              name: config
+
             - mountPath: /var/hyperledger/msp/config.yaml
               name: nodeou
               subPath: config.yaml
