@@ -88,7 +88,6 @@ func main() {
 	// Pass a Config struct
 	// to initialize a Client struct
 	// which implements Client interface
-	os.Getenv("API_KEY")
 	analytics := amplitude.NewClient(
 		amplitude.NewConfig("569cfca546698061cf130f97745afca6"),
 	)

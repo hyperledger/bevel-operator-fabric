@@ -34,6 +34,7 @@ import (
 	"reflect"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"strings"
 	"time"
@@ -92,6 +93,10 @@ func (r *FabricOrdererNodeReconciler) addFinalizer(reqLogger logr.Logger, m *hlf
 // +kubebuilder:rbac:groups=hlf.kungfusoftware.es,resources=fabricorderernodes/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=hlf.kungfusoftware.es,resources=fabricorderernodes/finalizers,verbs=get;update;patch
 func (r *FabricOrdererNodeReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+	log.Infof("Reconciling Orderer %s/%s", req.Namespace, req.Name)
+	defer func() {
+		log.Infof("Reconciling Orderer %s/%s done", req.Namespace, req.Name)
+	}()
 	reqLogger := r.Log.WithValues("hlf", req.NamespacedName)
 	fabricOrdererNode := &hlfv1alpha1.FabricOrdererNode{}
 	releaseName := req.Name
@@ -161,6 +166,7 @@ func (r *FabricOrdererNodeReconciler) Reconcile(ctx context.Context, req ctrl.Re
 		if r.AutoRenewCertificates && tlsCert.NotAfter.Before(time.Now().Add(r.AutoRenewCertificatesDelta)) {
 			certificatesNeedToBeRenewed = true
 		}
+		requeueAfter := time.Second * 10
 		log.Infof("Last time certs were updated: %v, they need to be renewed: %v", lastTimeCertsRenewed, certificatesNeedToBeRenewed)
 		if certificatesNeedToBeRenewed {
 			// must update the certificates and block until it's done
@@ -177,15 +183,8 @@ func (r *FabricOrdererNodeReconciler) Reconcile(ctx context.Context, req ctrl.Re
 			}
 			newTime := v1.NewTime(time.Now().Add(time.Minute * 5)) // to avoid duplicate updates
 			lastTimeCertsRenewed = &newTime
-		} else if fabricOrdererNode.Status.LastCertificateUpdate == nil && fabricOrdererNode.Spec.UpdateCertificateTime != nil {
-			log.Infof("Trying to upgrade certs")
-			err := r.updateCerts(req, fabricOrdererNode, clientSet, releaseName, ctx, cfg, ns)
-			if err != nil {
-				log.Errorf("Error renewing certs: %v", err)
-				r.setConditionStatus(ctx, fabricOrdererNode, hlfv1alpha1.FailedStatus, false, err, false)
-				return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricOrdererNode)
-			}
-			lastTimeCertsRenewed = fabricOrdererNode.Spec.UpdateCertificateTime
+			log.Infof("Certs updated, last time updated: %v", lastTimeCertsRenewed)
+			requeueAfter = time.Minute * 1
 		} else {
 			c, err := getConfig(fabricOrdererNode, clientSet, releaseName, req.Namespace, false)
 			if err != nil {
@@ -196,6 +195,7 @@ func (r *FabricOrdererNodeReconciler) Reconcile(ctx context.Context, req ctrl.Re
 				r.setConditionStatus(ctx, fabricOrdererNode, hlfv1alpha1.FailedStatus, false, err, false)
 				return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricOrdererNode)
 			}
+			requeueAfter = time.Minute * 10
 		}
 		s, err := GetOrdererState(cfg, r.Config, releaseName, ns, fabricOrdererNode)
 		if err != nil {
@@ -233,7 +233,11 @@ func (r *FabricOrdererNodeReconciler) Reconcile(ctx context.Context, req ctrl.Re
 			}, nil
 		case hlfv1alpha1.RunningStatus:
 			return ctrl.Result{
-				RequeueAfter: 10 * time.Minute,
+				RequeueAfter: requeueAfter,
+			}, nil
+		case hlfv1alpha1.UpdatingCertificates:
+			return ctrl.Result{
+				RequeueAfter: requeueAfter,
 			}, nil
 		case hlfv1alpha1.FailedStatus:
 			log.Infof("Orderer %s in failed status", fabricOrdererNode.Name)
@@ -364,6 +368,9 @@ func (r *FabricOrdererNodeReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&hlfv1alpha1.FabricOrdererNode{}).
 		Owns(&appsv1.Deployment{}).
+		WithOptions(controller.Options{
+			MaxConcurrentReconciles: 10,
+		}).
 		Complete(r)
 }
 
