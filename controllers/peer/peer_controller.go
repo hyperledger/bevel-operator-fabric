@@ -13,6 +13,7 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"os"
 	"reflect"
+	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"strings"
 	"time"
 
@@ -399,6 +400,7 @@ func (r *FabricPeerReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 		if r.AutoRenewCertificates && tlsCert.NotAfter.Before(time.Now().Add(r.AutoRenewCertificatesDelta)) {
 			certificatesNeedToBeRenewed = true
 		}
+		requeueAfter := time.Minute * 1
 		if certificatesNeedToBeRenewed {
 			// must update the certificates and block until it's done
 			// scale down to zero replicas
@@ -414,15 +416,23 @@ func (r *FabricPeerReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 			}
 			now := v1.NewTime(time.Now().Add(time.Minute * 5)) // to avoid the upgrade certs to be triggered again
 			lastTimeCertsRenewed = &now
+			requeueAfter = time.Minute * 5
 		} else if fabricPeer.Status.LastCertificateUpdate == nil && fabricPeer.Spec.UpdateCertificateTime != nil {
 			log.Infof("Trying to upgrade certs")
-			err := r.updateCerts(req, fabricPeer, clientSet, releaseName, svc, ctx, cfg, ns)
+			config, err := GetConfig(fabricPeer, clientSet, releaseName, req.Namespace, svc, true)
 			if err != nil {
 				log.Errorf("Error renewing certs: %v", err)
 				r.setConditionStatus(ctx, fabricPeer, hlfv1alpha1.FailedStatus, false, err, false)
 				return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricPeer)
 			}
+			err = r.upgradeChart(cfg, err, ns, releaseName, config)
+			if err != nil {
+				log.Errorf("Error upgrading chart: %v", err)
+				r.setConditionStatus(ctx, fabricPeer, hlfv1alpha1.FailedStatus, false, err, false)
+				return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricPeer)
+			}
 			lastTimeCertsRenewed = fabricPeer.Spec.UpdateCertificateTime
+			requeueAfter = time.Minute * 10
 		}
 		s, err := GetPeerState(cfg, r.Config, releaseName, ns, svc)
 		if err != nil {
@@ -460,11 +470,15 @@ func (r *FabricPeerReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 		case hlfv1alpha1.FailedStatus:
 			log.Infof("Peer %s in %s status", fPeer.Name, string(s.Status))
 			return ctrl.Result{
-				RequeueAfter: 10 * time.Second,
+				RequeueAfter: requeueAfter,
 			}, nil
 		case hlfv1alpha1.RunningStatus:
 			return ctrl.Result{
-				RequeueAfter: 10 * time.Minute,
+				RequeueAfter: requeueAfter,
+			}, nil
+		case hlfv1alpha1.UpdatingCertificates:
+			return ctrl.Result{
+				RequeueAfter: requeueAfter,
 			}, nil
 		default:
 			return ctrl.Result{
@@ -1302,6 +1316,9 @@ func (r *FabricPeerReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&hlfv1alpha1.FabricPeer{}).
 		Owns(&appsv1.Deployment{}).
+		WithOptions(controller.Options{
+			MaxConcurrentReconciles: 10,
+		}).
 		Complete(r)
 }
 func getServiceName(peer *hlfv1alpha1.FabricPeer) string {
