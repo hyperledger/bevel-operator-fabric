@@ -13,6 +13,7 @@ import (
 	"github.com/kfsoftware/hlf-operator/controllers/certs"
 	"github.com/kfsoftware/hlf-operator/controllers/hlfmetrics"
 	"github.com/kfsoftware/hlf-operator/controllers/utils"
+	operatorv1 "github.com/kfsoftware/hlf-operator/pkg/client/clientset/versioned"
 	"github.com/kfsoftware/hlf-operator/pkg/status"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
@@ -153,9 +154,23 @@ func (r *FabricOrdererNodeReconciler) Reconcile(ctx context.Context, req ctrl.Re
 	}
 	if exists {
 		// update
-		lastTimeCertsRenewed := fabricOrdererNode.Status.LastCertificateUpdate
+		hlfClientSet, err := operatorv1.NewForConfig(r.Config)
+		if err != nil {
+			r.setConditionStatus(ctx, fabricOrdererNode, hlfv1alpha1.FailedStatus, false, err, false)
+			return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricOrdererNode)
+		}
+		ordNode, err := hlfClientSet.HlfV1alpha1().FabricOrdererNodes(ns).Get(ctx, fabricOrdererNode.Name, v1.GetOptions{})
+		if err != nil {
+			r.setConditionStatus(ctx, fabricOrdererNode, hlfv1alpha1.FailedStatus, false, err, false)
+			return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricOrdererNode)
+		}
+
+		lastTimeCertsRenewed := ordNode.Status.LastCertificateUpdate
 		certificatesNeedToBeRenewed := false
-		if fabricOrdererNode.Status.LastCertificateUpdate != nil && fabricOrdererNode.Spec.UpdateCertificateTime.Time.After(fabricOrdererNode.Status.LastCertificateUpdate.Time) {
+		if ordNode.Status.LastCertificateUpdate != nil && fabricOrdererNode.Spec.UpdateCertificateTime.Time.After(ordNode.Status.LastCertificateUpdate.Time) {
+			certificatesNeedToBeRenewed = true
+		}
+		if lastTimeCertsRenewed == nil && fabricOrdererNode.Spec.UpdateCertificateTime != nil {
 			certificatesNeedToBeRenewed = true
 		}
 		// renew certificate 15 days before
@@ -245,6 +260,7 @@ func (r *FabricOrdererNodeReconciler) Reconcile(ctx context.Context, req ctrl.Re
 				RequeueAfter: 10 * time.Second,
 			}, nil
 		default:
+			log.Infof("Orderer %s in unknown status, requeuing in 2 seconds", fabricOrdererNode.Name)
 			return ctrl.Result{
 				RequeueAfter: 2 * time.Second,
 			}, nil
@@ -617,6 +633,7 @@ func CreateTLSCryptoMaterial(conf *hlfv1alpha1.FabricOrdererNode, caName string,
 	}
 	return tlsCert, tlsKey, tlsRootCert, nil
 }
+
 func ReenrollTLSCryptoMaterial(
 	conf *hlfv1alpha1.FabricOrdererNode,
 	caName string,
