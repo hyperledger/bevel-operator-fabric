@@ -6,8 +6,8 @@ import (
 	"io/ioutil"
 	"strings"
 
-	"github.com/hyperledger/fabric-ca/api"
 	"github.com/hyperledger/fabric-sdk-go/pkg/gateway"
+	"github.com/kfsoftware/hlf-operator/internal/github.com/hyperledger/fabric-ca/api"
 	"github.com/pkg/errors"
 
 	"github.com/ghodss/yaml"
