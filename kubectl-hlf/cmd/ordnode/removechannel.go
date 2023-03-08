@@ -46,7 +46,7 @@ func (c *removeChannelCmd) run() error {
 		return err
 	}
 	log.Printf("name=%s namespace=%s", c.name, c.namespace)
-	ordererNode, err := helpers.GetOrdererNodeByFullName(clientSet,hlfClient, fmt.Sprintf("%s.%s", c.name, c.namespace))
+	ordererNode, err := helpers.GetOrdererNodeByFullName(clientSet, hlfClient, fmt.Sprintf("%s.%s", c.name, c.namespace))
 	if err != nil {
 		return err
 	}

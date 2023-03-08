@@ -633,19 +633,31 @@ func createOrdererNode(releaseName string, namespace string, params createOrdere
 			Namespace: namespace,
 		},
 		Spec: hlfv1alpha1.FabricOrdererNodeSpec{
+			Tolerations:                 nil,
+			GRPCProxy:                   nil,
+			Affinity:                    nil,
+			UpdateCertificateTime:       nil,
+			ServiceMonitor:              nil,
+			HostAliases:                 nil,
+			NodeSelector:                nil,
+			Resources:                   resources,
+			Replicas:                    1,
+			Image:                       "hyperledger/fabric-orderer",
+			Tag:                         "amd64-2.3.0",
+			PullPolicy:                  corev1.PullAlways,
+			MspID:                       mspID,
+			ImagePullSecrets:            nil,
+			Genesis:                     "",
+			BootstrapMethod:             "none",
+			ChannelParticipationEnabled: true,
 			Storage: hlfv1alpha1.Storage{
 				Size:         "30Gi",
 				StorageClass: "standard",
 				AccessMode:   "ReadWriteOnce",
 			},
-			BootstrapMethod:             "none",
-			ChannelParticipationEnabled: true,
-			PullPolicy:                  corev1.PullAlways,
-			Image:                       "hyperledger/fabric-orderer",
-			Tag:                         "amd64-2.3.0",
-			MspID:                       mspID,
-			Replicas:                    1,
-			Resources:                   resources,
+			Service: hlfv1alpha1.OrdererNodeService{
+				Type: "NodePort",
+			},
 			Secret: &hlfv1alpha1.Secret{
 				Enrollment: hlfv1alpha1.Enrollment{
 					Component: hlfv1alpha1.Component{
@@ -674,9 +686,9 @@ func createOrdererNode(releaseName string, namespace string, params createOrdere
 					},
 				},
 			},
-			Service: hlfv1alpha1.OrdererNodeService{
-				Type: "NodePort",
-			},
+			Istio:      nil,
+			AdminIstio: nil,
+			Env:        nil,
 		},
 	}
 	Expect(K8sClient.Create(context.Background(), fabricOrderer)).Should(Succeed())
