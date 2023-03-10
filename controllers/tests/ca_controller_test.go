@@ -643,7 +643,7 @@ func createOrdererNode(releaseName string, namespace string, params createOrdere
 			Resources:                   resources,
 			Replicas:                    1,
 			Image:                       "hyperledger/fabric-orderer",
-			Tag:                         "amd64-2.3.0",
+			Tag:                         "amd64-2.4.9",
 			PullPolicy:                  corev1.PullAlways,
 			MspID:                       mspID,
 			ImagePullSecrets:            nil,
@@ -934,7 +934,6 @@ var _ = Describe("Fabric Controllers", func() {
 			defTimeoutSecs,
 			defInterval,
 		).Should(BeTrue(), "ca deployment should have been deleted")
-
 	})
 	Specify("create a new Fabric Orderer with channel participation", func() {
 		releaseNameOrdCA := "org1-ca"
