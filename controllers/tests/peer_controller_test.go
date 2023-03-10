@@ -96,7 +96,7 @@ func createPeer(releaseName string, namespace string, params createPeerParams, c
 				OrgLeader:         false,
 			},
 			ExternalEndpoint:         "",
-			Tag:                      "amd64-2.3.0",
+			Tag:                      "amd64-2.4.9",
 			ImagePullPolicy:          "Always",
 			ExternalChaincodeBuilder: true,
 			CouchDB: hlfv1alpha1.FabricPeerCouchDB{

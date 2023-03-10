@@ -10,8 +10,8 @@ const (
 	DefaultCAImage   = "hyperledger/fabric-ca"
 	DefaultCAVersion = "1.4.9"
 
-	DefaultPeerImage   = "quay.io/kfsoftware/fabric-peer"
-	DefaultPeerVersion = "2.3.0-v0.0.2"
+	DefaultPeerImage   = "hyperledger/fabric-peer"
+	DefaultPeerVersion = "2.4.9"
 
 	DefaultOperationsConsoleImage   = "ghcr.io/hyperledger-labs/fabric-console"
 	DefaultOperationsConsoleVersion = "latest"
@@ -29,5 +29,5 @@ const (
 	DefaultCouchDBVersion = "3.1.1"
 
 	DefaultOrdererImage   = "hyperledger/fabric-orderer"
-	DefaultOrdererVersion = "amd64-2.3.0"
+	DefaultOrdererVersion = "amd64-2.4.9"
 )
