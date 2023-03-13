@@ -14,6 +14,12 @@ image:
 auth:
   oidcJWKS: ""
   oidcIssuer: ""
+  oidcAuthority: ""
+  oidcClientId: ""
+  oidcScope: ""
+
+logoUrl: "xxxxxx"
+
 
 hlf:
   mspID: ""

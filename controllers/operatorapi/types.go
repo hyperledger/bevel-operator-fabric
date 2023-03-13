@@ -10,26 +10,31 @@ type Image struct {
 	PullPolicy corev1.PullPolicy `json:"pullPolicy"`
 	Tag        string            `json:"tag"`
 }
+
 type ServiceAccount struct {
 	Create      bool              `json:"create"`
 	Annotations map[string]string `json:"annotations"`
 	Name        string            `json:"name"`
 }
+
 type Service struct {
 	Type string `json:"type"`
 	Port int    `json:"port"`
 }
+
 type Autoscaling struct {
 	Enabled                        bool `json:"enabled"`
 	MinReplicas                    int  `json:"minReplicas"`
 	MaxReplicas                    int  `json:"maxReplicas"`
 	TargetCPUUtilizationPercentage int  `json:"targetCPUUtilizationPercentage"`
 }
+
 type HLFConfig struct {
 	MspID         string           `json:"mspID"`
 	User          string           `json:"user"`
 	NetworkConfig HLFNetworkConfig `json:"networkConfig"`
 }
+
 type HLFNetworkConfig struct {
 	SecretName string `json:"secretName"`
 	Key        string `json:"key"`
@@ -47,6 +52,7 @@ type IngressHost struct {
 	Host  string        `json:"host"`
 	Paths []IngressPath `json:"paths"`
 }
+
 type IngressPath struct {
 	Path     string `json:"path"`
 	PathType string `json:"pathType"`
@@ -54,6 +60,7 @@ type IngressPath struct {
 
 type HLFOperatorAPIChart struct {
 	ReplicaCount     int                           `json:"replicaCount"`
+	LogoURL          string                        `json:"logoUrl"`
 	Image            Image                         `json:"image"`
 	Hlf              HLFConfig                     `json:"hlf,omitempty"`
 	ImagePullSecrets []corev1.LocalObjectReference `json:"imagePullSecrets"`
@@ -69,6 +76,9 @@ type HLFOperatorAPIChart struct {
 }
 
 type Auth struct {
-	OIDCJWKS   string `json:"oidcJWKS"`
-	OIDCIssuer string `json:"oidcIssuer"`
+	OIDCJWKS      string `json:"oidcJWKS"`
+	OIDCIssuer    string `json:"oidcIssuer"`
+	OIDCAuthority string `json:"oidcAuthority"`
+	OIDCClientId  string `json:"oidcClientId"`
+	OIDCScope     string `json:"oidcScope"`
 }

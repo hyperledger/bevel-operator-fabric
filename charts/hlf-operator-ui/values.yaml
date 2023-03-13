@@ -13,6 +13,7 @@ image:
 
 
 logoUrl: ""
+
 auth:
   oidcAuthority: ""
   oidcClientId: ""
