@@ -1368,6 +1368,13 @@ type FabricOperatorAPINetworkConfig struct {
 type FabricOperatorAPIAuth struct {
 	OIDCJWKS   string `json:"oidcJWKS"`
 	OIDCIssuer string `json:"oidcIssuer"`
+
+	// +kubebuilder:default:=""
+	OIDCAuthority string `json:"oidcAuthority"`
+	// +kubebuilder:default:=""
+	OIDCClientId string `json:"oidcClientId"`
+	// +kubebuilder:default:=""
+	OIDCScope string `json:"oidcScope"`
 }
 
 // FabricOperatorAPISpec defines the desired state of FabricOperatorAPI
@@ -1387,7 +1394,11 @@ type FabricOperatorAPISpec struct {
 	// +kubebuilder:validation:Default={}
 	Auth *FabricOperatorAPIAuth `json:"auth"`
 
+	// +kubebuilder:default:=""
+	LogoURL string `json:"logoUrl"`
+
 	HLFConfig FabricOperatorAPIHLFConfig `json:"hlfConfig"`
+
 	// +optional
 	// +kubebuilder:validation:Optional
 	// +nullable
