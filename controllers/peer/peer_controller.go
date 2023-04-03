@@ -8,13 +8,14 @@ import (
 	"encoding/json"
 	"encoding/pem"
 	"fmt"
-	"github.com/kfsoftware/hlf-operator/controllers/hlfmetrics"
-	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/helpers"
-	"k8s.io/apimachinery/pkg/types"
 	"os"
 	"reflect"
 	"strings"
 	"time"
+
+	"github.com/kfsoftware/hlf-operator/controllers/hlfmetrics"
+	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/helpers"
+	"k8s.io/apimachinery/pkg/types"
 
 	"github.com/kfsoftware/hlf-operator/pkg/status"
 	"github.com/pkg/errors"
@@ -1188,8 +1189,8 @@ func GetConfig(
 			},
 		},
 		ExternalChaincodeBuilder: conf.Spec.ExternalChaincodeBuilder,
-		CouchdbPassword:          conf.Spec.CouchDB.User,
-		CouchdbUsername:          conf.Spec.CouchDB.Password,
+		CouchdbPassword:          conf.Spec.CouchDB.Password,
+		CouchdbUsername:          conf.Spec.CouchDB.User,
 		Rbac:                     RBAC{Ns: namespace},
 		Cert:                     string(signCRTEncoded),
 		Key:                      string(signPEMEncodedPK),
