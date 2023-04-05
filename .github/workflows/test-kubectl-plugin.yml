@@ -16,11 +16,11 @@ jobs:
       TAG: test
     steps:
       - name: Install Go
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v4
         with:
           go-version: ${{ matrix.go-version }}
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3.1.0
       - name: Create k8s Kind Cluster
         uses: helm/kind-action@v1.4.0
         with:
