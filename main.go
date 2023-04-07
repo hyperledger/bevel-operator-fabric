@@ -23,6 +23,7 @@ import (
 	"github.com/kfsoftware/hlf-operator/controllers/console"
 	"github.com/kfsoftware/hlf-operator/controllers/followerchannel"
 	"github.com/kfsoftware/hlf-operator/controllers/hlfmetrics"
+	"github.com/kfsoftware/hlf-operator/controllers/identity"
 	"github.com/kfsoftware/hlf-operator/controllers/mainchannel"
 	"github.com/kfsoftware/hlf-operator/controllers/networkconfig"
 	"github.com/kfsoftware/hlf-operator/controllers/operatorapi"
@@ -260,6 +261,16 @@ func main() {
 		Config: mgr.GetConfig(),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "FabricMainChannel")
+		os.Exit(1)
+	}
+
+	if err = (&identity.FabricIdentityReconciler{
+		Client: mgr.GetClient(),
+		Log:    ctrl.Log.WithName("controllers").WithName("FabricIdentity"),
+		Scheme: mgr.GetScheme(),
+		Config: mgr.GetConfig(),
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "FabricIdentity")
 		os.Exit(1)
 	}
 

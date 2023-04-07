@@ -1552,6 +1552,59 @@ type FabricChaincodeList struct {
 }
 
 // FabricMainChannelStatus defines the observed state of FabricMainChannel
+type FabricIdentityStatus struct {
+	Conditions status.Conditions `json:"conditions"`
+	Message    string            `json:"message"`
+	// Status of the FabricCA
+	Status DeploymentStatus `json:"status"`
+}
+
+// +genclient
+// +genclient:nonNamespaced
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+// +k8s:defaulter-gen=true
+// +kubebuilder:subresource:status
+// +kubebuilder:resource:scope=Namespaced,shortName=fabricidentity,singular=fabricidentity
+// +kubebuilder:printcolumn:name="State",type="string",JSONPath=".status.status"
+// +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
+// +kubebuilder:object:root=true
+// +kubebuilder:subresource:status
+// +k8s:openapi-gen=true
+
+// FabricIdentity is the Schema for the hlfs API
+type FabricIdentity struct {
+	metav1.TypeMeta   `json:",inline"`
+	metav1.ObjectMeta `json:"metadata,omitempty"`
+	Spec              FabricIdentitySpec   `json:"spec,omitempty"`
+	Status            FabricIdentityStatus `json:"status,omitempty"`
+}
+
+// +kubebuilder:object:root=true
+
+// FabricIdentityList contains a list of FabricIdentity
+type FabricIdentityList struct {
+	metav1.TypeMeta `json:",inline"`
+	metav1.ListMeta `json:"metadata,omitempty"`
+	Items           []FabricIdentity `json:"items"`
+}
+
+// FabricIdentitySpec defines the desired state of FabricIdentity
+type FabricIdentitySpec struct {
+	// +kubebuilder:validation:MinLength=1
+	Cahost string `json:"cahost"`
+	// +kubebuilder:validation:MinLength=1
+	Caname string `json:"caname"`
+	Caport int    `json:"caport"`
+	Catls  Catls  `json:"catls"`
+	// +kubebuilder:validation:MinLength=1
+	Enrollid string `json:"enrollid"`
+	// +kubebuilder:validation:MinLength=1
+	Enrollsecret string `json:"enrollsecret"`
+	// +kubebuilder:validation:MinLength=1
+	MSPID string `json:"mspid"`
+}
+
+// FabricMainChannelStatus defines the observed state of FabricMainChannel
 type FabricMainChannelStatus struct {
 	Conditions status.Conditions `json:"conditions"`
 	Message    string            `json:"message"`
@@ -1616,6 +1669,7 @@ type FabricMainChannelSpec struct {
 	// Consenters are the orderer nodes that are part of the channel consensus
 	Consenters []FabricMainChannelConsenter `json:"orderers"`
 }
+
 type FabricMainChannelAdminPeerOrganizationSpec struct {
 	// MSP ID of the organization
 	MSPID string `json:"mspID"`
@@ -1940,5 +1994,6 @@ func init() {
 	SchemeBuilder.Register(&FabricOperatorUI{}, &FabricOperatorUIList{})
 	SchemeBuilder.Register(&FabricOperatorAPI{}, &FabricOperatorAPIList{})
 	SchemeBuilder.Register(&FabricMainChannel{}, &FabricMainChannelList{})
+	SchemeBuilder.Register(&FabricIdentity{}, &FabricIdentityList{})
 	SchemeBuilder.Register(&FabricFollowerChannel{}, &FabricFollowerChannelList{})
 }
