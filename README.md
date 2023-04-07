@@ -197,27 +197,27 @@ EOF
 
 ```bash
 export PEER_IMAGE=hyperledger/fabric-peer
-export PEER_VERSION=2.4.6
+export PEER_VERSION=2.5.0
 
 export ORDERER_IMAGE=hyperledger/fabric-orderer
-export ORDERER_VERSION=2.4.6
+export ORDERER_VERSION=2.5.0
 
 export CA_IMAGE=hyperledger/fabric-ca
-export CA_VERSION=1.5.6-beta2
+export CA_VERSION=1.5.6
 ```
 
 
 ### Environment Variables for ARM (Mac M1)
 
 ```bash
-export PEER_IMAGE=bswamina/fabric-peer
-export PEER_VERSION=2.4.6
+export PEER_IMAGE=hyperledger/fabric-peer
+export PEER_VERSION=2.5.0
 
-export ORDERER_IMAGE=bswamina/fabric-orderer
-export ORDERER_VERSION=2.4.6
+export ORDERER_IMAGE=hyperledger/fabric-orderer
+export ORDERER_VERSION=2.5.0
 
 export CA_IMAGE=hyperledger/fabric-ca             
-export CA_VERSION=1.5.6-beta2
+export CA_VERSION=1.5.6
 
 ```
 
