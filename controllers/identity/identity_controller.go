@@ -2,6 +2,8 @@ package identity
 
 import (
 	"context"
+	"crypto/ecdsa"
+	"crypto/x509"
 	"encoding/base64"
 	"fmt"
 	"github.com/go-logr/logr"
@@ -30,9 +32,11 @@ import (
 // FabricIdentityReconciler reconciles a FabricIdentity object
 type FabricIdentityReconciler struct {
 	client.Client
-	Log    logr.Logger
-	Scheme *runtime.Scheme
-	Config *rest.Config
+	Log                        logr.Logger
+	Scheme                     *runtime.Scheme
+	Config                     *rest.Config
+	AutoRenewCertificates      bool
+	AutoRenewCertificatesDelta time.Duration
 }
 
 const identityFinalizer = "finalizer.identity.hlf.kungfusoftware.es"
@@ -106,25 +110,6 @@ func (r *FabricIdentityReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 		r.setConditionStatus(ctx, fabricIdentity, hlfv1alpha1.FailedStatus, false, err, false)
 		return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricIdentity)
 	}
-	x509Cert, pk, rootCert, err := certs.EnrollUser(certs.EnrollUserRequest{
-		TLSCert:    string(tlsCert),
-		URL:        fmt.Sprintf("https://%s:%d", fabricIdentity.Spec.Cahost, fabricIdentity.Spec.Caport),
-		Name:       fabricIdentity.Spec.Caname,
-		MSPID:      fabricIdentity.Spec.MSPID,
-		User:       fabricIdentity.Spec.Enrollid,
-		Secret:     fabricIdentity.Spec.Enrollsecret,
-		Hosts:      []string{},
-		Attributes: []*api.AttributeRequest{},
-	})
-	if err != nil {
-		r.setConditionStatus(ctx, fabricIdentity, hlfv1alpha1.FailedStatus, false, err, false)
-		return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricIdentity)
-	}
-	pkBytes, err := utils.EncodePrivateKey(pk)
-	if err != nil {
-		r.setConditionStatus(ctx, fabricIdentity, hlfv1alpha1.FailedStatus, false, err, false)
-		return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricIdentity)
-	}
 	// get secret if exists
 	secretExists := true
 	secret, err := clientSet.CoreV1().Secrets(fabricIdentity.Namespace).Get(ctx, fabricIdentity.Name, v1.GetOptions{})
@@ -136,6 +121,79 @@ func (r *FabricIdentityReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 			return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricIdentity)
 		}
 	}
+	var x509Cert *x509.Certificate
+	var pk *ecdsa.PrivateKey
+	var rootCert *x509.Certificate
+	if secretExists {
+		// get crypto material from secret
+		certPemBytes := secret.Data["cert.pem"]
+		keyPemBytes := secret.Data["key.pem"]
+		rootCertPemBytes := secret.Data["root.pem"]
+		x509Cert, err = utils.ParseX509Certificate(certPemBytes)
+		if err != nil {
+			r.setConditionStatus(ctx, fabricIdentity, hlfv1alpha1.FailedStatus, false, err, false)
+			return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricIdentity)
+		}
+		pk, err = utils.ParseECDSAPrivateKey(keyPemBytes)
+		if err != nil {
+			r.setConditionStatus(ctx, fabricIdentity, hlfv1alpha1.FailedStatus, false, err, false)
+			return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricIdentity)
+		}
+		rootCert, err = utils.ParseX509Certificate(rootCertPemBytes)
+		if err != nil {
+			r.setConditionStatus(ctx, fabricIdentity, hlfv1alpha1.FailedStatus, false, err, false)
+			return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricIdentity)
+		}
+		// check if certificates needs to be reenrolled
+		certificatesNeedToBeRenewed := false
+
+		if r.AutoRenewCertificates && x509Cert.NotAfter.Before(time.Now().Add(r.AutoRenewCertificatesDelta)) {
+			certificatesNeedToBeRenewed = true
+		}
+
+		log.Infof("Crypto material needs to be renewed: %v", certificatesNeedToBeRenewed)
+		if certificatesNeedToBeRenewed {
+			x509Cert, rootCert, err = certs.ReenrollUser(
+				certs.ReenrollUserRequest{
+					EnrollID:   fabricIdentity.Spec.Enrollid,
+					TLSCert:    string(tlsCert),
+					URL:        fmt.Sprintf("https://%s:%d", fabricIdentity.Spec.Cahost, fabricIdentity.Spec.Caport),
+					Name:       fabricIdentity.Spec.Caname,
+					MSPID:      fabricIdentity.Spec.MSPID,
+					Hosts:      []string{},
+					Attributes: []*api.AttributeRequest{},
+				},
+				string(utils.EncodeX509Certificate(x509Cert)),
+				pk,
+			)
+			if err != nil {
+				r.setConditionStatus(ctx, fabricIdentity, hlfv1alpha1.FailedStatus, false, err, false)
+				return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricIdentity)
+			}
+
+		}
+	} else {
+		x509Cert, pk, rootCert, err = certs.EnrollUser(certs.EnrollUserRequest{
+			TLSCert:    string(tlsCert),
+			URL:        fmt.Sprintf("https://%s:%d", fabricIdentity.Spec.Cahost, fabricIdentity.Spec.Caport),
+			Name:       fabricIdentity.Spec.Caname,
+			MSPID:      fabricIdentity.Spec.MSPID,
+			User:       fabricIdentity.Spec.Enrollid,
+			Secret:     fabricIdentity.Spec.Enrollsecret,
+			Hosts:      []string{},
+			Attributes: []*api.AttributeRequest{},
+		})
+		if err != nil {
+			r.setConditionStatus(ctx, fabricIdentity, hlfv1alpha1.FailedStatus, false, err, false)
+			return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricIdentity)
+		}
+	}
+	pkBytes, err := utils.EncodePrivateKey(pk)
+	if err != nil {
+		r.setConditionStatus(ctx, fabricIdentity, hlfv1alpha1.FailedStatus, false, err, false)
+		return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricIdentity)
+	}
+
 	if secretExists {
 		secret.Data = map[string][]byte{
 			"cert.pem": utils.EncodeX509Certificate(x509Cert),
@@ -182,7 +240,9 @@ func (r *FabricIdentityReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 		r.setConditionStatus(ctx, fabricIdentity, hlfv1alpha1.FailedStatus, false, err, false)
 		return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricIdentity)
 	}
-	return ctrl.Result{}, nil
+	return ctrl.Result{
+		RequeueAfter: 60 * time.Second,
+	}, nil
 }
 
 var (

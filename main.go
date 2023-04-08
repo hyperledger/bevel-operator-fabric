@@ -70,13 +70,17 @@ func main() {
 	var enableLeaderElection bool
 	var autoRenewCertificatesPeerEnabled bool
 	var autoRenewCertificatesOrdererEnabled bool
+	var autoRenewCertificatesIdentityEnabled bool
 	var autoRenewOrdererCertificatesDelta time.Duration
 	var autoRenewPeerCertificatesDelta time.Duration
+	var autoRenewIdentityCertificatesDelta time.Duration
 	flag.StringVar(&metricsAddr, "metrics-addr", ":8090", "The address the metric endpoint binds to.")
 	flag.DurationVar(&autoRenewOrdererCertificatesDelta, "auto-renew-orderer-certificates-delta", 15*24*time.Hour, "The delta to renew orderer certificates before expiration. Default is 15 days.")
 	flag.DurationVar(&autoRenewPeerCertificatesDelta, "auto-renew-peer-certificates-delta", 15*24*time.Hour, "The delta to renew peer certificates before expiration. Default is 15 days.")
+	flag.DurationVar(&autoRenewIdentityCertificatesDelta, "auto-renew-identity-certificates-delta", 15*24*time.Hour, "The delta to renew FabricIdentity certificates before expiration. Default is 15 days.")
 	flag.BoolVar(&autoRenewCertificatesPeerEnabled, "auto-renew-peer-certificates", false, "Enable auto renew certificates for orderer and peer nodes. Default is false.")
 	flag.BoolVar(&autoRenewCertificatesOrdererEnabled, "auto-renew-orderer-certificates", false, "Enable auto renew certificates for orderer and peer nodes. Default is false.")
+	flag.BoolVar(&autoRenewCertificatesIdentityEnabled, "auto-renew-identity-certificates", true, "Enable auto renew certificates for FabricIdentity. Default is true.")
 	flag.BoolVar(&enableLeaderElection, "enable-leader-election", false,
 		"Enable leader election for controller manager. "+
 			"Enabling this will ensure there is only one active controller manager.")
@@ -265,10 +269,12 @@ func main() {
 	}
 
 	if err = (&identity.FabricIdentityReconciler{
-		Client: mgr.GetClient(),
-		Log:    ctrl.Log.WithName("controllers").WithName("FabricIdentity"),
-		Scheme: mgr.GetScheme(),
-		Config: mgr.GetConfig(),
+		Client:                     mgr.GetClient(),
+		Log:                        ctrl.Log.WithName("controllers").WithName("FabricIdentity"),
+		Scheme:                     mgr.GetScheme(),
+		Config:                     mgr.GetConfig(),
+		AutoRenewCertificates:      autoRenewCertificatesIdentityEnabled,
+		AutoRenewCertificatesDelta: autoRenewIdentityCertificatesDelta,
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "FabricIdentity")
 		os.Exit(1)
