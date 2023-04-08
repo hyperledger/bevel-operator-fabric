@@ -317,9 +317,11 @@ type Component struct {
 	External *ExternalCertificate `json:"external"`
 }
 type ExternalCertificate struct {
-	SecretName     string `json:"secretName"`
-	CertificateKey string `json:"certificateKey"`
-	PrivateKeyKey  string `json:"privateKeyKey"`
+	SecretName         string `json:"secretName"`
+	SecretNamespace    string `json:"secretNamespace"`
+	RootCertificateKey string `json:"rootCertificateKey"`
+	CertificateKey     string `json:"certificateKey"`
+	PrivateKeyKey      string `json:"privateKeyKey"`
 }
 
 func (c *Component) CAUrl() string {
@@ -341,6 +343,10 @@ type TLS struct {
 	Csr          Csr    `json:"csr"`
 	Enrollid     string `json:"enrollid"`
 	Enrollsecret string `json:"enrollsecret"`
+
+	// +optional
+	// +nullable
+	External *ExternalCertificate `json:"external"`
 }
 type Enrollment struct {
 	Component Component `json:"component"`
