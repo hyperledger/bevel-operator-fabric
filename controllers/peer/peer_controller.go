@@ -902,7 +902,25 @@ func GetConfig(
 	var tlsCert, tlsRootCert, tlsOpsCert, signCert, signRootCert *x509.Certificate
 	var tlsKey, tlsOpsKey, signKey *ecdsa.PrivateKey
 	var err error
-	if refreshCerts {
+	ctx := context.Background()
+	if tlsParams.External != nil {
+		secret, err := client.CoreV1().Secrets(tlsParams.External.SecretNamespace).Get(ctx, tlsParams.External.SecretName, v1.GetOptions{})
+		if err != nil {
+			return nil, errors.Wrapf(err, "failed to get secret %s", tlsParams.External.SecretName)
+		}
+		tlsCert, err = utils.ParseX509Certificate(secret.Data[tlsParams.External.CertificateKey])
+		if err != nil {
+			return nil, errors.Wrapf(err, "failed to parse tls certificate")
+		}
+		tlsRootCert, err = utils.ParseX509Certificate(secret.Data[tlsParams.External.RootCertificateKey])
+		if err != nil {
+			return nil, errors.Wrapf(err, "failed to parse tls root certificate")
+		}
+		tlsKey, err = utils.ParseECDSAPrivateKey(secret.Data[tlsParams.External.PrivateKeyKey])
+		if err != nil {
+			return nil, errors.Wrapf(err, "failed to parse tls private key")
+		}
+	} else if refreshCerts {
 		cacert, err := base64.StdEncoding.DecodeString(tlsParams.Catls.Cacert)
 		if err != nil {
 			return nil, errors.Wrapf(err, "failed to decode tls ca cert")
@@ -986,7 +1004,24 @@ func GetConfig(
 	}
 	signParams := conf.Spec.Secret.Enrollment.Component
 	caUrl := fmt.Sprintf("https://%s:%d", signParams.Cahost, signParams.Caport)
-	if refreshCerts {
+	if signParams.External != nil {
+		secret, err := client.CoreV1().Secrets(signParams.External.SecretNamespace).Get(ctx, signParams.External.SecretName, v1.GetOptions{})
+		if err != nil {
+			return nil, errors.Wrapf(err, "failed to get secret %s", signParams.External.SecretName)
+		}
+		signCert, err = utils.ParseX509Certificate(secret.Data[signParams.External.CertificateKey])
+		if err != nil {
+			return nil, errors.Wrapf(err, "failed to parse sign certificate")
+		}
+		signRootCert, err = utils.ParseX509Certificate(secret.Data[signParams.External.RootCertificateKey])
+		if err != nil {
+			return nil, errors.Wrapf(err, "failed to parse sign root certificate")
+		}
+		signKey, err = utils.ParseECDSAPrivateKey(secret.Data[signParams.External.PrivateKeyKey])
+		if err != nil {
+			return nil, errors.Wrapf(err, "failed to parse sign private key")
+		}
+	} else if refreshCerts {
 		cacert, err := base64.StdEncoding.DecodeString(signParams.Catls.Cacert)
 		if err != nil {
 			return nil, errors.Wrapf(err, "failed to decode sign ca cert")
