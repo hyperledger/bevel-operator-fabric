@@ -167,7 +167,7 @@ func (r *FabricOrdererNodeReconciler) Reconcile(ctx context.Context, req ctrl.Re
 
 		lastTimeCertsRenewed := ordNode.Status.LastCertificateUpdate
 		certificatesNeedToBeRenewed := false
-		if ordNode.Status.LastCertificateUpdate != nil && fabricOrdererNode.Spec.UpdateCertificateTime.Time.After(ordNode.Status.LastCertificateUpdate.Time) {
+		if ordNode.Status.LastCertificateUpdate != nil && fabricOrdererNode.Spec.UpdateCertificateTime != nil && fabricOrdererNode.Spec.UpdateCertificateTime.Time.After(ordNode.Status.LastCertificateUpdate.Time) {
 			certificatesNeedToBeRenewed = true
 		}
 		if lastTimeCertsRenewed == nil && fabricOrdererNode.Spec.UpdateCertificateTime != nil {
