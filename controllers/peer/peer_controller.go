@@ -929,20 +929,37 @@ func GetConfig(
 		if err != nil {
 			return nil, errors.Wrapf(err, "failed to get existing tls crypto material")
 		}
-		tlsCert, tlsKey, tlsRootCert, err = ReenrollTLSCryptoMaterial(
-			conf,
-			tlsParams.Caname,
-			tlsCAUrl,
-			tlsParams.Enrollid,
-			string(cacert),
-			hosts,
-			string(utils.EncodeX509Certificate(tlsCert)),
-			tlsKey,
-		)
-		if err != nil {
-			return nil, errors.Wrapf(err, "failed to reenroll tls crypto material")
+		if tlsCert.NotAfter.Before(time.Now()) {
+			log.Infof("Enrolling tls crypto material for %s", chartName)
+			tlsCert, tlsKey, tlsRootCert, err = CreateTLSCryptoMaterial(
+				conf,
+				tlsParams.Caname,
+				tlsCAUrl,
+				tlsParams.Enrollid,
+				tlsParams.Enrollsecret,
+				string(cacert),
+				hosts,
+			)
+			if err != nil {
+				return nil, err
+			}
+			log.Infof("Successfully enrolled tls crypto material for %s", chartName)
+		} else {
+			tlsCert, tlsKey, tlsRootCert, err = ReenrollTLSCryptoMaterial(
+				conf,
+				tlsParams.Caname,
+				tlsCAUrl,
+				tlsParams.Enrollid,
+				string(cacert),
+				hosts,
+				string(utils.EncodeX509Certificate(tlsCert)),
+				tlsKey,
+			)
+			if err != nil {
+				return nil, errors.Wrapf(err, "failed to reenroll tls crypto material")
+			}
+			log.Infof("Successfully reenrolled tls crypto material for %s", chartName)
 		}
-		log.Infof("Successfully reenrolled tls crypto material for %s", chartName)
 	} else {
 		tlsCert, tlsKey, tlsRootCert, err = getExistingTLSCrypto(client, chartName, namespace)
 		if err != nil {
@@ -1031,19 +1048,36 @@ func GetConfig(
 			return nil, errors.Wrapf(err, "failed to get existing sign crypto material")
 		}
 		signCertPem := utils.EncodeX509Certificate(signCert)
-		signCert, signKey, signRootCert, err = ReenrollSignCryptoMaterial(
-			conf,
-			signParams.Caname,
-			caUrl,
-			signParams.Enrollid,
-			string(cacert),
-			string(signCertPem),
-			signKey,
-		)
-		if err != nil {
-			return nil, errors.Wrapf(err, "failed to reenroll sign crypto material")
+		if signCert.NotAfter.Before(time.Now()) {
+			log.Infof("Renewing certificates using enroll")
+			signCert, signKey, signRootCert, err = CreateSignCryptoMaterial(
+				conf,
+				signParams.Caname,
+				caUrl,
+				signParams.Enrollid,
+				signParams.Enrollsecret,
+				string(cacert),
+			)
+			if err != nil {
+				return nil, err
+			}
+			log.Infof("Enrolled sign crypto material")
+		} else {
+			log.Infof("Renewing certificates using reenroll")
+			signCert, signKey, signRootCert, err = ReenrollSignCryptoMaterial(
+				conf,
+				signParams.Caname,
+				caUrl,
+				signParams.Enrollid,
+				string(cacert),
+				string(signCertPem),
+				signKey,
+			)
+			if err != nil {
+				return nil, errors.Wrapf(err, "failed to reenroll sign crypto material")
+			}
+			log.Infof("Reenrolled sign crypto material")
 		}
-		log.Infof("Reenrolled sign crypto material")
 	} else {
 		signCert, signKey, signRootCert, err = getExistingSignCrypto(client, chartName, namespace)
 		if err != nil {
