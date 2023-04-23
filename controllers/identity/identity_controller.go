@@ -26,6 +26,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
+	"strings"
 	"time"
 )
 
@@ -184,6 +185,10 @@ func (r *FabricIdentityReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 			Attributes: []*api.AttributeRequest{},
 		})
 		if err != nil {
+			if strings.Contains(err.Error(), "Authentication failure") {
+				r.setConditionStatus(ctx, fabricIdentity, hlfv1alpha1.FailedStatus, false, errors.New("enroll secret is not correct"), false)
+				return r.updateCRStatusOrFailReconcileWithRequeue(ctx, r.Log, fabricIdentity, false, 0*time.Second)
+			}
 			r.setConditionStatus(ctx, fabricIdentity, hlfv1alpha1.FailedStatus, false, err, false)
 			return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricIdentity)
 		}
@@ -251,13 +256,24 @@ var (
 
 func (r *FabricIdentityReconciler) updateCRStatusOrFailReconcile(ctx context.Context, log logr.Logger, p *hlfv1alpha1.FabricIdentity) (
 	reconcile.Result, error) {
+	return r.updateCRStatusOrFailReconcileWithRequeue(ctx, log, p, true, 10*time.Second)
+}
+
+func (r *FabricIdentityReconciler) updateCRStatusOrFailReconcileWithRequeue(
+	ctx context.Context,
+	log logr.Logger,
+	p *hlfv1alpha1.FabricIdentity,
+	requeue bool,
+	requeueAfter time.Duration,
+) (
+	reconcile.Result, error) {
 	if err := r.Status().Update(ctx, p); err != nil {
 		log.Error(err, fmt.Sprintf("%v failed to update the application status", ErrClientK8s))
 		return reconcile.Result{}, err
 	}
 	return reconcile.Result{
-		Requeue:      true,
-		RequeueAfter: 10 * time.Second,
+		Requeue:      requeue,
+		RequeueAfter: requeueAfter,
 	}, nil
 }
 

@@ -45,8 +45,25 @@ spec:
           spec:
             description: FabricNetworkConfigSpec defines the desired state of FabricNetworkConfig
             properties:
+              identities:
+                description: HLF Identities to be included in the network config
+                items:
+                  properties:
+                    name:
+                      type: string
+                    namespace:
+                      type: string
+                  required:
+                  - name
+                  - namespace
+                  type: object
+                type: array
               internal:
                 type: boolean
+              namespaces:
+                items:
+                  type: string
+                type: array
               organization:
                 type: string
               organizations:
@@ -56,7 +73,9 @@ spec:
               secretName:
                 type: string
             required:
+            - identities
             - internal
+            - namespaces
             - organization
             - organizations
             - secretName

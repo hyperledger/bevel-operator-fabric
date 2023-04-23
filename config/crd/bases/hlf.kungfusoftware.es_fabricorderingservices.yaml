@@ -77,12 +77,18 @@ spec:
                             type: string
                           privateKeyKey:
                             type: string
+                          rootCertificateKey:
+                            type: string
                           secretName:
+                            type: string
+                          secretNamespace:
                             type: string
                         required:
                         - certificateKey
                         - privateKeyKey
+                        - rootCertificateKey
                         - secretName
+                        - secretNamespace
                         type: object
                     required:
                     - cahost
@@ -120,6 +126,26 @@ spec:
                         type: string
                       enrollsecret:
                         type: string
+                      external:
+                        nullable: true
+                        properties:
+                          certificateKey:
+                            type: string
+                          privateKeyKey:
+                            type: string
+                          rootCertificateKey:
+                            type: string
+                          secretName:
+                            type: string
+                          secretNamespace:
+                            type: string
+                        required:
+                        - certificateKey
+                        - privateKeyKey
+                        - rootCertificateKey
+                        - secretName
+                        - secretNamespace
+                        type: object
                     required:
                     - cahost
                     - caname

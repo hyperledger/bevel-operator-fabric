@@ -23,6 +23,8 @@ type FabricExplorerExpansion interface{}
 
 type FabricFollowerChannelExpansion interface{}
 
+type FabricIdentityExpansion interface{}
+
 type FabricMainChannelExpansion interface{}
 
 type FabricNetworkConfigExpansion interface{}

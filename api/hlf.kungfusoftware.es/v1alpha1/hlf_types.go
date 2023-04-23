@@ -1435,10 +1435,23 @@ type FabricOperatorAPISpec struct {
 
 // FabricNetworkConfigSpec defines the desired state of FabricNetworkConfig
 type FabricNetworkConfigSpec struct {
-	Organization  string   `json:"organization"`
-	Internal      bool     `json:"internal"`
+	Organization string `json:"organization"`
+
+	Internal bool `json:"internal"`
+
 	Organizations []string `json:"organizations"`
-	SecretName    string   `json:"secretName"`
+
+	Namespaces []string `json:"namespaces"`
+
+	// HLF Identities to be included in the network config
+	Identities []FabricNetworkConfigIdentity `json:"identities"`
+
+	SecretName string `json:"secretName"`
+}
+
+type FabricNetworkConfigIdentity struct {
+	Name      string `json:"name"`
+	Namespace string `json:"namespace"`
 }
 
 // FabricNetworkConfigStatus defines the observed state of FabricNetworkConfig
@@ -1566,15 +1579,12 @@ type FabricIdentityStatus struct {
 }
 
 // +genclient
-// +genclient:nonNamespaced
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 // +k8s:defaulter-gen=true
 // +kubebuilder:subresource:status
 // +kubebuilder:resource:scope=Namespaced,shortName=fabricidentity,singular=fabricidentity
 // +kubebuilder:printcolumn:name="State",type="string",JSONPath=".status.status"
 // +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
-// +kubebuilder:object:root=true
-// +kubebuilder:subresource:status
 // +k8s:openapi-gen=true
 
 // FabricIdentity is the Schema for the hlfs API
