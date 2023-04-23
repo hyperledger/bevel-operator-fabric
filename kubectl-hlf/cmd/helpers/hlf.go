@@ -25,6 +25,12 @@ type Organization struct {
 	MspID        string
 	OrdererNodes []*ClusterOrdererNode
 	Peers        []*ClusterPeer
+	Users        []OrgUser
+}
+type OrgUser struct {
+	Name string
+	Cert string
+	Key  string
 }
 
 type ClusterCA struct {

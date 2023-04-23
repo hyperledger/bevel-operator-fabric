@@ -96,7 +96,7 @@ To install helm: [https://helm.sh/docs/intro/install/](https://helm.sh/docs/intr
 ```bash
 helm repo add kfs https://kfsoftware.github.io/hlf-helm-charts --force-update
 
-helm install hlf-operator --version=1.8.2 kfs/hlf-operator
+helm install hlf-operator --version=1.9.0-beta4 -- kfs/hlf-operator
 ```
 
 
@@ -424,6 +424,33 @@ kubectl hlf ca enroll --name=ord-ca --namespace=default \
 # register
 kubectl hlf ca register --name=org1-ca --namespace=default --user=admin --secret=adminpw \
     --type=admin --enroll-id enroll --enroll-secret=enrollpw --mspid=Org1MSP
+
+kubectl hlf identity create --name=org1-admin --namespace=default --enroll-id=admin --enroll-secret=adminpw --mspid=Org1MSP \
+    --ca-name=org1-ca --ca-namespace=default  --ca=ca
+
+
+kubectl hlf ca register --name=org1-ca --namespace=default --user=client1 --secret=client1pw \
+    --type=client1 --enroll-id enroll --enroll-secret=enrollpw --mspid=Org1MSP
+
+kubectl hlf identity create --name=org1-client1 --namespace=default --enroll-id=client1 --enroll-secret=client1pw --mspid=Org1MSP \
+    --ca-name=org1-ca --ca-namespace=default  --ca=ca
+
+kubectl hlf ca register --name=org1-ca --namespace=default --user=client4 --secret=client4pw \
+    --type=client4 --enroll-id enroll --enroll-secret=enrollpw --mspid=Org1MSP
+
+kubectl hlf identity create --name=org1-client4 --namespace=default --enroll-id=client4 --enroll-secret=client4pw --mspid=Org1MSP \
+    --ca-name=org1-ca --ca-namespace=default  --ca=ca
+
+
+
+
+kubectl hlf networkconfig create --identities=org1-admin.default --identities=org1-client1.default \
+    --name=nc --namespace=default -o Org1MSP -o OrdererMSP 
+
+
+
+kubectl hlf networkconfig update --identities=org1-admin.default --identities=org1-client1.default \
+    --name=nc --namespace=default -o Org1MSP -o OrdererMSP 
 
 # enroll
 kubectl hlf ca enroll --name=org1-ca --namespace=default \
