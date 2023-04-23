@@ -364,41 +364,6 @@ openssl s_client -connect orderer0-ord.localho.st:443
 ```
 
 
-## Prepare connection string to interact with orderer
-
-To prepare the connection string, we have to:
-
-- Get the connection string without users
-- Register a user in the certification authority for signature
-- Get the certificates using the user created above
-- Attach the user to the connection string
-
-1. Get the connection string without users
-
-```bash
-kubectl hlf inspect --output ordservice.yaml -o OrdererMSP
-```
-
-2. Register a user in the TLS certification authority
-
-```bash
-kubectl hlf ca register --name=ord-ca --user=admin --secret=adminpw \
-    --type=admin --enroll-id enroll --enroll-secret=enrollpw --mspid=OrdererMSP
-```
-
-3. Get the certificates using the certificate
-
-```bash
-kubectl hlf ca enroll --name=ord-ca --user=admin --secret=adminpw --mspid OrdererMSP \
-        --ca-name ca  --output admin-ordservice.yaml
-```
-
-4. Attach the user to the connection string
-
-```
-kubectl hlf utils adduser --userPath=admin-ordservice.yaml --config=ordservice.yaml --username=admin --mspid=OrdererMSP
-```
-
 ## Create channel
 
 To create the channel we need to first create the wallet secret, which will contain the identities used by the operator to manage the channel
@@ -424,33 +389,6 @@ kubectl hlf ca enroll --name=ord-ca --namespace=default \
 # register
 kubectl hlf ca register --name=org1-ca --namespace=default --user=admin --secret=adminpw \
     --type=admin --enroll-id enroll --enroll-secret=enrollpw --mspid=Org1MSP
-
-kubectl hlf identity create --name=org1-admin --namespace=default --enroll-id=admin --enroll-secret=adminpw --mspid=Org1MSP \
-    --ca-name=org1-ca --ca-namespace=default  --ca=ca
-
-
-kubectl hlf ca register --name=org1-ca --namespace=default --user=client1 --secret=client1pw \
-    --type=client1 --enroll-id enroll --enroll-secret=enrollpw --mspid=Org1MSP
-
-kubectl hlf identity create --name=org1-client1 --namespace=default --enroll-id=client1 --enroll-secret=client1pw --mspid=Org1MSP \
-    --ca-name=org1-ca --ca-namespace=default  --ca=ca
-
-kubectl hlf ca register --name=org1-ca --namespace=default --user=client4 --secret=client4pw \
-    --type=client4 --enroll-id enroll --enroll-secret=enrollpw --mspid=Org1MSP
-
-kubectl hlf identity create --name=org1-client4 --namespace=default --enroll-id=client4 --enroll-secret=client4pw --mspid=Org1MSP \
-    --ca-name=org1-ca --ca-namespace=default  --ca=ca
-
-
-
-
-kubectl hlf networkconfig create --identities=org1-admin.default --identities=org1-client1.default \
-    --name=nc --namespace=default -o Org1MSP -o OrdererMSP 
-
-
-
-kubectl hlf networkconfig update --identities=org1-admin.default --identities=org1-client1.default \
-    --name=nc --namespace=default -o Org1MSP -o OrdererMSP 
 
 # enroll
 kubectl hlf ca enroll --name=org1-ca --namespace=default \
