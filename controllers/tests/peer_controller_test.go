@@ -203,7 +203,7 @@ var _ = Describe("Fabric Peer Controller", func() {
 		log.Infof("Creating namespace %s", FabricNamespace)
 		Expect(K8sClient.Create(context.Background(), testNamespace)).Should(Succeed())
 	})
-	FSpecify("create a new Fabric Peer", func() {
+	Specify("create a new Fabric Peer", func() {
 		By("create a fabric peer")
 		releaseNameCA := "org1-ca"
 		releaseNamePeer := "org1-peer"
