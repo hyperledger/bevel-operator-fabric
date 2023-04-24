@@ -25,7 +25,7 @@ jobs:
         uses: helm/kind-action@v1.4.0
         with:
           cluster_name: kind
-          node_image: kindest/node:v1.25.0
+          node_image: kindest/node:v1.25.8
           config: .github/kind-config.yaml
 
       - name: Install kubectl plugin
@@ -44,7 +44,7 @@ jobs:
       - name: Deploy operator
         run: |
           helm repo add kfs https://kfsoftware.github.io/hlf-helm-charts --force-update
-          helm install hlf-operator --version=1.8.2 kfs/hlf-operator --set image.repository="${IMAGE}" --set image.tag="${TAG}" --set image.pullPolicy="IfNotPresent"
+          helm install hlf-operator --version=1.9.0-beta4 kfs/hlf-operator --set image.repository="${IMAGE}" --set image.tag="${TAG}" --set image.pullPolicy="IfNotPresent"
 
       - name: Install operator CRDs
         run: |
