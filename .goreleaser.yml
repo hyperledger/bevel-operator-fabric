@@ -62,10 +62,21 @@ dockers:
     # GOOS of the built binary that should be used.
     goos: linux
     # GOARCH of the built binary that should be used.
-    goarch: 
-      - amd64
-      - arm64
-      - arm
+    goarch: amd64
+    dockerfile: Dockerfile
+    image_templates:
+      - "quay.io/kfsoftware/hlf-operator:{{ .Tag }}"
+      - "quay.io/kfsoftware/hlf-operator:latest"
+    extra_files:
+      - charts
+      - LICENSE
+      - README.md
+      - CREDITS
+  -
+    # GOOS of the built binary that should be used.
+    goos: linux
+    # GOARCH of the built binary that should be used.
+    goarch: arm64
     dockerfile: Dockerfile
     image_templates:
       - "quay.io/kfsoftware/hlf-operator:{{ .Tag }}"
