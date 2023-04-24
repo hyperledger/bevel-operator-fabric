@@ -81,7 +81,7 @@ func createPeer(releaseName string, namespace string, params createPeerParams, c
 			},
 			Replicas:         1,
 			DockerSocketPath: "",
-			Image:            "quay.io/kfsoftware/fabric-peer",
+			Image:            "ghcr.io/kfsoftware/fabric-peer",
 			ExternalBuilders: []hlfv1alpha1.ExternalBuilder{},
 			Istio: &hlfv1alpha1.FabricIstio{
 				Port:           443,
@@ -96,7 +96,7 @@ func createPeer(releaseName string, namespace string, params createPeerParams, c
 				OrgLeader:         false,
 			},
 			ExternalEndpoint:         "",
-			Tag:                      "amd64-2.4.9",
+			Tag:                      "2.4.3-v0.0.6",
 			ImagePullPolicy:          "Always",
 			ExternalChaincodeBuilder: true,
 			CouchDB: hlfv1alpha1.FabricPeerCouchDB{
@@ -203,7 +203,7 @@ var _ = Describe("Fabric Peer Controller", func() {
 		log.Infof("Creating namespace %s", FabricNamespace)
 		Expect(K8sClient.Create(context.Background(), testNamespace)).Should(Succeed())
 	})
-	Specify("create a new Fabric Peer", func() {
+	FSpecify("create a new Fabric Peer", func() {
 		By("create a fabric peer")
 		releaseNameCA := "org1-ca"
 		releaseNamePeer := "org1-peer"
