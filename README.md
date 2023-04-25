@@ -30,7 +30,8 @@ For discussions and questions, please join the Hyperledger Foundation Discord:
 
 [https://discord.com/invite/hyperledger](https://discord.com/invite/hyperledger)
 
-Channel is located under `LABS`, named `hlf-operator`.
+The channel is located under `BEVEL`, named [`bevel-operator-fabric`](https://discordapp.com/channels/905194001349627914/967823782712594442).
+
 
 ## Tutorial Videos
 
