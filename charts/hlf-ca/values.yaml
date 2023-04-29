@@ -20,4 +20,9 @@ istio:
   hosts: []
   ingressGateway: ingressgateway
 
+gatewayApi:
+  port: 443
+  hosts: []
+  gatewayClassName: "hlf-gateway"
+
 envVars: []

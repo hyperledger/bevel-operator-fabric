@@ -1,0 +1,14 @@
+{{- if and (not .Values.istio.hosts) .Values.gatewayApi.hosts -}}
+apiVersion: gateway.networking.k8s.io/v1alpha2
+kind: Gateway
+metadata:
+  name: {{ include "hlf-ca.fullname" . }}-gateway
+spec:
+  gatewayClassName: {{ .Values.gatewayApi.gatewayClassName }}
+  listeners:
+    - protocol: TLS # Other possible value is `TLS`
+      port: 443
+      name: tcp
+      tls:
+        mode: Passthrough # If protocol is `TLS`, `Passthrough` is a possible mode
+{{- end -}}

@@ -203,4 +203,8 @@ couchdbPassword: "couchdb"
 opsTLS:
   key: ""
   cert: ""
+gatewayApi:
+  port: 443
+  hosts: []
+  gatewayClassName: "hlf-gateway"
 

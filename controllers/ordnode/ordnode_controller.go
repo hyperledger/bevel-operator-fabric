@@ -833,6 +833,24 @@ func getConfig(
 			IngressGateway: "",
 		}
 	}
+	var gatewayApi GatewayApi
+	if spec.GatewayApi != nil{
+		gatewayApiClassName := spec.GatewayApi.GatewayClassName
+		if gatewayApiClassName == "" {
+			gatewayApiClassName = "hlf-gateway"
+		}
+		gatewayApi = GatewayApi{
+			Port:           spec.GatewayApi.Port,
+			Hosts:          spec.GatewayApi.Hosts,
+			GatewayClassName: gatewayApiClassName,
+		}
+	} else {
+		gatewayApi = GatewayApi{
+			Port:           0,
+			Hosts:          []string{},
+			GatewayClassName: "",
+		}
+	}
 	var adminIstio Istio
 	if spec.AdminIstio != nil {
 		gateway := spec.AdminIstio.IngressGateway
@@ -849,6 +867,24 @@ func getConfig(
 			Port:           0,
 			Hosts:          []string{},
 			IngressGateway: "",
+		}
+	}
+	var adminGatewayApi GatewayApi
+	if spec.AdminGatewayApi != nil{
+		gatewayApiClassName := spec.AdminGatewayApi.GatewayClassName
+		if gatewayApiClassName == "" {
+			gatewayApiClassName = "hlf-gateway"
+		}
+		adminGatewayApi = GatewayApi{
+			Port:           spec.AdminGatewayApi.Port,
+			Hosts:          spec.AdminGatewayApi.Hosts,
+			GatewayClassName: gatewayApiClassName,
+		}
+	} else {
+		adminGatewayApi = GatewayApi{
+			Port:           0,
+			Hosts:          []string{},
+			GatewayClassName: "",
 		}
 	}
 	var monitor ServiceMonitor
@@ -910,6 +946,8 @@ func getConfig(
 		Resources:                   resources,
 		Istio:                       istio,
 		AdminIstio:                  adminIstio,
+		GatewayApi:          		 gatewayApi,
+		AdminGatewayApi:             adminGatewayApi,		
 		Replicas:                    spec.Replicas,
 		Genesis:                     spec.Genesis,
 		Proxy:                       proxy,

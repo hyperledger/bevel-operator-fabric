@@ -4,6 +4,7 @@ import corev1 "k8s.io/api/core/v1"
 
 type FabricCAChart struct {
 	Istio            Istio                         `json:"istio"`
+	GatewayApi       GatewayApi                    `json:"gatewayApi"`
 	FullNameOverride string                        `json:"fullnameOverride"`
 	Image            Image                         `json:"image"`
 	Service          Service                       `json:"service"`
@@ -38,6 +39,11 @@ type ServiceMonitor struct {
 type Istio struct {
 	Port  int      `json:"port"`
 	Hosts []string `json:"hosts"`
+}
+type GatewayApi struct {
+	Port  int      `json:"port"`
+	Hosts []string `json:"hosts"`
+	GatewayClassName string `json:"gatewayClassName"`
 }
 type Cors struct {
 	Enabled bool     `json:"enabled"`

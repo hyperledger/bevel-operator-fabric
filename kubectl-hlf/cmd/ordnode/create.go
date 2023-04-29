@@ -4,15 +4,16 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
+	"io"
+	"strings"
+
 	"github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
 	"github.com/kfsoftware/hlf-operator/controllers/utils"
 	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/helpers"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"io"
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"strings"
 )
 
 type OrdererOptions struct {
@@ -35,6 +36,10 @@ type OrdererOptions struct {
 	CAHost           string
 	CAPort           int
 	ImagePullSecrets []string
+	GatewayClassName string
+	GatewayApiPort   int
+	GatewayApiHosts  []string
+	AdminGatewayApiHosts  []string
 }
 
 func (o OrdererOptions) Validate() error {
@@ -82,6 +87,13 @@ func (c *createCmd) run(args []string) error {
 		Hosts:          []string{},
 		IngressGateway: ingressGateway,
 	}
+	gatewayApiClassName := c.ordererOpts.GatewayClassName
+	gatewayApiPort := c.ordererOpts.GatewayApiPort
+	gatewayApi := &v1alpha1.FabricGatewayApi{
+		Port:           gatewayApiPort,
+		Hosts:          []string{},
+		GatewayClassName: gatewayApiClassName,
+	}	
 	if len(c.ordererOpts.Hosts) > 0 {
 		istio = &v1alpha1.FabricIstio{
 			Port:           ingressPort,
@@ -89,11 +101,23 @@ func (c *createCmd) run(args []string) error {
 			IngressGateway: ingressGateway,
 		}
 		csrHosts = append(csrHosts, c.ordererOpts.Hosts...)
+	}else if len(c.ordererOpts.GatewayApiHosts) > 0 {
+		gatewayApi = &v1alpha1.FabricGatewayApi{
+			Port:           gatewayApiPort,
+			Hosts:          c.ordererOpts.GatewayApiHosts,
+			GatewayClassName: gatewayApiClassName,
+		}
+		csrHosts = append(csrHosts, c.ordererOpts.GatewayApiHosts...)
 	}
 	adminIstio := &v1alpha1.FabricIstio{
 		Port:           ingressPort,
 		Hosts:          []string{},
 		IngressGateway: ingressGateway,
+	}
+	adminGatewayApi := &v1alpha1.FabricGatewayApi{
+		Port:           gatewayApiPort,
+		Hosts:          []string{},
+		GatewayClassName: gatewayApiClassName,
 	}
 	if len(c.ordererOpts.AdminHosts) > 0 {
 		adminIstio = &v1alpha1.FabricIstio{
@@ -102,13 +126,25 @@ func (c *createCmd) run(args []string) error {
 			IngressGateway: ingressGateway,
 		}
 		csrHosts = append(csrHosts, c.ordererOpts.AdminHosts...)
+	}else if len(c.ordererOpts.AdminGatewayApiHosts) > 0 {
+		adminGatewayApi = &v1alpha1.FabricGatewayApi{
+			Port:           gatewayApiPort,
+			Hosts:          c.ordererOpts.AdminGatewayApiHosts,
+			GatewayClassName: gatewayApiClassName,
+		}
+		csrHosts = append(csrHosts, c.ordererOpts.AdminGatewayApiHosts...)
 	}
+
 	caHost := k8sIP
 	caPort := certAuth.Status.NodePort
 	serviceType := corev1.ServiceTypeNodePort
 	if len(certAuth.Spec.Istio.Hosts) > 0 {
 		caHost = certAuth.Spec.Istio.Hosts[0]
 		caPort = certAuth.Spec.Istio.Port
+		serviceType = corev1.ServiceTypeClusterIP
+	}else if len(certAuth.Spec.GatewayApi.Hosts) > 0 {
+		caHost = certAuth.Spec.GatewayApi.Hosts[0]
+		caPort = certAuth.Spec.GatewayApi.Port
 		serviceType = corev1.ServiceTypeClusterIP
 	}
 	if c.ordererOpts.CAHost != "" {
@@ -200,6 +236,8 @@ func (c *createCmd) run(args []string) error {
 			},
 			Istio:      istio,
 			AdminIstio: adminIstio,
+			GatewayApi: gatewayApi,
+			AdminGatewayApi: adminGatewayApi,
 		},
 	}
 	if c.ordererOpts.Output {
@@ -250,6 +288,10 @@ func newCreateOrdererNodeCmd(out io.Writer, errOut io.Writer) *cobra.Command {
 	f.IntVarP(&c.ordererOpts.IngressPort, "istio-port", "", 443, "Istio ingress port")
 	f.StringVarP(&c.ordererOpts.MspID, "mspid", "", "", "MSP ID of the organization")
 	f.StringArrayVarP(&c.ordererOpts.Hosts, "hosts", "", []string{}, "Hosts")
+	f.StringArrayVarP(&c.ordererOpts.GatewayApiHosts, "gateway-api-hosts", "", []string{}, "Hosts for GatewayApi")
+	f.StringArrayVarP(&c.ordererOpts.AdminGatewayApiHosts, "admin-gateway-api-hosts", "", []string{}, "GatewayAPI Hosts for the admin API(introduced in v2.3)")
+	f.StringVarP(&c.ordererOpts.GatewayClassName, "gateway-classname", "", "hlf-gateway", "Gateway-api classname")
+	f.IntVarP(&c.ordererOpts.GatewayApiPort, "gateway-api-port", "", 443, "Gateway API port")
 	f.StringArrayVarP(&c.ordererOpts.AdminHosts, "admin-hosts", "", []string{}, "Hosts for the admin API(introduced in v2.3)")
 	f.BoolVarP(&c.ordererOpts.Output, "output", "o", false, "Output in yaml")
 	f.StringArrayVarP(&c.ordererOpts.HostAliases, "host-aliases", "", []string{}, "Host aliases (e.g.: \"1.2.3.4:osn2.example.com,peer1.example.com\")")
