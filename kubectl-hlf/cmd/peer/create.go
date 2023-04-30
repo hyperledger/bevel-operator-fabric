@@ -35,6 +35,9 @@ type Options struct {
 	CAName                          string
 	EnrollID                        string
 	Hosts                           []string
+	GatewayClassName 				string
+	GatewayApiPort   				int
+	GatewayApiHosts  				[]string
 	HostAliases                     []string
 	BootstrapPeers                  []string
 	Leader                          bool
@@ -85,6 +88,8 @@ func (c *createCmd) run() error {
 	externalEndpoint := ""
 	if len(c.peerOpts.Hosts) > 0 {
 		externalEndpoint = fmt.Sprintf("%s:%d", c.peerOpts.Hosts[0], c.peerOpts.IngressPort)
+	} else if len(c.peerOpts.GatewayApiHosts) > 0 {
+		externalEndpoint = fmt.Sprintf("%s:%d", c.peerOpts.GatewayApiHosts[0], c.peerOpts.GatewayApiPort)
 	}
 	ingressGateway := c.peerOpts.IngressGateway
 	istio := &v1alpha1.FabricIstio{
@@ -97,6 +102,19 @@ func (c *createCmd) run() error {
 			Port:           c.peerOpts.IngressPort,
 			Hosts:          c.peerOpts.Hosts,
 			IngressGateway: ingressGateway,
+		}
+	}
+	gatewayApiClassName := c.peerOpts.GatewayClassName
+	gatewayApi := &v1alpha1.FabricGatewayApi{
+		Port:           c.peerOpts.GatewayApiPort,
+		Hosts:          []string{},
+		GatewayClassName: gatewayApiClassName,
+	}
+	if len(c.peerOpts.GatewayApiHosts) > 0 {
+		gatewayApi = &v1alpha1.FabricGatewayApi{
+			Port:           c.peerOpts.GatewayApiPort,
+			Hosts:          c.peerOpts.GatewayApiHosts,
+			GatewayClassName: gatewayApiClassName,
 		}
 	}
 	k8sIP, err := utils.GetPublicIPKubernetes(clientSet)
@@ -126,6 +144,8 @@ func (c *createCmd) run() error {
 	csrHosts = append(csrHosts, fmt.Sprintf("%s.%s", c.peerOpts.Name, c.peerOpts.NS))
 	if len(c.peerOpts.Hosts) > 0 {
 		csrHosts = append(csrHosts, c.peerOpts.Hosts...)
+	}else if len(c.peerOpts.GatewayApiHosts) > 0 {
+		csrHosts = append(csrHosts, c.peerOpts.GatewayApiHosts...)
 	}
 	var externalBuilders []v1alpha1.ExternalBuilder
 	if c.peerOpts.ExternalChaincodeServiceBuilder {
@@ -252,6 +272,7 @@ func (c *createCmd) run() error {
 			ExternalChaincodeBuilder: kubernetesBuilder,
 			ExternalBuilders:         externalBuilders,
 			Istio:                    istio,
+			GatewayApi: 			  gatewayApi,
 			Gossip: v1alpha1.FabricPeerSpecGossip{
 				ExternalEndpoint:  externalEndpoint,
 				Bootstrap:         "",
@@ -454,6 +475,9 @@ func newCreatePeerCmd(out io.Writer, errOut io.Writer) *cobra.Command {
 	f.BoolVarP(&c.peerOpts.Leader, "leader", "", false, "Force peer to be leader")
 	f.StringArrayVarP(&c.peerOpts.BootstrapPeers, "bootstrap-peer", "", []string{}, "Bootstrap peers")
 	f.StringArrayVarP(&c.peerOpts.Hosts, "hosts", "", []string{}, "External hosts")
+	f.StringArrayVarP(&c.peerOpts.GatewayApiHosts, "gateway-api-hosts", "", []string{}, "Hosts for GatewayApi")
+	f.StringVarP(&c.peerOpts.GatewayClassName, "gateway-classname", "", "hlf-gateway", "Gateway-api classname")
+	f.IntVarP(&c.peerOpts.GatewayApiPort, "gateway-api-port", "", 443, "Gateway API port")
 	f.BoolVarP(&c.peerOpts.Output, "output", "o", false, "Output in yaml")
 	f.BoolVarP(&c.peerOpts.KubernetesBuilder, "k8s-builder", "", false, "Enable kubernetes builder (deprecated)")
 	f.BoolVarP(&c.peerOpts.ExternalChaincodeServiceBuilder, "external-service-builder", "", true, "External chaincode service builder enabled(only use in 2.4.1+)")

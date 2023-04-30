@@ -1053,6 +1053,24 @@ func GetConfig(
 			IngressGateway: "",
 		}
 	}
+	var gatewayApi GatewayApi
+	if spec.GatewayApi != nil{
+		gatewayApiClassName := spec.GatewayApi.GatewayClassName
+		if gatewayApiClassName == "" {
+			gatewayApiClassName = "hlf-gateway"
+		}
+		gatewayApi = GatewayApi{
+			Port:           spec.GatewayApi.Port,
+			Hosts:          spec.GatewayApi.Hosts,
+			GatewayClassName: gatewayApiClassName,
+		}
+	} else {
+		gatewayApi = GatewayApi{
+			Port:           0,
+			Hosts:          []string{},
+			GatewayClassName: "",
+		}
+	}
 	exporter := CouchDBExporter{
 		Enabled:    false,
 		Image:      "",
@@ -1160,6 +1178,7 @@ func GetConfig(
 		EnvVars:          spec.Env,
 		Replicas:         spec.Replicas,
 		ImagePullSecrets: spec.ImagePullSecrets,
+		GatewayApi: 	  gatewayApi,
 		Istio:            istio,
 		Image: Image{
 			Repository: spec.Image,

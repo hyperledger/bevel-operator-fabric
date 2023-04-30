@@ -3,7 +3,9 @@ package ordnode
 import corev1 "k8s.io/api/core/v1"
 
 type fabricOrdChart struct {
+	GatewayApi					GatewayApi					  `json:"gatewayApi"`
 	Istio                       Istio                         `json:"istio"`
+	AdminGatewayApi				GatewayApi					  `json:"adminGatewayApi"`
 	AdminIstio                  Istio                         `json:"adminIstio"`
 	Replicas                    int                           `json:"replicas"`
 	Genesis                     string                        `json:"genesis"`
@@ -134,4 +136,9 @@ type Istio struct {
 	Port           int      `json:"port"`
 	Hosts          []string `json:"hosts"`
 	IngressGateway string   `json:"ingressGateway"`
+}
+type GatewayApi struct {
+	Port  int      `json:"port"`
+	Hosts []string `json:"hosts"`
+	GatewayClassName string `json:"gatewayClassName"`
 }

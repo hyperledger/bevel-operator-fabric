@@ -27,6 +27,9 @@ type Options struct {
 	IngressGateway   string
 	IngressPort      int
 	Hosts            []string
+	GatewayClassName string
+	GatewayApiPort   int
+	GatewayApiHosts  []string
 	DBType           string
 	DBDataSource     string
 	ImagePullSecrets []string
@@ -69,6 +72,13 @@ func (c *createCmd) run(_ []string) error {
 	}
 	ingressGateway := c.caOpts.IngressGateway
 	ingressPort := c.caOpts.IngressPort
+	gatewayClassName := c.caOpts.GatewayClassName
+	gatewayApiPort := c.caOpts.GatewayApiPort
+	gatewayApi := &v1alpha1.FabricGatewayApi{
+		Port:           gatewayApiPort,
+		Hosts:          []string{},
+		GatewayClassName: gatewayClassName,
+	}
 	istio := &v1alpha1.FabricIstio{
 		Port:           ingressPort,
 		Hosts:          []string{},
@@ -82,7 +92,15 @@ func (c *createCmd) run(_ []string) error {
 			IngressGateway: ingressGateway,
 		}
 		serviceType = corev1.ServiceTypeClusterIP
+	} else if len(c.caOpts.GatewayApiHosts) > 0 {
+		gatewayApi = &v1alpha1.FabricGatewayApi{
+			Port:           gatewayApiPort,
+			Hosts:          c.caOpts.GatewayApiHosts,
+			GatewayClassName: gatewayClassName,
+		}
+		serviceType = corev1.ServiceTypeClusterIP
 	}
+	
 
 	var imagePullSecrets []corev1.LocalObjectReference
 	if len(c.caOpts.ImagePullSecrets) > 0 {
@@ -99,8 +117,10 @@ func (c *createCmd) run(_ []string) error {
 		fmt.Sprintf("%s.%s", c.caOpts.Name, c.caOpts.NS),
 	}
 	hosts = append(hosts, c.caOpts.Hosts...)
+	hosts = append(hosts, c.caOpts.GatewayApiHosts...)
 	csrHosts := []string{"localhost"}
 	csrHosts = append(csrHosts, c.caOpts.Hosts...)
+	csrHosts = append(csrHosts, c.caOpts.GatewayApiHosts...)
 	caResources, err := getDefaultCAResources()
 	if err != nil {
 		return err
@@ -128,6 +148,7 @@ func (c *createCmd) run(_ []string) error {
 			Version:          c.caOpts.Version,
 			Debug:            false,
 			Istio:            istio,
+			GatewayApi: 	  gatewayApi,	
 			CLRSizeLimit:     512000,
 			TLS: v1alpha1.FabricCATLSConf{
 				Subject: v1alpha1.FabricCASubject{
@@ -311,6 +332,9 @@ func newCreateCACmd(out io.Writer, errOut io.Writer) *cobra.Command {
 	f.StringArrayVarP(&c.caOpts.Hosts, "hosts", "", []string{}, "Hosts for Istio")
 	f.StringVarP(&c.caOpts.IngressGateway, "istio-ingressgateway", "", "ingressgateway", "Istio ingress gateway name")
 	f.IntVarP(&c.caOpts.IngressPort, "istio-port", "", 443, "Istio ingress port")
+	f.StringArrayVarP(&c.caOpts.GatewayApiHosts, "gateway-api-hosts", "", []string{}, "Hosts for GatewayApi")
+	f.StringVarP(&c.caOpts.GatewayClassName, "gateway-classname", "", "hlf-gateway", "Gateway-api classname")
+	f.IntVarP(&c.caOpts.GatewayApiPort, "gateway-api-port", "", 443, "Gateway API port")
 	f.StringArrayVarP(&c.caOpts.ImagePullSecrets, "image-pull-secrets", "", []string{}, "Image Pull Secrets for the CA Image")
 	return cmd
 }
