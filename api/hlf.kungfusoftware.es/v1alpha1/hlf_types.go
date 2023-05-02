@@ -18,6 +18,7 @@ package v1alpha1
 
 import (
 	"fmt"
+
 	"github.com/kfsoftware/hlf-operator/pkg/status"
 	"k8s.io/api/networking/v1beta1"
 	kubeclock "k8s.io/apimachinery/pkg/util/clock"
@@ -317,9 +318,11 @@ type Component struct {
 	External *ExternalCertificate `json:"external"`
 }
 type ExternalCertificate struct {
-	SecretName     string `json:"secretName"`
-	CertificateKey string `json:"certificateKey"`
-	PrivateKeyKey  string `json:"privateKeyKey"`
+	SecretName         string `json:"secretName"`
+	SecretNamespace    string `json:"secretNamespace"`
+	RootCertificateKey string `json:"rootCertificateKey"`
+	CertificateKey     string `json:"certificateKey"`
+	PrivateKeyKey      string `json:"privateKeyKey"`
 }
 
 func (c *Component) CAUrl() string {
@@ -341,6 +344,10 @@ type TLS struct {
 	Csr          Csr    `json:"csr"`
 	Enrollid     string `json:"enrollid"`
 	Enrollsecret string `json:"enrollsecret"`
+
+	// +optional
+	// +nullable
+	External *ExternalCertificate `json:"external"`
 }
 type Enrollment struct {
 	Component Component `json:"component"`
@@ -1429,10 +1436,23 @@ type FabricOperatorAPISpec struct {
 
 // FabricNetworkConfigSpec defines the desired state of FabricNetworkConfig
 type FabricNetworkConfigSpec struct {
-	Organization  string   `json:"organization"`
-	Internal      bool     `json:"internal"`
+	Organization string `json:"organization"`
+
+	Internal bool `json:"internal"`
+
 	Organizations []string `json:"organizations"`
-	SecretName    string   `json:"secretName"`
+
+	Namespaces []string `json:"namespaces"`
+
+	// HLF Identities to be included in the network config
+	Identities []FabricNetworkConfigIdentity `json:"identities"`
+
+	SecretName string `json:"secretName"`
+}
+
+type FabricNetworkConfigIdentity struct {
+	Name      string `json:"name"`
+	Namespace string `json:"namespace"`
 }
 
 // FabricNetworkConfigStatus defines the observed state of FabricNetworkConfig
@@ -1552,6 +1572,56 @@ type FabricChaincodeList struct {
 }
 
 // FabricMainChannelStatus defines the observed state of FabricMainChannel
+type FabricIdentityStatus struct {
+	Conditions status.Conditions `json:"conditions"`
+	Message    string            `json:"message"`
+	// Status of the FabricCA
+	Status DeploymentStatus `json:"status"`
+}
+
+// +genclient
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+// +k8s:defaulter-gen=true
+// +kubebuilder:subresource:status
+// +kubebuilder:resource:scope=Namespaced,shortName=fabricidentity,singular=fabricidentity
+// +kubebuilder:printcolumn:name="State",type="string",JSONPath=".status.status"
+// +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
+// +k8s:openapi-gen=true
+
+// FabricIdentity is the Schema for the hlfs API
+type FabricIdentity struct {
+	metav1.TypeMeta   `json:",inline"`
+	metav1.ObjectMeta `json:"metadata,omitempty"`
+	Spec              FabricIdentitySpec   `json:"spec,omitempty"`
+	Status            FabricIdentityStatus `json:"status,omitempty"`
+}
+
+// +kubebuilder:object:root=true
+
+// FabricIdentityList contains a list of FabricIdentity
+type FabricIdentityList struct {
+	metav1.TypeMeta `json:",inline"`
+	metav1.ListMeta `json:"metadata,omitempty"`
+	Items           []FabricIdentity `json:"items"`
+}
+
+// FabricIdentitySpec defines the desired state of FabricIdentity
+type FabricIdentitySpec struct {
+	// +kubebuilder:validation:MinLength=1
+	Cahost string `json:"cahost"`
+	// +kubebuilder:validation:MinLength=1
+	Caname string `json:"caname"`
+	Caport int    `json:"caport"`
+	Catls  Catls  `json:"catls"`
+	// +kubebuilder:validation:MinLength=1
+	Enrollid string `json:"enrollid"`
+	// +kubebuilder:validation:MinLength=1
+	Enrollsecret string `json:"enrollsecret"`
+	// +kubebuilder:validation:MinLength=1
+	MSPID string `json:"mspid"`
+}
+
+// FabricMainChannelStatus defines the observed state of FabricMainChannel
 type FabricMainChannelStatus struct {
 	Conditions status.Conditions `json:"conditions"`
 	Message    string            `json:"message"`
@@ -1616,6 +1686,7 @@ type FabricMainChannelSpec struct {
 	// Consenters are the orderer nodes that are part of the channel consensus
 	Consenters []FabricMainChannelConsenter `json:"orderers"`
 }
+
 type FabricMainChannelAdminPeerOrganizationSpec struct {
 	// MSP ID of the organization
 	MSPID string `json:"mspID"`
@@ -1940,5 +2011,6 @@ func init() {
 	SchemeBuilder.Register(&FabricOperatorUI{}, &FabricOperatorUIList{})
 	SchemeBuilder.Register(&FabricOperatorAPI{}, &FabricOperatorAPIList{})
 	SchemeBuilder.Register(&FabricMainChannel{}, &FabricMainChannelList{})
+	SchemeBuilder.Register(&FabricIdentity{}, &FabricIdentityList{})
 	SchemeBuilder.Register(&FabricFollowerChannel{}, &FabricFollowerChannelList{})
 }

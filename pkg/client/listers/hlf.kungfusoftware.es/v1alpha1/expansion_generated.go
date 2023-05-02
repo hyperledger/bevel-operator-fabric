@@ -43,6 +43,14 @@ type FabricExplorerNamespaceListerExpansion interface{}
 // FabricFollowerChannelLister.
 type FabricFollowerChannelListerExpansion interface{}
 
+// FabricIdentityListerExpansion allows custom methods to be added to
+// FabricIdentityLister.
+type FabricIdentityListerExpansion interface{}
+
+// FabricIdentityNamespaceListerExpansion allows custom methods to be added to
+// FabricIdentityNamespaceLister.
+type FabricIdentityNamespaceListerExpansion interface{}
+
 // FabricMainChannelListerExpansion allows custom methods to be added to
 // FabricMainChannelLister.
 type FabricMainChannelListerExpansion interface{}

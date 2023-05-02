@@ -73,6 +73,7 @@ kind: Cluster
 apiVersion: kind.x-k8s.io/v1alpha4
 nodes:
 - role: control-plane
+  image: kindest/node:v1.25.8
   extraPortMappings:
   - containerPort: 30949
     hostPort: 80
@@ -96,7 +97,7 @@ To install helm: [https://helm.sh/docs/intro/install/](https://helm.sh/docs/intr
 ```bash
 helm repo add kfs https://kfsoftware.github.io/hlf-helm-charts --force-update
 
-helm install hlf-operator --version=1.8.2 kfs/hlf-operator
+helm install hlf-operator --version=1.9.0-beta4 -- kfs/hlf-operator
 ```
 
 
@@ -197,27 +198,27 @@ EOF
 
 ```bash
 export PEER_IMAGE=hyperledger/fabric-peer
-export PEER_VERSION=2.4.6
+export PEER_VERSION=2.5.0
 
 export ORDERER_IMAGE=hyperledger/fabric-orderer
-export ORDERER_VERSION=2.4.6
+export ORDERER_VERSION=2.5.0
 
 export CA_IMAGE=hyperledger/fabric-ca
-export CA_VERSION=1.5.6-beta2
+export CA_VERSION=1.5.6
 ```
 
 
 ### Environment Variables for ARM (Mac M1)
 
 ```bash
-export PEER_IMAGE=bswamina/fabric-peer
-export PEER_VERSION=2.4.6
+export PEER_IMAGE=hyperledger/fabric-peer
+export PEER_VERSION=2.5.0
 
-export ORDERER_IMAGE=bswamina/fabric-orderer
-export ORDERER_VERSION=2.4.6
+export ORDERER_IMAGE=hyperledger/fabric-orderer
+export ORDERER_VERSION=2.5.0
 
 export CA_IMAGE=hyperledger/fabric-ca             
-export CA_VERSION=1.5.6-beta2
+export CA_VERSION=1.5.6
 
 ```
 
@@ -363,41 +364,6 @@ kubectl get pods
 openssl s_client -connect orderer0-ord.localho.st:443
 ```
 
-
-## Prepare connection string to interact with orderer
-
-To prepare the connection string, we have to:
-
-- Get the connection string without users
-- Register a user in the certification authority for signature
-- Get the certificates using the user created above
-- Attach the user to the connection string
-
-1. Get the connection string without users
-
-```bash
-kubectl hlf inspect --output ordservice.yaml -o OrdererMSP
-```
-
-2. Register a user in the TLS certification authority
-
-```bash
-kubectl hlf ca register --name=ord-ca --user=admin --secret=adminpw \
-    --type=admin --enroll-id enroll --enroll-secret=enrollpw --mspid=OrdererMSP
-```
-
-3. Get the certificates using the certificate
-
-```bash
-kubectl hlf ca enroll --name=ord-ca --user=admin --secret=adminpw --mspid OrdererMSP \
-        --ca-name ca  --output admin-ordservice.yaml
-```
-
-4. Attach the user to the connection string
-
-```
-kubectl hlf utils adduser --userPath=admin-ordservice.yaml --config=ordservice.yaml --username=admin --mspid=OrdererMSP
-```
 
 ## Create channel
 

@@ -6,16 +6,16 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.3.0
   creationTimestamp: null
-  name: fabricnetworkconfigs.hlf.kungfusoftware.es
+  name: fabricidentities.hlf.kungfusoftware.es
 spec:
   group: hlf.kungfusoftware.es
   names:
-    kind: FabricNetworkConfig
-    listKind: FabricNetworkConfigList
-    plural: fabricnetworkconfigs
+    kind: FabricIdentity
+    listKind: FabricIdentityList
+    plural: fabricidentities
     shortNames:
-    - networkconfig
-    singular: networkconfig
+    - fabricidentity
+    singular: fabricidentity
   scope: Namespaced
   versions:
   - additionalPrinterColumns:
@@ -28,7 +28,7 @@ spec:
     name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: FabricNetworkConfig is the Schema for the hlfs API
+        description: FabricIdentity is the Schema for the hlfs API
         properties:
           apiVersion:
             description: 'APIVersion defines the versioned schema of this representation
@@ -43,45 +43,43 @@ spec:
           metadata:
             type: object
           spec:
-            description: FabricNetworkConfigSpec defines the desired state of FabricNetworkConfig
+            description: FabricIdentitySpec defines the desired state of FabricIdentity
             properties:
-              identities:
-                description: HLF Identities to be included in the network config
-                items:
-                  properties:
-                    name:
-                      type: string
-                    namespace:
-                      type: string
-                  required:
-                  - name
-                  - namespace
-                  type: object
-                type: array
-              internal:
-                type: boolean
-              namespaces:
-                items:
-                  type: string
-                type: array
-              organization:
+              cahost:
+                minLength: 1
                 type: string
-              organizations:
-                items:
-                  type: string
-                type: array
-              secretName:
+              caname:
+                minLength: 1
+                type: string
+              caport:
+                type: integer
+              catls:
+                properties:
+                  cacert:
+                    type: string
+                required:
+                - cacert
+                type: object
+              enrollid:
+                minLength: 1
+                type: string
+              enrollsecret:
+                minLength: 1
+                type: string
+              mspid:
+                minLength: 1
                 type: string
             required:
-            - identities
-            - internal
-            - namespaces
-            - organization
-            - organizations
-            - secretName
+            - cahost
+            - caname
+            - caport
+            - catls
+            - enrollid
+            - enrollsecret
+            - mspid
             type: object
           status:
-            description: FabricNetworkConfigStatus defines the observed state of FabricNetworkConfig
+            description: FabricMainChannelStatus defines the observed state of FabricMainChannel
             properties:
               conditions:
                 description: Conditions is a set of Condition instances.
@@ -126,7 +124,7 @@ spec:
               message:
                 type: string
               status:
-                description: Status of the FabricNetworkConfig
+                description: Status of the FabricCA
                 type: string
             required:
             - conditions

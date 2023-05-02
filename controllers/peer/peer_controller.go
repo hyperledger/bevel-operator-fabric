@@ -8,15 +8,16 @@ import (
 	"encoding/json"
 	"encoding/pem"
 	"fmt"
+	"os"
+	"reflect"
+	"strings"
+	"time"
+
 	"github.com/kfsoftware/hlf-operator/controllers/hlfmetrics"
 	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/helpers"
 	operatorv1 "github.com/kfsoftware/hlf-operator/pkg/client/clientset/versioned"
 	"k8s.io/apimachinery/pkg/types"
-	"os"
-	"reflect"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
-	"strings"
-	"time"
 
 	"github.com/kfsoftware/hlf-operator/pkg/status"
 	"github.com/pkg/errors"
@@ -902,7 +903,25 @@ func GetConfig(
 	var tlsCert, tlsRootCert, tlsOpsCert, signCert, signRootCert *x509.Certificate
 	var tlsKey, tlsOpsKey, signKey *ecdsa.PrivateKey
 	var err error
-	if refreshCerts {
+	ctx := context.Background()
+	if tlsParams.External != nil {
+		secret, err := client.CoreV1().Secrets(tlsParams.External.SecretNamespace).Get(ctx, tlsParams.External.SecretName, v1.GetOptions{})
+		if err != nil {
+			return nil, errors.Wrapf(err, "failed to get secret %s", tlsParams.External.SecretName)
+		}
+		tlsCert, err = utils.ParseX509Certificate(secret.Data[tlsParams.External.CertificateKey])
+		if err != nil {
+			return nil, errors.Wrapf(err, "failed to parse tls certificate")
+		}
+		tlsRootCert, err = utils.ParseX509Certificate(secret.Data[tlsParams.External.RootCertificateKey])
+		if err != nil {
+			return nil, errors.Wrapf(err, "failed to parse tls root certificate")
+		}
+		tlsKey, err = utils.ParseECDSAPrivateKey(secret.Data[tlsParams.External.PrivateKeyKey])
+		if err != nil {
+			return nil, errors.Wrapf(err, "failed to parse tls private key")
+		}
+	} else if refreshCerts {
 		cacert, err := base64.StdEncoding.DecodeString(tlsParams.Catls.Cacert)
 		if err != nil {
 			return nil, errors.Wrapf(err, "failed to decode tls ca cert")
@@ -911,18 +930,36 @@ func GetConfig(
 		if err != nil {
 			return nil, errors.Wrapf(err, "failed to get existing tls crypto material")
 		}
-		tlsCert, tlsKey, tlsRootCert, err = ReenrollTLSCryptoMaterial(
-			conf,
-			tlsParams.Caname,
-			tlsCAUrl,
-			tlsParams.Enrollid,
-			string(cacert),
-			hosts,
-			string(utils.EncodeX509Certificate(tlsCert)),
-			tlsKey,
-		)
-		if err != nil {
-			return nil, errors.Wrapf(err, "failed to reenroll tls crypto material")
+		if tlsCert.NotAfter.Before(time.Now()) {
+			log.Infof("Enrolling tls crypto material for %s", chartName)
+			tlsCert, tlsKey, tlsRootCert, err = CreateTLSCryptoMaterial(
+				conf,
+				tlsParams.Caname,
+				tlsCAUrl,
+				tlsParams.Enrollid,
+				tlsParams.Enrollsecret,
+				string(cacert),
+				hosts,
+			)
+			if err != nil {
+				return nil, err
+			}
+			log.Infof("Successfully enrolled tls crypto material for %s", chartName)
+		} else {
+			tlsCert, tlsKey, tlsRootCert, err = ReenrollTLSCryptoMaterial(
+				conf,
+				tlsParams.Caname,
+				tlsCAUrl,
+				tlsParams.Enrollid,
+				string(cacert),
+				hosts,
+				string(utils.EncodeX509Certificate(tlsCert)),
+				tlsKey,
+			)
+			if err != nil {
+				return nil, errors.Wrapf(err, "failed to reenroll tls crypto material")
+			}
+			log.Infof("Successfully reenrolled tls crypto material for %s", chartName)
 		}
 		log.Infof("Successfully reenrolled tls crypto material for %s", chartName)
 	} else {
@@ -986,7 +1023,24 @@ func GetConfig(
 	}
 	signParams := conf.Spec.Secret.Enrollment.Component
 	caUrl := fmt.Sprintf("https://%s:%d", signParams.Cahost, signParams.Caport)
-	if refreshCerts {
+	if signParams.External != nil {
+		secret, err := client.CoreV1().Secrets(signParams.External.SecretNamespace).Get(ctx, signParams.External.SecretName, v1.GetOptions{})
+		if err != nil {
+			return nil, errors.Wrapf(err, "failed to get secret %s", signParams.External.SecretName)
+		}
+		signCert, err = utils.ParseX509Certificate(secret.Data[signParams.External.CertificateKey])
+		if err != nil {
+			return nil, errors.Wrapf(err, "failed to parse sign certificate")
+		}
+		signRootCert, err = utils.ParseX509Certificate(secret.Data[signParams.External.RootCertificateKey])
+		if err != nil {
+			return nil, errors.Wrapf(err, "failed to parse sign root certificate")
+		}
+		signKey, err = utils.ParseECDSAPrivateKey(secret.Data[signParams.External.PrivateKeyKey])
+		if err != nil {
+			return nil, errors.Wrapf(err, "failed to parse sign private key")
+		}
+	} else if refreshCerts {
 		cacert, err := base64.StdEncoding.DecodeString(signParams.Catls.Cacert)
 		if err != nil {
 			return nil, errors.Wrapf(err, "failed to decode sign ca cert")
@@ -996,17 +1050,35 @@ func GetConfig(
 			return nil, errors.Wrapf(err, "failed to get existing sign crypto material")
 		}
 		signCertPem := utils.EncodeX509Certificate(signCert)
-		signCert, signKey, signRootCert, err = ReenrollSignCryptoMaterial(
-			conf,
-			signParams.Caname,
-			caUrl,
-			signParams.Enrollid,
-			string(cacert),
-			string(signCertPem),
-			signKey,
-		)
-		if err != nil {
-			return nil, errors.Wrapf(err, "failed to reenroll sign crypto material")
+		if signCert.NotAfter.Before(time.Now()) {
+			log.Infof("Renewing certificates using enroll")
+			signCert, signKey, signRootCert, err = CreateSignCryptoMaterial(
+				conf,
+				signParams.Caname,
+				caUrl,
+				signParams.Enrollid,
+				signParams.Enrollsecret,
+				string(cacert),
+			)
+			if err != nil {
+				return nil, err
+			}
+			log.Infof("Enrolled sign crypto material")
+		} else {
+			log.Infof("Renewing certificates using reenroll")
+			signCert, signKey, signRootCert, err = ReenrollSignCryptoMaterial(
+				conf,
+				signParams.Caname,
+				caUrl,
+				signParams.Enrollid,
+				string(cacert),
+				string(signCertPem),
+				signKey,
+			)
+			if err != nil {
+				return nil, errors.Wrapf(err, "failed to reenroll sign crypto material")
+			}
+			log.Infof("Reenrolled sign crypto material")
 		}
 		log.Infof("Reenrolled sign crypto material")
 	} else {

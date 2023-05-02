@@ -41,6 +41,10 @@ func (c *FakeHlfV1alpha1) FabricFollowerChannels() v1alpha1.FabricFollowerChanne
 	return &FakeFabricFollowerChannels{c}
 }
 
+func (c *FakeHlfV1alpha1) FabricIdentities(namespace string) v1alpha1.FabricIdentityInterface {
+	return &FakeFabricIdentities{c, namespace}
+}
+
 func (c *FakeHlfV1alpha1) FabricMainChannels() v1alpha1.FabricMainChannelInterface {
 	return &FakeFabricMainChannels{c}
 }

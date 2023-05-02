@@ -8,6 +8,11 @@ import (
 	"encoding/json"
 	"encoding/pem"
 	"fmt"
+	"os"
+	"reflect"
+	"strings"
+	"time"
+
 	"github.com/go-logr/logr"
 	hlfv1alpha1 "github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
 	"github.com/kfsoftware/hlf-operator/controllers/certs"
@@ -31,14 +36,10 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/kubernetes/pkg/api/v1/pod"
-	"os"
-	"reflect"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
-	"strings"
-	"time"
 )
 
 // FabricOrdererNodeReconciler reconciles a FabricOrdererNode object
@@ -167,7 +168,7 @@ func (r *FabricOrdererNodeReconciler) Reconcile(ctx context.Context, req ctrl.Re
 
 		lastTimeCertsRenewed := ordNode.Status.LastCertificateUpdate
 		certificatesNeedToBeRenewed := false
-		if ordNode.Status.LastCertificateUpdate != nil && fabricOrdererNode.Spec.UpdateCertificateTime.Time.After(ordNode.Status.LastCertificateUpdate.Time) {
+		if ordNode.Status.LastCertificateUpdate != nil && fabricOrdererNode.Spec.UpdateCertificateTime != nil && fabricOrdererNode.Spec.UpdateCertificateTime.Time.After(ordNode.Status.LastCertificateUpdate.Time) {
 			certificatesNeedToBeRenewed = true
 		}
 		if lastTimeCertsRenewed == nil && fabricOrdererNode.Spec.UpdateCertificateTime != nil {
@@ -774,7 +775,25 @@ func getConfig(
 	var tlsCert, tlsRootCert, adminCert, adminRootCert, adminClientRootCert, signCert, signRootCert *x509.Certificate
 	var tlsKey, adminKey, signKey *ecdsa.PrivateKey
 	var err error
-	if refreshCerts {
+	ctx := context.Background()
+	if tlsParams.External != nil {
+		secret, err := client.CoreV1().Secrets(tlsParams.External.SecretNamespace).Get(ctx, tlsParams.External.SecretName, v1.GetOptions{})
+		if err != nil {
+			return nil, errors.Wrapf(err, "failed to get secret %s", tlsParams.External.SecretName)
+		}
+		tlsCert, err = utils.ParseX509Certificate(secret.Data[tlsParams.External.CertificateKey])
+		if err != nil {
+			return nil, errors.Wrapf(err, "failed to parse tls certificate")
+		}
+		tlsRootCert, err = utils.ParseX509Certificate(secret.Data[tlsParams.External.RootCertificateKey])
+		if err != nil {
+			return nil, errors.Wrapf(err, "failed to parse tls root certificate")
+		}
+		tlsKey, err = utils.ParseECDSAPrivateKey(secret.Data[tlsParams.External.PrivateKeyKey])
+		if err != nil {
+			return nil, errors.Wrapf(err, "failed to parse tls private key")
+		}
+	} else if refreshCerts {
 		cacert, err := base64.StdEncoding.DecodeString(tlsParams.Catls.Cacert)
 		if err != nil {
 			return nil, errors.Wrapf(err, "failed to decode tls ca cert")
@@ -865,7 +884,24 @@ func getConfig(
 	}
 	signParams := conf.Spec.Secret.Enrollment.Component
 	caUrl := fmt.Sprintf("https://%s:%d", signParams.Cahost, signParams.Caport)
-	if refreshCerts {
+	if signParams.External != nil {
+		secret, err := client.CoreV1().Secrets(signParams.External.SecretNamespace).Get(ctx, signParams.External.SecretName, v1.GetOptions{})
+		if err != nil {
+			return nil, errors.Wrapf(err, "failed to get secret %s", signParams.External.SecretName)
+		}
+		signCert, err = utils.ParseX509Certificate(secret.Data[signParams.External.CertificateKey])
+		if err != nil {
+			return nil, errors.Wrapf(err, "failed to parse sign certificate")
+		}
+		signRootCert, err = utils.ParseX509Certificate(secret.Data[signParams.External.RootCertificateKey])
+		if err != nil {
+			return nil, errors.Wrapf(err, "failed to parse sign root certificate")
+		}
+		signKey, err = utils.ParseECDSAPrivateKey(secret.Data[signParams.External.PrivateKeyKey])
+		if err != nil {
+			return nil, errors.Wrapf(err, "failed to parse sign private key")
+		}
+	} else if refreshCerts {
 		cacert, err := base64.StdEncoding.DecodeString(signParams.Catls.Cacert)
 		if err != nil {
 			return nil, errors.Wrapf(err, "failed to decode sign ca cert")

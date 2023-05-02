@@ -4,6 +4,9 @@ import (
 	"crypto/ecdsa"
 	"crypto/x509"
 	"fmt"
+	"io/ioutil"
+	"path/filepath"
+
 	"github.com/hyperledger/fabric/bccsp"
 	bccsputils "github.com/hyperledger/fabric/bccsp/utils"
 	"github.com/kfsoftware/hlf-operator/controllers/utils"
@@ -13,9 +16,6 @@ import (
 	fabricx509 "github.com/kfsoftware/hlf-operator/internal/github.com/hyperledger/fabric-ca/lib/client/credential/x509"
 	"github.com/kfsoftware/hlf-operator/internal/github.com/hyperledger/fabric-ca/lib/tls"
 	"github.com/pkg/errors"
-	log "github.com/sirupsen/logrus"
-	"io/ioutil"
-	"path/filepath"
 )
 
 type FabricPem struct {
@@ -272,7 +272,6 @@ func readKey(client *lib.Client) (*ecdsa.PrivateKey, error) {
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to read key file %s", keyPath)
 	}
-	log.Infof("Enrolled key %s", string(keyBytes))
 	ecdsaKey, err := utils.ParseECDSAPrivateKey(keyBytes)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to parse key file %s", keyPath)
