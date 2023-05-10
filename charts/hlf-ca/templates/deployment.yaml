@@ -17,6 +17,13 @@ spec:
   template:
     metadata:
       labels:
+        checksum/secret--ca: {{ include (print $.Template.BasePath "/secret--ca.yaml") . | sha256sum | trunc 60 }}
+        checksum/secret--msp-tls-cryptomaterial: {{ include (print $.Template.BasePath "/secret--msp-tls-cryptomaterial.yaml") . | sha256sum | trunc 60 }}
+        checksum/secret--tls-cryptomaterial: {{ include (print $.Template.BasePath "/secret--tls-cryptomaterial.yaml") . | sha256sum | trunc 60 }}
+        checksum/secret--msp-cryptomaterial: {{ include (print $.Template.BasePath "/secret--msp-cryptomaterial.yaml") . | sha256sum | trunc 60 }}
+        checksum/configmap--ca: {{ include (print $.Template.BasePath "/configmap--ca.yaml") . | sha256sum | trunc 60 }}
+        checksum/configmap--config: {{ include (print $.Template.BasePath "/configmap--config.yaml") . | sha256sum | trunc 60 }}
+        checksum/configmap--config-tls: {{ include (print $.Template.BasePath "/configmap--config-tls.yaml") . | sha256sum | trunc 60 }}
 {{ include "labels.standard" . | indent 8 }}
     spec:
       volumes:

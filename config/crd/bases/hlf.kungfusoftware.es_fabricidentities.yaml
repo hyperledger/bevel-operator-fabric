@@ -69,6 +69,35 @@ spec:
               mspid:
                 minLength: 1
                 type: string
+              register:
+                nullable: true
+                properties:
+                  affiliation:
+                    minLength: 1
+                    type: string
+                  attrs:
+                    items:
+                      type: string
+                    type: array
+                  enrollid:
+                    minLength: 1
+                    type: string
+                  enrollsecret:
+                    minLength: 1
+                    type: string
+                  maxenrollments:
+                    type: integer
+                  type:
+                    minLength: 1
+                    type: string
+                required:
+                - affiliation
+                - attrs
+                - enrollid
+                - enrollsecret
+                - maxenrollments
+                - type
+                type: object
             required:
             - cahost
             - caname

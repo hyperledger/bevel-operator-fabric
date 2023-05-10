@@ -97,7 +97,7 @@ To install helm: [https://helm.sh/docs/intro/install/](https://helm.sh/docs/intr
 ```bash
 helm repo add kfs https://kfsoftware.github.io/hlf-helm-charts --force-update
 
-helm install hlf-operator --version=1.9.0-beta4 -- kfs/hlf-operator
+helm install hlf-operator --version=1.9.0-beta7 -- kfs/hlf-operator
 ```
 
 

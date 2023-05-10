@@ -17,9 +17,12 @@ package v1alpha1
 
 import (
 	"context"
+	json "encoding/json"
+	"fmt"
 	"time"
 
 	v1alpha1 "github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
+	hlfkungfusoftwareesv1alpha1 "github.com/kfsoftware/hlf-operator/pkg/client/applyconfiguration/hlf.kungfusoftware.es/v1alpha1"
 	scheme "github.com/kfsoftware/hlf-operator/pkg/client/clientset/versioned/scheme"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	types "k8s.io/apimachinery/pkg/types"
@@ -44,6 +47,8 @@ type FabricFollowerChannelInterface interface {
 	List(ctx context.Context, opts v1.ListOptions) (*v1alpha1.FabricFollowerChannelList, error)
 	Watch(ctx context.Context, opts v1.ListOptions) (watch.Interface, error)
 	Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *v1alpha1.FabricFollowerChannel, err error)
+	Apply(ctx context.Context, fabricFollowerChannel *hlfkungfusoftwareesv1alpha1.FabricFollowerChannelApplyConfiguration, opts v1.ApplyOptions) (result *v1alpha1.FabricFollowerChannel, err error)
+	ApplyStatus(ctx context.Context, fabricFollowerChannel *hlfkungfusoftwareesv1alpha1.FabricFollowerChannelApplyConfiguration, opts v1.ApplyOptions) (result *v1alpha1.FabricFollowerChannel, err error)
 	FabricFollowerChannelExpansion
 }
 
@@ -174,6 +179,60 @@ func (c *fabricFollowerChannels) Patch(ctx context.Context, name string, pt type
 		Name(name).
 		SubResource(subresources...).
 		VersionedParams(&opts, scheme.ParameterCodec).
+		Body(data).
+		Do(ctx).
+		Into(result)
+	return
+}
+
+// Apply takes the given apply declarative configuration, applies it and returns the applied fabricFollowerChannel.
+func (c *fabricFollowerChannels) Apply(ctx context.Context, fabricFollowerChannel *hlfkungfusoftwareesv1alpha1.FabricFollowerChannelApplyConfiguration, opts v1.ApplyOptions) (result *v1alpha1.FabricFollowerChannel, err error) {
+	if fabricFollowerChannel == nil {
+		return nil, fmt.Errorf("fabricFollowerChannel provided to Apply must not be nil")
+	}
+	patchOpts := opts.ToPatchOptions()
+	data, err := json.Marshal(fabricFollowerChannel)
+	if err != nil {
+		return nil, err
+	}
+	name := fabricFollowerChannel.Name
+	if name == nil {
+		return nil, fmt.Errorf("fabricFollowerChannel.Name must be provided to Apply")
+	}
+	result = &v1alpha1.FabricFollowerChannel{}
+	err = c.client.Patch(types.ApplyPatchType).
+		Resource("fabricfollowerchannels").
+		Name(*name).
+		VersionedParams(&patchOpts, scheme.ParameterCodec).
+		Body(data).
+		Do(ctx).
+		Into(result)
+	return
+}
+
+// ApplyStatus was generated because the type contains a Status member.
+// Add a +genclient:noStatus comment above the type to avoid generating ApplyStatus().
+func (c *fabricFollowerChannels) ApplyStatus(ctx context.Context, fabricFollowerChannel *hlfkungfusoftwareesv1alpha1.FabricFollowerChannelApplyConfiguration, opts v1.ApplyOptions) (result *v1alpha1.FabricFollowerChannel, err error) {
+	if fabricFollowerChannel == nil {
+		return nil, fmt.Errorf("fabricFollowerChannel provided to Apply must not be nil")
+	}
+	patchOpts := opts.ToPatchOptions()
+	data, err := json.Marshal(fabricFollowerChannel)
+	if err != nil {
+		return nil, err
+	}
+
+	name := fabricFollowerChannel.Name
+	if name == nil {
+		return nil, fmt.Errorf("fabricFollowerChannel.Name must be provided to Apply")
+	}
+
+	result = &v1alpha1.FabricFollowerChannel{}
+	err = c.client.Patch(types.ApplyPatchType).
+		Resource("fabricfollowerchannels").
+		Name(*name).
+		SubResource("status").
+		VersionedParams(&patchOpts, scheme.ParameterCodec).
 		Body(data).
 		Do(ctx).
 		Into(result)

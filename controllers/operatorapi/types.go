@@ -59,6 +59,7 @@ type IngressPath struct {
 }
 
 type HLFOperatorAPIChart struct {
+	PodLabels        map[string]string             `json:"podLabels"`
 	ReplicaCount     int                           `json:"replicaCount"`
 	LogoURL          string                        `json:"logoUrl"`
 	Image            Image                         `json:"image"`
