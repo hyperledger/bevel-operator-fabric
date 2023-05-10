@@ -4,6 +4,9 @@ metadata:
   name: {{ include "hlf-operator-api.fullname" . }}
   labels:
     {{- include "hlf-operator-api.labels" . | nindent 4 }}
+  {{- with .Values.podLabels }}
+  {{- toYaml . | nindent 4 }}
+  {{- end }}
 spec:
   {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}

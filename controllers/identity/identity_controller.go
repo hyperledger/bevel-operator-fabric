@@ -6,6 +6,7 @@ import (
 	"crypto/x509"
 	"encoding/base64"
 	"fmt"
+	"github.com/ghodss/yaml"
 	"github.com/go-logr/logr"
 	"github.com/golang/protobuf/proto"
 	"github.com/hyperledger/fabric-protos-go/common"
@@ -198,12 +199,24 @@ func (r *FabricIdentityReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 		r.setConditionStatus(ctx, fabricIdentity, hlfv1alpha1.FailedStatus, false, err, false)
 		return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricIdentity)
 	}
-
+	userYaml, err := yaml.Marshal(map[string]interface{}{
+		"key": map[string]interface{}{
+			"pem": string(pkBytes),
+		},
+		"cert": map[string]interface{}{
+			"pem": string(utils.EncodeX509Certificate(x509Cert)),
+		},
+	})
+	if err != nil {
+		r.setConditionStatus(ctx, fabricIdentity, hlfv1alpha1.FailedStatus, false, err, false)
+		return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricIdentity)
+	}
 	if secretExists {
 		secret.Data = map[string][]byte{
-			"cert.pem": utils.EncodeX509Certificate(x509Cert),
-			"key.pem":  pkBytes,
-			"root.pem": utils.EncodeX509Certificate(rootCert),
+			"cert.pem":  utils.EncodeX509Certificate(x509Cert),
+			"key.pem":   pkBytes,
+			"root.pem":  utils.EncodeX509Certificate(rootCert),
+			"user.yaml": userYaml,
 		}
 		if err := controllerutil.SetControllerReference(fabricIdentity, secret, r.Scheme); err != nil {
 			r.setConditionStatus(ctx, fabricIdentity, hlfv1alpha1.FailedStatus, false, err, false)
@@ -220,9 +233,10 @@ func (r *FabricIdentityReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 				Namespace: fabricIdentity.Namespace,
 			},
 			Data: map[string][]byte{
-				"cert.pem": utils.EncodeX509Certificate(x509Cert),
-				"key.pem":  pkBytes,
-				"root.pem": utils.EncodeX509Certificate(rootCert),
+				"cert.pem":  utils.EncodeX509Certificate(x509Cert),
+				"key.pem":   pkBytes,
+				"root.pem":  utils.EncodeX509Certificate(rootCert),
+				"user.yaml": userYaml,
 			},
 		}
 		if err := controllerutil.SetControllerReference(fabricIdentity, secret, r.Scheme); err != nil {

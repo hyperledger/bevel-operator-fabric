@@ -16,6 +16,19 @@ spec:
   template:
     metadata:
       labels:
+        checksum/configmap--peer: {{ include (print $.Template.BasePath "/configmap--peer.yaml") . | sha256sum | trunc 60 }}
+        checksum/configmap--peer--core: {{ include (print $.Template.BasePath "/configmap--peer--core.yaml") . | sha256sum | trunc 60 }}
+        checksum/config-ou: {{ include (print $.Template.BasePath "/config-ou.yaml") . | sha256sum | trunc 60 }}
+        checksum/secret--couchdb: {{ include (print $.Template.BasePath "/secret--couchdb.yaml") . | sha256sum | trunc 60 }}
+        checksum/secret--peer-idcert: {{ include (print $.Template.BasePath "/secret--peer-idcert.yaml") . | sha256sum | trunc 60 }}
+        checksum/secret--peer-idkey: {{ include (print $.Template.BasePath "/secret--peer-idkey.yaml") . | sha256sum | trunc 60 }}
+        checksum/secret--peer-ops-tls: {{ include (print $.Template.BasePath "/secret--peer-ops-tls.yaml") . | sha256sum | trunc 60 }}
+        checksum/secret--peer-tls: {{ include (print $.Template.BasePath "/secret--peer-tls.yaml") . | sha256sum | trunc 60 }}
+        checksum/secret--peerorg-cacert: {{ include (print $.Template.BasePath "/secret--peerorg-cacert.yaml") . | sha256sum | trunc 60 }}
+        checksum/secret--peerorg-intcacert: {{ include (print $.Template.BasePath "/secret--peerorg-intcacert.yaml") . | sha256sum | trunc 60 }}
+        checksum/secret--peerorg-tlsintcacert: {{ include (print $.Template.BasePath "/secret--peerorg-tlsintcacert.yaml") . | sha256sum | trunc 60 }}
+        checksum/secret--peerorg-tlsrootcert: {{ include (print $.Template.BasePath "/secret--peerorg-tlsrootcert.yaml") . | sha256sum | trunc 60 }}
+        checksum/secret--tlsclientrootcert: {{ include (print $.Template.BasePath "/secret--tlsclientrootcert.yaml") . | sha256sum | trunc 60 }}
 {{ include "labels.standard" . | indent 8 }}
     spec:
       serviceAccountName: {{ template "hlf-peer.fullname" . }}

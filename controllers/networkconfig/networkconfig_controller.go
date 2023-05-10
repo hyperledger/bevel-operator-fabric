@@ -80,13 +80,11 @@ organizations:
     {{- end }}
 {{- end }}
 {{- end }}
-
 {{- if not .Orderers }}
 orderers: []
 {{- else }}
 orderers:
-{{- range $ordService := .Orderers }}
-{{- range $orderer := $ordService.Orderers }}
+{{- range $orderer := .Orderers }}
   {{$orderer.Name}}:
 {{if $.Internal }}
     url: grpcs://{{ $orderer.PrivateURL }}
@@ -98,7 +96,6 @@ orderers:
     tlsCACerts:
       pem: |
 {{ or $orderer.Status.TlsCACert $orderer.Status.TlsCert | indent 8 }}
-{{- end }}
 {{- end }}
 {{- end }}
 
@@ -147,29 +144,30 @@ certificateAuthorities:
 {{- end }}
 {{- end }}
 
+
 channels:
-  _default:
-{{- if not .Orderers }}
+{{- range $channel := .Channels }}
+  {{ $channel }}:
+{{- if not $.Orderers }}
     orderers: []
 {{- else }}
     orderers:
-{{- range $ordService := .Orderers }}
-{{- range $orderer := $ordService.Orderers }}
+{{- range $orderer := $.Orderers }}
       - {{$orderer.Name}}
 {{- end }}
 {{- end }}
-{{- end }}
-{{- if not .Peers }}
+{{- if not $.Peers }}
     peers: {}
 {{- else }}
     peers:
-{{- range $peer := .Peers }}
+{{- range $peer := $.Peers }}
        {{$peer.Name}}:
         discover: true
         endorsingPeer: true
         chaincodeQuery: true
         ledgerQuery: true
         eventSource: true
+{{- end }}
 {{- end }}
 {{- end }}
 
@@ -254,12 +252,13 @@ func (r *FabricNetworkConfigReconciler) Reconcile(ctx context.Context, req ctrl.
 		return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricNetworkConfig)
 	}
 	var buf bytes.Buffer
-	certAuths, err := helpers.GetClusterCAs(kubeClientset, hlfClientSet, "")
+	clusterCertAuths, err := helpers.GetClusterCAs(kubeClientset, hlfClientSet, "")
 	if err != nil {
 		r.setConditionStatus(ctx, fabricNetworkConfig, hlfv1alpha1.FailedStatus, false, err, false)
 		return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricNetworkConfig)
 	}
-	ordOrgs, orderers, err := helpers.GetClusterOrderers(kubeClientset, hlfClientSet, "")
+
+	clusterOrderersNodes, err := helpers.GetClusterOrdererNodes(kubeClientset, hlfClientSet, "")
 	if err != nil {
 		r.setConditionStatus(ctx, fabricNetworkConfig, hlfv1alpha1.FailedStatus, false, err, false)
 		return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricNetworkConfig)
@@ -271,14 +270,48 @@ func (r *FabricNetworkConfigReconciler) Reconcile(ctx context.Context, req ctrl.
 	}
 	orgMap := map[string]*helpers.Organization{}
 	filterByOrgs := len(fabricNetworkConfig.Spec.Organizations) > 0
-	for _, v := range ordOrgs {
-		if (filterByOrgs && utils.Contains(fabricNetworkConfig.Spec.Organizations, v.MspID)) || !filterByOrgs {
-			orgMap[v.MspID] = v
+	filterByNS := len(fabricNetworkConfig.Spec.Namespaces) > 0
+	var certAuths []*helpers.ClusterCA
+	for _, ca := range clusterCertAuths {
+		if filterByNS && !utils.Contains(fabricNetworkConfig.Spec.Namespaces, ca.Namespace) {
+			continue
 		}
+		certAuths = append(certAuths, ca)
 	}
 	for _, v := range peerOrgs {
 		if (filterByOrgs && utils.Contains(fabricNetworkConfig.Spec.Organizations, v.MspID)) || !filterByOrgs {
 			orgMap[v.MspID] = v
+		}
+	}
+
+	var orderers []*helpers.ClusterOrdererNode
+	for _, orderer := range clusterOrderersNodes {
+		if filterByNS && !utils.Contains(fabricNetworkConfig.Spec.Namespaces, orderer.Namespace) {
+			continue
+		}
+		if !filterByOrgs {
+			orderers = append(orderers, orderer)
+		} else if filterByOrgs && utils.Contains(fabricNetworkConfig.Spec.Organizations, orderer.Item.Spec.MspID) {
+			orderers = append(orderers, orderer)
+		}
+	}
+	for _, ordererNode := range clusterOrderersNodes {
+		if filterByNS && !utils.Contains(fabricNetworkConfig.Spec.Namespaces, ordererNode.Namespace) {
+			continue
+		}
+
+		if (filterByOrgs && utils.Contains(fabricNetworkConfig.Spec.Organizations, ordererNode.Spec.MspID)) || !filterByOrgs {
+			org, ok := orgMap[ordererNode.Spec.MspID]
+			if ok {
+				org.OrdererNodes = append(org.OrdererNodes, ordererNode)
+			} else {
+				orgMap[ordererNode.Spec.MspID] = &helpers.Organization{
+					Type:         helpers.OrdererType,
+					MspID:        ordererNode.Spec.MspID,
+					OrdererNodes: []*helpers.ClusterOrdererNode{ordererNode},
+					Peers:        []*helpers.ClusterPeer{},
+				}
+			}
 		}
 	}
 	for _, identity := range fabricNetworkConfig.Spec.Identities {
@@ -322,14 +355,19 @@ func (r *FabricNetworkConfigReconciler) Reconcile(ctx context.Context, req ctrl.
 	}
 	var peers []*helpers.ClusterPeer
 	for _, peer := range clusterPeers {
+		if filterByNS && !utils.Contains(fabricNetworkConfig.Spec.Namespaces, peer.Namespace) {
+			continue
+		}
 		if (filterByOrgs && utils.Contains(fabricNetworkConfig.Spec.Organizations, peer.MSPID)) || !filterByOrgs {
 			peers = append(peers, peer)
 		}
+
 	}
 	err = tmpl.Execute(&buf, map[string]interface{}{
 		"Peers":         peers,
 		"Orderers":      orderers,
 		"Organizations": orgMap,
+		"Channels":      fabricNetworkConfig.Spec.Channels,
 		"CertAuths":     certAuths,
 		"Organization":  fabricNetworkConfig.Spec.Organization,
 		"Internal":      fabricNetworkConfig.Spec.Internal,

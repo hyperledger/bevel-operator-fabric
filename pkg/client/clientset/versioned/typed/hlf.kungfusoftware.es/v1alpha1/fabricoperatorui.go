@@ -17,9 +17,12 @@ package v1alpha1
 
 import (
 	"context"
+	json "encoding/json"
+	"fmt"
 	"time"
 
 	v1alpha1 "github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
+	hlfkungfusoftwareesv1alpha1 "github.com/kfsoftware/hlf-operator/pkg/client/applyconfiguration/hlf.kungfusoftware.es/v1alpha1"
 	scheme "github.com/kfsoftware/hlf-operator/pkg/client/clientset/versioned/scheme"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	types "k8s.io/apimachinery/pkg/types"
@@ -44,6 +47,8 @@ type FabricOperatorUIInterface interface {
 	List(ctx context.Context, opts v1.ListOptions) (*v1alpha1.FabricOperatorUIList, error)
 	Watch(ctx context.Context, opts v1.ListOptions) (watch.Interface, error)
 	Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *v1alpha1.FabricOperatorUI, err error)
+	Apply(ctx context.Context, fabricOperatorUI *hlfkungfusoftwareesv1alpha1.FabricOperatorUIApplyConfiguration, opts v1.ApplyOptions) (result *v1alpha1.FabricOperatorUI, err error)
+	ApplyStatus(ctx context.Context, fabricOperatorUI *hlfkungfusoftwareesv1alpha1.FabricOperatorUIApplyConfiguration, opts v1.ApplyOptions) (result *v1alpha1.FabricOperatorUI, err error)
 	FabricOperatorUIExpansion
 }
 
@@ -185,6 +190,62 @@ func (c *fabricOperatorUIs) Patch(ctx context.Context, name string, pt types.Pat
 		Name(name).
 		SubResource(subresources...).
 		VersionedParams(&opts, scheme.ParameterCodec).
+		Body(data).
+		Do(ctx).
+		Into(result)
+	return
+}
+
+// Apply takes the given apply declarative configuration, applies it and returns the applied fabricOperatorUI.
+func (c *fabricOperatorUIs) Apply(ctx context.Context, fabricOperatorUI *hlfkungfusoftwareesv1alpha1.FabricOperatorUIApplyConfiguration, opts v1.ApplyOptions) (result *v1alpha1.FabricOperatorUI, err error) {
+	if fabricOperatorUI == nil {
+		return nil, fmt.Errorf("fabricOperatorUI provided to Apply must not be nil")
+	}
+	patchOpts := opts.ToPatchOptions()
+	data, err := json.Marshal(fabricOperatorUI)
+	if err != nil {
+		return nil, err
+	}
+	name := fabricOperatorUI.Name
+	if name == nil {
+		return nil, fmt.Errorf("fabricOperatorUI.Name must be provided to Apply")
+	}
+	result = &v1alpha1.FabricOperatorUI{}
+	err = c.client.Patch(types.ApplyPatchType).
+		Namespace(c.ns).
+		Resource("fabricoperatoruis").
+		Name(*name).
+		VersionedParams(&patchOpts, scheme.ParameterCodec).
+		Body(data).
+		Do(ctx).
+		Into(result)
+	return
+}
+
+// ApplyStatus was generated because the type contains a Status member.
+// Add a +genclient:noStatus comment above the type to avoid generating ApplyStatus().
+func (c *fabricOperatorUIs) ApplyStatus(ctx context.Context, fabricOperatorUI *hlfkungfusoftwareesv1alpha1.FabricOperatorUIApplyConfiguration, opts v1.ApplyOptions) (result *v1alpha1.FabricOperatorUI, err error) {
+	if fabricOperatorUI == nil {
+		return nil, fmt.Errorf("fabricOperatorUI provided to Apply must not be nil")
+	}
+	patchOpts := opts.ToPatchOptions()
+	data, err := json.Marshal(fabricOperatorUI)
+	if err != nil {
+		return nil, err
+	}
+
+	name := fabricOperatorUI.Name
+	if name == nil {
+		return nil, fmt.Errorf("fabricOperatorUI.Name must be provided to Apply")
+	}
+
+	result = &v1alpha1.FabricOperatorUI{}
+	err = c.client.Patch(types.ApplyPatchType).
+		Namespace(c.ns).
+		Resource("fabricoperatoruis").
+		Name(*name).
+		SubResource("status").
+		VersionedParams(&patchOpts, scheme.ParameterCodec).
 		Body(data).
 		Do(ctx).
 		Into(result)

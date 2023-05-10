@@ -493,6 +493,7 @@ func GetConfig(conf *hlfv1alpha1.FabricOperatorAPI) (*HLFOperatorAPIChart, error
 		auth.OIDCScope = spec.Auth.OIDCScope
 	}
 	var c = HLFOperatorAPIChart{
+		PodLabels:    spec.PodLabels,
 		ReplicaCount: spec.Replicas,
 		LogoURL:      spec.LogoURL,
 		Image: Image{

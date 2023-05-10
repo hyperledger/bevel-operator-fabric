@@ -1395,6 +1395,8 @@ type FabricOperatorAPISpec struct {
 	// +kubebuilder:validation:Default=1
 	Replicas int `json:"replicas"`
 
+	// +kubebuilder:validation:Default={}
+	PodLabels map[string]string `json:"podLabels"`
 	// +optional
 	// +kubebuilder:validation:Optional
 	// +nullable
@@ -1444,6 +1446,7 @@ type FabricNetworkConfigSpec struct {
 
 	Namespaces []string `json:"namespaces"`
 
+	Channels []string `json:"channels"`
 	// HLF Identities to be included in the network config
 	Identities []FabricNetworkConfigIdentity `json:"identities"`
 
@@ -1619,6 +1622,25 @@ type FabricIdentitySpec struct {
 	Enrollsecret string `json:"enrollsecret"`
 	// +kubebuilder:validation:MinLength=1
 	MSPID string `json:"mspid"`
+
+	// +optional
+	// +nullable
+	Register *FabricIdentityRegister `json:"register"`
+}
+
+type FabricIdentityRegister struct {
+	// +kubebuilder:validation:MinLength=1
+	Enrollid string `json:"enrollid"`
+	// +kubebuilder:validation:MinLength=1
+	Enrollsecret string `json:"enrollsecret"`
+	// +kubebuilder:validation:MinLength=1
+	Type string `json:"type"`
+	// +kubebuilder:validation:MinLength=1
+	Affiliation string `json:"affiliation"`
+
+	MaxEnrollments int `json:"maxenrollments"`
+
+	Attrs []string `json:"attrs"`
 }
 
 // FabricMainChannelStatus defines the observed state of FabricMainChannel

@@ -17,11 +17,13 @@ package fake
 
 import (
 	"context"
+	json "encoding/json"
+	"fmt"
 
 	v1alpha1 "github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
+	hlfkungfusoftwareesv1alpha1 "github.com/kfsoftware/hlf-operator/pkg/client/applyconfiguration/hlf.kungfusoftware.es/v1alpha1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	labels "k8s.io/apimachinery/pkg/labels"
-	schema "k8s.io/apimachinery/pkg/runtime/schema"
 	types "k8s.io/apimachinery/pkg/types"
 	watch "k8s.io/apimachinery/pkg/watch"
 	testing "k8s.io/client-go/testing"
@@ -33,9 +35,9 @@ type FakeFabricOperatorAPIs struct {
 	ns   string
 }
 
-var fabricoperatorapisResource = schema.GroupVersionResource{Group: "hlf.kungfusoftware.es", Version: "v1alpha1", Resource: "fabricoperatorapis"}
+var fabricoperatorapisResource = v1alpha1.SchemeGroupVersion.WithResource("fabricoperatorapis")
 
-var fabricoperatorapisKind = schema.GroupVersionKind{Group: "hlf.kungfusoftware.es", Version: "v1alpha1", Kind: "FabricOperatorAPI"}
+var fabricoperatorapisKind = v1alpha1.SchemeGroupVersion.WithKind("FabricOperatorAPI")
 
 // Get takes name of the fabricOperatorAPI, and returns the corresponding fabricOperatorAPI object, and an error if there is any.
 func (c *FakeFabricOperatorAPIs) Get(ctx context.Context, name string, options v1.GetOptions) (result *v1alpha1.FabricOperatorAPI, err error) {
@@ -131,6 +133,51 @@ func (c *FakeFabricOperatorAPIs) DeleteCollection(ctx context.Context, opts v1.D
 func (c *FakeFabricOperatorAPIs) Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *v1alpha1.FabricOperatorAPI, err error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewPatchSubresourceAction(fabricoperatorapisResource, c.ns, name, pt, data, subresources...), &v1alpha1.FabricOperatorAPI{})
+
+	if obj == nil {
+		return nil, err
+	}
+	return obj.(*v1alpha1.FabricOperatorAPI), err
+}
+
+// Apply takes the given apply declarative configuration, applies it and returns the applied fabricOperatorAPI.
+func (c *FakeFabricOperatorAPIs) Apply(ctx context.Context, fabricOperatorAPI *hlfkungfusoftwareesv1alpha1.FabricOperatorAPIApplyConfiguration, opts v1.ApplyOptions) (result *v1alpha1.FabricOperatorAPI, err error) {
+	if fabricOperatorAPI == nil {
+		return nil, fmt.Errorf("fabricOperatorAPI provided to Apply must not be nil")
+	}
+	data, err := json.Marshal(fabricOperatorAPI)
+	if err != nil {
+		return nil, err
+	}
+	name := fabricOperatorAPI.Name
+	if name == nil {
+		return nil, fmt.Errorf("fabricOperatorAPI.Name must be provided to Apply")
+	}
+	obj, err := c.Fake.
+		Invokes(testing.NewPatchSubresourceAction(fabricoperatorapisResource, c.ns, *name, types.ApplyPatchType, data), &v1alpha1.FabricOperatorAPI{})
+
+	if obj == nil {
+		return nil, err
+	}
+	return obj.(*v1alpha1.FabricOperatorAPI), err
+}
+
+// ApplyStatus was generated because the type contains a Status member.
+// Add a +genclient:noStatus comment above the type to avoid generating ApplyStatus().
+func (c *FakeFabricOperatorAPIs) ApplyStatus(ctx context.Context, fabricOperatorAPI *hlfkungfusoftwareesv1alpha1.FabricOperatorAPIApplyConfiguration, opts v1.ApplyOptions) (result *v1alpha1.FabricOperatorAPI, err error) {
+	if fabricOperatorAPI == nil {
+		return nil, fmt.Errorf("fabricOperatorAPI provided to Apply must not be nil")
+	}
+	data, err := json.Marshal(fabricOperatorAPI)
+	if err != nil {
+		return nil, err
+	}
+	name := fabricOperatorAPI.Name
+	if name == nil {
+		return nil, fmt.Errorf("fabricOperatorAPI.Name must be provided to Apply")
+	}
+	obj, err := c.Fake.
+		Invokes(testing.NewPatchSubresourceAction(fabricoperatorapisResource, c.ns, *name, types.ApplyPatchType, data, "status"), &v1alpha1.FabricOperatorAPI{})
 
 	if obj == nil {
 		return nil, err
