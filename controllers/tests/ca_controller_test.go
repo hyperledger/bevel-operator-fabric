@@ -806,6 +806,9 @@ var _ = Describe("Fabric Controllers", func() {
 		}
 		resources, err := getDefaultResources()
 		Expect(err).ToNot(HaveOccurred())
+		k8sIP, err := utils.GetPublicIPKubernetes(ClientSet)
+		Expect(err).ToNot(HaveOccurred())
+
 		fabricCa := &hlfv1alpha1.FabricCA{
 			TypeMeta: NewTypeMeta("FabricCA"),
 			ObjectMeta: v1.ObjectMeta{
@@ -824,6 +827,7 @@ var _ = Describe("Fabric Controllers", func() {
 					"localhost",
 					objName,
 					fmt.Sprintf("%s.%s", objName, FabricNamespace),
+					k8sIP,
 				},
 				Service: hlfv1alpha1.FabricCASpecService{
 					ServiceType: "NodePort",
