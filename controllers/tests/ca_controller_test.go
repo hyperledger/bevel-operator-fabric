@@ -217,6 +217,8 @@ func randomFabricCA(releaseName string, namespace string) *hlfv1alpha1.FabricCA 
 	}
 	resources, err := getDefaultResources()
 	Expect(err).ToNot(HaveOccurred())
+	k8sIP, err := utils.GetPublicIPKubernetes(ClientSet)
+	Expect(err).ToNot(HaveOccurred())
 
 	fabricCa := &hlfv1alpha1.FabricCA{
 		TypeMeta: NewTypeMeta("FabricCA"),
@@ -237,6 +239,7 @@ func randomFabricCA(releaseName string, namespace string) *hlfv1alpha1.FabricCA 
 				"localhost",
 				releaseName,
 				fmt.Sprintf("%s.%s", releaseName, namespace),
+				k8sIP,
 			},
 			Service: hlfv1alpha1.FabricCASpecService{
 				ServiceType: "NodePort",
@@ -252,7 +255,7 @@ func randomFabricCA(releaseName string, namespace string) *hlfv1alpha1.FabricCA 
 				Subject: subject,
 				CSR: hlfv1alpha1.FabricCACSR{
 					CN:    "ca",
-					Hosts: []string{"localhost"},
+					Hosts: []string{"localhost", k8sIP},
 					Names: []hlfv1alpha1.FabricCANames{
 						{
 							C:  "US",
@@ -278,7 +281,7 @@ func randomFabricCA(releaseName string, namespace string) *hlfv1alpha1.FabricCA 
 				CFG:     cfg,
 				CSR: hlfv1alpha1.FabricCACSR{
 					CN:    "tlsca",
-					Hosts: []string{"localhost"},
+					Hosts: []string{"localhost", k8sIP},
 					Names: []hlfv1alpha1.FabricCANames{
 						{
 							C:  "US",
