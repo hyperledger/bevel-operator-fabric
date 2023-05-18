@@ -15,6 +15,7 @@ import (
 
 	"github.com/kfsoftware/hlf-operator/controllers/hlfmetrics"
 	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/helpers"
+
 	operatorv1 "github.com/kfsoftware/hlf-operator/pkg/client/clientset/versioned"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
@@ -1367,8 +1368,8 @@ func GetConfig(
 			},
 		},
 		ExternalChaincodeBuilder: conf.Spec.ExternalChaincodeBuilder,
-		CouchdbPassword:          conf.Spec.CouchDB.User,
-		CouchdbUsername:          conf.Spec.CouchDB.Password,
+		CouchdbPassword:          conf.Spec.CouchDB.Password,
+		CouchdbUsername:          conf.Spec.CouchDB.User,
 		Rbac:                     RBAC{Ns: namespace},
 		Cert:                     string(signCRTEncoded),
 		Key:                      string(signPEMEncodedPK),
@@ -1632,6 +1633,8 @@ func newActionCfg(log logr.Logger, clusterCfg *rest.Config, namespace string) (*
 		BearerToken: &clusterCfg.BearerToken,
 	}, ns, "secret", actionLogger(log))
 	return cfg, err
+  
+  
 }
 
 func actionLogger(logger logr.Logger) func(format string, v ...interface{}) {
