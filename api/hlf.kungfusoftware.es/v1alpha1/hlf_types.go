@@ -18,7 +18,6 @@ package v1alpha1
 
 import (
 	"fmt"
-
 	"github.com/kfsoftware/hlf-operator/pkg/status"
 	"k8s.io/api/networking/v1beta1"
 	kubeclock "k8s.io/apimachinery/pkg/util/clock"
@@ -1506,6 +1505,16 @@ type FabricChaincodeSpec struct {
 	// +kubebuilder:validation:Optional
 	// +nullable
 	ImagePullSecrets []corev1.LocalObjectReference `json:"imagePullSecrets"`
+
+	// Entrypoint array. Not executed within a shell.
+	// The container image's ENTRYPOINT is used if this is not provided.
+	// +optional
+	Command []string `json:"command,omitempty" protobuf:"bytes,3,rep,name=command"`
+
+	// Arguments to the entrypoint.
+	// The container image's CMD is used if this is not provided.
+	// +optional
+	Args []string `json:"args,omitempty" protobuf:"bytes,4,rep,name=args"`
 
 	// +nullable
 	// +kubebuilder:validation:Optional

@@ -1053,6 +1053,16 @@ func (in *FabricChaincodeSpec) DeepCopyInto(out *FabricChaincodeSpec) {
 		*out = make([]v1.LocalObjectReference, len(*in))
 		copy(*out, *in)
 	}
+	if in.Command != nil {
+		in, out := &in.Command, &out.Command
+		*out = make([]string, len(*in))
+		copy(*out, *in)
+	}
+	if in.Args != nil {
+		in, out := &in.Args, &out.Args
+		*out = make([]string, len(*in))
+		copy(*out, *in)
+	}
 	if in.Affinity != nil {
 		in, out := &in.Affinity, &out.Affinity
 		*out = new(v1.Affinity)

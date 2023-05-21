@@ -863,6 +863,18 @@ spec:
                         type: array
                     type: object
                 type: object
+              args:
+                description: Arguments to the entrypoint. The container image's CMD
+                  is used if this is not provided.
+                items:
+                  type: string
+                type: array
+              command:
+                description: Entrypoint array. Not executed within a shell. The container
+                  image's ENTRYPOINT is used if this is not provided.
+                items:
+                  type: string
+                type: array
               credentials:
                 nullable: true
                 properties:
