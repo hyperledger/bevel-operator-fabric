@@ -1,12 +1,13 @@
-{{- if and .Values.channelParticipationEnabled (and (not .Values.adminIstio.hosts) .Values.adminGatewayApi.hosts)  -}}
+{{- if and .Values.channelParticipationEnabled (and (not .Values.adminIstio.hosts) (and (.Values.adminGatewayApi.hosts) (.Values.adminGatewayApi.gatewayName)))  -}}
 apiVersion: gateway.networking.k8s.io/v1alpha2
 kind: TLSRoute
 metadata:
   name: {{ include "hlf-ordnode.fullname" . }}-tlsroute-admin
 spec:
   parentRefs:
-    - name: {{ include "hlf-ordnode.fullname" . }}-gateway-admin
+    - name: {{.Values.adminGatewayApi.gatewayName}}
       sectionName: tcp
+      namespace: {{.Values.gatewayApi.gatewayNamespace}}
   hostnames:
   {{- range .Values.adminGatewayApi.hosts }}
       - {{ . }}

@@ -17,29 +17,30 @@ import (
 )
 
 type OrdererOptions struct {
-	Name             string
-	StorageClass     string
-	Capacity         string
-	NS               string
-	Image            string
-	Version          string
-	MspID            string
-	EnrollID         string
-	EnrollPW         string
-	CAName           string
-	Hosts            []string
-	HostAliases      []string
-	Output           bool
-	IngressGateway   string
-	IngressPort      int
-	AdminHosts       []string
-	CAHost           string
-	CAPort           int
-	ImagePullSecrets []string
-	GatewayClassName string
-	GatewayApiPort   int
-	GatewayApiHosts  []string
-	AdminGatewayApiHosts  []string
+	Name                 string
+	StorageClass         string
+	Capacity             string
+	NS                   string
+	Image                string
+	Version              string
+	MspID                string
+	EnrollID             string
+	EnrollPW             string
+	CAName               string
+	Hosts                []string
+	HostAliases          []string
+	Output               bool
+	IngressGateway       string
+	IngressPort          int
+	AdminHosts           []string
+	CAHost               string
+	CAPort               int
+	ImagePullSecrets     []string
+	GatewayApiName       string
+	GatewayApiNamespace  string
+	GatewayApiPort       int
+	GatewayApiHosts      []string
+	AdminGatewayApiHosts []string
 }
 
 func (o OrdererOptions) Validate() error {
@@ -87,13 +88,15 @@ func (c *createCmd) run(args []string) error {
 		Hosts:          []string{},
 		IngressGateway: ingressGateway,
 	}
-	gatewayApiClassName := c.ordererOpts.GatewayClassName
+	gatewayApiName := c.ordererOpts.GatewayApiName
+	gatewayApiNamespace := c.ordererOpts.GatewayApiNamespace
 	gatewayApiPort := c.ordererOpts.GatewayApiPort
 	gatewayApi := &v1alpha1.FabricGatewayApi{
-		Port:           gatewayApiPort,
-		Hosts:          []string{},
-		GatewayClassName: gatewayApiClassName,
-	}	
+		Port:             gatewayApiPort,
+		Hosts:            []string{},
+		GatewayName:      gatewayApiName,
+		GatewayNamespace: gatewayApiNamespace,
+	}
 	if len(c.ordererOpts.Hosts) > 0 {
 		istio = &v1alpha1.FabricIstio{
 			Port:           ingressPort,
@@ -101,11 +104,12 @@ func (c *createCmd) run(args []string) error {
 			IngressGateway: ingressGateway,
 		}
 		csrHosts = append(csrHosts, c.ordererOpts.Hosts...)
-	}else if len(c.ordererOpts.GatewayApiHosts) > 0 {
+	} else if len(c.ordererOpts.GatewayApiHosts) > 0 {
 		gatewayApi = &v1alpha1.FabricGatewayApi{
-			Port:           gatewayApiPort,
-			Hosts:          c.ordererOpts.GatewayApiHosts,
-			GatewayClassName: gatewayApiClassName,
+			Port:             gatewayApiPort,
+			Hosts:            c.ordererOpts.GatewayApiHosts,
+			GatewayName:      gatewayApiName,
+			GatewayNamespace: gatewayApiNamespace,
 		}
 		csrHosts = append(csrHosts, c.ordererOpts.GatewayApiHosts...)
 	}
@@ -115,9 +119,10 @@ func (c *createCmd) run(args []string) error {
 		IngressGateway: ingressGateway,
 	}
 	adminGatewayApi := &v1alpha1.FabricGatewayApi{
-		Port:           gatewayApiPort,
-		Hosts:          []string{},
-		GatewayClassName: gatewayApiClassName,
+		Port:             gatewayApiPort,
+		Hosts:            []string{},
+		GatewayName:      gatewayApiName,
+		GatewayNamespace: gatewayApiNamespace,
 	}
 	if len(c.ordererOpts.AdminHosts) > 0 {
 		adminIstio = &v1alpha1.FabricIstio{
@@ -126,11 +131,12 @@ func (c *createCmd) run(args []string) error {
 			IngressGateway: ingressGateway,
 		}
 		csrHosts = append(csrHosts, c.ordererOpts.AdminHosts...)
-	}else if len(c.ordererOpts.AdminGatewayApiHosts) > 0 {
+	} else if len(c.ordererOpts.AdminGatewayApiHosts) > 0 {
 		adminGatewayApi = &v1alpha1.FabricGatewayApi{
-			Port:           gatewayApiPort,
-			Hosts:          c.ordererOpts.AdminGatewayApiHosts,
-			GatewayClassName: gatewayApiClassName,
+			Port:             gatewayApiPort,
+			Hosts:            c.ordererOpts.AdminGatewayApiHosts,
+			GatewayName:      gatewayApiName,
+			GatewayNamespace: gatewayApiNamespace,
 		}
 		csrHosts = append(csrHosts, c.ordererOpts.AdminGatewayApiHosts...)
 	}
@@ -142,7 +148,7 @@ func (c *createCmd) run(args []string) error {
 		caHost = certAuth.Spec.Istio.Hosts[0]
 		caPort = certAuth.Spec.Istio.Port
 		serviceType = corev1.ServiceTypeClusterIP
-	}else if len(certAuth.Spec.GatewayApi.Hosts) > 0 {
+	} else if len(certAuth.Spec.GatewayApi.Hosts) > 0 {
 		caHost = certAuth.Spec.GatewayApi.Hosts[0]
 		caPort = certAuth.Spec.GatewayApi.Port
 		serviceType = corev1.ServiceTypeClusterIP
@@ -234,9 +240,9 @@ func (c *createCmd) run(args []string) error {
 					},
 				},
 			},
-			Istio:      istio,
-			AdminIstio: adminIstio,
-			GatewayApi: gatewayApi,
+			Istio:           istio,
+			AdminIstio:      adminIstio,
+			GatewayApi:      gatewayApi,
 			AdminGatewayApi: adminGatewayApi,
 		},
 	}
@@ -289,8 +295,9 @@ func newCreateOrdererNodeCmd(out io.Writer, errOut io.Writer) *cobra.Command {
 	f.StringVarP(&c.ordererOpts.MspID, "mspid", "", "", "MSP ID of the organization")
 	f.StringArrayVarP(&c.ordererOpts.Hosts, "hosts", "", []string{}, "Hosts")
 	f.StringArrayVarP(&c.ordererOpts.GatewayApiHosts, "gateway-api-hosts", "", []string{}, "Hosts for GatewayApi")
-	f.StringArrayVarP(&c.ordererOpts.AdminGatewayApiHosts, "admin-gateway-api-hosts", "", []string{}, "GatewayAPI Hosts for the admin API(introduced in v2.3)")
-	f.StringVarP(&c.ordererOpts.GatewayClassName, "gateway-classname", "", "hlf-gateway", "Gateway-api classname")
+	f.StringArrayVarP(&c.ordererOpts.AdminGatewayApiHosts, "admin-gateway-api-hosts", "", []string{}, "GatewayAPI Hosts for the admin API")
+	f.StringVarP(&c.ordererOpts.GatewayApiName, "gateway-api-name", "", "hlf-gateway", "Gateway-api name")
+	f.StringVarP(&c.ordererOpts.GatewayApiNamespace, "gateway-api-namespace", "", "default", "Namespace of GatewayApi")
 	f.IntVarP(&c.ordererOpts.GatewayApiPort, "gateway-api-port", "", 443, "Gateway API port")
 	f.StringArrayVarP(&c.ordererOpts.AdminHosts, "admin-hosts", "", []string{}, "Hosts for the admin API(introduced in v2.3)")
 	f.BoolVarP(&c.ordererOpts.Output, "output", "o", false, "Output in yaml")

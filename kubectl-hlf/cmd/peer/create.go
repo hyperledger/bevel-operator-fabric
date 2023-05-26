@@ -4,10 +4,11 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
-	"github.com/pkg/errors"
 	"io"
-	"k8s.io/apimachinery/pkg/api/resource"
 	"strings"
+
+	"github.com/pkg/errors"
+	"k8s.io/apimachinery/pkg/api/resource"
 
 	"github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
 	"github.com/kfsoftware/hlf-operator/controllers/utils"
@@ -35,9 +36,10 @@ type Options struct {
 	CAName                          string
 	EnrollID                        string
 	Hosts                           []string
-	GatewayClassName 				string
-	GatewayApiPort   				int
-	GatewayApiHosts  				[]string
+	GatewayApiName                  string
+	GatewayApiNamespace             string
+	GatewayApiPort                  int
+	GatewayApiHosts                 []string
 	HostAliases                     []string
 	BootstrapPeers                  []string
 	Leader                          bool
@@ -104,17 +106,20 @@ func (c *createCmd) run() error {
 			IngressGateway: ingressGateway,
 		}
 	}
-	gatewayApiClassName := c.peerOpts.GatewayClassName
+	gatewayApiName := c.peerOpts.GatewayApiName
+	gatewayApiNamespace := c.peerOpts.GatewayApiNamespace
 	gatewayApi := &v1alpha1.FabricGatewayApi{
-		Port:           c.peerOpts.GatewayApiPort,
-		Hosts:          []string{},
-		GatewayClassName: gatewayApiClassName,
+		Port:             c.peerOpts.GatewayApiPort,
+		Hosts:            []string{},
+		GatewayName:      gatewayApiName,
+		GatewayNamespace: gatewayApiNamespace,
 	}
 	if len(c.peerOpts.GatewayApiHosts) > 0 {
 		gatewayApi = &v1alpha1.FabricGatewayApi{
-			Port:           c.peerOpts.GatewayApiPort,
-			Hosts:          c.peerOpts.GatewayApiHosts,
-			GatewayClassName: gatewayApiClassName,
+			Port:             c.peerOpts.GatewayApiPort,
+			Hosts:            c.peerOpts.GatewayApiHosts,
+			GatewayName:      gatewayApiName,
+			GatewayNamespace: gatewayApiNamespace,
 		}
 	}
 	k8sIP, err := utils.GetPublicIPKubernetes(clientSet)
@@ -144,7 +149,7 @@ func (c *createCmd) run() error {
 	csrHosts = append(csrHosts, fmt.Sprintf("%s.%s", c.peerOpts.Name, c.peerOpts.NS))
 	if len(c.peerOpts.Hosts) > 0 {
 		csrHosts = append(csrHosts, c.peerOpts.Hosts...)
-	}else if len(c.peerOpts.GatewayApiHosts) > 0 {
+	} else if len(c.peerOpts.GatewayApiHosts) > 0 {
 		csrHosts = append(csrHosts, c.peerOpts.GatewayApiHosts...)
 	}
 	var externalBuilders []v1alpha1.ExternalBuilder
@@ -196,6 +201,10 @@ func (c *createCmd) run() error {
 	if len(certAuth.Spec.Istio.Hosts) > 0 {
 		caHost = certAuth.Spec.Istio.Hosts[0]
 		caPort = certAuth.Spec.Istio.Port
+		serviceType = corev1.ServiceTypeClusterIP
+	} else if len(certAuth.Spec.GatewayApi.Hosts) > 0 {
+		caHost = certAuth.Spec.GatewayApi.Hosts[0]
+		caPort = certAuth.Spec.GatewayApi.Port
 		serviceType = corev1.ServiceTypeClusterIP
 	}
 	if c.peerOpts.CAHost != "" {
@@ -272,7 +281,7 @@ func (c *createCmd) run() error {
 			ExternalChaincodeBuilder: kubernetesBuilder,
 			ExternalBuilders:         externalBuilders,
 			Istio:                    istio,
-			GatewayApi: 			  gatewayApi,
+			GatewayApi:               gatewayApi,
 			Gossip: v1alpha1.FabricPeerSpecGossip{
 				ExternalEndpoint:  externalEndpoint,
 				Bootstrap:         "",
@@ -476,14 +485,14 @@ func newCreatePeerCmd(out io.Writer, errOut io.Writer) *cobra.Command {
 	f.StringArrayVarP(&c.peerOpts.BootstrapPeers, "bootstrap-peer", "", []string{}, "Bootstrap peers")
 	f.StringArrayVarP(&c.peerOpts.Hosts, "hosts", "", []string{}, "External hosts")
 	f.StringArrayVarP(&c.peerOpts.GatewayApiHosts, "gateway-api-hosts", "", []string{}, "Hosts for GatewayApi")
-	f.StringVarP(&c.peerOpts.GatewayClassName, "gateway-classname", "", "hlf-gateway", "Gateway-api classname")
+	f.StringVarP(&c.peerOpts.GatewayApiName, "gateway-api-name", "", "hlf-gateway", "Gateway-api name")
+	f.StringVarP(&c.peerOpts.GatewayApiNamespace, "gateway-api-namespace", "", "default", "Namespace of GatewayApi")
 	f.IntVarP(&c.peerOpts.GatewayApiPort, "gateway-api-port", "", 443, "Gateway API port")
 	f.BoolVarP(&c.peerOpts.Output, "output", "o", false, "Output in yaml")
 	f.BoolVarP(&c.peerOpts.KubernetesBuilder, "k8s-builder", "", false, "Enable kubernetes builder (deprecated)")
 	f.BoolVarP(&c.peerOpts.ExternalChaincodeServiceBuilder, "external-service-builder", "", true, "External chaincode service builder enabled(only use in 2.4.1+)")
 	f.StringArrayVarP(&c.peerOpts.HostAliases, "host-aliases", "", []string{}, "Host aliases (e.g.: \"1.2.3.4:osn1.example.com,osn2.example.com\")")
 	f.StringArrayVarP(&c.peerOpts.ImagePullSecrets, "image-pull-secrets", "", []string{}, "Image Pull Secrets for the Peer Image")
-
 	f.StringVarP(&c.peerOpts.CouchDBImage, "couchdb-repository", "", helpers.DefaultCouchDBImage, "CouchDB image")
 	f.StringVarP(&c.peerOpts.CouchDBTag, "couchdb-tag", "", helpers.DefaultCouchDBVersion, "CouchDB version")
 	f.StringVarP(&c.peerOpts.CouchDBPassword, "couchdb-password", "", "", "CouchDB password")

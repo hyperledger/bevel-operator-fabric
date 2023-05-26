@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+
 	"k8s.io/apimachinery/pkg/api/resource"
 
 	"github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
@@ -15,24 +16,25 @@ import (
 )
 
 type Options struct {
-	Name             string
-	StorageClass     string
-	Capacity         string
-	NS               string
-	Image            string
-	Version          string
-	EnrollID         string
-	EnrollSecret     string
-	Output           bool
-	IngressGateway   string
-	IngressPort      int
-	Hosts            []string
-	GatewayClassName string
-	GatewayApiPort   int
-	GatewayApiHosts  []string
-	DBType           string
-	DBDataSource     string
-	ImagePullSecrets []string
+	Name                string
+	StorageClass        string
+	Capacity            string
+	NS                  string
+	Image               string
+	Version             string
+	EnrollID            string
+	EnrollSecret        string
+	Output              bool
+	IngressGateway      string
+	IngressPort         int
+	Hosts               []string
+	GatewayApiPort      int
+	GatewayApiName      string
+	GatewayApiNamespace string
+	GatewayApiHosts     []string
+	DBType              string
+	DBDataSource        string
+	ImagePullSecrets    []string
 }
 
 func (o Options) Validate() error {
@@ -72,12 +74,14 @@ func (c *createCmd) run(_ []string) error {
 	}
 	ingressGateway := c.caOpts.IngressGateway
 	ingressPort := c.caOpts.IngressPort
-	gatewayClassName := c.caOpts.GatewayClassName
+	gatewayApiName := c.caOpts.GatewayApiName
+	gatewayApiNamespace := c.caOpts.GatewayApiNamespace
 	gatewayApiPort := c.caOpts.GatewayApiPort
 	gatewayApi := &v1alpha1.FabricGatewayApi{
-		Port:           gatewayApiPort,
-		Hosts:          []string{},
-		GatewayClassName: gatewayClassName,
+		Port:             gatewayApiPort,
+		Hosts:            []string{},
+		GatewayName:      gatewayApiName,
+		GatewayNamespace: gatewayApiNamespace,
 	}
 	istio := &v1alpha1.FabricIstio{
 		Port:           ingressPort,
@@ -92,15 +96,16 @@ func (c *createCmd) run(_ []string) error {
 			IngressGateway: ingressGateway,
 		}
 		serviceType = corev1.ServiceTypeClusterIP
-	} else if len(c.caOpts.GatewayApiHosts) > 0 {
+	}
+	if len(c.caOpts.GatewayApiHosts) > 0 {
 		gatewayApi = &v1alpha1.FabricGatewayApi{
-			Port:           gatewayApiPort,
-			Hosts:          c.caOpts.GatewayApiHosts,
-			GatewayClassName: gatewayClassName,
+			Port:             gatewayApiPort,
+			Hosts:            c.caOpts.GatewayApiHosts,
+			GatewayName:      gatewayApiName,
+			GatewayNamespace: gatewayApiNamespace,
 		}
 		serviceType = corev1.ServiceTypeClusterIP
 	}
-	
 
 	var imagePullSecrets []corev1.LocalObjectReference
 	if len(c.caOpts.ImagePullSecrets) > 0 {
@@ -148,7 +153,7 @@ func (c *createCmd) run(_ []string) error {
 			Version:          c.caOpts.Version,
 			Debug:            false,
 			Istio:            istio,
-			GatewayApi: 	  gatewayApi,	
+			GatewayApi:       gatewayApi,
 			CLRSizeLimit:     512000,
 			TLS: v1alpha1.FabricCATLSConf{
 				Subject: v1alpha1.FabricCASubject{
@@ -327,14 +332,14 @@ func newCreateCACmd(out io.Writer, errOut io.Writer) *cobra.Command {
 	f.StringVarP(&c.caOpts.EnrollSecret, "enroll-pw", "", "enrollpw", "Enroll secret of the CA")
 	f.StringVarP(&c.caOpts.DBType, "db.type", "", "sqlite3", "Database type of the CA")
 	f.StringVarP(&c.caOpts.DBDataSource, "db.datasource", "", "fabric-ca-server.db", "Database datasource of the CA")
-
 	f.BoolVarP(&c.caOpts.Output, "output", "o", false, "Output in yaml")
 	f.StringArrayVarP(&c.caOpts.Hosts, "hosts", "", []string{}, "Hosts for Istio")
 	f.StringVarP(&c.caOpts.IngressGateway, "istio-ingressgateway", "", "ingressgateway", "Istio ingress gateway name")
 	f.IntVarP(&c.caOpts.IngressPort, "istio-port", "", 443, "Istio ingress port")
 	f.StringArrayVarP(&c.caOpts.GatewayApiHosts, "gateway-api-hosts", "", []string{}, "Hosts for GatewayApi")
-	f.StringVarP(&c.caOpts.GatewayClassName, "gateway-classname", "", "hlf-gateway", "Gateway-api classname")
-	f.IntVarP(&c.caOpts.GatewayApiPort, "gateway-api-port", "", 443, "Gateway API port")
+	f.StringVarP(&c.caOpts.GatewayApiName, "gateway-api-name", "", "hlf-gateway", "Gateway name of GatewayApi")
+	f.StringVarP(&c.caOpts.GatewayApiNamespace, "gateway-api-namespace", "", "default", "Namespace of GatewayApi")
+	f.IntVarP(&c.caOpts.GatewayApiPort, "gateway-api-port", "", 443, "Gateway port of GatewayApi")
 	f.StringArrayVarP(&c.caOpts.ImagePullSecrets, "image-pull-secrets", "", []string{}, "Image Pull Secrets for the CA Image")
 	return cmd
 }

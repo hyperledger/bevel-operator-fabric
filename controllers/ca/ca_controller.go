@@ -493,17 +493,15 @@ func GetConfig(conf *hlfv1alpha1.FabricCA, client *kubernetes.Clientset, chartNa
 	if spec.Istio != nil && len(spec.Istio.Hosts) > 0 {
 		istioHosts = spec.Istio.Hosts
 	}
-	gatewayApiPort := 443
-	if spec.GatewayApi != nil && spec.GatewayApi.Port != 0 {
-		gatewayApiPort = spec.GatewayApi.Port
-	}
 	gatewayApiHosts := []string{}
-	if spec.GatewayApi != nil && len(spec.GatewayApi.Hosts) > 0 {
+	gatewayApiName := ""
+	gatewayApiNamespace := ""
+	gatewayApiPort := 443
+	if spec.GatewayApi != nil {
+		gatewayApiPort = spec.GatewayApi.Port
 		gatewayApiHosts = spec.GatewayApi.Hosts
-	}
-	gatewayApiClassName := "hlf-gateway"
-	if spec.GatewayApi != nil && spec.GatewayApi.GatewayClassName != "" {
-		gatewayApiClassName = spec.GatewayApi.GatewayClassName
+		gatewayApiName = spec.GatewayApi.GatewayName
+		gatewayApiNamespace = spec.GatewayApi.GatewayNamespace
 	}
 	msp := Msp{
 		Keyfile:        string(signPEMEncodedPK),
@@ -549,9 +547,10 @@ func GetConfig(conf *hlfv1alpha1.FabricCA, client *kubernetes.Clientset, chartNa
 			Hosts: istioHosts,
 		},
 		GatewayApi: GatewayApi{
-			Port:  gatewayApiPort,
-			Hosts: gatewayApiHosts,
-			GatewayClassName: gatewayApiClassName,
+			Port:             gatewayApiPort,
+			Hosts:            gatewayApiHosts,
+			GatewayName:      gatewayApiName,
+			GatewayNamespace: gatewayApiNamespace,
 		},
 		ServiceMonitor: serviceMonitor,
 		Image: Image{

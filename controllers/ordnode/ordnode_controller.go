@@ -834,21 +834,27 @@ func getConfig(
 		}
 	}
 	var gatewayApi GatewayApi
-	if spec.GatewayApi != nil{
-		gatewayApiClassName := spec.GatewayApi.GatewayClassName
-		if gatewayApiClassName == "" {
-			gatewayApiClassName = "hlf-gateway"
+	if spec.GatewayApi != nil {
+		gatewayApiName := spec.GatewayApi.GatewayName
+		gatewayApiNamespace := spec.GatewayApi.GatewayNamespace
+		if gatewayApiName == "" {
+			gatewayApiName = "hlf-gateway"
+		}
+		if gatewayApiNamespace == "" {
+			gatewayApiName = "default"
 		}
 		gatewayApi = GatewayApi{
-			Port:           spec.GatewayApi.Port,
-			Hosts:          spec.GatewayApi.Hosts,
-			GatewayClassName: gatewayApiClassName,
+			Port:             spec.GatewayApi.Port,
+			Hosts:            spec.GatewayApi.Hosts,
+			GatewayName:      gatewayApiName,
+			GatewayNamespace: gatewayApiNamespace,
 		}
 	} else {
 		gatewayApi = GatewayApi{
-			Port:           0,
-			Hosts:          []string{},
-			GatewayClassName: "",
+			Port:             443,
+			Hosts:            []string{},
+			GatewayName:      "",
+			GatewayNamespace: "",
 		}
 	}
 	var adminIstio Istio
@@ -870,21 +876,27 @@ func getConfig(
 		}
 	}
 	var adminGatewayApi GatewayApi
-	if spec.AdminGatewayApi != nil{
-		gatewayApiClassName := spec.AdminGatewayApi.GatewayClassName
-		if gatewayApiClassName == "" {
-			gatewayApiClassName = "hlf-gateway"
+	if spec.AdminGatewayApi != nil {
+		gatewayApiName := spec.AdminGatewayApi.GatewayName
+		gatewayApiNamespace := spec.GatewayApi.GatewayNamespace
+		if gatewayApiName == "" {
+			gatewayApiName = "hlf-gateway"
+		}
+		if gatewayApiNamespace == "" {
+			gatewayApiName = "default"
 		}
 		adminGatewayApi = GatewayApi{
-			Port:           spec.AdminGatewayApi.Port,
-			Hosts:          spec.AdminGatewayApi.Hosts,
-			GatewayClassName: gatewayApiClassName,
+			Port:             spec.AdminGatewayApi.Port,
+			Hosts:            spec.AdminGatewayApi.Hosts,
+			GatewayName:      gatewayApiName,
+			GatewayNamespace: gatewayApiNamespace,
 		}
 	} else {
 		adminGatewayApi = GatewayApi{
-			Port:           0,
-			Hosts:          []string{},
-			GatewayClassName: "",
+			Port:             443,
+			Hosts:            []string{},
+			GatewayName:      "",
+			GatewayNamespace: "",
 		}
 	}
 	var monitor ServiceMonitor
@@ -946,8 +958,8 @@ func getConfig(
 		Resources:                   resources,
 		Istio:                       istio,
 		AdminIstio:                  adminIstio,
-		GatewayApi:          		 gatewayApi,
-		AdminGatewayApi:             adminGatewayApi,		
+		GatewayApi:                  gatewayApi,
+		AdminGatewayApi:             adminGatewayApi,
 		Replicas:                    spec.Replicas,
 		Genesis:                     spec.Genesis,
 		Proxy:                       proxy,

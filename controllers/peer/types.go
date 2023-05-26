@@ -24,7 +24,7 @@ type FSServer struct {
 
 type FabricPeerChart struct {
 	FSServer                 FSServer                      `json:"fsServer"`
-	GatewayApi       		 GatewayApi                    `json:"gatewayApi"`
+	GatewayApi               GatewayApi                    `json:"gatewayApi"`
 	Istio                    Istio                         `json:"istio"`
 	Replicas                 int                           `json:"replicas"`
 	ExternalChaincodeBuilder bool                          `json:"externalChaincodeBuilder"`
@@ -61,9 +61,10 @@ type FabricPeerChart struct {
 	EnvVars                  []corev1.EnvVar               `json:"envVars"`
 }
 type GatewayApi struct {
-	Port  int      `json:"port"`
-	Hosts []string `json:"hosts"`
-	GatewayClassName string `json:"gatewayClassName"`
+	Port             int      `json:"port"`
+	Hosts            []string `json:"hosts"`
+	GatewayName      string   `json:"gatewayName"`
+	GatewayNamespace string   `json:"gatewayNamespace"`
 }
 type GRPCProxy struct {
 	Enabled          bool                          `json:"enabled"`

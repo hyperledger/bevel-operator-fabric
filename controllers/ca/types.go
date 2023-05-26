@@ -41,9 +41,10 @@ type Istio struct {
 	Hosts []string `json:"hosts"`
 }
 type GatewayApi struct {
-	Port  int      `json:"port"`
-	Hosts []string `json:"hosts"`
-	GatewayClassName string `json:"gatewayClassName"`
+	Port             int      `json:"port"`
+	Hosts            []string `json:"hosts"`
+	GatewayName      string   `json:"gatewayName"`
+	GatewayNamespace string   `json:"gatewayNamespace"`
 }
 type Cors struct {
 	Enabled bool     `json:"enabled"`

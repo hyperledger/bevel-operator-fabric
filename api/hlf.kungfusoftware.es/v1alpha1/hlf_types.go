@@ -177,7 +177,7 @@ type FabricPeerSpec struct {
 	// +optional
 	// +kubebuilder:validation:Optional
 	// +nullable
-	GatewayApi 		 *FabricGatewayApi 	  `json:"gatewayApi"`
+	GatewayApi       *FabricGatewayApi    `json:"gatewayApi"`
 	Istio            *FabricIstio         `json:"istio"`
 	Gossip           FabricPeerSpecGossip `json:"gossip"`
 	ExternalEndpoint string               `json:"externalEndpoint"`
@@ -293,7 +293,6 @@ type FabricIstio struct {
 }
 
 type FabricGatewayApi struct {
-
 	// +optional
 	// +nullable
 	Port int `json:"port"`
@@ -303,8 +302,9 @@ type FabricGatewayApi struct {
 	// +kubebuilder:validation:Default={}
 	Hosts []string `json:"hosts,omitempty"`
 	// +kubebuilder:validation:Default=hlf-gateway
-	GatewayClassName string `json:"gatewayClassName"`
-
+	GatewayName string `json:"gatewayName"`
+	// +kubebuilder:validation:Default=default
+	GatewayNamespace string `json:"gatewayNamespace"`
 }
 
 type FabricPeerSpecGossip struct {
@@ -513,12 +513,12 @@ type FabricOrdererNodeSpec struct {
 	// +kubebuilder:validation:Optional
 	// +nullable
 	GatewayApi *FabricGatewayApi `json:"gatewayApi"`
-	Istio *FabricIstio `json:"istio"`
+	Istio      *FabricIstio      `json:"istio"`
 	// +optional
 	// +kubebuilder:validation:Optional
 	// +nullable
 	AdminGatewayApi *FabricGatewayApi `json:"adminGatewayApi"`
-	AdminIstio *FabricIstio `json:"adminIstio"`
+	AdminIstio      *FabricIstio      `json:"adminIstio"`
 
 	// +nullable
 	// +kubebuilder:validation:Optional
@@ -631,8 +631,8 @@ type FabricCASpec struct {
 	// +kubebuilder:validation:Optional
 	// +nullable
 	GatewayApi *FabricGatewayApi `json:"gatewayApi"`
-	Istio    *FabricIstio     `json:"istio"`
-	Database FabricCADatabase `json:"db"`
+	Istio      *FabricIstio      `json:"istio"`
+	Database   FabricCADatabase  `json:"db"`
 	// +kubebuilder:validation:MinItems=1
 	// Hosts for the Fabric CA
 	Hosts   []string            `json:"hosts"`

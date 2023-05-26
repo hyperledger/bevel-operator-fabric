@@ -968,7 +968,9 @@ spec:
                 gatewayApi:
                   nullable: true
                   properties:
-                    gatewayClassName:
+                    gatewayName:
+                      type: string
+                    gatewayNamespace:
                       type: string
                     hosts:
                       items:
@@ -979,7 +981,8 @@ spec:
                       nullable: true
                       type: integer
                   required:
-                    - gatewayClassName
+                    - gatewayName
+                    - gatewayNamespace
                   type: object
                 hosts:
                   description: Hosts for the Fabric CA

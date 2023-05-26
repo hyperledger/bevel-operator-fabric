@@ -23,6 +23,7 @@ istio:
 gatewayApi:
   port: 443
   hosts: []
-  gatewayClassName: "hlf-gateway"
+  gatewayName: ""
+  gatewayNamespace: ""
 
 envVars: []

@@ -63,12 +63,14 @@ adminIstio:
 gatewayApi:
   port: 443
   hosts: []
-  gatewayClassName: "hlf-gateway"
+  gatewayName: "hlf-gateway"
+  gatewayNamespace: ""
 
 adminGatewayApi:
   port: 443
   hosts: []
-  gatewayClassName: "hlf-gateway"
+  gatewayName: "hlf-gateway"
+  gatewayNamespace: ""
 
 
 serviceMonitor:

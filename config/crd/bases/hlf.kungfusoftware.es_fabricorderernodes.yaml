@@ -43,7 +43,9 @@ spec:
                 adminGatewayApi:
                   nullable: true
                   properties:
-                    gatewayClassName:
+                    gatewayName:
+                      type: string
+                    gatewayNamespace:
                       type: string
                     hosts:
                       items:
@@ -54,7 +56,8 @@ spec:
                       nullable: true
                       type: integer
                   required:
-                    - gatewayClassName
+                    - gatewayName
+                    - gatewayNamespace
                   type: object
                 adminIstio:
                   properties:
@@ -620,7 +623,9 @@ spec:
                 gatewayApi:
                   nullable: true
                   properties:
-                    gatewayClassName:
+                    gatewayName:
+                      type: string
+                    gatewayNamespace:
                       type: string
                     hosts:
                       items:
@@ -631,7 +636,8 @@ spec:
                       nullable: true
                       type: integer
                   required:
-                    - gatewayClassName
+                    - gatewayName
+                    - gatewayNamespace
                   type: object
                 genesis:
                   type: string
