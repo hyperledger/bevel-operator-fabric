@@ -643,6 +643,7 @@ spec:
                 resources:
                   description: ResourceRequirements describes the compute resource requirements.
                   nullable: true
+
                   properties:
                     limits:
                       additionalProperties:

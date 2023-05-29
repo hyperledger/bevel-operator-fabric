@@ -8,6 +8,7 @@ import (
 	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/console"
 	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/externalchaincode"
 	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/fop"
+	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/identity"
 	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/inspect"
 	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/networkconfig"
 	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/operatorapi"
@@ -45,6 +46,7 @@ func NewCmdHLF() *cobra.Command {
 		chaincode.NewChaincodeCmd(cmd.OutOrStdout(), cmd.ErrOrStderr()),
 		org.NewOrgCmd(cmd.OutOrStdout(), cmd.ErrOrStderr()),
 		utils.NewUtilsCMD(cmd.OutOrStdout(), cmd.ErrOrStderr()),
+		identity.NewIdentityCMD(),
 		networkconfig.NewNetworkConfigCmd(cmd.OutOrStdout(), cmd.ErrOrStderr()),
 		externalchaincode.NewExternalChaincodeCmd(cmd.OutOrStdout(), cmd.ErrOrStderr()),
 		fop.NewFOPCMD(cmd.OutOrStdout(), cmd.ErrOrStderr()),

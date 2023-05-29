@@ -629,6 +629,7 @@ spec:
                                 x-kubernetes-int-or-string: true
                               resource:
                                 description: "Required: resource to select"
+
                                 type: string
                             required:
                               - resource
@@ -648,6 +649,7 @@ spec:
                             required:
                               - key
                             type: object
+
                         type: object
                     required:
                       - name

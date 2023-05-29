@@ -17,11 +17,13 @@ package fake
 
 import (
 	"context"
+	json "encoding/json"
+	"fmt"
 
 	v1alpha1 "github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
+	hlfkungfusoftwareesv1alpha1 "github.com/kfsoftware/hlf-operator/pkg/client/applyconfiguration/hlf.kungfusoftware.es/v1alpha1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	labels "k8s.io/apimachinery/pkg/labels"
-	schema "k8s.io/apimachinery/pkg/runtime/schema"
 	types "k8s.io/apimachinery/pkg/types"
 	watch "k8s.io/apimachinery/pkg/watch"
 	testing "k8s.io/client-go/testing"
@@ -33,9 +35,9 @@ type FakeFabricExplorers struct {
 	ns   string
 }
 
-var fabricexplorersResource = schema.GroupVersionResource{Group: "hlf.kungfusoftware.es", Version: "v1alpha1", Resource: "fabricexplorers"}
+var fabricexplorersResource = v1alpha1.SchemeGroupVersion.WithResource("fabricexplorers")
 
-var fabricexplorersKind = schema.GroupVersionKind{Group: "hlf.kungfusoftware.es", Version: "v1alpha1", Kind: "FabricExplorer"}
+var fabricexplorersKind = v1alpha1.SchemeGroupVersion.WithKind("FabricExplorer")
 
 // Get takes name of the fabricExplorer, and returns the corresponding fabricExplorer object, and an error if there is any.
 func (c *FakeFabricExplorers) Get(ctx context.Context, name string, options v1.GetOptions) (result *v1alpha1.FabricExplorer, err error) {
@@ -131,6 +133,51 @@ func (c *FakeFabricExplorers) DeleteCollection(ctx context.Context, opts v1.Dele
 func (c *FakeFabricExplorers) Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *v1alpha1.FabricExplorer, err error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewPatchSubresourceAction(fabricexplorersResource, c.ns, name, pt, data, subresources...), &v1alpha1.FabricExplorer{})
+
+	if obj == nil {
+		return nil, err
+	}
+	return obj.(*v1alpha1.FabricExplorer), err
+}
+
+// Apply takes the given apply declarative configuration, applies it and returns the applied fabricExplorer.
+func (c *FakeFabricExplorers) Apply(ctx context.Context, fabricExplorer *hlfkungfusoftwareesv1alpha1.FabricExplorerApplyConfiguration, opts v1.ApplyOptions) (result *v1alpha1.FabricExplorer, err error) {
+	if fabricExplorer == nil {
+		return nil, fmt.Errorf("fabricExplorer provided to Apply must not be nil")
+	}
+	data, err := json.Marshal(fabricExplorer)
+	if err != nil {
+		return nil, err
+	}
+	name := fabricExplorer.Name
+	if name == nil {
+		return nil, fmt.Errorf("fabricExplorer.Name must be provided to Apply")
+	}
+	obj, err := c.Fake.
+		Invokes(testing.NewPatchSubresourceAction(fabricexplorersResource, c.ns, *name, types.ApplyPatchType, data), &v1alpha1.FabricExplorer{})
+
+	if obj == nil {
+		return nil, err
+	}
+	return obj.(*v1alpha1.FabricExplorer), err
+}
+
+// ApplyStatus was generated because the type contains a Status member.
+// Add a +genclient:noStatus comment above the type to avoid generating ApplyStatus().
+func (c *FakeFabricExplorers) ApplyStatus(ctx context.Context, fabricExplorer *hlfkungfusoftwareesv1alpha1.FabricExplorerApplyConfiguration, opts v1.ApplyOptions) (result *v1alpha1.FabricExplorer, err error) {
+	if fabricExplorer == nil {
+		return nil, fmt.Errorf("fabricExplorer provided to Apply must not be nil")
+	}
+	data, err := json.Marshal(fabricExplorer)
+	if err != nil {
+		return nil, err
+	}
+	name := fabricExplorer.Name
+	if name == nil {
+		return nil, fmt.Errorf("fabricExplorer.Name must be provided to Apply")
+	}
+	obj, err := c.Fake.
+		Invokes(testing.NewPatchSubresourceAction(fabricexplorersResource, c.ns, *name, types.ApplyPatchType, data, "status"), &v1alpha1.FabricExplorer{})
 
 	if obj == nil {
 		return nil, err

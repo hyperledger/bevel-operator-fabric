@@ -17,11 +17,13 @@ package fake
 
 import (
 	"context"
+	json "encoding/json"
+	"fmt"
 
 	v1alpha1 "github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
+	hlfkungfusoftwareesv1alpha1 "github.com/kfsoftware/hlf-operator/pkg/client/applyconfiguration/hlf.kungfusoftware.es/v1alpha1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	labels "k8s.io/apimachinery/pkg/labels"
-	schema "k8s.io/apimachinery/pkg/runtime/schema"
 	types "k8s.io/apimachinery/pkg/types"
 	watch "k8s.io/apimachinery/pkg/watch"
 	testing "k8s.io/client-go/testing"
@@ -32,9 +34,9 @@ type FakeFabricMainChannels struct {
 	Fake *FakeHlfV1alpha1
 }
 
-var fabricmainchannelsResource = schema.GroupVersionResource{Group: "hlf.kungfusoftware.es", Version: "v1alpha1", Resource: "fabricmainchannels"}
+var fabricmainchannelsResource = v1alpha1.SchemeGroupVersion.WithResource("fabricmainchannels")
 
-var fabricmainchannelsKind = schema.GroupVersionKind{Group: "hlf.kungfusoftware.es", Version: "v1alpha1", Kind: "FabricMainChannel"}
+var fabricmainchannelsKind = v1alpha1.SchemeGroupVersion.WithKind("FabricMainChannel")
 
 // Get takes name of the fabricMainChannel, and returns the corresponding fabricMainChannel object, and an error if there is any.
 func (c *FakeFabricMainChannels) Get(ctx context.Context, name string, options v1.GetOptions) (result *v1alpha1.FabricMainChannel, err error) {
@@ -123,6 +125,49 @@ func (c *FakeFabricMainChannels) DeleteCollection(ctx context.Context, opts v1.D
 func (c *FakeFabricMainChannels) Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *v1alpha1.FabricMainChannel, err error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewRootPatchSubresourceAction(fabricmainchannelsResource, name, pt, data, subresources...), &v1alpha1.FabricMainChannel{})
+	if obj == nil {
+		return nil, err
+	}
+	return obj.(*v1alpha1.FabricMainChannel), err
+}
+
+// Apply takes the given apply declarative configuration, applies it and returns the applied fabricMainChannel.
+func (c *FakeFabricMainChannels) Apply(ctx context.Context, fabricMainChannel *hlfkungfusoftwareesv1alpha1.FabricMainChannelApplyConfiguration, opts v1.ApplyOptions) (result *v1alpha1.FabricMainChannel, err error) {
+	if fabricMainChannel == nil {
+		return nil, fmt.Errorf("fabricMainChannel provided to Apply must not be nil")
+	}
+	data, err := json.Marshal(fabricMainChannel)
+	if err != nil {
+		return nil, err
+	}
+	name := fabricMainChannel.Name
+	if name == nil {
+		return nil, fmt.Errorf("fabricMainChannel.Name must be provided to Apply")
+	}
+	obj, err := c.Fake.
+		Invokes(testing.NewRootPatchSubresourceAction(fabricmainchannelsResource, *name, types.ApplyPatchType, data), &v1alpha1.FabricMainChannel{})
+	if obj == nil {
+		return nil, err
+	}
+	return obj.(*v1alpha1.FabricMainChannel), err
+}
+
+// ApplyStatus was generated because the type contains a Status member.
+// Add a +genclient:noStatus comment above the type to avoid generating ApplyStatus().
+func (c *FakeFabricMainChannels) ApplyStatus(ctx context.Context, fabricMainChannel *hlfkungfusoftwareesv1alpha1.FabricMainChannelApplyConfiguration, opts v1.ApplyOptions) (result *v1alpha1.FabricMainChannel, err error) {
+	if fabricMainChannel == nil {
+		return nil, fmt.Errorf("fabricMainChannel provided to Apply must not be nil")
+	}
+	data, err := json.Marshal(fabricMainChannel)
+	if err != nil {
+		return nil, err
+	}
+	name := fabricMainChannel.Name
+	if name == nil {
+		return nil, fmt.Errorf("fabricMainChannel.Name must be provided to Apply")
+	}
+	obj, err := c.Fake.
+		Invokes(testing.NewRootPatchSubresourceAction(fabricmainchannelsResource, *name, types.ApplyPatchType, data, "status"), &v1alpha1.FabricMainChannel{})
 	if obj == nil {
 		return nil, err
 	}

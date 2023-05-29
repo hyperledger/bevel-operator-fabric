@@ -8,7 +8,7 @@ data:
   ## Location where fabric-ca-client configuration is saved
   FABRIC_CA_CLIENT_HOME: /var/hyperledger/fabric-ca-client
   ## Orderer defaults
-  ORDERER_CFG_PATH: /var/hyperledger/config
+  FABRIC_CFG_PATH: /var/hyperledger/fabric/config
   ORDERER_GENERAL_LEDGERTYPE: file
   ORDERER_FILELEDGER_LOCATION: /var/hyperledger/ledger
   ORDERER_GENERAL_BATCHTIMEOUT: 1s

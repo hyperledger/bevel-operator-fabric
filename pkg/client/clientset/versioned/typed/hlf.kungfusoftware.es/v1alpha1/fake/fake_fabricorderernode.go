@@ -17,11 +17,13 @@ package fake
 
 import (
 	"context"
+	json "encoding/json"
+	"fmt"
 
 	v1alpha1 "github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
+	hlfkungfusoftwareesv1alpha1 "github.com/kfsoftware/hlf-operator/pkg/client/applyconfiguration/hlf.kungfusoftware.es/v1alpha1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	labels "k8s.io/apimachinery/pkg/labels"
-	schema "k8s.io/apimachinery/pkg/runtime/schema"
 	types "k8s.io/apimachinery/pkg/types"
 	watch "k8s.io/apimachinery/pkg/watch"
 	testing "k8s.io/client-go/testing"
@@ -33,9 +35,9 @@ type FakeFabricOrdererNodes struct {
 	ns   string
 }
 
-var fabricorderernodesResource = schema.GroupVersionResource{Group: "hlf.kungfusoftware.es", Version: "v1alpha1", Resource: "fabricorderernodes"}
+var fabricorderernodesResource = v1alpha1.SchemeGroupVersion.WithResource("fabricorderernodes")
 
-var fabricorderernodesKind = schema.GroupVersionKind{Group: "hlf.kungfusoftware.es", Version: "v1alpha1", Kind: "FabricOrdererNode"}
+var fabricorderernodesKind = v1alpha1.SchemeGroupVersion.WithKind("FabricOrdererNode")
 
 // Get takes name of the fabricOrdererNode, and returns the corresponding fabricOrdererNode object, and an error if there is any.
 func (c *FakeFabricOrdererNodes) Get(ctx context.Context, name string, options v1.GetOptions) (result *v1alpha1.FabricOrdererNode, err error) {
@@ -131,6 +133,51 @@ func (c *FakeFabricOrdererNodes) DeleteCollection(ctx context.Context, opts v1.D
 func (c *FakeFabricOrdererNodes) Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *v1alpha1.FabricOrdererNode, err error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewPatchSubresourceAction(fabricorderernodesResource, c.ns, name, pt, data, subresources...), &v1alpha1.FabricOrdererNode{})
+
+	if obj == nil {
+		return nil, err
+	}
+	return obj.(*v1alpha1.FabricOrdererNode), err
+}
+
+// Apply takes the given apply declarative configuration, applies it and returns the applied fabricOrdererNode.
+func (c *FakeFabricOrdererNodes) Apply(ctx context.Context, fabricOrdererNode *hlfkungfusoftwareesv1alpha1.FabricOrdererNodeApplyConfiguration, opts v1.ApplyOptions) (result *v1alpha1.FabricOrdererNode, err error) {
+	if fabricOrdererNode == nil {
+		return nil, fmt.Errorf("fabricOrdererNode provided to Apply must not be nil")
+	}
+	data, err := json.Marshal(fabricOrdererNode)
+	if err != nil {
+		return nil, err
+	}
+	name := fabricOrdererNode.Name
+	if name == nil {
+		return nil, fmt.Errorf("fabricOrdererNode.Name must be provided to Apply")
+	}
+	obj, err := c.Fake.
+		Invokes(testing.NewPatchSubresourceAction(fabricorderernodesResource, c.ns, *name, types.ApplyPatchType, data), &v1alpha1.FabricOrdererNode{})
+
+	if obj == nil {
+		return nil, err
+	}
+	return obj.(*v1alpha1.FabricOrdererNode), err
+}
+
+// ApplyStatus was generated because the type contains a Status member.
+// Add a +genclient:noStatus comment above the type to avoid generating ApplyStatus().
+func (c *FakeFabricOrdererNodes) ApplyStatus(ctx context.Context, fabricOrdererNode *hlfkungfusoftwareesv1alpha1.FabricOrdererNodeApplyConfiguration, opts v1.ApplyOptions) (result *v1alpha1.FabricOrdererNode, err error) {
+	if fabricOrdererNode == nil {
+		return nil, fmt.Errorf("fabricOrdererNode provided to Apply must not be nil")
+	}
+	data, err := json.Marshal(fabricOrdererNode)
+	if err != nil {
+		return nil, err
+	}
+	name := fabricOrdererNode.Name
+	if name == nil {
+		return nil, fmt.Errorf("fabricOrdererNode.Name must be provided to Apply")
+	}
+	obj, err := c.Fake.
+		Invokes(testing.NewPatchSubresourceAction(fabricorderernodesResource, c.ns, *name, types.ApplyPatchType, data, "status"), &v1alpha1.FabricOrdererNode{})
 
 	if obj == nil {
 		return nil, err

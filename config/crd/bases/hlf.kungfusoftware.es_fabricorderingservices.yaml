@@ -41,6 +41,7 @@ spec:
               description: FabricOrderingServiceSpec defines the desired state of FabricOrderingService
               properties:
                 enrollment:
+
                   properties:
                     component:
                       properties:

@@ -3,17 +3,13 @@ Copyright IBM Corp. All Rights Reserved.
 
 SPDX-License-Identifier: Apache-2.0
 */
-/*
-Notice: This file has been modified for Hyperledger Fabric SDK Go usage.
-Please review third_party pinning scripts and patches for more details.
-*/
 
 package credential
 
 import (
 	"net/http"
 
-	"github.com/kfsoftware/hlf-operator/internal/github.com/hyperledger/fabric-ca/sdkinternal/pkg/api"
+	"github.com/kfsoftware/hlf-operator/internal/github.com/hyperledger/fabric-ca/api"
 )
 
 // Credential represents an credential of an identity

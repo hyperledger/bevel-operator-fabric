@@ -58,6 +58,8 @@ func (f *sharedInformerFactory) ForResource(resource schema.GroupVersionResource
 		return &genericInformer{resource: resource.GroupResource(), informer: f.Hlf().V1alpha1().FabricExplorers().Informer()}, nil
 	case v1alpha1.SchemeGroupVersion.WithResource("fabricfollowerchannels"):
 		return &genericInformer{resource: resource.GroupResource(), informer: f.Hlf().V1alpha1().FabricFollowerChannels().Informer()}, nil
+	case v1alpha1.SchemeGroupVersion.WithResource("fabricidentities"):
+		return &genericInformer{resource: resource.GroupResource(), informer: f.Hlf().V1alpha1().FabricIdentities().Informer()}, nil
 	case v1alpha1.SchemeGroupVersion.WithResource("fabricmainchannels"):
 		return &genericInformer{resource: resource.GroupResource(), informer: f.Hlf().V1alpha1().FabricMainChannels().Informer()}, nil
 	case v1alpha1.SchemeGroupVersion.WithResource("fabricnetworkconfigs"):

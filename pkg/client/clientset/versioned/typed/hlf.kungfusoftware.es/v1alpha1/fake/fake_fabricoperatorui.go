@@ -17,11 +17,13 @@ package fake
 
 import (
 	"context"
+	json "encoding/json"
+	"fmt"
 
 	v1alpha1 "github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
+	hlfkungfusoftwareesv1alpha1 "github.com/kfsoftware/hlf-operator/pkg/client/applyconfiguration/hlf.kungfusoftware.es/v1alpha1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	labels "k8s.io/apimachinery/pkg/labels"
-	schema "k8s.io/apimachinery/pkg/runtime/schema"
 	types "k8s.io/apimachinery/pkg/types"
 	watch "k8s.io/apimachinery/pkg/watch"
 	testing "k8s.io/client-go/testing"
@@ -33,9 +35,9 @@ type FakeFabricOperatorUIs struct {
 	ns   string
 }
 
-var fabricoperatoruisResource = schema.GroupVersionResource{Group: "hlf.kungfusoftware.es", Version: "v1alpha1", Resource: "fabricoperatoruis"}
+var fabricoperatoruisResource = v1alpha1.SchemeGroupVersion.WithResource("fabricoperatoruis")
 
-var fabricoperatoruisKind = schema.GroupVersionKind{Group: "hlf.kungfusoftware.es", Version: "v1alpha1", Kind: "FabricOperatorUI"}
+var fabricoperatoruisKind = v1alpha1.SchemeGroupVersion.WithKind("FabricOperatorUI")
 
 // Get takes name of the fabricOperatorUI, and returns the corresponding fabricOperatorUI object, and an error if there is any.
 func (c *FakeFabricOperatorUIs) Get(ctx context.Context, name string, options v1.GetOptions) (result *v1alpha1.FabricOperatorUI, err error) {
@@ -131,6 +133,51 @@ func (c *FakeFabricOperatorUIs) DeleteCollection(ctx context.Context, opts v1.De
 func (c *FakeFabricOperatorUIs) Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *v1alpha1.FabricOperatorUI, err error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewPatchSubresourceAction(fabricoperatoruisResource, c.ns, name, pt, data, subresources...), &v1alpha1.FabricOperatorUI{})
+
+	if obj == nil {
+		return nil, err
+	}
+	return obj.(*v1alpha1.FabricOperatorUI), err
+}
+
+// Apply takes the given apply declarative configuration, applies it and returns the applied fabricOperatorUI.
+func (c *FakeFabricOperatorUIs) Apply(ctx context.Context, fabricOperatorUI *hlfkungfusoftwareesv1alpha1.FabricOperatorUIApplyConfiguration, opts v1.ApplyOptions) (result *v1alpha1.FabricOperatorUI, err error) {
+	if fabricOperatorUI == nil {
+		return nil, fmt.Errorf("fabricOperatorUI provided to Apply must not be nil")
+	}
+	data, err := json.Marshal(fabricOperatorUI)
+	if err != nil {
+		return nil, err
+	}
+	name := fabricOperatorUI.Name
+	if name == nil {
+		return nil, fmt.Errorf("fabricOperatorUI.Name must be provided to Apply")
+	}
+	obj, err := c.Fake.
+		Invokes(testing.NewPatchSubresourceAction(fabricoperatoruisResource, c.ns, *name, types.ApplyPatchType, data), &v1alpha1.FabricOperatorUI{})
+
+	if obj == nil {
+		return nil, err
+	}
+	return obj.(*v1alpha1.FabricOperatorUI), err
+}
+
+// ApplyStatus was generated because the type contains a Status member.
+// Add a +genclient:noStatus comment above the type to avoid generating ApplyStatus().
+func (c *FakeFabricOperatorUIs) ApplyStatus(ctx context.Context, fabricOperatorUI *hlfkungfusoftwareesv1alpha1.FabricOperatorUIApplyConfiguration, opts v1.ApplyOptions) (result *v1alpha1.FabricOperatorUI, err error) {
+	if fabricOperatorUI == nil {
+		return nil, fmt.Errorf("fabricOperatorUI provided to Apply must not be nil")
+	}
+	data, err := json.Marshal(fabricOperatorUI)
+	if err != nil {
+		return nil, err
+	}
+	name := fabricOperatorUI.Name
+	if name == nil {
+		return nil, fmt.Errorf("fabricOperatorUI.Name must be provided to Apply")
+	}
+	obj, err := c.Fake.
+		Invokes(testing.NewPatchSubresourceAction(fabricoperatoruisResource, c.ns, *name, types.ApplyPatchType, data, "status"), &v1alpha1.FabricOperatorUI{})
 
 	if obj == nil {
 		return nil, err

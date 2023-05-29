@@ -2,8 +2,8 @@ package helpers
 
 import (
 	"sigs.k8s.io/yaml"
-
 )
+
 func MarshallWithoutStatus(item interface{}) ([]byte, error) {
 	ot, err := yaml.Marshal(item)
 	if err != nil {

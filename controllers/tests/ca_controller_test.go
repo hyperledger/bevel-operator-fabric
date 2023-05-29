@@ -217,6 +217,8 @@ func randomFabricCA(releaseName string, namespace string) *hlfv1alpha1.FabricCA 
 	}
 	resources, err := getDefaultResources()
 	Expect(err).ToNot(HaveOccurred())
+	k8sIP, err := utils.GetPublicIPKubernetes(ClientSet)
+	Expect(err).ToNot(HaveOccurred())
 
 	fabricCa := &hlfv1alpha1.FabricCA{
 		TypeMeta: NewTypeMeta("FabricCA"),
@@ -237,6 +239,7 @@ func randomFabricCA(releaseName string, namespace string) *hlfv1alpha1.FabricCA 
 				"localhost",
 				releaseName,
 				fmt.Sprintf("%s.%s", releaseName, namespace),
+				k8sIP,
 			},
 			Service: hlfv1alpha1.FabricCASpecService{
 				ServiceType: "NodePort",
@@ -252,7 +255,7 @@ func randomFabricCA(releaseName string, namespace string) *hlfv1alpha1.FabricCA 
 				Subject: subject,
 				CSR: hlfv1alpha1.FabricCACSR{
 					CN:    "ca",
-					Hosts: []string{"localhost"},
+					Hosts: []string{"localhost", k8sIP},
 					Names: []hlfv1alpha1.FabricCANames{
 						{
 							C:  "US",
@@ -278,7 +281,7 @@ func randomFabricCA(releaseName string, namespace string) *hlfv1alpha1.FabricCA 
 				CFG:     cfg,
 				CSR: hlfv1alpha1.FabricCACSR{
 					CN:    "tlsca",
-					Hosts: []string{"localhost"},
+					Hosts: []string{"localhost", k8sIP},
 					Names: []hlfv1alpha1.FabricCANames{
 						{
 							C:  "US",
@@ -633,19 +636,31 @@ func createOrdererNode(releaseName string, namespace string, params createOrdere
 			Namespace: namespace,
 		},
 		Spec: hlfv1alpha1.FabricOrdererNodeSpec{
+			Tolerations:                 nil,
+			GRPCProxy:                   nil,
+			Affinity:                    nil,
+			UpdateCertificateTime:       nil,
+			ServiceMonitor:              nil,
+			HostAliases:                 nil,
+			NodeSelector:                nil,
+			Resources:                   resources,
+			Replicas:                    1,
+			Image:                       "hyperledger/fabric-orderer",
+			Tag:                         "amd64-2.4.9",
+			PullPolicy:                  corev1.PullAlways,
+			MspID:                       mspID,
+			ImagePullSecrets:            nil,
+			Genesis:                     "",
+			BootstrapMethod:             "none",
+			ChannelParticipationEnabled: true,
 			Storage: hlfv1alpha1.Storage{
 				Size:         "30Gi",
 				StorageClass: "standard",
 				AccessMode:   "ReadWriteOnce",
 			},
-			BootstrapMethod:             "none",
-			ChannelParticipationEnabled: true,
-			PullPolicy:                  corev1.PullAlways,
-			Image:                       "hyperledger/fabric-orderer",
-			Tag:                         "amd64-2.3.0",
-			MspID:                       mspID,
-			Replicas:                    1,
-			Resources:                   resources,
+			Service: hlfv1alpha1.OrdererNodeService{
+				Type: "NodePort",
+			},
 			Secret: &hlfv1alpha1.Secret{
 				Enrollment: hlfv1alpha1.Enrollment{
 					Component: hlfv1alpha1.Component{
@@ -674,9 +689,9 @@ func createOrdererNode(releaseName string, namespace string, params createOrdere
 					},
 				},
 			},
-			Service: hlfv1alpha1.OrdererNodeService{
-				Type: "NodePort",
-			},
+			Istio:      nil,
+			AdminIstio: nil,
+			Env:        nil,
 		},
 	}
 	Expect(K8sClient.Create(context.Background(), fabricOrderer)).Should(Succeed())
@@ -791,6 +806,9 @@ var _ = Describe("Fabric Controllers", func() {
 		}
 		resources, err := getDefaultResources()
 		Expect(err).ToNot(HaveOccurred())
+		k8sIP, err := utils.GetPublicIPKubernetes(ClientSet)
+		Expect(err).ToNot(HaveOccurred())
+
 		fabricCa := &hlfv1alpha1.FabricCA{
 			TypeMeta: NewTypeMeta("FabricCA"),
 			ObjectMeta: v1.ObjectMeta{
@@ -809,6 +827,7 @@ var _ = Describe("Fabric Controllers", func() {
 					"localhost",
 					objName,
 					fmt.Sprintf("%s.%s", objName, FabricNamespace),
+					k8sIP,
 				},
 				Service: hlfv1alpha1.FabricCASpecService{
 					ServiceType: "NodePort",
@@ -922,7 +941,6 @@ var _ = Describe("Fabric Controllers", func() {
 			defTimeoutSecs,
 			defInterval,
 		).Should(BeTrue(), "ca deployment should have been deleted")
-
 	})
 	Specify("create a new Fabric Orderer with channel participation", func() {
 		releaseNameOrdCA := "org1-ca"

@@ -1,13 +1,13 @@
 package ca
 
 import (
+	log "github.com/sirupsen/logrus"
 	"io"
 	"io/ioutil"
 	"strings"
 
 	"github.com/hyperledger/fabric-sdk-go/pkg/gateway"
-	"github.com/hyperledger/fabric-sdk-go/pkg/msp/api"
-	log "github.com/kfsoftware/hlf-operator/internal/github.com/hyperledger/fabric-ca/sdkpatch/logbridge"
+	"github.com/kfsoftware/hlf-operator/internal/github.com/hyperledger/fabric-ca/api"
 	"github.com/pkg/errors"
 
 	"github.com/ghodss/yaml"

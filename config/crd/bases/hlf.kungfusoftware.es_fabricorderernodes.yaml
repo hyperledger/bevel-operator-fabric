@@ -924,6 +924,7 @@ spec:
                     - enrollment
                   type: object
                 service:
+
                   properties:
                     nodePortOperations:
                       type: integer

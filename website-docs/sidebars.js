@@ -11,6 +11,7 @@ module.exports = {
       "operator-guide/renew-certificates",
       "operator-guide/istio",
       "operator-guide/upgrade-hlf-operator",
+      "operator-guide/auto-renew-certificates",
     ],
     "User Guide": [
       "user-guide/network-config",
@@ -34,6 +35,7 @@ module.exports = {
       "channel-management/manage",
     ],
     "Kubectl Plugin": ["kubectl-plugin/installation", "kubectl-plugin/upgrade"],
+    "Identity": ["identity-crd/manage-identities"],
     CouchDB: ["couchdb/external-couchdb", "couchdb/custom-image"],
     Reference: ["reference/reference"],
     "GRPC Proxy": ["grpc-proxy/enable-peers", "grpc-proxy/enable-orderers"],

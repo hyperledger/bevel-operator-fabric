@@ -29,6 +29,8 @@ type Interface interface {
 	FabricExplorers() FabricExplorerInformer
 	// FabricFollowerChannels returns a FabricFollowerChannelInformer.
 	FabricFollowerChannels() FabricFollowerChannelInformer
+	// FabricIdentities returns a FabricIdentityInformer.
+	FabricIdentities() FabricIdentityInformer
 	// FabricMainChannels returns a FabricMainChannelInformer.
 	FabricMainChannels() FabricMainChannelInformer
 	// FabricNetworkConfigs returns a FabricNetworkConfigInformer.
@@ -76,6 +78,11 @@ func (v *version) FabricExplorers() FabricExplorerInformer {
 // FabricFollowerChannels returns a FabricFollowerChannelInformer.
 func (v *version) FabricFollowerChannels() FabricFollowerChannelInformer {
 	return &fabricFollowerChannelInformer{factory: v.factory, tweakListOptions: v.tweakListOptions}
+}
+
+// FabricIdentities returns a FabricIdentityInformer.
+func (v *version) FabricIdentities() FabricIdentityInformer {
+	return &fabricIdentityInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
 }
 
 // FabricMainChannels returns a FabricMainChannelInformer.

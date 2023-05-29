@@ -1,6 +1,7 @@
 package ca
 
 import (
+	"bytes"
 	"context"
 	"crypto/ecdsa"
 	"crypto/elliptic"
@@ -18,6 +19,7 @@ import (
 	"github.com/kfsoftware/hlf-operator/pkg/status"
 	"helm.sh/helm/v3/pkg/cli"
 	"k8s.io/kubernetes/pkg/api/v1/pod"
+	"sort"
 
 	"math/big"
 	"net"
@@ -145,33 +147,35 @@ func computeSKI(privKey *ecdsa.PrivateKey) []byte {
 	hash := sha256.Sum256(raw)
 	return hash[:]
 }
-func CreateDefaultTLSCA(clientSet *kubernetes.Clientset, spec hlfv1alpha1.FabricCASpec) (*x509.Certificate, *ecdsa.PrivateKey, error) {
+func getDNSNames(spect hlfv1alpha1.FabricCASpec) []string {
+	var dnsNames []string
+	for _, host := range spect.Hosts {
+		addr := net.ParseIP(host)
+		if addr == nil {
+			dnsNames = append(dnsNames, host)
+		}
+	}
+	return dnsNames
+}
+func getIPAddresses(spect hlfv1alpha1.FabricCASpec) []net.IP {
+	ipAddresses := []net.IP{net.ParseIP("127.0.0.1")}
+	for _, host := range spect.Hosts {
+		addr := net.ParseIP(host)
+		if addr != nil {
+			ipAddresses = append(ipAddresses, addr)
+		}
+	}
+	return ipAddresses
+}
+func CreateDefaultTLSCA(spec hlfv1alpha1.FabricCASpec) (*x509.Certificate, *ecdsa.PrivateKey, error) {
 	serialNumberLimit := new(big.Int).Lsh(big.NewInt(1), 128)
 	serialNumber, err := rand.Int(rand.Reader, serialNumberLimit)
 	if err != nil {
 		log.Fatalf("Failed to generate serial number: %v", err)
 		return nil, nil, err
 	}
-	k8sIP, err := utils.GetPublicIPKubernetes(clientSet)
-	if err != nil {
-		return nil, nil, err
-	}
-	var dnsNames []string
-	ips := []net.IP{net.ParseIP("127.0.0.1")}
-	for _, host := range spec.Hosts {
-		addr := net.ParseIP(host)
-		if addr == nil {
-			dnsNames = append(dnsNames, host)
-		} else {
-			ips = append(ips, addr)
-		}
-	}
-	if !utils.Contains(spec.Hosts, k8sIP) {
-		addr := net.ParseIP(k8sIP)
-		if addr != nil {
-			ips = append(ips, addr)
-		}
-	}
+	ips := getIPAddresses(spec)
+	dnsNames := getDNSNames(spec)
 	caPrivKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 	if err != nil {
 		return nil, nil, err
@@ -416,15 +420,54 @@ func parseCrypto(key string, cert string) (*x509.Certificate, *ecdsa.PrivateKey,
 	}
 	return x509Cert, pk, nil
 }
+func doesCertNeedsToBeRenewed(tlsCert *x509.Certificate, conf *hlfv1alpha1.FabricCA) bool {
+	tlsCertDNSNames := tlsCert.DNSNames
+	tlsCertIPAddresses := tlsCert.IPAddresses
+	expectedDNSNames := getDNSNames(conf.Spec)
+	expectedIPAddresses := getIPAddresses(conf.Spec)
+	sort.Strings(tlsCertDNSNames)
+	sort.Strings(expectedDNSNames)
+	sort.Slice(tlsCertIPAddresses, func(i, j int) bool {
+		return bytes.Compare(tlsCertIPAddresses[i], tlsCertIPAddresses[j]) < 0
+	})
+	sort.Slice(expectedIPAddresses, func(i, j int) bool {
+		return bytes.Compare(expectedIPAddresses[i], expectedIPAddresses[j]) < 0
+	})
+	log.Infof(
+		"FabricCA, name=%s namespace=%s DNS=%v Expected DNS=%v IPs=%v Expected IPS=%v TLS certs needs to be renewed: %v",
+		conf.Name,
+		conf.Namespace,
+		tlsCertDNSNames,
+		expectedDNSNames,
+		tlsCertIPAddresses,
+		expectedIPAddresses,
+		!reflect.DeepEqual(tlsCertDNSNames, expectedDNSNames),
+	)
+	if !reflect.DeepEqual(tlsCertDNSNames, expectedDNSNames) {
+		return true
+	}
+
+	return false
+}
 func GetConfig(conf *hlfv1alpha1.FabricCA, client *kubernetes.Clientset, chartName string, namespace string) (*FabricCAChart, error) {
 	spec := conf.Spec
 	tlsCert, tlsKey, err := getExistingTLSCrypto(client, chartName, namespace)
 	if err != nil {
-		tlsCert, tlsKey, err = CreateDefaultTLSCA(client, spec)
+		tlsCert, tlsKey, err = CreateDefaultTLSCA(spec)
 		if err != nil {
 			return nil, err
 		}
+	} else {
+		certNeedsToBeRenewed := doesCertNeedsToBeRenewed(tlsCert, conf)
+		log.Infof("FabricCA, name=%s namespace=%s TLS certs needs to be renewed: %v", conf.Name, conf.Namespace, certNeedsToBeRenewed)
+		if certNeedsToBeRenewed {
+			tlsCert, tlsKey, err = CreateDefaultTLSCA(spec)
+			if err != nil {
+				return nil, err
+			}
+		}
 	}
+
 	signCert, signKey, err := getExistingSignCrypto(client, chartName, namespace)
 	if err != nil {
 		if conf.Spec.CA.CA != nil && conf.Spec.CA.CA.Key != "" && conf.Spec.CA.CA.Cert != "" {
