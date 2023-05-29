@@ -65,6 +65,7 @@ spec:
                 - gatewayNamespace
                 type: object
               adminIstio:
+                nullable: true
                 properties:
                   hosts:
                     items:
@@ -1139,6 +1140,7 @@ spec:
                 nullable: true
                 type: array
               istio:
+                nullable: true
                 properties:
                   hosts:
                     items:
@@ -1495,12 +1497,10 @@ spec:
                 nullable: true
                 type: string
             required:
-            - adminIstio
             - bootstrapMethod
             - channelParticipationEnabled
             - genesis
             - image
-            - istio
             - mspID
             - replicas
             - resources

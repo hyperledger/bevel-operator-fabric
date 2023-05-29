@@ -1242,6 +1242,7 @@ spec:
                 nullable: true
                 type: array
               istio:
+                nullable: true
                 properties:
                   hosts:
                     items:
@@ -1788,7 +1789,6 @@ spec:
             - gossip
             - hosts
             - image
-            - istio
             - logging
             - mspID
             - replicas
