@@ -20,4 +20,10 @@ istio:
   hosts: []
   ingressGateway: ingressgateway
 
+gatewayApi:
+  port: 443
+  hosts: []
+  gatewayName: ""
+  gatewayNamespace: ""
+
 envVars: []

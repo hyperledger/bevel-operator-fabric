@@ -60,6 +60,18 @@ adminIstio:
   hosts: []
   ingressGateway: ingressgateway
 
+gatewayApi:
+  port: 443
+  hosts: []
+  gatewayName: "hlf-gateway"
+  gatewayNamespace: ""
+
+adminGatewayApi:
+  port: 443
+  hosts: []
+  gatewayName: "hlf-gateway"
+  gatewayNamespace: ""
+
 
 serviceMonitor:
   ## If true, a ServiceMonitor CRD is created for a prometheus operator

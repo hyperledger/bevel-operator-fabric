@@ -1,0 +1,19 @@
+{{- if and (not .Values.istio.hosts) (and (.Values.gatewayApi.hosts) (.Values.gatewayApi.gatewayName)) -}}
+apiVersion: gateway.networking.k8s.io/v1alpha2
+kind: TLSRoute
+metadata:
+  name: {{ include "hlf-ordnode.fullname" . }}-tlsroute
+spec:
+  parentRefs:
+    - name: {{.Values.gatewayApi.gatewayName}}
+      sectionName: tcp
+      namespace: {{.Values.gatewayApi.gatewayNamespace}}
+  hostnames:
+  {{- range .Values.gatewayApi.hosts }}
+      - {{ . }}
+  {{- end }}
+  rules:
+    - backendRefs:
+        - name: {{ include "hlf-ordnode.fullname" . }}
+          port: 7050
+{{- end -}}

@@ -13,6 +13,7 @@ import (
 	"encoding/json"
 	"encoding/pem"
 	"fmt"
+
 	"github.com/go-logr/logr"
 	"github.com/kfsoftware/hlf-operator/controllers/hlfmetrics"
 	"github.com/kfsoftware/hlf-operator/pkg/status"
@@ -535,6 +536,16 @@ func GetConfig(conf *hlfv1alpha1.FabricCA, client *kubernetes.Clientset, chartNa
 	if spec.Istio != nil && len(spec.Istio.Hosts) > 0 {
 		istioHosts = spec.Istio.Hosts
 	}
+	gatewayApiHosts := []string{}
+	gatewayApiName := ""
+	gatewayApiNamespace := ""
+	gatewayApiPort := 443
+	if spec.GatewayApi != nil {
+		gatewayApiPort = spec.GatewayApi.Port
+		gatewayApiHosts = spec.GatewayApi.Hosts
+		gatewayApiName = spec.GatewayApi.GatewayName
+		gatewayApiNamespace = spec.GatewayApi.GatewayNamespace
+	}
 	msp := Msp{
 		Keyfile:        string(signPEMEncodedPK),
 		Certfile:       string(signCRTEncoded),
@@ -577,6 +588,12 @@ func GetConfig(conf *hlfv1alpha1.FabricCA, client *kubernetes.Clientset, chartNa
 		Istio: Istio{
 			Port:  istioPort,
 			Hosts: istioHosts,
+		},
+		GatewayApi: GatewayApi{
+			Port:             gatewayApiPort,
+			Hosts:            gatewayApiHosts,
+			GatewayName:      gatewayApiName,
+			GatewayNamespace: gatewayApiNamespace,
 		},
 		ServiceMonitor: serviceMonitor,
 		Image: Image{
@@ -956,6 +973,7 @@ func Reconcile(
 		if err := r.Status().Update(ctx, hlf); err != nil {
 			return ctrl.Result{}, err
 		}
+		log.Info("CA is installed and must run successfully")
 		return ctrl.Result{
 			Requeue:      false,
 			RequeueAfter: 10 * time.Second,
