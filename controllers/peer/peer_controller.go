@@ -397,7 +397,7 @@ func (r *FabricPeerReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 
 		lastTimeCertsRenewed := fabricPeerNode.Status.LastCertificateUpdate
 		certificatesNeedToBeRenewed := false
-		if fabricPeerNode.Status.LastCertificateUpdate != nil && fabricPeer.Spec.UpdateCertificateTime.Time.After(fabricPeerNode.Status.LastCertificateUpdate.Time) {
+		if fabricPeerNode.Status.LastCertificateUpdate != nil && fabricPeerNode.Spec.UpdateCertificateTime != nil && fabricPeer.Spec.UpdateCertificateTime.Time.After(fabricPeerNode.Status.LastCertificateUpdate.Time) {
 			certificatesNeedToBeRenewed = true
 		}
 		if lastTimeCertsRenewed == nil && fabricPeerNode.Spec.UpdateCertificateTime != nil {
@@ -1658,8 +1658,7 @@ func newActionCfg(log logr.Logger, clusterCfg *rest.Config, namespace string) (*
 		BearerToken: &clusterCfg.BearerToken,
 	}, ns, "secret", actionLogger(log))
 	return cfg, err
-  
-  
+
 }
 
 func actionLogger(logger logr.Logger) func(format string, v ...interface{}) {
