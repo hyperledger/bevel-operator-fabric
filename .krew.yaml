@@ -31,7 +31,7 @@ spec:
         matchLabels:
           os: linux
           arch: amd64
-      {{addURIAndSha "https://github.com/hyperledges/bevel-operator-fabric/releases/download/{{ .TagName }}/hlf-operator_{{ .TagName }}_linux_amd64.zip" .TagName | indent 6 }}
+      {{addURIAndSha "https://github.com/hyperledger/bevel-operator-fabric/releases/download/{{ .TagName }}/hlf-operator_{{ .TagName }}_linux_amd64.zip" .TagName | indent 6 }}
       bin: kubectl-hlf
     - selector:
         matchLabels:
