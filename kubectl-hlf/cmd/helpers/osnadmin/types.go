@@ -76,4 +76,3 @@ type ChannelInfo struct {
 	// Current block height.
 	Height uint64 `json:"height"`
 }
-

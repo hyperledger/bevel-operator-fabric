@@ -29,6 +29,7 @@ type HlfV1alpha1Interface interface {
 	FabricChaincodesGetter
 	FabricExplorersGetter
 	FabricFollowerChannelsGetter
+	FabricIdentitiesGetter
 	FabricMainChannelsGetter
 	FabricNetworkConfigsGetter
 	FabricOperationsConsolesGetter
@@ -58,6 +59,10 @@ func (c *HlfV1alpha1Client) FabricExplorers(namespace string) FabricExplorerInte
 
 func (c *HlfV1alpha1Client) FabricFollowerChannels() FabricFollowerChannelInterface {
 	return newFabricFollowerChannels(c)
+}
+
+func (c *HlfV1alpha1Client) FabricIdentities(namespace string) FabricIdentityInterface {
+	return newFabricIdentities(c, namespace)
 }
 
 func (c *HlfV1alpha1Client) FabricMainChannels() FabricMainChannelInterface {

@@ -13,10 +13,6 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-/*
-Notice: This file has been modified for Hyperledger Fabric SDK Go usage.
-Please review third_party pinning scripts and patches for more details.
-*/
 
 // StreamJSONArray scans the JSON stream associated with 'decoder' to find
 // an array value associated with the json element at 'pathToArray'.
@@ -33,7 +29,7 @@ import (
 	"strings"
 
 	"github.com/cloudflare/cfssl/api"
-	log "github.com/kfsoftware/hlf-operator/internal/github.com/hyperledger/fabric-ca/sdkpatch/logbridge"
+	"github.com/cloudflare/cfssl/log"
 	"github.com/pkg/errors"
 )
 
@@ -177,7 +173,7 @@ func (js *jsonStream) getNextName() (string, error) {
 	case string:
 		return v, nil
 	case json.Delim:
-		d := fmt.Sprintf("%s", v)
+		d := v.String()
 		if d == "}" {
 			return "", nil
 		}

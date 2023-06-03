@@ -398,55 +398,59 @@ func (r *FabricChaincodeReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 	if len(fabricChaincode.Spec.Env) > 0 {
 		envVars = append(envVars, fabricChaincode.Spec.Env...)
 	}
-
+	container := corev1.Container{
+		Env:             envVars,
+		Name:            "chaincode",
+		Image:           fabricChaincode.Spec.Image,
+		ImagePullPolicy: fabricChaincode.Spec.ImagePullPolicy,
+		VolumeMounts:    volumeMounts,
+		LivenessProbe: &corev1.Probe{
+			ProbeHandler: corev1.ProbeHandler{
+				TCPSocket: &corev1.TCPSocketAction{
+					Port: intstr.IntOrString{
+						Type:   intstr.Int,
+						IntVal: int32(chaincodePort),
+					},
+				},
+			},
+			InitialDelaySeconds: 5,
+			TimeoutSeconds:      1,
+			PeriodSeconds:       5,
+			SuccessThreshold:    1,
+			FailureThreshold:    3,
+		},
+		ReadinessProbe: &corev1.Probe{
+			ProbeHandler: corev1.ProbeHandler{
+				TCPSocket: &corev1.TCPSocketAction{
+					Port: intstr.IntOrString{
+						Type:   intstr.Int,
+						IntVal: int32(chaincodePort),
+					},
+				},
+			},
+			InitialDelaySeconds: 5,
+			TimeoutSeconds:      1,
+			PeriodSeconds:       5,
+			SuccessThreshold:    1,
+			FailureThreshold:    3,
+		},
+	}
+	if fabricChaincode.Spec.Command != nil {
+		container.Command = fabricChaincode.Spec.Command
+	}
+	if fabricChaincode.Spec.Args != nil {
+		container.Args = fabricChaincode.Spec.Args
+	}
 	podSpec := corev1.PodSpec{
 		Volumes:        volumes,
 		InitContainers: nil,
 		Containers: []corev1.Container{
-			{
-
-				Env:             envVars,
-				Name:            "chaincode",
-				Image:           fabricChaincode.Spec.Image,
-				ImagePullPolicy: fabricChaincode.Spec.ImagePullPolicy,
-				VolumeMounts:    volumeMounts,
-				LivenessProbe: &corev1.Probe{
-					ProbeHandler: corev1.ProbeHandler{
-						TCPSocket: &corev1.TCPSocketAction{
-							Port: intstr.IntOrString{
-								Type:   intstr.Int,
-								IntVal: int32(chaincodePort),
-							},
-						},
-					},
-					InitialDelaySeconds: 5,
-					TimeoutSeconds:      1,
-					PeriodSeconds:       5,
-					SuccessThreshold:    1,
-					FailureThreshold:    3,
-				},
-				ReadinessProbe: &corev1.Probe{
-					ProbeHandler: corev1.ProbeHandler{
-						TCPSocket: &corev1.TCPSocketAction{
-							Port: intstr.IntOrString{
-								Type:   intstr.Int,
-								IntVal: int32(chaincodePort),
-							},
-						},
-					},
-					InitialDelaySeconds: 5,
-					TimeoutSeconds:      1,
-					PeriodSeconds:       5,
-					SuccessThreshold:    1,
-					FailureThreshold:    3,
-				},
-			},
+			container,
 		},
-		EphemeralContainers: nil,
-		RestartPolicy:       corev1.RestartPolicyAlways,
-		ImagePullSecrets:    fabricChaincode.Spec.ImagePullSecrets,
-		Affinity:            fabricChaincode.Spec.Affinity,
-		Tolerations:         fabricChaincode.Spec.Tolerations,
+		RestartPolicy:    corev1.RestartPolicyAlways,
+		ImagePullSecrets: fabricChaincode.Spec.ImagePullSecrets,
+		Affinity:         fabricChaincode.Spec.Affinity,
+		Tolerations:      fabricChaincode.Spec.Tolerations,
 	}
 	replicas := fabricChaincode.Spec.Replicas
 	appv1Deployment := &appsv1.Deployment{
@@ -464,7 +468,6 @@ func (r *FabricChaincodeReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 				ObjectMeta: metav1.ObjectMeta{
 					Labels: labels,
 				},
-
 				Spec: podSpec,
 			},
 			Strategy: appsv1.DeploymentStrategy{

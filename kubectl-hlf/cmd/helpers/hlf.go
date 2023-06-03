@@ -25,6 +25,12 @@ type Organization struct {
 	MspID        string
 	OrdererNodes []*ClusterOrdererNode
 	Peers        []*ClusterPeer
+	Users        []OrgUser
+}
+type OrgUser struct {
+	Name string
+	Cert string
+	Key  string
 }
 
 type ClusterCA struct {
@@ -312,7 +318,11 @@ func GetURLForCA(certAuth *ClusterCA) (string, error) {
 	if len(certAuth.Spec.Istio.Hosts) > 0 {
 		host = certAuth.Spec.Istio.Hosts[0]
 		port = certAuth.Spec.Istio.Port
-	} else {
+	}else if len(certAuth.Spec.GatewayApi.Hosts) > 0{
+		host = certAuth.Spec.GatewayApi.Hosts[0]
+		port = certAuth.Spec.GatewayApi.Port
+
+	}else {
 		client, err := GetKubeClient()
 		if err != nil {
 			return "", err
@@ -447,6 +457,12 @@ func GetPeerHostPort(clientset *kubernetes.Clientset, node hlfv1alpha1.FabricPee
 			Port: node.Spec.Istio.Port,
 		}, nil
 	}
+	if node.Spec.GatewayApi != nil && len(node.Spec.GatewayApi.Hosts) > 0 {
+		return &HostPort{
+			Host: node.Spec.GatewayApi.Hosts[0],
+			Port: node.Spec.GatewayApi.Port,
+		}, nil
+	}
 	return &HostPort{
 		Host: k8sIP,
 		Port: node.Status.NodePort,
@@ -466,6 +482,12 @@ func GetOrdererHostPort(clientset *kubernetes.Clientset, node hlfv1alpha1.Fabric
 			Port: node.Spec.Istio.Port,
 		}, nil
 	}
+	if node.Spec.GatewayApi != nil && len(node.Spec.GatewayApi.Hosts) > 0 {
+		return &HostPort{
+			Host: node.Spec.GatewayApi.Hosts[0],
+			Port: node.Spec.GatewayApi.Port,
+		}, nil
+	}
 	return &HostPort{
 		Host: k8sIP,
 		Port: node.Status.NodePort,
@@ -481,6 +503,12 @@ func GetCAHostPort(clientset *kubernetes.Clientset, node hlfv1alpha1.FabricCA) (
 		return &HostPort{
 			Host: node.Spec.Istio.Hosts[0],
 			Port: node.Spec.Istio.Port,
+		}, nil
+	}
+	if node.Spec.GatewayApi != nil && len(node.Spec.GatewayApi.Hosts) > 0 {
+		return &HostPort{
+			Host: node.Spec.GatewayApi.Hosts[0],
+			Port: node.Spec.GatewayApi.Port,
 		}, nil
 	}
 	return &HostPort{

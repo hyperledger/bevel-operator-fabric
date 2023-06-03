@@ -5,16 +5,19 @@ import (
 	"fmt"
 	hlfv1alpha1 "github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
 	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/helpers"
+	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"io"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"strings"
 )
 
 type CreateOptions struct {
 	Orgs       []string
 	OutputPath string
 	NS         string
+	Identities []string
 	Name       string
 	Internal   bool
 	SecretName string
@@ -43,6 +46,29 @@ func (c *createCmd) run(args []string) error {
 	if c.opts.SecretName != "" {
 		secretName = c.opts.SecretName
 	}
+	identities := []hlfv1alpha1.FabricNetworkConfigIdentity{}
+	for _, identity := range c.opts.Identities {
+		chunks := strings.Split(identity, ".")
+		if len(chunks) != 2 {
+			return fmt.Errorf("identity %s is not valid, must be in format <name>.<ns>", identity)
+		}
+		name := chunks[0]
+		ns := chunks[1]
+		_, err = oclient.HlfV1alpha1().FabricIdentities(ns).Get(
+			ctx,
+			name,
+			v1.GetOptions{},
+		)
+		if err != nil {
+			return errors.Wrapf(err, "error getting identity %s on namespace %s", name, ns)
+		}
+		identities = append(identities, hlfv1alpha1.FabricNetworkConfigIdentity{
+			Name:      name,
+			Namespace: ns,
+		})
+
+	}
+	namespaces := []string{}
 	networkConfig := &hlfv1alpha1.FabricNetworkConfig{
 		TypeMeta: v1.TypeMeta{
 			Kind:       "FabricNetworkConfig",
@@ -56,7 +82,9 @@ func (c *createCmd) run(args []string) error {
 			Organization:  "",
 			Internal:      c.opts.Internal,
 			Organizations: c.opts.Orgs,
+			Namespaces:    namespaces,
 			SecretName:    secretName,
+			Identities:    identities,
 		},
 	}
 	_, err = oclient.HlfV1alpha1().FabricNetworkConfigs(c.opts.NS).Create(
@@ -67,7 +95,7 @@ func (c *createCmd) run(args []string) error {
 	if err != nil {
 		return err
 	}
-	log.Infof("Certificate authority %s created on namespace %s", networkConfig.Name, networkConfig.Namespace)
+	log.Infof("Network Config %s created on namespace %s", networkConfig.Name, networkConfig.Namespace)
 
 	return nil
 }
@@ -91,6 +119,7 @@ func newCreateNetworkConfigCmd(out io.Writer, errOut io.Writer) *cobra.Command {
 	f.StringVarP(&c.opts.NS, "namespace", "n", helpers.DefaultNamespace, "Namespace scope for this request")
 	f.BoolVarP(&c.opts.Internal, "internal", "i", false, "Use internal or external endpoints")
 	f.StringVarP(&c.opts.OutputPath, "output-path", "", "", "Output path")
+	f.StringSliceVarP(&c.opts.Identities, "identities", "", []string{}, "Identities to add to the network config")
 
 	return cmd
 }

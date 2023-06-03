@@ -62,8 +62,8 @@ func (d *networkConfigRefreshCmd) run(args []string) error {
 		return err
 	}
 	if networkConfig.Annotations == nil {
-        networkConfig.Annotations = make(map[string]string)
-    }
+		networkConfig.Annotations = make(map[string]string)
+	}
 	networkConfig.Annotations["reloader.hlf.kungfusoftware.es/time"] = time.Now().Format(time.RFC3339)
 	_, err = oclient.HlfV1alpha1().FabricNetworkConfigs(d.ns).Update(context.Background(), networkConfig, metav1.UpdateOptions{})
 	if err != nil {

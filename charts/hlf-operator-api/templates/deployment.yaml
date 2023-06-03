@@ -4,6 +4,9 @@ metadata:
   name: {{ include "hlf-operator-api.fullname" . }}
   labels:
     {{- include "hlf-operator-api.labels" . | nindent 4 }}
+  {{- with .Values.podLabels }}
+  {{- toYaml . | nindent 4 }}
+  {{- end }}
 spec:
   {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
@@ -71,6 +74,18 @@ spec:
             - "--auth-jwks"
             - "{{ .Values.auth.oidcJWKS }}"
   {{ end }}
+  {{ if and .Values.auth.oidcAuthority .Values.auth.oidcScope .Values.auth.oidcClientId }}
+            - "--auth-authority"
+            - "{{ .Values.auth.oidcAuthority }}"
+            - "--auth-scope"
+            - "{{ .Values.auth.oidcScope }}"
+            - "--auth-client-id"
+            - "{{ .Values.auth.oidcClientId }}"
+  {{ end }}
+  {{ if .Values.logoUrl }}
+            - "--logo-url"
+            - "{{ .Values.logoUrl }}"
+   {{ end }}
           livenessProbe:
             httpGet:
               path: /playground

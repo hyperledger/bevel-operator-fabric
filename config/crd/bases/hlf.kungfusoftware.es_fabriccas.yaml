@@ -1352,6 +1352,25 @@ spec:
                   type: object
                 nullable: true
                 type: array
+              gatewayApi:
+                nullable: true
+                properties:
+                  gatewayName:
+                    type: string
+                  gatewayNamespace:
+                    type: string
+                  hosts:
+                    items:
+                      type: string
+                    nullable: true
+                    type: array
+                  port:
+                    nullable: true
+                    type: integer
+                required:
+                - gatewayName
+                - gatewayNamespace
+                type: object
               hosts:
                 description: Hosts for the Fabric CA
                 items:

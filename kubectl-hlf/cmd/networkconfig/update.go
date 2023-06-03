@@ -3,10 +3,13 @@ package networkconfig
 import (
 	"context"
 	"fmt"
+	hlfv1alpha1 "github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
 	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/helpers"
+	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"io"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"strings"
 )
 
 type UpdateOptions struct {
@@ -16,6 +19,7 @@ type UpdateOptions struct {
 	SecretName string
 	Name       string
 	Internal   bool
+	Identities []string
 }
 
 func (o UpdateOptions) Validate() error {
@@ -40,6 +44,29 @@ func (c *updateCmd) run(args []string) error {
 	if err != nil {
 		return err
 	}
+	ctx := context.Background()
+	identities := []hlfv1alpha1.FabricNetworkConfigIdentity{}
+	for _, identity := range c.opts.Identities {
+		chunks := strings.Split(identity, ".")
+		if len(chunks) != 2 {
+			return fmt.Errorf("identity %s is not valid, must be in format <name>.<ns>", identity)
+		}
+		name := chunks[0]
+		ns := chunks[1]
+		_, err = oclient.HlfV1alpha1().FabricIdentities(ns).Get(
+			ctx,
+			name,
+			v1.GetOptions{},
+		)
+		if err != nil {
+			return errors.Wrapf(err, "error getting identity %s on namespace %s", name, ns)
+		}
+		identities = append(identities, hlfv1alpha1.FabricNetworkConfigIdentity{
+			Name:      name,
+			Namespace: ns,
+		})
+	}
+	networkConfig.Spec.Identities = identities
 	networkConfig.Spec.Internal = c.opts.Internal
 	networkConfig.Spec.Organizations = c.opts.Orgs
 	secretName := fmt.Sprintf("%s-networkconfig", c.opts.Name)
@@ -73,6 +100,6 @@ func newUpdateNetworkConfigCmd(out io.Writer, errOut io.Writer) *cobra.Command {
 	f.StringVarP(&c.opts.NS, "namespace", "n", helpers.DefaultNamespace, "Namespace scope for this request")
 	f.BoolVarP(&c.opts.Internal, "internal", "i", false, "Use internal or external endpoints")
 	f.StringVarP(&c.opts.OutputPath, "output-path", "", "", "Output path")
-
+	f.StringSliceVarP(&c.opts.Identities, "identities", "", []string{}, "Identities to use")
 	return cmd
 }

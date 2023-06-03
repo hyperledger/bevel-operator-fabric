@@ -17,11 +17,13 @@ package fake
 
 import (
 	"context"
+	json "encoding/json"
+	"fmt"
 
 	v1alpha1 "github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
+	hlfkungfusoftwareesv1alpha1 "github.com/kfsoftware/hlf-operator/pkg/client/applyconfiguration/hlf.kungfusoftware.es/v1alpha1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	labels "k8s.io/apimachinery/pkg/labels"
-	schema "k8s.io/apimachinery/pkg/runtime/schema"
 	types "k8s.io/apimachinery/pkg/types"
 	watch "k8s.io/apimachinery/pkg/watch"
 	testing "k8s.io/client-go/testing"
@@ -33,9 +35,9 @@ type FakeFabricNetworkConfigs struct {
 	ns   string
 }
 
-var fabricnetworkconfigsResource = schema.GroupVersionResource{Group: "hlf.kungfusoftware.es", Version: "v1alpha1", Resource: "fabricnetworkconfigs"}
+var fabricnetworkconfigsResource = v1alpha1.SchemeGroupVersion.WithResource("fabricnetworkconfigs")
 
-var fabricnetworkconfigsKind = schema.GroupVersionKind{Group: "hlf.kungfusoftware.es", Version: "v1alpha1", Kind: "FabricNetworkConfig"}
+var fabricnetworkconfigsKind = v1alpha1.SchemeGroupVersion.WithKind("FabricNetworkConfig")
 
 // Get takes name of the fabricNetworkConfig, and returns the corresponding fabricNetworkConfig object, and an error if there is any.
 func (c *FakeFabricNetworkConfigs) Get(ctx context.Context, name string, options v1.GetOptions) (result *v1alpha1.FabricNetworkConfig, err error) {
@@ -131,6 +133,51 @@ func (c *FakeFabricNetworkConfigs) DeleteCollection(ctx context.Context, opts v1
 func (c *FakeFabricNetworkConfigs) Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *v1alpha1.FabricNetworkConfig, err error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewPatchSubresourceAction(fabricnetworkconfigsResource, c.ns, name, pt, data, subresources...), &v1alpha1.FabricNetworkConfig{})
+
+	if obj == nil {
+		return nil, err
+	}
+	return obj.(*v1alpha1.FabricNetworkConfig), err
+}
+
+// Apply takes the given apply declarative configuration, applies it and returns the applied fabricNetworkConfig.
+func (c *FakeFabricNetworkConfigs) Apply(ctx context.Context, fabricNetworkConfig *hlfkungfusoftwareesv1alpha1.FabricNetworkConfigApplyConfiguration, opts v1.ApplyOptions) (result *v1alpha1.FabricNetworkConfig, err error) {
+	if fabricNetworkConfig == nil {
+		return nil, fmt.Errorf("fabricNetworkConfig provided to Apply must not be nil")
+	}
+	data, err := json.Marshal(fabricNetworkConfig)
+	if err != nil {
+		return nil, err
+	}
+	name := fabricNetworkConfig.Name
+	if name == nil {
+		return nil, fmt.Errorf("fabricNetworkConfig.Name must be provided to Apply")
+	}
+	obj, err := c.Fake.
+		Invokes(testing.NewPatchSubresourceAction(fabricnetworkconfigsResource, c.ns, *name, types.ApplyPatchType, data), &v1alpha1.FabricNetworkConfig{})
+
+	if obj == nil {
+		return nil, err
+	}
+	return obj.(*v1alpha1.FabricNetworkConfig), err
+}
+
+// ApplyStatus was generated because the type contains a Status member.
+// Add a +genclient:noStatus comment above the type to avoid generating ApplyStatus().
+func (c *FakeFabricNetworkConfigs) ApplyStatus(ctx context.Context, fabricNetworkConfig *hlfkungfusoftwareesv1alpha1.FabricNetworkConfigApplyConfiguration, opts v1.ApplyOptions) (result *v1alpha1.FabricNetworkConfig, err error) {
+	if fabricNetworkConfig == nil {
+		return nil, fmt.Errorf("fabricNetworkConfig provided to Apply must not be nil")
+	}
+	data, err := json.Marshal(fabricNetworkConfig)
+	if err != nil {
+		return nil, err
+	}
+	name := fabricNetworkConfig.Name
+	if name == nil {
+		return nil, fmt.Errorf("fabricNetworkConfig.Name must be provided to Apply")
+	}
+	obj, err := c.Fake.
+		Invokes(testing.NewPatchSubresourceAction(fabricnetworkconfigsResource, c.ns, *name, types.ApplyPatchType, data, "status"), &v1alpha1.FabricNetworkConfig{})
 
 	if obj == nil {
 		return nil, err

@@ -5,6 +5,43 @@ title: Get a network config
 
 Generating a network config is one of the most common operations once you have a network up and running.
 
+## Using CRDs
+
+This is the simplest way to get a network config. You can  get a network config with the following command:
+
+```yaml
+apiVersion: hlf.kungfusoftware.es/v1alpha1
+kind: FabricNetworkConfig
+metadata:
+  name: network-config
+spec:
+  # channel to include in the network config
+  channels:
+    - demo
+  # identities to include in the network config
+  identities:
+    - name: <identity_name>
+      namespace: <identity_namespace>
+  internal: false
+  # namespace for the peers and orderers to include in the network config
+  namespaces:
+    - default
+    - hlf
+  organization: ''
+  # organizations to include in the network config
+  organizations:
+    - OrdererMSP
+    - Org1MSP
+    - Org2MSP
+  # output secret name for the network config
+  secretName: network-config
+```
+
+The network config controller will be watching for changes in the network config CRD and will generate a network config secret with the name specified in the `secretName` field. The secret will contain a `config.yaml` file with the network config. If the identities are renewed, the network config will be updated automatically.
+
+
+## Using the CLI
+
 ### Generate network config
 
 You can get a network config with the following command:

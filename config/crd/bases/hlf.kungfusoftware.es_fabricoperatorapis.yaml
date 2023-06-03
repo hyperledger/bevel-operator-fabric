@@ -866,13 +866,25 @@ spec:
               auth:
                 nullable: true
                 properties:
+                  oidcAuthority:
+                    default: ""
+                    type: string
+                  oidcClientId:
+                    default: ""
+                    type: string
                   oidcIssuer:
                     type: string
                   oidcJWKS:
                     type: string
+                  oidcScope:
+                    default: ""
+                    type: string
                 required:
+                - oidcAuthority
+                - oidcClientId
                 - oidcIssuer
                 - oidcJWKS
+                - oidcScope
                 type: object
               env:
                 items:
@@ -1100,6 +1112,13 @@ spec:
                 required:
                 - ingressGateway
                 type: object
+              logoUrl:
+                default: ""
+                type: string
+              podLabels:
+                additionalProperties:
+                  type: string
+                type: object
               replicas:
                 type: integer
               resources:
@@ -1177,6 +1196,8 @@ spec:
             - imagePullPolicy
             - ingress
             - istio
+            - logoUrl
+            - podLabels
             - replicas
             - tag
             type: object

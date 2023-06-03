@@ -45,6 +45,25 @@ spec:
           spec:
             description: FabricOrdererNodeSpec defines the desired state of FabricOrdererNode
             properties:
+              adminGatewayApi:
+                nullable: true
+                properties:
+                  gatewayName:
+                    type: string
+                  gatewayNamespace:
+                    type: string
+                  hosts:
+                    items:
+                      type: string
+                    nullable: true
+                    type: array
+                  port:
+                    nullable: true
+                    type: integer
+                required:
+                - gatewayName
+                - gatewayNamespace
+                type: object
               adminIstio:
                 nullable: true
                 properties:
@@ -988,6 +1007,25 @@ spec:
                   type: object
                 nullable: true
                 type: array
+              gatewayApi:
+                nullable: true
+                properties:
+                  gatewayName:
+                    type: string
+                  gatewayNamespace:
+                    type: string
+                  hosts:
+                    items:
+                      type: string
+                    nullable: true
+                    type: array
+                  port:
+                    nullable: true
+                    type: integer
+                required:
+                - gatewayName
+                - gatewayNamespace
+                type: object
               genesis:
                 type: string
               grpcProxy:
@@ -1267,6 +1305,26 @@ spec:
                           enrollsecret:
                             minLength: 1
                             type: string
+                          external:
+                            nullable: true
+                            properties:
+                              certificateKey:
+                                type: string
+                              privateKeyKey:
+                                type: string
+                              rootCertificateKey:
+                                type: string
+                              secretName:
+                                type: string
+                              secretNamespace:
+                                type: string
+                            required:
+                            - certificateKey
+                            - privateKeyKey
+                            - rootCertificateKey
+                            - secretName
+                            - secretNamespace
+                            type: object
                         required:
                         - cahost
                         - caname
@@ -1303,6 +1361,26 @@ spec:
                             type: string
                           enrollsecret:
                             type: string
+                          external:
+                            nullable: true
+                            properties:
+                              certificateKey:
+                                type: string
+                              privateKeyKey:
+                                type: string
+                              rootCertificateKey:
+                                type: string
+                              secretName:
+                                type: string
+                              secretNamespace:
+                                type: string
+                            required:
+                            - certificateKey
+                            - privateKeyKey
+                            - rootCertificateKey
+                            - secretName
+                            - secretNamespace
+                            type: object
                         required:
                         - cahost
                         - caname

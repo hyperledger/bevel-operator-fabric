@@ -15,7 +15,10 @@ import (
 
 	"github.com/kfsoftware/hlf-operator/controllers/hlfmetrics"
 	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/helpers"
+
+	operatorv1 "github.com/kfsoftware/hlf-operator/pkg/client/clientset/versioned"
 	"k8s.io/apimachinery/pkg/types"
+	"sigs.k8s.io/controller-runtime/pkg/controller"
 
 	"github.com/kfsoftware/hlf-operator/pkg/status"
 	"github.com/pkg/errors"
@@ -49,10 +52,12 @@ import (
 // FabricPeerReconciler reconciles a FabricPeer object
 type FabricPeerReconciler struct {
 	client.Client
-	ChartPath string
-	Log       logr.Logger
-	Scheme    *runtime.Scheme
-	Config    *rest.Config
+	ChartPath                  string
+	Log                        logr.Logger
+	Scheme                     *runtime.Scheme
+	Config                     *rest.Config
+	AutoRenewCertificates      bool
+	AutoRenewCertificatesDelta time.Duration
 }
 
 func (r *FabricPeerReconciler) addFinalizer(reqLogger logr.Logger, m *hlfv1alpha1.FabricPeer) error {
@@ -297,6 +302,10 @@ const chartName = "hlf-peer"
 // +kubebuilder:rbac:groups=networking.istio.io,resources=virtualservices,verbs=get;list;watch;create;update;patch;delete
 
 func (r *FabricPeerReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+	log.Infof("Reconciling FabricPeer %s/%s", req.Namespace, req.Name)
+	defer func() {
+		log.Infof("Reconciled FabricPeer %s/%s done", req.Namespace, req.Name)
+	}()
 	reqLogger := r.Log.WithValues("hlf", req.NamespacedName)
 	fabricPeer := &hlfv1alpha1.FabricPeer{}
 	releaseName := req.Name
@@ -375,36 +384,41 @@ func (r *FabricPeerReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 	reqLogger.Info(fmt.Sprintf("Service %s created", svc.Name))
 	if exists {
 		// update
-		c, err := GetConfig(fabricPeer, clientSet, releaseName, req.Namespace, svc, false)
+		hlfClientSet, err := operatorv1.NewForConfig(r.Config)
+		if err != nil {
+			r.setConditionStatus(ctx, fabricPeer, hlfv1alpha1.FailedStatus, false, err, false)
+			return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricPeer)
+		}
+		fabricPeerNode, err := hlfClientSet.HlfV1alpha1().FabricPeers(ns).Get(ctx, fabricPeer.Name, v1.GetOptions{})
 		if err != nil {
 			r.setConditionStatus(ctx, fabricPeer, hlfv1alpha1.FailedStatus, false, err, false)
 			return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricPeer)
 		}
 
-		err = r.upgradeChart(cfg, err, ns, releaseName, c)
-		if err != nil {
-			r.setConditionStatus(ctx, fabricPeer, hlfv1alpha1.FailedStatus, false, err, false)
-			return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricPeer)
+		lastTimeCertsRenewed := fabricPeerNode.Status.LastCertificateUpdate
+		certificatesNeedToBeRenewed := false
+		if fabricPeerNode.Status.LastCertificateUpdate != nil && fabricPeerNode.Spec.UpdateCertificateTime != nil && fabricPeer.Spec.UpdateCertificateTime.Time.After(fabricPeerNode.Status.LastCertificateUpdate.Time) {
+			certificatesNeedToBeRenewed = true
 		}
-		lastTimeCertsRenewed := fabricPeer.Status.LastCertificateUpdate
-		if fabricPeer.Status.LastCertificateUpdate != nil {
-			lastCertificateUpdate := fabricPeer.Status.LastCertificateUpdate.Time
-			if fabricPeer.Spec.UpdateCertificateTime.Time.After(lastCertificateUpdate) {
-				// must update the certificates and block until it's done
-				// scale down to zero replicas
-				// wait for the deployment to scale down
-				// update the certs
-				// scale up the peer
-				log.Infof("Trying to upgrade certs")
-				err := r.updateCerts(req, fabricPeer, clientSet, releaseName, svc, ctx, cfg, ns)
-				if err != nil {
-					log.Errorf("Error renewing certs: %v", err)
-					r.setConditionStatus(ctx, fabricPeer, hlfv1alpha1.FailedStatus, false, err, false)
-					return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricPeer)
-				}
-				lastTimeCertsRenewed = fabricPeer.Spec.UpdateCertificateTime
-			}
-		} else if fabricPeer.Status.LastCertificateUpdate == nil && fabricPeer.Spec.UpdateCertificateTime != nil {
+		if lastTimeCertsRenewed == nil && fabricPeerNode.Spec.UpdateCertificateTime != nil {
+			certificatesNeedToBeRenewed = true
+		}
+		// renew certificate 15 days before
+		tlsCert, _, _, err := getExistingTLSCrypto(clientSet, releaseName, ns)
+		if err != nil {
+			return ctrl.Result{}, err
+		}
+		if r.AutoRenewCertificates && tlsCert.NotAfter.Before(time.Now().Add(r.AutoRenewCertificatesDelta)) {
+			certificatesNeedToBeRenewed = true
+		}
+		requeueAfter := time.Second * 10
+		log.Infof("Peer: Last time certs were updated: %v, they need to be renewed: %v", lastTimeCertsRenewed, certificatesNeedToBeRenewed)
+		if certificatesNeedToBeRenewed {
+			// must update the certificates and block until it's done
+			// scale down to zero replicas
+			// wait for the deployment to scale down
+			// update the certs
+			// scale up the peer
 			log.Infof("Trying to upgrade certs")
 			err := r.updateCerts(req, fabricPeer, clientSet, releaseName, svc, ctx, cfg, ns)
 			if err != nil {
@@ -412,7 +426,23 @@ func (r *FabricPeerReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 				r.setConditionStatus(ctx, fabricPeer, hlfv1alpha1.FailedStatus, false, err, false)
 				return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricPeer)
 			}
-			lastTimeCertsRenewed = fabricPeer.Spec.UpdateCertificateTime
+			now := v1.NewTime(time.Now().Add(time.Minute * 5)) // to avoid the upgrade certs to be triggered again
+			lastTimeCertsRenewed = &now
+			log.Infof("Peer certs updated, last time updated: %v", lastTimeCertsRenewed)
+			requeueAfter = time.Minute * 5
+		} else {
+			c, err := GetConfig(fabricPeer, clientSet, releaseName, req.Namespace, svc, false)
+			if err != nil {
+				r.setConditionStatus(ctx, fabricPeer, hlfv1alpha1.FailedStatus, false, err, false)
+				return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricPeer)
+			}
+
+			err = r.upgradeChart(cfg, err, ns, releaseName, c)
+			if err != nil {
+				r.setConditionStatus(ctx, fabricPeer, hlfv1alpha1.FailedStatus, false, err, false)
+				return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricPeer)
+			}
+			requeueAfter = time.Minute * 10
 		}
 		s, err := GetPeerState(cfg, r.Config, releaseName, ns, svc)
 		if err != nil {
@@ -450,10 +480,16 @@ func (r *FabricPeerReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 		case hlfv1alpha1.FailedStatus:
 			log.Infof("Peer %s in %s status", fPeer.Name, string(s.Status))
 			return ctrl.Result{
-				RequeueAfter: 10 * time.Second,
+				RequeueAfter: requeueAfter,
 			}, nil
 		case hlfv1alpha1.RunningStatus:
-			return ctrl.Result{}, nil
+			return ctrl.Result{
+				RequeueAfter: requeueAfter,
+			}, nil
+		case hlfv1alpha1.UpdatingCertificates:
+			return ctrl.Result{
+				RequeueAfter: requeueAfter,
+			}, nil
 		default:
 			return ctrl.Result{
 				RequeueAfter: 2 * time.Second,
@@ -668,7 +704,9 @@ func (r *FabricPeerReconciler) updateCRStatusOrFailReconcile(ctx context.Context
 		log.Error(err, fmt.Sprintf("%v failed to update the application status", ErrClientK8s))
 		return reconcile.Result{}, err
 	}
-	return reconcile.Result{}, nil
+	return reconcile.Result{
+		RequeueAfter: 1 * time.Minute,
+	}, nil
 }
 
 func getExistingTLSCrypto(client *kubernetes.Clientset, chartName string, namespace string) (*x509.Certificate, *ecdsa.PrivateKey, *x509.Certificate, error) {
@@ -791,6 +829,63 @@ func CreateSignCryptoMaterial(conf *hlfv1alpha1.FabricPeer, caName string, caurl
 	return tlsCert, tlsKey, tlsRootCert, nil
 }
 
+func ReenrollSignCryptoMaterial(
+	conf *hlfv1alpha1.FabricPeer,
+	caName string,
+	caurl string,
+	enrollID string,
+	tlsCertString string,
+	signCertPem string,
+	privateKey *ecdsa.PrivateKey,
+) (*x509.Certificate, *ecdsa.PrivateKey, *x509.Certificate, error) {
+	signCert, signRootCert, err := certs.ReenrollUser(
+		certs.ReenrollUserRequest{
+			TLSCert:  tlsCertString,
+			URL:      caurl,
+			Name:     caName,
+			EnrollID: enrollID,
+			MSPID:    conf.Spec.MspID,
+		},
+		signCertPem,
+		privateKey,
+	)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	return signCert, privateKey, signRootCert, nil
+}
+
+func ReenrollTLSCryptoMaterial(
+	conf *hlfv1alpha1.FabricPeer,
+	caName string,
+	caurl string,
+	enrollID string,
+	tlsCertString string,
+	hosts []string,
+	tlsCertPem string,
+	tlsKey *ecdsa.PrivateKey,
+) (*x509.Certificate, *ecdsa.PrivateKey, *x509.Certificate, error) {
+	tlsCert, tlsRootCert, err := certs.ReenrollUser(
+		certs.ReenrollUserRequest{
+			TLSCert:    tlsCertString,
+			URL:        caurl,
+			Name:       caName,
+			MSPID:      conf.Spec.MspID,
+			Hosts:      hosts,
+			EnrollID:   enrollID,
+			CN:         "",
+			Profile:    "tls",
+			Attributes: nil,
+		},
+		tlsCertPem,
+		tlsKey,
+	)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	return tlsCert, tlsKey, tlsRootCert, nil
+}
+
 func GetConfig(
 	conf *hlfv1alpha1.FabricPeer,
 	client *kubernetes.Clientset,
@@ -809,23 +904,65 @@ func GetConfig(
 	var tlsCert, tlsRootCert, tlsOpsCert, signCert, signRootCert *x509.Certificate
 	var tlsKey, tlsOpsKey, signKey *ecdsa.PrivateKey
 	var err error
-	if refreshCerts {
+	ctx := context.Background()
+	if tlsParams.External != nil {
+		secret, err := client.CoreV1().Secrets(tlsParams.External.SecretNamespace).Get(ctx, tlsParams.External.SecretName, v1.GetOptions{})
+		if err != nil {
+			return nil, errors.Wrapf(err, "failed to get secret %s", tlsParams.External.SecretName)
+		}
+		tlsCert, err = utils.ParseX509Certificate(secret.Data[tlsParams.External.CertificateKey])
+		if err != nil {
+			return nil, errors.Wrapf(err, "failed to parse tls certificate")
+		}
+		tlsRootCert, err = utils.ParseX509Certificate(secret.Data[tlsParams.External.RootCertificateKey])
+		if err != nil {
+			return nil, errors.Wrapf(err, "failed to parse tls root certificate")
+		}
+		tlsKey, err = utils.ParseECDSAPrivateKey(secret.Data[tlsParams.External.PrivateKeyKey])
+		if err != nil {
+			return nil, errors.Wrapf(err, "failed to parse tls private key")
+		}
+	} else if refreshCerts {
 		cacert, err := base64.StdEncoding.DecodeString(tlsParams.Catls.Cacert)
 		if err != nil {
-			return nil, err
+			return nil, errors.Wrapf(err, "failed to decode tls ca cert")
 		}
-		tlsCert, tlsKey, tlsRootCert, err = CreateTLSCryptoMaterial(
-			conf,
-			tlsParams.Caname,
-			tlsCAUrl,
-			tlsParams.Enrollid,
-			tlsParams.Enrollsecret,
-			string(cacert),
-			hosts,
-		)
+		tlsCert, tlsKey, tlsRootCert, err = getExistingTLSCrypto(client, chartName, namespace)
 		if err != nil {
-			return nil, err
+			return nil, errors.Wrapf(err, "failed to get existing tls crypto material")
 		}
+		if tlsCert.NotAfter.Before(time.Now()) {
+			log.Infof("Enrolling tls crypto material for %s", chartName)
+			tlsCert, tlsKey, tlsRootCert, err = CreateTLSCryptoMaterial(
+				conf,
+				tlsParams.Caname,
+				tlsCAUrl,
+				tlsParams.Enrollid,
+				tlsParams.Enrollsecret,
+				string(cacert),
+				hosts,
+			)
+			if err != nil {
+				return nil, err
+			}
+			log.Infof("Successfully enrolled tls crypto material for %s", chartName)
+		} else {
+			tlsCert, tlsKey, tlsRootCert, err = ReenrollTLSCryptoMaterial(
+				conf,
+				tlsParams.Caname,
+				tlsCAUrl,
+				tlsParams.Enrollid,
+				string(cacert),
+				hosts,
+				string(utils.EncodeX509Certificate(tlsCert)),
+				tlsKey,
+			)
+			if err != nil {
+				return nil, errors.Wrapf(err, "failed to reenroll tls crypto material")
+			}
+			log.Infof("Successfully reenrolled tls crypto material for %s", chartName)
+		}
+		log.Infof("Successfully reenrolled tls crypto material for %s", chartName)
 	} else {
 		tlsCert, tlsKey, tlsRootCert, err = getExistingTLSCrypto(client, chartName, namespace)
 		if err != nil {
@@ -887,22 +1024,64 @@ func GetConfig(
 	}
 	signParams := conf.Spec.Secret.Enrollment.Component
 	caUrl := fmt.Sprintf("https://%s:%d", signParams.Cahost, signParams.Caport)
-	if refreshCerts {
+	if signParams.External != nil {
+		secret, err := client.CoreV1().Secrets(signParams.External.SecretNamespace).Get(ctx, signParams.External.SecretName, v1.GetOptions{})
+		if err != nil {
+			return nil, errors.Wrapf(err, "failed to get secret %s", signParams.External.SecretName)
+		}
+		signCert, err = utils.ParseX509Certificate(secret.Data[signParams.External.CertificateKey])
+		if err != nil {
+			return nil, errors.Wrapf(err, "failed to parse sign certificate")
+		}
+		signRootCert, err = utils.ParseX509Certificate(secret.Data[signParams.External.RootCertificateKey])
+		if err != nil {
+			return nil, errors.Wrapf(err, "failed to parse sign root certificate")
+		}
+		signKey, err = utils.ParseECDSAPrivateKey(secret.Data[signParams.External.PrivateKeyKey])
+		if err != nil {
+			return nil, errors.Wrapf(err, "failed to parse sign private key")
+		}
+	} else if refreshCerts {
 		cacert, err := base64.StdEncoding.DecodeString(signParams.Catls.Cacert)
 		if err != nil {
-			return nil, err
+			return nil, errors.Wrapf(err, "failed to decode sign ca cert")
 		}
-		signCert, signKey, signRootCert, err = CreateSignCryptoMaterial(
-			conf,
-			signParams.Caname,
-			caUrl,
-			signParams.Enrollid,
-			signParams.Enrollsecret,
-			string(cacert),
-		)
+		signCert, signKey, signRootCert, err = getExistingSignCrypto(client, chartName, namespace)
 		if err != nil {
-			return nil, err
+			return nil, errors.Wrapf(err, "failed to get existing sign crypto material")
 		}
+		signCertPem := utils.EncodeX509Certificate(signCert)
+		if signCert.NotAfter.Before(time.Now()) {
+			log.Infof("Renewing certificates using enroll")
+			signCert, signKey, signRootCert, err = CreateSignCryptoMaterial(
+				conf,
+				signParams.Caname,
+				caUrl,
+				signParams.Enrollid,
+				signParams.Enrollsecret,
+				string(cacert),
+			)
+			if err != nil {
+				return nil, err
+			}
+			log.Infof("Enrolled sign crypto material")
+		} else {
+			log.Infof("Renewing certificates using reenroll")
+			signCert, signKey, signRootCert, err = ReenrollSignCryptoMaterial(
+				conf,
+				signParams.Caname,
+				caUrl,
+				signParams.Enrollid,
+				string(cacert),
+				string(signCertPem),
+				signKey,
+			)
+			if err != nil {
+				return nil, errors.Wrapf(err, "failed to reenroll sign crypto material")
+			}
+			log.Infof("Reenrolled sign crypto material")
+		}
+		log.Infof("Reenrolled sign crypto material")
 	} else {
 		signCert, signKey, signRootCert, err = getExistingSignCrypto(client, chartName, namespace)
 		if err != nil {
@@ -1053,6 +1232,30 @@ func GetConfig(
 			IngressGateway: "",
 		}
 	}
+	var gatewayApi GatewayApi
+	if spec.GatewayApi != nil {
+		gatewayApiName := spec.GatewayApi.GatewayName
+		gatewayApiNamespace := spec.GatewayApi.GatewayNamespace
+		if gatewayApiName == "" {
+			gatewayApiName = "hlf-gateway"
+		}
+		if gatewayApiNamespace == "" {
+			gatewayApiName = "default"
+		}
+		gatewayApi = GatewayApi{
+			Port:             spec.GatewayApi.Port,
+			Hosts:            spec.GatewayApi.Hosts,
+			GatewayName:      gatewayApiName,
+			GatewayNamespace: gatewayApiNamespace,
+		}
+	} else {
+		gatewayApi = GatewayApi{
+			Port:             443,
+			Hosts:            []string{},
+			GatewayName:      "",
+			GatewayNamespace: "",
+		}
+	}
 	exporter := CouchDBExporter{
 		Enabled:    false,
 		Image:      "",
@@ -1160,6 +1363,7 @@ func GetConfig(
 		EnvVars:          spec.Env,
 		Replicas:         spec.Replicas,
 		ImagePullSecrets: spec.ImagePullSecrets,
+		GatewayApi:       gatewayApi,
 		Istio:            istio,
 		Image: Image{
 			Repository: spec.Image,
@@ -1290,6 +1494,9 @@ func (r *FabricPeerReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&hlfv1alpha1.FabricPeer{}).
 		Owns(&appsv1.Deployment{}).
+		WithOptions(controller.Options{
+			MaxConcurrentReconciles: 1,
+		}).
 		Complete(r)
 }
 func getServiceName(peer *hlfv1alpha1.FabricPeer) string {
@@ -1451,6 +1658,7 @@ func newActionCfg(log logr.Logger, clusterCfg *rest.Config, namespace string) (*
 		BearerToken: &clusterCfg.BearerToken,
 	}, ns, "secret", actionLogger(log))
 	return cfg, err
+
 }
 
 func actionLogger(logger logr.Logger) func(format string, v ...interface{}) {

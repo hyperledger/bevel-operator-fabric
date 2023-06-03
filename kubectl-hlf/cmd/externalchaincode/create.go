@@ -12,12 +12,13 @@ import (
 )
 
 type createExternalChaincodeCmd struct {
-	name        string
-	namespace   string
-	image       string
-	packageID   string
-	caName      string
-	caNamespace string
+	name            string
+	namespace       string
+	image           string
+	packageID       string
+	caName          string
+	caNamespace     string
+	imagePullPolicy string
 
 	enrollId     string
 	enrollSecret string
@@ -66,9 +67,10 @@ func (c *createExternalChaincodeCmd) run() error {
 		return err
 	}
 	ctx := context.Background()
+	imagePullPolicy := corev1.PullPolicy(c.imagePullPolicy)
 	fabricChaincodeSpec := v1alpha1.FabricChaincodeSpec{
 		Image:            c.image,
-		ImagePullPolicy:  corev1.PullAlways,
+		ImagePullPolicy:  imagePullPolicy,
 		PackageID:        c.packageID,
 		ImagePullSecrets: []corev1.LocalObjectReference{},
 		Credentials:      nil,
@@ -139,6 +141,7 @@ func newExternalChaincodeCreateCmd() *cobra.Command {
 	f.StringVar(&c.name, "name", "", "Name of the external chaincode")
 	f.StringVar(&c.namespace, "namespace", "", "Namespace of the external chaincode")
 	f.StringVar(&c.image, "image", "", "Image of the external chaincode")
+	f.StringVar(&c.imagePullPolicy, "image-pull-policy", "IfNotPresent", "Image Pull Policy of the external chaincode")
 	f.StringVar(&c.packageID, "package-id", "", "Package ID of the external chaincode")
 	f.StringVar(&c.caName, "ca-name", "", "CA name to enroll this user")
 	f.StringVar(&c.caNamespace, "ca-namespace", "", "Namespace of the CA")
