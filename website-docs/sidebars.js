@@ -36,6 +36,11 @@ module.exports = {
     ],
     "Kubectl Plugin": ["kubectl-plugin/installation", "kubectl-plugin/upgrade"],
     "Identity": ["identity-crd/manage-identities"],
+    "Gateway API": [
+      "gateway-api/introduction",
+      "gateway-api/getting-started",
+      "gateway-api/implementation"
+    ],
     CouchDB: ["couchdb/external-couchdb", "couchdb/custom-image"],
     Reference: ["reference/reference"],
     "GRPC Proxy": ["grpc-proxy/enable-peers", "grpc-proxy/enable-orderers"],
