@@ -9,6 +9,7 @@ import (
 	"github.com/spf13/cobra"
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"strings"
 )
 
 type syncExternalChaincodeCmd struct {
@@ -27,6 +28,7 @@ type syncExternalChaincodeCmd struct {
 
 	tlsRequired     bool
 	ImagePullSecret []string
+	Env             []string
 }
 
 func (c *syncExternalChaincodeCmd) validate() error {
@@ -81,6 +83,15 @@ func (c syncExternalChaincodeCmd) getFabricChaincodeSpec(ctx context.Context) (v
 		}
 		fabricChaincodeSpec.ImagePullSecrets = imagePullSecret
 	}
+
+	if len(c.Env) > 0 {
+		env, err := c.handleEnv()
+		if err != nil {
+			return fabricChaincodeSpec, err
+		}
+		fabricChaincodeSpec.Env = env
+	}
+
 	oclient, err := helpers.GetKubeOperatorClient()
 	if err != nil {
 		return fabricChaincodeSpec, err
@@ -205,6 +216,39 @@ func (c *syncExternalChaincodeCmd) updateChaincode(ctx context.Context, fabricCh
 	fmt.Printf("Updated external chaincode %s\n", fabricChaincode.Name)
 	return nil
 }
+
+func (c *syncExternalChaincodeCmd) handleEnv() ([]corev1.EnvVar, error) {
+	var env []corev1.EnvVar
+	for _, literalSource := range c.Env {
+		keyName, value, err := ParseEnv(literalSource)
+		if err != nil {
+			return nil, err
+		}
+		env = append(env, corev1.EnvVar{
+			Name:  keyName,
+			Value: value,
+		})
+	}
+	return env, nil
+}
+
+// ParseEnv parses the source key=val pair into its component pieces.
+// This functionality is distinguished from strings.SplitN(source, "=", 2) since
+// it returns an error in the case of empty keys, values, or a missing equals sign.
+func ParseEnv(source string) (keyName, value string, err error) {
+	// leading equal is invalid
+	if strings.Index(source, "=") == 0 {
+		return "", "", fmt.Errorf("invalid formart %v, expected key=value", source)
+	}
+	// split after the first equal (so values can have the = character)
+	items := strings.SplitN(source, "=", 2)
+	if len(items) != 2 {
+		return "", "", fmt.Errorf("invalid format %v, expected key=value", source)
+	}
+
+	return items[0], items[1], nil
+}
+
 func newExternalChaincodeSyncCmd() *cobra.Command {
 	c := &syncExternalChaincodeCmd{}
 	cmd := &cobra.Command{
@@ -229,5 +273,6 @@ func newExternalChaincodeSyncCmd() *cobra.Command {
 	f.BoolVar(&c.tlsRequired, "tls-required", false, "Require TLS for chaincode")
 	f.IntVarP(&c.replicas, "replicas", "", 1, "Number of replicas of the chaincode")
 	f.StringArrayVarP(&c.ImagePullSecret, "image-pull-secret", "s", []string{}, "Image Pull Secret for the Chaincode Image")
+	f.StringArrayVarP(&c.Env, "env", "", []string{}, "Environment variable for the Chaincode (key=value)")
 	return cmd
 }
