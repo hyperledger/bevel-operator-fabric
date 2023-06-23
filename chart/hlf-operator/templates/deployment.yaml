@@ -37,6 +37,24 @@ spec:
         - args:
             - --metrics-addr=127.0.0.1:8080
             - --enable-leader-election
+  {{ if .Values.certificates.renewal.peer.enabled }}
+            - --auto-renew-peer-certificates
+            - "true"
+            - --auto-renew-peer-certificates-delta
+            - {{ .Values.certificates.renewal.peer.delta | quote }}
+  {{- end }}
+  {{ if .Values.certificates.renewal.orderer.enabled }}
+            - --auto-renew-orderer-certificates
+            - "true"
+            - --auto-renew-orderer-certificates-delta
+            - {{ .Values.certificates.renewal.orderer.delta | quote }}
+  {{- end }}
+  {{ if .Values.certificates.renewal.identity.enabled }}
+            - --auto-renew-identity-certificates
+            - "true"
+            - --auto-renew-identity-certificates-delta
+            - {{ .Values.certificates.renewal.identity.delta | quote }}
+  {{- end }}
           command:
             - /hlf-operator
           image: {{.Values.image.repository}}:{{.Values.image.tag}}
