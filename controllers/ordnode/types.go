@@ -21,7 +21,7 @@ type fabricOrdChart struct {
 	Key                         string                        `json:"key"`
 	TLS                         tls                           `json:"tls"`
 	Tolerations                 []corev1.Toleration           `json:"tolerations,omitempty"`
-	Resources                   Resources                     `json:"resources,omitempty"`
+	Resources                   corev1.ResourceRequirements   `json:"resources,omitempty"`
 	FullnameOverride            string                        `json:"fullnameOverride"`
 	HostAliases                 []HostAlias                   `json:"hostAliases"`
 	Service                     service                       `json:"service"`
@@ -50,18 +50,6 @@ type GRPCProxy struct {
 	Resources *corev1.ResourceRequirements `json:"resources"`
 }
 
-type Resources struct {
-	Limits   Limits   `json:"limits"`
-	Requests Requests `json:"requests"`
-}
-type Limits struct {
-	CPU    string `json:"cpu"`
-	Memory string `json:"memory"`
-}
-type Requests struct {
-	CPU    string `json:"cpu"`
-	Memory string `json:"memory"`
-}
 type ServiceMonitor struct {
 	Enabled           bool              `json:"enabled"`
 	Labels            map[string]string `json:"labels"`

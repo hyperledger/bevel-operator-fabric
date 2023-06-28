@@ -1095,16 +1095,6 @@ func getConfig(
 	} else {
 		monitor = ServiceMonitor{Enabled: false}
 	}
-	resources := Resources{
-		Requests: Requests{
-			CPU:    spec.Resources.Requests.Cpu().String(),
-			Memory: spec.Resources.Requests.Memory().String(),
-		},
-		Limits: Limits{
-			CPU:    spec.Resources.Limits.Cpu().String(),
-			Memory: spec.Resources.Limits.Memory().String(),
-		},
-	}
 	proxy := GRPCProxy{
 		Enabled:          false,
 		Image:            "",
@@ -1135,7 +1125,7 @@ func getConfig(
 		NodeSelector:                spec.NodeSelector,
 		ImagePullSecrets:            spec.ImagePullSecrets,
 		EnvVars:                     spec.Env,
-		Resources:                   resources,
+		Resources:                   spec.Resources,
 		Istio:                       istio,
 		AdminIstio:                  adminIstio,
 		GatewayApi:                  gatewayApi,

@@ -594,7 +594,7 @@ func (r *FabricPeerReconciler) upgradeChart(
 	releaseName string,
 	c *FabricPeerChart,
 ) error {
-	inrec, err := json.Marshal(c)
+	inrec, err := json.MarshalIndent(c, "", "  ")
 	if err != nil {
 		return err
 	}
@@ -617,6 +617,7 @@ func (r *FabricPeerReconciler) upgradeChart(
 	}
 	cmd.Wait = true
 	cmd.Timeout = time.Minute * 5
+	log.Infof("Upgrading chart %s", inrec)
 	release, err := cmd.Run(releaseName, ch, inInterface)
 	if err != nil {
 		return err
@@ -1262,7 +1263,6 @@ func GetConfig(
 		Tag:        "",
 		PullPolicy: "",
 	}
-	var couchDBExporterResources *Resources
 	if spec.CouchDBExporter != nil && spec.CouchDBExporter.Enabled {
 		exporter.Enabled = spec.CouchDBExporter.Enabled
 		if spec.CouchDBExporter.Image != "" {
@@ -1273,18 +1273,6 @@ func GetConfig(
 		}
 		if spec.CouchDBExporter.ImagePullPolicy != "" {
 			exporter.PullPolicy = string(spec.CouchDBExporter.ImagePullPolicy)
-		}
-		if spec.Resources.CouchDBExporter != nil {
-			couchDBExporterResources = &Resources{
-				Requests: Requests{
-					CPU:    spec.Resources.CouchDBExporter.Requests.Cpu().String(),
-					Memory: spec.Resources.CouchDBExporter.Requests.Memory().String(),
-				},
-				Limits: Limits{
-					CPU:    spec.Resources.CouchDBExporter.Limits.Cpu().String(),
-					Memory: spec.Resources.CouchDBExporter.Limits.Memory().String(),
-				},
-			}
 		}
 	}
 
@@ -1331,7 +1319,6 @@ func GetConfig(
 		ImagePullSecrets: nil,
 		Istio:            Istio{},
 	}
-	var proxyResources *Resources
 	if spec.GRPCProxy != nil && spec.GRPCProxy.Enabled {
 		proxy = GRPCProxy{
 			Enabled:          spec.GRPCProxy.Enabled,
@@ -1345,20 +1332,14 @@ func GetConfig(
 				IngressGateway: spec.GRPCProxy.Istio.IngressGateway,
 			},
 		}
-		if spec.Resources.Proxy != nil {
-			proxyResources = &Resources{
-				Requests: Requests{
-					CPU:    spec.Resources.Proxy.Requests.Cpu().String(),
-					Memory: spec.Resources.Proxy.Requests.Memory().String(),
-				},
-				Limits: Limits{
-					CPU:    spec.Resources.Proxy.Limits.Cpu().String(),
-					Memory: spec.Resources.Proxy.Limits.Memory().String(),
-				},
-			}
-		}
 	}
-
+	peerResources := PeerResources{
+		Peer:            spec.Resources.Peer,
+		CouchDB:         spec.Resources.CouchDB,
+		Chaincode:       spec.Resources.Chaincode,
+		CouchDBExporter: spec.Resources.CouchDBExporter,
+		Proxy:           spec.Resources.Proxy,
+	}
 	var c = FabricPeerChart{
 		EnvVars:          spec.Env,
 		Replicas:         spec.Replicas,
@@ -1407,43 +1388,10 @@ func GetConfig(
 			Cert: string(tlsOpsCRTEncoded),
 			Key:  string(tlsOpsPEMEncodedPK),
 		},
-		Cacert:      string(signRootCRTEncoded),
-		IntCacert:   ``,
-		Tlsrootcert: string(tlsRootCRTEncoded),
-		Resources: PeerResources{
-			Peer: Resources{
-				Requests: Requests{
-					CPU:    spec.Resources.Peer.Requests.Cpu().String(),
-					Memory: spec.Resources.Peer.Requests.Memory().String(),
-				},
-				Limits: Limits{
-					CPU:    spec.Resources.Peer.Limits.Cpu().String(),
-					Memory: spec.Resources.Peer.Limits.Memory().String(),
-				},
-			},
-			CouchDB: Resources{
-				Requests: Requests{
-					CPU:    spec.Resources.CouchDB.Requests.Cpu().String(),
-					Memory: spec.Resources.CouchDB.Requests.Memory().String(),
-				},
-				Limits: Limits{
-					CPU:    spec.Resources.CouchDB.Limits.Cpu().String(),
-					Memory: spec.Resources.CouchDB.Limits.Memory().String(),
-				},
-			},
-			Chaincode: Resources{
-				Requests: Requests{
-					CPU:    spec.Resources.Chaincode.Requests.Cpu().String(),
-					Memory: spec.Resources.Chaincode.Requests.Memory().String(),
-				},
-				Limits: Limits{
-					CPU:    spec.Resources.Chaincode.Limits.Cpu().String(),
-					Memory: spec.Resources.Chaincode.Limits.Memory().String(),
-				},
-			},
-			CouchDBExporter: couchDBExporterResources,
-			Proxy:           proxyResources,
-		},
+		Cacert:           string(signRootCRTEncoded),
+		IntCacert:        ``,
+		Tlsrootcert:      string(tlsRootCRTEncoded),
+		Resources:        peerResources,
 		NodeSelector:     spec.NodeSelector,
 		Tolerations:      spec.Tolerations,
 		Affinity:         spec.Affinity,

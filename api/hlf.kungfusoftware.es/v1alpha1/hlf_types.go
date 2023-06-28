@@ -223,9 +223,9 @@ type FabricPeerSpec struct {
 	Env []corev1.EnvVar `json:"env"`
 }
 type FabricPeerResources struct {
-	Peer      corev1.ResourceRequirements `json:"peer"`
-	CouchDB   corev1.ResourceRequirements `json:"couchdb"`
-	Chaincode corev1.ResourceRequirements `json:"chaincode"`
+	Peer      *corev1.ResourceRequirements `json:"peer"`
+	CouchDB   *corev1.ResourceRequirements `json:"couchdb"`
+	Chaincode *corev1.ResourceRequirements `json:"chaincode"`
 	// +optional
 	// +nullable
 	CouchDBExporter *corev1.ResourceRequirements `json:"couchdbExporter"`

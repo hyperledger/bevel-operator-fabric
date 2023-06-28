@@ -91,6 +91,7 @@ func (c *createCmd) run() error {
 			Namespace: c.apiOpts.NS,
 		},
 		Spec: v1alpha1.FabricOperatorAPISpec{
+			PodLabels:       map[string]string{},
 			Image:           c.apiOpts.Image,
 			Tag:             c.apiOpts.Version,
 			ImagePullPolicy: "Always",

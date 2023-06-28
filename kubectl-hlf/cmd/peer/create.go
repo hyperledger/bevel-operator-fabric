@@ -365,24 +365,24 @@ func (c *createCmd) run() error {
 	return nil
 }
 
-func getChaincodeResourceRequirements() (corev1.ResourceRequirements, error) {
+func getChaincodeResourceRequirements() (*corev1.ResourceRequirements, error) {
 	requestCpu, err := resource.ParseQuantity("10m")
 	if err != nil {
-		return corev1.ResourceRequirements{}, err
+		return nil, err
 	}
 	requestMemory, err := resource.ParseQuantity("10m")
 	if err != nil {
-		return corev1.ResourceRequirements{}, err
+		return nil, err
 	}
 	limitsCpu, err := resource.ParseQuantity("1")
 	if err != nil {
-		return corev1.ResourceRequirements{}, err
+		return nil, err
 	}
 	limitsMemory, err := resource.ParseQuantity("100Mi")
 	if err != nil {
-		return corev1.ResourceRequirements{}, err
+		return nil, err
 	}
-	return corev1.ResourceRequirements{
+	return &corev1.ResourceRequirements{
 		Requests: corev1.ResourceList{
 			corev1.ResourceCPU:    requestCpu,
 			corev1.ResourceMemory: requestMemory,
@@ -394,24 +394,24 @@ func getChaincodeResourceRequirements() (corev1.ResourceRequirements, error) {
 	}, nil
 }
 
-func getCouchdbResourceRequirements() (corev1.ResourceRequirements, error) {
+func getCouchdbResourceRequirements() (*corev1.ResourceRequirements, error) {
 	requestCpu, err := resource.ParseQuantity("10m")
 	if err != nil {
-		return corev1.ResourceRequirements{}, err
+		return nil, err
 	}
 	requestMemory, err := resource.ParseQuantity("10m")
 	if err != nil {
-		return corev1.ResourceRequirements{}, err
+		return nil, err
 	}
 	limitsCpu, err := resource.ParseQuantity("1")
 	if err != nil {
-		return corev1.ResourceRequirements{}, err
+		return nil, err
 	}
 	limitsMemory, err := resource.ParseQuantity("512Mi")
 	if err != nil {
-		return corev1.ResourceRequirements{}, err
+		return nil, err
 	}
-	return corev1.ResourceRequirements{
+	return &corev1.ResourceRequirements{
 		Requests: corev1.ResourceList{
 			corev1.ResourceCPU:    requestCpu,
 			corev1.ResourceMemory: requestMemory,
@@ -423,24 +423,24 @@ func getCouchdbResourceRequirements() (corev1.ResourceRequirements, error) {
 	}, nil
 }
 
-func getPeerResourceRequirements() (corev1.ResourceRequirements, error) {
+func getPeerResourceRequirements() (*corev1.ResourceRequirements, error) {
 	requestCpu, err := resource.ParseQuantity("10m")
 	if err != nil {
-		return corev1.ResourceRequirements{}, err
+		return nil, err
 	}
 	requestMemory, err := resource.ParseQuantity("128Mi")
 	if err != nil {
-		return corev1.ResourceRequirements{}, err
+		return nil, err
 	}
 	limitsCpu, err := resource.ParseQuantity("1")
 	if err != nil {
-		return corev1.ResourceRequirements{}, err
+		return nil, err
 	}
 	limitsMemory, err := resource.ParseQuantity("512Mi")
 	if err != nil {
-		return corev1.ResourceRequirements{}, err
+		return nil, err
 	}
-	return corev1.ResourceRequirements{
+	return &corev1.ResourceRequirements{
 		Requests: corev1.ResourceList{
 			corev1.ResourceCPU:    requestCpu,
 			corev1.ResourceMemory: requestMemory,
