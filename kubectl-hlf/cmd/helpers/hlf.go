@@ -318,11 +318,11 @@ func GetURLForCA(certAuth *ClusterCA) (string, error) {
 	if len(certAuth.Spec.Istio.Hosts) > 0 {
 		host = certAuth.Spec.Istio.Hosts[0]
 		port = certAuth.Spec.Istio.Port
-	}else if len(certAuth.Spec.GatewayApi.Hosts) > 0{
+	} else if len(certAuth.Spec.GatewayApi.Hosts) > 0 {
 		host = certAuth.Spec.GatewayApi.Hosts[0]
 		port = certAuth.Spec.GatewayApi.Port
 
-	}else {
+	} else {
 		client, err := GetKubeClient()
 		if err != nil {
 			return "", err
