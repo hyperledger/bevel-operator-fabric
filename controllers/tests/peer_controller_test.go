@@ -178,9 +178,9 @@ func createPeer(releaseName string, namespace string, params createPeerParams, c
 				Policies: "info",
 			},
 			Resources: hlfv1alpha1.FabricPeerResources{
-				Peer:            resources,
-				CouchDB:         resources,
-				Chaincode:       resources,
+				Peer:            &resources,
+				CouchDB:         &resources,
+				Chaincode:       &resources,
 				CouchDBExporter: &resources,
 			},
 			Hosts:       []string{},
