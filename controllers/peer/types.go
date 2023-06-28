@@ -98,11 +98,11 @@ type Istio struct {
 	IngressGateway string   `json:"ingressGateway"`
 }
 type PeerResources struct {
-	Peer            Resources  `json:"peer"`
-	CouchDB         Resources  `json:"couchdb"`
-	Chaincode       Resources  `json:"chaincode"`
-	CouchDBExporter *Resources `json:"couchdbExporter,omitempty"`
-	Proxy           *Resources `json:"proxy,omitempty"`
+	Peer            *corev1.ResourceRequirements `json:"peer"`
+	CouchDB         *corev1.ResourceRequirements `json:"couchdb"`
+	Chaincode       *corev1.ResourceRequirements `json:"chaincode"`
+	CouchDBExporter *corev1.ResourceRequirements `json:"couchdbExporter,omitempty"`
+	Proxy           *corev1.ResourceRequirements `json:"proxy,omitempty"`
 }
 type CouchDBExporter struct {
 	Enabled    bool   `json:"enabled"`
@@ -149,18 +149,6 @@ type Peer struct {
 type TLS struct {
 	Cert string `json:"cert"`
 	Key  string `json:"key"`
-}
-type Limits struct {
-	CPU    string `json:"cpu"`
-	Memory string `json:"memory"`
-}
-type Requests struct {
-	CPU    string `json:"cpu"`
-	Memory string `json:"memory"`
-}
-type Resources struct {
-	Limits   Limits   `json:"limits"`
-	Requests Requests `json:"requests"`
 }
 
 type HostAlias struct {

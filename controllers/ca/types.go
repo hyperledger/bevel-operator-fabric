@@ -11,7 +11,7 @@ type FabricCAChart struct {
 	Persistence      Persistence                   `json:"persistence"`
 	Msp              Msp                           `json:"msp"`
 	Database         Database                      `json:"db"`
-	Resources        Resources                     `json:"resources"`
+	Resources        corev1.ResourceRequirements   `json:"resources"`
 	NodeSelector     *corev1.NodeSelector          `json:"nodeSelector,omitempty"`
 	Tolerations      []corev1.Toleration           `json:"tolerations"`
 	Affinity         *corev1.Affinity              `json:"affinity,omitempty"`
@@ -216,23 +216,6 @@ type Names struct {
 type Affiliation struct {
 	Name        string   `json:"name"`
 	Departments []string `json:"departments"`
-}
-
-type Resources struct {
-	// +kubebuilder:default:="10m"
-	Requests Requests `json:"requests"`
-	// +kubebuilder:default:="256Mi"
-	Limits RequestsLimit `json:"limits"`
-}
-type Requests struct {
-	// +kubebuilder:default:="2"
-	CPU string `json:"cpu"`
-	// +kubebuilder:default:="4Gi"
-	Memory string `json:"memory"`
-}
-type RequestsLimit struct {
-	CPU    string `json:"cpu"`
-	Memory string `json:"memory"`
 }
 
 type FabricCASigning struct {
