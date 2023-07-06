@@ -22,6 +22,7 @@ bin
 *.swp
 *.swo
 *~
+
 **/.DS_Store
 
 crypto-config

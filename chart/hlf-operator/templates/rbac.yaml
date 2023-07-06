@@ -31,17 +31,37 @@ rules:
     verbs:
       - create
       - patch
+  - apiGroups:
+      - gateway.networking.k8s.io
+    resources:
+      - gatewayclasses
+      - gateways
+      - httproutes
+      - tcproutes
+      - tlsroutes
+    verbs:
+      - get
+      - list
+      - watch
+      - create
+      - patch
+  - apiGroups:
+      - gateway.networking.k8s.io
+    resources:
+      - gatewayclasses/status
+      - gateways/status
+      - httproutes/status
+      - tcproutes/status
+      - tlsroutes/status
+    verbs:
+      - update
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   name: {{ include "hlf-operator.fullname" . }}-manager-role
 rules:
-  - apiGroups:
-      - ""
-    resources:
-      - configmaps
-    verbs:
+  - verbs:
       - create
       - delete
       - get
@@ -49,11 +69,23 @@ rules:
       - patch
       - update
       - watch
-  - apiGroups:
+    apiGroups:
+      - ''
+    resources:
+      - configmaps
+  - verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+    apiGroups:
       - apps
     resources:
       - replicasets
-    verbs:
+  - verbs:
       - create
       - delete
       - get
@@ -61,31 +93,31 @@ rules:
       - patch
       - update
       - watch
-  - apiGroups:
+    apiGroups:
       - apps
     resources:
       - deployments
-    verbs:
-      - create
-      - delete
+  - verbs:
       - get
       - list
-      - patch
-      - update
       - watch
-  - apiGroups:
-      - ""
+    apiGroups:
+      - ''
     resources:
       - nodes
-    verbs:
+  - verbs:
+      - create
+      - delete
       - get
       - list
+      - patch
+      - update
       - watch
-  - apiGroups:
-      - ""
+    apiGroups:
+      - ''
     resources:
       - persistentvolumeclaims
-    verbs:
+  - verbs:
       - create
       - delete
       - get
@@ -93,11 +125,11 @@ rules:
       - patch
       - update
       - watch
-  - apiGroups:
-      - ""
+    apiGroups:
+      - ''
     resources:
       - pods
-    verbs:
+  - verbs:
       - create
       - delete
       - get
@@ -105,11 +137,11 @@ rules:
       - patch
       - update
       - watch
-  - apiGroups:
-      - ""
+    apiGroups:
+      - ''
     resources:
       - pods/log
-    verbs:
+  - verbs:
       - create
       - delete
       - get
@@ -117,11 +149,11 @@ rules:
       - patch
       - update
       - watch
-  - apiGroups:
-      - ""
+    apiGroups:
+      - ''
     resources:
       - pods/status
-    verbs:
+  - verbs:
       - create
       - delete
       - get
@@ -129,11 +161,11 @@ rules:
       - patch
       - update
       - watch
-  - apiGroups:
-      - ""
+    apiGroups:
+      - ''
     resources:
       - secrets
-    verbs:
+  - verbs:
       - create
       - delete
       - get
@@ -141,11 +173,11 @@ rules:
       - patch
       - update
       - watch
-  - apiGroups:
-      - ""
+    apiGroups:
+      - ''
     resources:
       - serviceaccounts
-    verbs:
+  - verbs:
       - create
       - delete
       - get
@@ -153,11 +185,11 @@ rules:
       - patch
       - update
       - watch
-  - apiGroups:
-      - ""
+    apiGroups:
+      - ''
     resources:
       - services
-    verbs:
+  - verbs:
       - create
       - delete
       - get
@@ -165,11 +197,23 @@ rules:
       - patch
       - update
       - watch
-  - apiGroups:
+    apiGroups:
+      - ''
+    resources:
+      - ingresses
+  - verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+    apiGroups:
       - apps
     resources:
       - configmaps
-    verbs:
+  - verbs:
       - create
       - delete
       - get
@@ -177,11 +221,11 @@ rules:
       - patch
       - update
       - watch
-  - apiGroups:
+    apiGroups:
       - apps
     resources:
       - deployments
-    verbs:
+  - verbs:
       - create
       - delete
       - get
@@ -189,11 +233,11 @@ rules:
       - patch
       - update
       - watch
-  - apiGroups:
+    apiGroups:
       - apps
     resources:
       - persistentvolumeclaims
-    verbs:
+  - verbs:
       - create
       - delete
       - get
@@ -201,11 +245,11 @@ rules:
       - patch
       - update
       - watch
-  - apiGroups:
+    apiGroups:
       - apps
     resources:
       - pods
-    verbs:
+  - verbs:
       - create
       - delete
       - get
@@ -213,11 +257,11 @@ rules:
       - patch
       - update
       - watch
-  - apiGroups:
+    apiGroups:
       - apps
     resources:
       - pods/log
-    verbs:
+  - verbs:
       - create
       - delete
       - get
@@ -225,11 +269,11 @@ rules:
       - patch
       - update
       - watch
-  - apiGroups:
+    apiGroups:
       - apps
     resources:
       - pods/status
-    verbs:
+  - verbs:
       - create
       - delete
       - get
@@ -237,11 +281,35 @@ rules:
       - patch
       - update
       - watch
-  - apiGroups:
+    apiGroups:
+      - extensions
+    resources:
+      - ingresses
+  - verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+    apiGroups:
+      - networking.k8s.io
+    resources:
+      - ingresses
+  - verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+    apiGroups:
       - apps
     resources:
       - secrets
-    verbs:
+  - verbs:
       - create
       - delete
       - get
@@ -249,11 +317,11 @@ rules:
       - patch
       - update
       - watch
-  - apiGroups:
+    apiGroups:
       - apps
     resources:
       - services
-    verbs:
+  - verbs:
       - create
       - delete
       - get
@@ -261,11 +329,23 @@ rules:
       - patch
       - update
       - watch
-  - apiGroups:
+    apiGroups:
+      - apps
+    resources:
+      - ingresses
+  - verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+    apiGroups:
       - extensions
     resources:
       - configmaps
-    verbs:
+  - verbs:
       - create
       - delete
       - get
@@ -273,11 +353,11 @@ rules:
       - patch
       - update
       - watch
-  - apiGroups:
+    apiGroups:
       - extensions
     resources:
       - deployments
-    verbs:
+  - verbs:
       - create
       - delete
       - get
@@ -285,11 +365,11 @@ rules:
       - patch
       - update
       - watch
-  - apiGroups:
+    apiGroups:
       - extensions
     resources:
       - persistentvolumeclaims
-    verbs:
+  - verbs:
       - create
       - delete
       - get
@@ -297,11 +377,11 @@ rules:
       - patch
       - update
       - watch
-  - apiGroups:
+    apiGroups:
       - extensions
     resources:
       - pods
-    verbs:
+  - verbs:
       - create
       - delete
       - get
@@ -309,11 +389,11 @@ rules:
       - patch
       - update
       - watch
-  - apiGroups:
+    apiGroups:
       - extensions
     resources:
       - pods/log
-    verbs:
+  - verbs:
       - create
       - delete
       - get
@@ -321,11 +401,11 @@ rules:
       - patch
       - update
       - watch
-  - apiGroups:
+    apiGroups:
       - extensions
     resources:
       - pods/status
-    verbs:
+  - verbs:
       - create
       - delete
       - get
@@ -333,11 +413,11 @@ rules:
       - patch
       - update
       - watch
-  - apiGroups:
+    apiGroups:
       - extensions
     resources:
       - secrets
-    verbs:
+  - verbs:
       - create
       - delete
       - get
@@ -345,11 +425,11 @@ rules:
       - patch
       - update
       - watch
-  - apiGroups:
+    apiGroups:
       - extensions
     resources:
       - services
-    verbs:
+  - verbs:
       - create
       - delete
       - get
@@ -357,130 +437,352 @@ rules:
       - patch
       - update
       - watch
-  - apiGroups:
+    apiGroups:
+      - hlf.kungfusoftware.es
+    resources:
+      - fabricoperationsconsoles
+  - verbs:
+      - get
+      - patch
+      - update
+    apiGroups:
+      - hlf.kungfusoftware.es
+    resources:
+      - fabricoperationsconsoles/finalizers
+  - verbs:
+      - get
+      - patch
+      - update
+    apiGroups:
+      - hlf.kungfusoftware.es
+    resources:
+      - fabricoperationsconsoles/status
+  - verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+    apiGroups:
+      - hlf.kungfusoftware.es
+    resources:
+      - fabricoperatorapis
+  - verbs:
+      - get
+      - patch
+      - update
+    apiGroups:
+      - hlf.kungfusoftware.es
+    resources:
+      - fabricoperatorapis/finalizers
+  - verbs:
+      - get
+      - patch
+      - update
+    apiGroups:
+      - hlf.kungfusoftware.es
+    resources:
+      - fabricoperatorapis/status
+  - verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+    apiGroups:
+      - hlf.kungfusoftware.es
+    resources:
+      - fabricoperatoruis
+  - verbs:
+      - get
+      - patch
+      - update
+    apiGroups:
+      - hlf.kungfusoftware.es
+    resources:
+      - fabricoperatoruis/finalizers
+  - verbs:
+      - get
+      - patch
+      - update
+    apiGroups:
+      - hlf.kungfusoftware.es
+    resources:
+      - fabricoperatoruis/status
+  - verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+    apiGroups:
       - hlf.kungfusoftware.es
     resources:
       - fabricpeers
-    verbs:
-      - create
-      - delete
+  - verbs:
       - get
-      - list
       - patch
       - update
-      - watch
-  - apiGroups:
+    apiGroups:
       - hlf.kungfusoftware.es
     resources:
       - fabricpeers/finalizers
-    verbs:
+  - verbs:
       - get
       - patch
       - update
-  - apiGroups:
+    apiGroups:
       - hlf.kungfusoftware.es
     resources:
       - fabricpeers/status
-    verbs:
+  - verbs:
+      - create
+      - delete
       - get
+      - list
       - patch
       - update
-
-  - apiGroups:
+      - watch
+    apiGroups:
       - hlf.kungfusoftware.es
     resources:
       - fabricorderernodes
-    verbs:
-      - create
-      - delete
+  - verbs:
       - get
-      - list
       - patch
       - update
-      - watch
-  - apiGroups:
+    apiGroups:
       - hlf.kungfusoftware.es
     resources:
       - fabricorderernodes/finalizers
-    verbs:
+  - verbs:
       - get
       - patch
       - update
-  - apiGroups:
+    apiGroups:
       - hlf.kungfusoftware.es
     resources:
       - fabricorderernodes/status
-    verbs:
+  - verbs:
+      - create
+      - delete
       - get
+      - list
       - patch
       - update
-
-
-  - apiGroups:
+      - watch
+    apiGroups:
       - hlf.kungfusoftware.es
     resources:
       - fabricorderingservices
-    verbs:
-      - create
-      - delete
+  - verbs:
       - get
-      - list
       - patch
       - update
-      - watch
-  - apiGroups:
+    apiGroups:
       - hlf.kungfusoftware.es
     resources:
       - fabricorderingservices/finalizers
-    verbs:
+  - verbs:
       - get
       - patch
       - update
-  - apiGroups:
+    apiGroups:
       - hlf.kungfusoftware.es
     resources:
       - fabricorderingservices/status
-    verbs:
+  - verbs:
+      - create
+      - delete
       - get
+      - list
       - patch
       - update
-
-
-  - apiGroups:
+      - watch
+    apiGroups:
       - hlf.kungfusoftware.es
     resources:
       - fabriccas
-    verbs:
-      - create
-      - delete
+  - verbs:
       - get
-      - list
       - patch
       - update
-      - watch
-  - apiGroups:
+    apiGroups:
       - hlf.kungfusoftware.es
     resources:
       - fabriccas/finalizers
-    verbs:
+  - verbs:
       - get
       - patch
       - update
-  - apiGroups:
+    apiGroups:
       - hlf.kungfusoftware.es
     resources:
       - fabriccas/status
-    verbs:
+  - verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+    apiGroups:
+      - hlf.kungfusoftware.es
+    resources:
+      - fabricnetworkconfigs
+  - verbs:
       - get
       - patch
       - update
+    apiGroups:
+      - hlf.kungfusoftware.es
+    resources:
+      - fabricnetworkconfigs/finalizers
+  - verbs:
+      - get
+      - patch
+      - update
+    apiGroups:
+      - hlf.kungfusoftware.es
+    resources:
+      - fabricnetworkconfigs/status
+  - verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+    apiGroups:
+      - hlf.kungfusoftware.es
+    resources:
+      - fabricchaincodes
+  - verbs:
+      - get
+      - patch
+      - update
+    apiGroups:
+      - hlf.kungfusoftware.es
+    resources:
+      - fabricchaincodes/finalizers
+  - verbs:
+      - get
+      - patch
+      - update
+    apiGroups:
+      - hlf.kungfusoftware.es
+    resources:
+      - fabricchaincodes/status
+  - verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+    apiGroups:
+      - hlf.kungfusoftware.es
+    resources:
+      - fabricfollowerchannels
+  - verbs:
+      - get
+      - patch
+      - update
+    apiGroups:
+      - hlf.kungfusoftware.es
+    resources:
+      - fabricfollowerchannels/finalizers
+  - verbs:
+      - get
+      - patch
+      - update
+    apiGroups:
+      - hlf.kungfusoftware.es
+    resources:
+      - fabricfollowerchannels/status
+
+  - verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+    apiGroups:
+      - hlf.kungfusoftware.es
+    resources:
+      - fabricmainchannels
+  - verbs:
+      - get
+      - patch
+      - update
+    apiGroups:
+      - hlf.kungfusoftware.es
+    resources:
+      - fabricmainchannels/finalizers
+  - verbs:
+      - get
+      - patch
+      - update
+    apiGroups:
+      - hlf.kungfusoftware.es
+    resources:
+      - fabricmainchannels/status
 
 
-  - apiGroups:
+  - verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+    apiGroups:
+      - hlf.kungfusoftware.es
+    resources:
+      - fabricidentities
+  - verbs:
+      - get
+      - patch
+      - update
+    apiGroups:
+      - hlf.kungfusoftware.es
+    resources:
+      - fabricidentities/finalizers
+  - verbs:
+      - get
+      - patch
+      - update
+    apiGroups:
+      - hlf.kungfusoftware.es
+    resources:
+      - fabricidentities/status
+
+
+  - verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+    apiGroups:
       - networking.istio.io
     resources:
       - gateways
-    verbs:
+  - verbs:
       - create
       - delete
       - get
@@ -488,11 +790,11 @@ rules:
       - patch
       - update
       - watch
-  - apiGroups:
+    apiGroups:
       - networking.istio.io
     resources:
       - virtualservices
-    verbs:
+  - verbs:
       - create
       - delete
       - get
@@ -500,11 +802,11 @@ rules:
       - patch
       - update
       - watch
-  - apiGroups:
+    apiGroups:
       - monitoring.coreos.com
     resources:
       - servicemonitors
-    verbs:
+  - verbs:
       - create
       - delete
       - get
@@ -512,11 +814,23 @@ rules:
       - patch
       - update
       - watch
-  - apiGroups:
+    apiGroups:
+      - coordination.k8s.io
+    resources:
+      - leases
+  - verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+    apiGroups:
       - monitoring.coreos.com
     resources:
       - podmonitors
-    verbs:
+  - verbs:
       - create
       - delete
       - get
@@ -524,11 +838,11 @@ rules:
       - patch
       - update
       - watch
-  - apiGroups:
+    apiGroups:
       - rbac.authorization.k8s.io
     resources:
       - clusterrolebindings
-    verbs:
+  - verbs:
       - create
       - delete
       - get
@@ -536,11 +850,11 @@ rules:
       - patch
       - update
       - watch
-  - apiGroups:
+    apiGroups:
       - rbac.authorization.k8s.io
     resources:
       - clusterroles
-    verbs:
+  - verbs:
       - create
       - delete
       - get
@@ -548,6 +862,61 @@ rules:
       - patch
       - update
       - watch
+    apiGroups:
+      - rbac.authorization.k8s.io
+    resources:
+      - roles
+  - verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+    apiGroups:
+      - rbac.authorization.k8s.io
+    resources:
+      - rolebindings
+  - verbs:
+      - get
+      - update
+      - patch
+    apiGroups:
+      - ''
+    resources:
+      - configmaps/status
+  - verbs:
+      - create
+      - patch
+    apiGroups:
+      - ''
+    resources:
+      - events
+  - apiGroups:
+      - gateway.networking.k8s.io
+    resources:
+      - gatewayclasses
+      - gateways
+      - httproutes
+      - tcproutes
+      - tlsroutes
+    verbs:
+      - get
+      - list
+      - watch
+      - create
+      - patch
+  - apiGroups:
+      - gateway.networking.k8s.io
+    resources:
+      - gatewayclasses/status
+      - gateways/status
+      - httproutes/status
+      - tcproutes/status
+      - tlsroutes/status
+    verbs:
+      - update
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
@@ -617,4 +986,3 @@ subjects:
   - kind: ServiceAccount
     name: default
     namespace: {{.Release.Namespace}}
-
