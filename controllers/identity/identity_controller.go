@@ -126,6 +126,30 @@ func (r *FabricIdentityReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 	var x509Cert *x509.Certificate
 	var pk *ecdsa.PrivateKey
 	var rootCert *x509.Certificate
+	if fabricIdentity.Spec.Register != nil {
+		log.Infof("Registering user %s", fabricIdentity.Spec.Enrollid)
+		_, err = certs.RegisterUser(certs.RegisterUserRequest{
+			TLSCert:      string(tlsCert),
+			URL:          fmt.Sprintf("https://%s:%d", fabricIdentity.Spec.Cahost, fabricIdentity.Spec.Caport),
+			Name:         fabricIdentity.Spec.Caname,
+			MSPID:        fabricIdentity.Spec.MSPID,
+			EnrollID:     fabricIdentity.Spec.Register.Enrollid,
+			EnrollSecret: fabricIdentity.Spec.Register.Enrollsecret,
+			User:         fabricIdentity.Spec.Enrollid,
+			Secret:       fabricIdentity.Spec.Enrollsecret,
+			Type:         fabricIdentity.Spec.Register.Type,
+			Attributes:   []api.Attribute{},
+		})
+		if err != nil {
+			if !strings.Contains(err.Error(), "already registered") {
+				log.Errorf("Error registering user: %v", err)
+				r.setConditionStatus(ctx, fabricIdentity, hlfv1alpha1.FailedStatus, false, err, false)
+				return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricIdentity)
+			}
+
+		}
+	}
+
 	if secretExists {
 		// get crypto material from secret
 		certPemBytes := secret.Data["cert.pem"]
