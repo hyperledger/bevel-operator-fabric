@@ -1675,7 +1675,7 @@ type FabricIdentityRegister struct {
 	Enrollsecret string `json:"enrollsecret"`
 	// +kubebuilder:validation:MinLength=1
 	Type string `json:"type"`
-	// +kubebuilder:validation:MinLength=1
+
 	Affiliation string `json:"affiliation"`
 
 	MaxEnrollments int `json:"maxenrollments"`
