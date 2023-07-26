@@ -133,7 +133,7 @@ certificateAuthorities:
 {{if $ca.EnrollID }}
     registrar:
         enrollId: {{ $ca.EnrollID }}
-        enrollSecret: {{ $ca.EnrollPWD }}
+        enrollSecret: "{{ $ca.EnrollPWD }}"
 {{ end }}
     caName: ca
     tlsCACerts:

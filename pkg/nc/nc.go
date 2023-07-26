@@ -117,7 +117,7 @@ certificateAuthorities:
 {{if $ca.EnrollID }}
     registrar:
         enrollId: {{ $ca.EnrollID }}
-        enrollSecret: {{ $ca.EnrollSecret }}
+        enrollSecret: "{{ $ca.EnrollSecret }}"
 {{ end }}
     caName: {{ $ca.CAName }}
     tlsCACerts:
