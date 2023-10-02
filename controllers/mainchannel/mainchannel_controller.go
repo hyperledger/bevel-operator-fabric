@@ -16,6 +16,7 @@ import (
 	"github.com/hyperledger/fabric-config/protolator"
 	"github.com/hyperledger/fabric-protos-go/common"
 	cb "github.com/hyperledger/fabric-protos-go/common"
+	"github.com/hyperledger/fabric-protos-go/orderer/smartbft"
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/resmgmt"
 	fab2 "github.com/hyperledger/fabric-sdk-go/pkg/common/providers/fab"
 	"github.com/hyperledger/fabric-sdk-go/pkg/common/providers/msp"
@@ -929,6 +930,21 @@ func (r *FabricMainChannelReconciler) mapToConfigTX(channel *hlfv1alpha1.FabricM
 	ordConfigtx := configtx.Orderer{
 		OrdererType:   "etcdraft",
 		Organizations: ordererOrgs,
+		SmartBFT: &smartbft.Options{
+			RequestBatchMaxCount:      100,
+			RequestBatchMaxInterval:   "50ms",
+			RequestForwardTimeout:     "2s",
+			RequestComplainTimeout:    "20s",
+			RequestAutoRemoveTimeout:  "3m0s",
+			ViewChangeResendInterval:  "5s",
+			ViewChangeTimeout:         "20s",
+			LeaderHeartbeatTimeout:    "1m0s",
+			CollectTimeout:            "1s",
+			RequestBatchMaxBytes:      10485760,
+			IncomingMessageBufferSize: 200,
+			RequestPoolSize:           100000,
+			LeaderHeartbeatCount:      10,
+		},
 		EtcdRaft: orderer.EtcdRaft{
 			Consenters: consenters,
 			Options:    etcdRaftOptions,

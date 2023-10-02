@@ -1,0 +1,31 @@
+{{ if .Values.traefik.hosts }}
+{{- $root := . -}}
+
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRouteTCP
+metadata:
+  name: {{ include "hlf-ca.fullname" . }}
+spec:
+  {{ if .Values.traefik.middlewares }}
+  middlewares:
+{{- range .Values.traefik.middlewares }}
+    - name: {{ .name }}
+      namespace: {{ .namespace }}
+{{- end }}
+{{- end }}
+
+  entryPoints:
+  {{ range .Values.traefik.entryPoints }}
+    - {{ . }}
+  {{ end }}
+  routes:
+  {{- range .Values.traefik.hosts }}
+    - match: HostSNI(`{{ . }}`)
+      services:
+        - name: {{ include "hlf-ca.fullname" $root }}
+          port: 7054
+  {{ end }}
+  tls:
+    passthrough: true
+
+{{- end }}

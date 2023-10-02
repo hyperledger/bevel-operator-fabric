@@ -615,7 +615,8 @@ func (r *FabricPeerReconciler) upgradeChart(
 	if err != nil {
 		return err
 	}
-	cmd.Wait = true
+	cmd.Wait = false
+	cmd.MaxHistory = 10
 	cmd.Timeout = time.Minute * 5
 	log.Infof("Upgrading chart %s", inrec)
 	release, err := cmd.Run(releaseName, ch, inInterface)
@@ -887,6 +888,26 @@ func ReenrollTLSCryptoMaterial(
 	return tlsCert, tlsKey, tlsRootCert, nil
 }
 
+func getCertBytesFromCATLS(client *kubernetes.Clientset, caTls hlfv1alpha1.Catls) ([]byte, error) {
+	var signCertBytes []byte
+	var err error
+	if caTls.Cacert != "" {
+		signCertBytes, err = base64.StdEncoding.DecodeString(caTls.Cacert)
+		if err != nil {
+			return nil, err
+		}
+	} else if caTls.SecretRef != nil {
+		secret, err := client.CoreV1().Secrets(caTls.SecretRef.Namespace).Get(context.Background(), caTls.SecretRef.Name, v1.GetOptions{})
+		if err != nil {
+			return nil, err
+		}
+		signCertBytes = secret.Data[caTls.SecretRef.Key]
+	} else {
+		return nil, errors.New("invalid ca tls")
+	}
+	return signCertBytes, nil
+}
+
 func GetConfig(
 	conf *hlfv1alpha1.FabricPeer,
 	client *kubernetes.Clientset,
@@ -924,7 +945,7 @@ func GetConfig(
 			return nil, errors.Wrapf(err, "failed to parse tls private key")
 		}
 	} else if refreshCerts {
-		cacert, err := base64.StdEncoding.DecodeString(tlsParams.Catls.Cacert)
+		cacert, err := getCertBytesFromCATLS(client, tlsParams.Catls)
 		if err != nil {
 			return nil, errors.Wrapf(err, "failed to decode tls ca cert")
 		}
@@ -967,7 +988,7 @@ func GetConfig(
 	} else {
 		tlsCert, tlsKey, tlsRootCert, err = getExistingTLSCrypto(client, chartName, namespace)
 		if err != nil {
-			cacert, err := base64.StdEncoding.DecodeString(tlsParams.Catls.Cacert)
+			cacert, err := getCertBytesFromCATLS(client, tlsParams.Catls)
 			if err != nil {
 				return nil, err
 			}
@@ -986,7 +1007,7 @@ func GetConfig(
 		}
 	}
 	if refreshCerts {
-		cacert, err := base64.StdEncoding.DecodeString(tlsParams.Catls.Cacert)
+		cacert, err := getCertBytesFromCATLS(client, tlsParams.Catls)
 		if err != nil {
 			return nil, err
 		}
@@ -1005,7 +1026,7 @@ func GetConfig(
 	} else {
 		tlsOpsCert, tlsOpsKey, _, err = getExistingTLSOPSCrypto(client, chartName, namespace)
 		if err != nil {
-			cacert, err := base64.StdEncoding.DecodeString(tlsParams.Catls.Cacert)
+			cacert, err := getCertBytesFromCATLS(client, tlsParams.Catls)
 			if err != nil {
 				return nil, err
 			}
@@ -1043,7 +1064,7 @@ func GetConfig(
 			return nil, errors.Wrapf(err, "failed to parse sign private key")
 		}
 	} else if refreshCerts {
-		cacert, err := base64.StdEncoding.DecodeString(signParams.Catls.Cacert)
+		cacert, err := getCertBytesFromCATLS(client, signParams.Catls)
 		if err != nil {
 			return nil, errors.Wrapf(err, "failed to decode sign ca cert")
 		}
@@ -1086,7 +1107,7 @@ func GetConfig(
 	} else {
 		signCert, signKey, signRootCert, err = getExistingSignCrypto(client, chartName, namespace)
 		if err != nil {
-			cacert, err := base64.StdEncoding.DecodeString(signParams.Catls.Cacert)
+			cacert, err := getCertBytesFromCATLS(client, signParams.Catls)
 			if err != nil {
 				return nil, err
 			}
@@ -1196,6 +1217,8 @@ func GetConfig(
 		stateDb = "CouchDB"
 	case hlfv1alpha1.StateDBLevelDB:
 		stateDb = "goleveldb"
+	case hlfv1alpha1.StateDBPostgres:
+		stateDb = "pg"
 	default:
 		stateDb = "goleveldb"
 	}
@@ -1231,6 +1254,23 @@ func GetConfig(
 			Port:           0,
 			Hosts:          []string{},
 			IngressGateway: "",
+		}
+	}
+	traefik := Traefik{}
+	if spec.Traefik != nil {
+		var middlewares []TraefikMiddleware
+		if spec.Traefik.Middlewares != nil {
+			for _, middleware := range spec.Traefik.Middlewares {
+				middlewares = append(middlewares, TraefikMiddleware{
+					Name:      middleware.Name,
+					Namespace: middleware.Namespace,
+				})
+			}
+		}
+		traefik = Traefik{
+			Entrypoints: spec.Traefik.Entrypoints,
+			Middlewares: middlewares,
+			Hosts:       spec.Traefik.Hosts,
 		}
 	}
 	var gatewayApi GatewayApi
@@ -1346,6 +1386,7 @@ func GetConfig(
 		ImagePullSecrets: spec.ImagePullSecrets,
 		GatewayApi:       gatewayApi,
 		Istio:            istio,
+		Traefik:          traefik,
 		Image: Image{
 			Repository: spec.Image,
 			Tag:        spec.Tag,

@@ -4,6 +4,7 @@ import corev1 "k8s.io/api/core/v1"
 
 type FabricCAChart struct {
 	Istio            Istio                         `json:"istio"`
+	Traefik          Traefik                       `json:"traefik"`
 	GatewayApi       GatewayApi                    `json:"gatewayApi"`
 	FullNameOverride string                        `json:"fullnameOverride"`
 	Image            Image                         `json:"image"`
@@ -35,6 +36,15 @@ type ServiceMonitor struct {
 	TargetLabels      []interface{}     `json:"targetLabels"`
 	MetricRelabelings []interface{}     `json:"metricRelabelings"`
 	SampleLimit       int               `json:"sampleLimit"`
+}
+type TraefikMiddleware struct {
+	Name      string `json:"name"`
+	Namespace string `json:"namespace"`
+}
+type Traefik struct {
+	Entrypoints []string            `json:"entryPoints"`
+	Middlewares []TraefikMiddleware `json:"middlewares"`
+	Hosts       []string            `json:"hosts"`
 }
 type Istio struct {
 	Port  int      `json:"port"`
@@ -179,7 +189,13 @@ type Persistence struct {
 	AccessMode   string            `json:"accessMode"`
 	Size         string            `json:"size"`
 }
+type SecretRef struct {
+	SecretName string `json:"secretName"`
+}
 type Msp struct {
+	CARef    *SecretRef `json:"caRef"`
+	TLSCARef *SecretRef `json:"tlsCARef"`
+
 	Keyfile        string `json:"keyfile"`
 	Certfile       string `json:"certfile"`
 	Chainfile      string `json:"chainfile"`

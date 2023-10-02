@@ -453,7 +453,8 @@ func (r *FabricOrdererNodeReconciler) upgradeChart(
 	if err != nil {
 		return err
 	}
-	cmd.Wait = true
+	cmd.Wait = false
+	cmd.MaxHistory = 10
 	cmd.Timeout = time.Minute * 5
 	release, err := cmd.Run(releaseName, ch, inInterface)
 	if err != nil {
@@ -758,6 +759,26 @@ func ReenrollSignCryptoMaterial(
 	}
 	return signCert, privateKey, signRootCert, nil
 }
+
+func getCertBytesFromCATLS(client *kubernetes.Clientset, caTls hlfv1alpha1.Catls) ([]byte, error) {
+	var signCertBytes []byte
+	var err error
+	if caTls.Cacert != "" {
+		signCertBytes, err = base64.StdEncoding.DecodeString(caTls.Cacert)
+		if err != nil {
+			return nil, err
+		}
+	} else if caTls.SecretRef != nil {
+		secret, err := client.CoreV1().Secrets(caTls.SecretRef.Namespace).Get(context.Background(), caTls.SecretRef.Name, v1.GetOptions{})
+		if err != nil {
+			return nil, err
+		}
+		signCertBytes = secret.Data[caTls.SecretRef.Key]
+	} else {
+		return nil, errors.New("invalid ca tls")
+	}
+	return signCertBytes, nil
+}
 func getConfig(
 	conf *hlfv1alpha1.FabricOrdererNode,
 	client *kubernetes.Clientset,
@@ -794,7 +815,7 @@ func getConfig(
 			return nil, errors.Wrapf(err, "failed to parse tls private key")
 		}
 	} else if refreshCerts {
-		cacert, err := base64.StdEncoding.DecodeString(tlsParams.Catls.Cacert)
+		cacert, err := getCertBytesFromCATLS(client, tlsParams.Catls)
 		if err != nil {
 			return nil, errors.Wrapf(err, "failed to decode tls ca cert")
 		}
@@ -820,7 +841,7 @@ func getConfig(
 		tlsCert, tlsKey, tlsRootCert, err = getExistingTLSCrypto(client, chartName, namespace)
 		if err != nil {
 			log.Warnf("Failed to get existing tls crypto material for %s, will create new one", chartName)
-			cacert, err := base64.StdEncoding.DecodeString(tlsParams.Catls.Cacert)
+			cacert, err := getCertBytesFromCATLS(client, tlsParams.Catls)
 			if err != nil {
 				return nil, errors.Wrapf(err, "failed to decode tls ca cert")
 			}
@@ -839,7 +860,7 @@ func getConfig(
 		}
 	}
 	if refreshCerts {
-		cacert, err := base64.StdEncoding.DecodeString(tlsParams.Catls.Cacert)
+		cacert, err := getCertBytesFromCATLS(client, tlsParams.Catls)
 		if err != nil {
 			return nil, errors.Wrapf(err, "failed to decode tls ca cert")
 		}
@@ -864,7 +885,7 @@ func getConfig(
 		adminCert, adminKey, adminRootCert, adminClientRootCert, err = getExistingTLSAdminCrypto(client, chartName, namespace)
 		if err != nil {
 			log.Warnf("Failed to get existing tls admin crypto material, creating new one")
-			cacert, err := base64.StdEncoding.DecodeString(tlsParams.Catls.Cacert)
+			cacert, err := getCertBytesFromCATLS(client, tlsParams.Catls)
 			if err != nil {
 				return nil, errors.Wrapf(err, "failed to decode tls ca cert")
 			}
@@ -902,7 +923,7 @@ func getConfig(
 			return nil, errors.Wrapf(err, "failed to parse sign private key")
 		}
 	} else if refreshCerts {
-		cacert, err := base64.StdEncoding.DecodeString(signParams.Catls.Cacert)
+		cacert, err := getCertBytesFromCATLS(client, signParams.Catls)
 		if err != nil {
 			return nil, errors.Wrapf(err, "failed to decode sign ca cert")
 		}
@@ -928,7 +949,7 @@ func getConfig(
 		signCert, signKey, signRootCert, err = getExistingSignCrypto(client, chartName, namespace)
 		if err != nil {
 			log.Warnf("Failed to get existing sign crypto material: %s", err)
-			cacert, err := base64.StdEncoding.DecodeString(signParams.Catls.Cacert)
+			cacert, err := getCertBytesFromCATLS(client, signParams.Catls)
 			if err != nil {
 				return nil, errors.Wrapf(err, "failed to decode sign ca cert")
 			}
@@ -1037,6 +1058,43 @@ func getConfig(
 			GatewayNamespace: "",
 		}
 	}
+
+	traefik := Traefik{}
+	if spec.Traefik != nil {
+		var middlewares []TraefikMiddleware
+		if spec.Traefik.Middlewares != nil {
+			for _, middleware := range spec.Traefik.Middlewares {
+				middlewares = append(middlewares, TraefikMiddleware{
+					Name:      middleware.Name,
+					Namespace: middleware.Namespace,
+				})
+			}
+		}
+		traefik = Traefik{
+			Entrypoints: spec.Traefik.Entrypoints,
+			Middlewares: middlewares,
+			Hosts:       spec.Traefik.Hosts,
+		}
+	}
+
+	adminTraefik := Traefik{}
+	if spec.AdminTraefik != nil {
+		var middlewares []TraefikMiddleware
+		if spec.AdminTraefik.Middlewares != nil {
+			for _, middleware := range spec.AdminTraefik.Middlewares {
+				middlewares = append(middlewares, TraefikMiddleware{
+					Name:      middleware.Name,
+					Namespace: middleware.Namespace,
+				})
+			}
+		}
+		adminTraefik = Traefik{
+			Entrypoints: spec.AdminTraefik.Entrypoints,
+			Middlewares: middlewares,
+			Hosts:       spec.AdminTraefik.Hosts,
+		}
+	}
+
 	var adminIstio Istio
 	if spec.AdminIstio != nil {
 		gateway := spec.AdminIstio.IngressGateway
@@ -1121,18 +1179,14 @@ func getConfig(
 	}
 
 	fabricOrdChart := fabricOrdChart{
-		Affinity:                    spec.Affinity,
-		NodeSelector:                spec.NodeSelector,
-		ImagePullSecrets:            spec.ImagePullSecrets,
-		EnvVars:                     spec.Env,
-		Resources:                   spec.Resources,
-		Istio:                       istio,
-		AdminIstio:                  adminIstio,
 		GatewayApi:                  gatewayApi,
+		Istio:                       istio,
+		Traefik:                     traefik,
 		AdminGatewayApi:             adminGatewayApi,
+		AdminIstio:                  adminIstio,
+		AdminTraefik:                adminTraefik,
 		Replicas:                    spec.Replicas,
 		Genesis:                     spec.Genesis,
-		Proxy:                       proxy,
 		ChannelParticipationEnabled: spec.ChannelParticipationEnabled,
 		BootstrapMethod:             string(spec.BootstrapMethod),
 		Admin: admin{
@@ -1141,16 +1195,19 @@ func getConfig(
 			RootCAs:       string(adminRootCRTEncoded),
 			ClientRootCAs: string(adminClientRootCRTEncoded),
 		},
-		Cacert:      string(signRootCRTEncoded),
-		Tlsrootcert: string(tlsRootCRTEncoded),
-		AdminCert:   "",
-		Cert:        string(signCRTEncoded),
-		Key:         string(signEncodedPK),
-		Tolerations: spec.Tolerations,
+		Cacert:       string(signRootCRTEncoded),
+		NodeSelector: spec.NodeSelector,
+		Tlsrootcert:  string(tlsRootCRTEncoded),
+		AdminCert:    "",
+		Affinity:     spec.Affinity,
+		Cert:         string(signCRTEncoded),
+		Key:          string(signEncodedPK),
 		TLS: tls{
 			Cert: string(tlsCRTEncoded),
 			Key:  string(tlsEncodedPK),
 		},
+		Tolerations:      spec.Tolerations,
+		Resources:        spec.Resources,
 		FullnameOverride: conf.Name,
 		HostAliases:      hostAliases,
 		Service: service{
@@ -1184,10 +1241,13 @@ func getConfig(
 				},
 			},
 		},
-		Clientcerts:    clientcerts{},
-		Hosts:          ingressHosts,
-		Logging:        Logging{Spec: "info"},
-		ServiceMonitor: monitor,
+		Clientcerts:      clientcerts{},
+		Hosts:            ingressHosts,
+		Logging:          Logging{Spec: "info"},
+		ServiceMonitor:   monitor,
+		EnvVars:          spec.Env,
+		ImagePullSecrets: spec.ImagePullSecrets,
+		Proxy:            proxy,
 	}
 
 	return &fabricOrdChart, nil

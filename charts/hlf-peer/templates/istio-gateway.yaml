@@ -1,4 +1,4 @@
-{{- if .Values.hosts -}}
+{{- if .Values.istio.hosts -}}
 
 apiVersion: networking.istio.io/v1alpha3
 kind: Gateway

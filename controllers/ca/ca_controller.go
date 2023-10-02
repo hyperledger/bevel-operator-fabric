@@ -13,7 +13,6 @@ import (
 	"encoding/json"
 	"encoding/pem"
 	"fmt"
-
 	"github.com/go-logr/logr"
 	"github.com/kfsoftware/hlf-operator/controllers/hlfmetrics"
 	"github.com/kfsoftware/hlf-operator/pkg/status"
@@ -101,6 +100,24 @@ func getExistingTLSCrypto(client *kubernetes.Clientset, chartName string, namesp
 func getExistingSignCrypto(client *kubernetes.Clientset, chartName string, namespace string) (*x509.Certificate, *ecdsa.PrivateKey, error) {
 	secretName := fmt.Sprintf("%s--msp-cryptomaterial", chartName)
 
+	secret, err := client.CoreV1().Secrets(namespace).Get(context.Background(), secretName, v1.GetOptions{})
+	if err != nil {
+		return nil, nil, err
+	}
+	tlsKeyData := secret.Data["keyfile"]
+	tlsCrtData := secret.Data["certfile"]
+	key, err := parseECDSAPrivateKey(tlsKeyData)
+	if err != nil {
+		return nil, nil, err
+	}
+	crt, err := parseX509Certificate(tlsCrtData)
+	if err != nil {
+		return nil, nil, err
+	}
+	return crt, key, nil
+}
+
+func getAlreadyExistingCrypto(client *kubernetes.Clientset, secretName string, namespace string) (*x509.Certificate, *ecdsa.PrivateKey, error) {
 	secret, err := client.CoreV1().Secrets(namespace).Get(context.Background(), secretName, v1.GetOptions{})
 	if err != nil {
 		return nil, nil, err
@@ -467,10 +484,15 @@ func GetConfig(conf *hlfv1alpha1.FabricCA, client *kubernetes.Clientset, chartNa
 			}
 		}
 	}
-
+	var caRef *SecretRef
 	signCert, signKey, err := getExistingSignCrypto(client, chartName, namespace)
 	if err != nil {
-		if conf.Spec.CA.CA != nil && conf.Spec.CA.CA.Key != "" && conf.Spec.CA.CA.Cert != "" {
+		if conf.Spec.CA.CA != nil && conf.Spec.CA.CA.SecretRef != nil {
+			caRef = &SecretRef{
+				SecretName: conf.Spec.CA.CA.SecretRef.Name,
+			}
+			err = nil
+		} else if conf.Spec.CA.CA != nil && conf.Spec.CA.CA.Key != "" && conf.Spec.CA.CA.Cert != "" {
 			signCert, signKey, err = parseCrypto(conf.Spec.CA.CA.Key, conf.Spec.CA.CA.Cert)
 		} else {
 			signCert, signKey, err = CreateDefaultCA(spec.CA)
@@ -479,9 +501,15 @@ func GetConfig(conf *hlfv1alpha1.FabricCA, client *kubernetes.Clientset, chartNa
 			return nil, err
 		}
 	}
+	var caTLSSignRef *SecretRef
 	caTLSSignCert, caTLSSignKey, err := getExistingSignTLSCrypto(client, chartName, namespace)
 	if err != nil {
-		if conf.Spec.TLSCA.CA != nil && conf.Spec.TLSCA.CA.Key != "" && conf.Spec.TLSCA.CA.Cert != "" {
+		if conf.Spec.TLSCA.CA != nil && conf.Spec.TLSCA.CA.SecretRef != nil {
+			caTLSSignRef = &SecretRef{
+				SecretName: conf.Spec.TLSCA.CA.SecretRef.Name,
+			}
+			err = nil
+		} else if conf.Spec.TLSCA.CA != nil && conf.Spec.TLSCA.CA.Key != "" && conf.Spec.TLSCA.CA.Cert != "" {
 			caTLSSignCert, caTLSSignKey, err = parseCrypto(conf.Spec.TLSCA.CA.Key, conf.Spec.TLSCA.CA.Cert)
 		} else {
 			caTLSSignCert, caTLSSignKey, err = CreateDefaultCA(spec.TLSCA)
@@ -502,32 +530,42 @@ func GetConfig(conf *hlfv1alpha1.FabricCA, client *kubernetes.Clientset, chartNa
 		Type:  "PRIVATE KEY",
 		Bytes: tlsEncodedPK,
 	})
-
-	signCRTEncoded := pem.EncodeToMemory(&pem.Block{
-		Type:  "CERTIFICATE",
-		Bytes: signCert.Raw,
-	})
-	signEncodedPK, err := x509.MarshalPKCS8PrivateKey(signKey)
-	if err != nil {
-		return nil, err
+	var signCRTEncoded []byte
+	if signCert != nil {
+		signCRTEncoded = pem.EncodeToMemory(&pem.Block{
+			Type:  "CERTIFICATE",
+			Bytes: signCert.Raw,
+		})
 	}
-	signPEMEncodedPK := pem.EncodeToMemory(&pem.Block{
-		Type:  "PRIVATE KEY",
-		Bytes: signEncodedPK,
-	})
-
-	caTLSSignCRTEncoded := pem.EncodeToMemory(&pem.Block{
-		Type:  "CERTIFICATE",
-		Bytes: caTLSSignCert.Raw,
-	})
-	caTLSSignEncodedPK, err := x509.MarshalPKCS8PrivateKey(caTLSSignKey)
-	if err != nil {
-		return nil, err
+	var signPEMEncodedPK []byte
+	if signKey != nil {
+		signEncodedPK, err := x509.MarshalPKCS8PrivateKey(signKey)
+		if err != nil {
+			return nil, err
+		}
+		signPEMEncodedPK = pem.EncodeToMemory(&pem.Block{
+			Type:  "PRIVATE KEY",
+			Bytes: signEncodedPK,
+		})
 	}
-	caTLSSignPEMEncodedPK := pem.EncodeToMemory(&pem.Block{
-		Type:  "PRIVATE KEY",
-		Bytes: caTLSSignEncodedPK,
-	})
+	var caTLSSignCRTEncoded []byte
+	if caTLSSignCert != nil {
+		caTLSSignCRTEncoded = pem.EncodeToMemory(&pem.Block{
+			Type:  "CERTIFICATE",
+			Bytes: caTLSSignCert.Raw,
+		})
+	}
+	var caTLSSignPEMEncodedPK []byte
+	if caTLSSignKey != nil {
+		caTLSSignEncodedPK, err := x509.MarshalPKCS8PrivateKey(caTLSSignKey)
+		if err != nil {
+			return nil, err
+		}
+		caTLSSignPEMEncodedPK = pem.EncodeToMemory(&pem.Block{
+			Type:  "PRIVATE KEY",
+			Bytes: caTLSSignEncodedPK,
+		})
+	}
 	istioPort := 443
 	if spec.Istio != nil && spec.Istio.Port != 0 {
 		istioPort = spec.Istio.Port
@@ -547,6 +585,8 @@ func GetConfig(conf *hlfv1alpha1.FabricCA, client *kubernetes.Clientset, chartNa
 		gatewayApiNamespace = spec.GatewayApi.GatewayNamespace
 	}
 	msp := Msp{
+		CARef:          caRef,
+		TLSCARef:       caTLSSignRef,
 		Keyfile:        string(signPEMEncodedPK),
 		Certfile:       string(signCRTEncoded),
 		Chainfile:      "",
@@ -581,6 +621,23 @@ func GetConfig(conf *hlfv1alpha1.FabricCA, client *kubernetes.Clientset, chartNa
 		}
 	}
 
+	traefik := Traefik{}
+	if spec.Traefik != nil {
+		var middlewares []TraefikMiddleware
+		if spec.Traefik.Middlewares != nil {
+			for _, middleware := range spec.Traefik.Middlewares {
+				middlewares = append(middlewares, TraefikMiddleware{
+					Name:      middleware.Name,
+					Namespace: middleware.Namespace,
+				})
+			}
+		}
+		traefik = Traefik{
+			Entrypoints: spec.Traefik.Entrypoints,
+			Middlewares: middlewares,
+			Hosts:       spec.Traefik.Hosts,
+		}
+	}
 	var c = FabricCAChart{
 		ImagePullSecrets: spec.ImagePullSecrets,
 		EnvVars:          spec.Env,
@@ -605,6 +662,7 @@ func GetConfig(conf *hlfv1alpha1.FabricCA, client *kubernetes.Clientset, chartNa
 			Type: string(spec.Service.ServiceType),
 			Port: 7054,
 		},
+		Traefik: traefik,
 		Persistence: Persistence{
 			Enabled:      true,
 			Annotations:  map[string]string{},
@@ -724,9 +782,17 @@ func GetCAState(clientSet *kubernetes.Clientset, ca *hlfv1alpha1.FabricCA, relea
 		releaseName,
 		ns,
 	)
-	signCrt, _, err := getExistingSignCrypto(clientSet, releaseName, ns)
-	if err != nil {
-		return nil, err
+	var signCrt *x509.Certificate
+	if ca.Spec.CA.CA != nil && ca.Spec.CA.CA.SecretRef != nil {
+		signCrt, _, err = getAlreadyExistingCrypto(clientSet, ca.Spec.CA.CA.SecretRef.Name, ns)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		signCrt, _, err = getExistingSignCrypto(clientSet, releaseName, ns)
+		if err != nil {
+			return nil, err
+		}
 	}
 	r.CACert = string(utils.EncodeX509Certificate(signCrt))
 	hlfmetrics.UpdateCertificateExpiry(
@@ -736,9 +802,17 @@ func GetCAState(clientSet *kubernetes.Clientset, ca *hlfv1alpha1.FabricCA, relea
 		releaseName,
 		ns,
 	)
-	tlsCACrt, _, err := getExistingSignTLSCrypto(clientSet, releaseName, ns)
-	if err != nil {
-		return nil, err
+	var tlsCACrt *x509.Certificate
+	if ca.Spec.TLSCA.CA != nil && ca.Spec.TLSCA.CA.SecretRef != nil {
+		tlsCACrt, _, err = getAlreadyExistingCrypto(clientSet, ca.Spec.TLSCA.CA.SecretRef.Name, ns)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		tlsCACrt, _, err = getExistingSignTLSCrypto(clientSet, releaseName, ns)
+		if err != nil {
+			return nil, err
+		}
 	}
 	r.TLSCACert = string(utils.EncodeX509Certificate(tlsCACrt))
 	hlfmetrics.UpdateCertificateExpiry(
@@ -850,6 +924,7 @@ func Reconcile(
 
 	if exists {
 		// update
+		log.Debugf("Release %s exists, updating", releaseName)
 		s, err := GetCAState(r.ClientSet, hlf, releaseName, ns)
 		if err != nil {
 			return ctrl.Result{}, err
@@ -890,8 +965,9 @@ func Reconcile(
 			return ctrl.Result{}, err
 		}
 		cmd := action.NewUpgrade(cfg)
-		cmd.MaxHistory = 5
 		cmd.Timeout = 5 * time.Minute
+		cmd.Wait = false
+		cmd.MaxHistory = 10
 		settings := cli.New()
 		chartPath, err := cmd.LocateChart(r.ChartPath, settings)
 		ch, err := loader.Load(chartPath)
@@ -930,6 +1006,7 @@ func Reconcile(
 			return ctrl.Result{}, err
 		}
 		cmd.ReleaseName = name
+		cmd.Wait = false
 		ch, err := loader.Load(chart)
 		if err != nil {
 			return ctrl.Result{}, err

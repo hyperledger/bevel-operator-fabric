@@ -98,7 +98,7 @@ To install helm: [https://helm.sh/docs/intro/install/](https://helm.sh/docs/intr
 ```bash
 helm repo add kfs https://kfsoftware.github.io/hlf-helm-charts --force-update
 
-helm install hlf-operator --version=1.9.0 -- kfs/hlf-operator
+helm install hlf-operator --version=1.9.2 -- kfs/hlf-operator
 ```
 
 
@@ -199,13 +199,13 @@ EOF
 
 ```bash
 export PEER_IMAGE=hyperledger/fabric-peer
-export PEER_VERSION=2.5.0
+export PEER_VERSION=3.0.0-preview
 
 export ORDERER_IMAGE=hyperledger/fabric-orderer
-export ORDERER_VERSION=2.5.0
+export ORDERER_VERSION=3.0.0-preview
 
 export CA_IMAGE=hyperledger/fabric-ca
-export CA_VERSION=1.5.6
+export CA_VERSION=1.5.7
 ```
 
 
@@ -213,13 +213,13 @@ export CA_VERSION=1.5.6
 
 ```bash
 export PEER_IMAGE=hyperledger/fabric-peer
-export PEER_VERSION=2.5.0
+export PEER_VERSION=3.0.0-preview
 
 export ORDERER_IMAGE=hyperledger/fabric-orderer
-export ORDERER_VERSION=2.5.0
+export ORDERER_VERSION=3.0.0-preview
 
 export CA_IMAGE=hyperledger/fabric-ca             
-export CA_VERSION=1.5.6
+export CA_VERSION=1.5.7
 
 ```
 
@@ -350,7 +350,31 @@ kubectl hlf ca register --name=ord-ca --user=orderer --secret=ordererpw \
 kubectl hlf ordnode create --image=$ORDERER_IMAGE --version=$ORDERER_VERSION \
     --storage-class=standard --enroll-id=orderer --mspid=OrdererMSP \
     --enroll-pw=ordererpw --capacity=2Gi --name=ord-node1 --ca-name=ord-ca.default \
-    --hosts=orderer0-ord.localho.st --istio-port=443
+    --hosts=orderer0-ord.localho.st --admin-hosts=admin-orderer0-ord.localho.st --istio-port=443
+
+
+kubectl hlf ordnode create --image=$ORDERER_IMAGE --version=$ORDERER_VERSION \
+    --storage-class=standard --enroll-id=orderer --mspid=OrdererMSP \
+    --enroll-pw=ordererpw --capacity=2Gi --name=ord-node2 --ca-name=ord-ca.default \
+    --hosts=orderer1-ord.localho.st --admin-hosts=admin-orderer1-ord.localho.st --istio-port=443
+
+
+kubectl hlf ordnode create --image=$ORDERER_IMAGE --version=$ORDERER_VERSION \
+    --storage-class=standard --enroll-id=orderer --mspid=OrdererMSP \
+    --enroll-pw=ordererpw --capacity=2Gi --name=ord-node3 --ca-name=ord-ca.default \
+    --hosts=orderer2-ord.localho.st --admin-hosts=admin-orderer2-ord.localho.st --istio-port=443
+
+
+kubectl hlf ordnode create --image=$ORDERER_IMAGE --version=$ORDERER_VERSION \
+    --storage-class=standard --enroll-id=orderer --mspid=OrdererMSP \
+    --enroll-pw=ordererpw --capacity=2Gi --name=ord-node4 --ca-name=ord-ca.default \
+    --hosts=orderer3-ord.localho.st --admin-hosts=admin-orderer3-ord.localho.st --istio-port=443
+
+kubectl hlf ordnode create --image=$ORDERER_IMAGE --version=$ORDERER_VERSION \
+    --storage-class=standard --enroll-id=orderer --mspid=OrdererMSP \
+    --enroll-pw=ordererpw --capacity=2Gi --name=ord-node5 --ca-name=ord-ca.default \
+    --hosts=orderer4-ord.localho.st --admin-hosts=admin-orderer4-ord.localho.st --istio-port=443
+
 
 kubectl wait --timeout=180s --for=condition=Running fabricorderernodes.hlf.kungfusoftware.es --all
 ```
@@ -500,7 +524,7 @@ kubectl apply -f - <<EOF
 apiVersion: hlf.kungfusoftware.es/v1alpha1
 kind: FabricFollowerChannel
 metadata:
-  name: demo-org1msp
+  name: testbft02-org1msp
 spec:
   anchorPeers:
     - host: org1-peer0.default
@@ -510,7 +534,7 @@ spec:
     secretName: wallet
     secretNamespace: default
   mspId: Org1MSP
-  name: demo
+  name: testbft02
   externalPeersToJoin: []
   orderers:
     - certificate: |
@@ -518,8 +542,6 @@ ${ORDERER0_TLS_CERT}
       url: grpcs://ord-node1.default:7050
   peersToJoin:
     - name: org1-peer0
-      namespace: default
-    - name: org1-peer1
       namespace: default
 EOF
 
@@ -629,14 +651,14 @@ export VERSION="1.0"
 kubectl hlf chaincode approveformyorg --config=org1.yaml --user=admin --peer=org1-peer0.default \
     --package-id=$PACKAGE_ID \
     --version "$VERSION" --sequence "$SEQUENCE" --name=asset \
-    --policy="OR('Org1MSP.member')" --channel=demo
+    --policy="OR('Org1MSP.member')" --channel=testbft02
 ```
 
 ## Commit chaincode
 ```bash
 kubectl hlf chaincode commit --config=org1.yaml --user=admin --mspid=Org1MSP \
     --version "$VERSION" --sequence "$SEQUENCE" --name=asset \
-    --policy="OR('Org1MSP.member')" --channel=demo
+    --policy="OR('Org1MSP.member')" --channel=testbft02
 ```
 
 
@@ -644,7 +666,7 @@ kubectl hlf chaincode commit --config=org1.yaml --user=admin --mspid=Org1MSP \
 ```bash
 kubectl hlf chaincode invoke --config=org1.yaml \
     --user=admin --peer=org1-peer0.default \
-    --chaincode=asset --channel=demo \
+    --chaincode=asset --channel=testbft02 \
     --fcn=initLedger -a '[]'
 ```
 
@@ -652,7 +674,7 @@ kubectl hlf chaincode invoke --config=org1.yaml \
 ```bash
 kubectl hlf chaincode query --config=org1.yaml \
     --user=admin --peer=org1-peer0.default \
-    --chaincode=asset --channel=demo \
+    --chaincode=asset --channel=testbft02 \
     --fcn=GetAllAssets -a '[]'
 ```
 

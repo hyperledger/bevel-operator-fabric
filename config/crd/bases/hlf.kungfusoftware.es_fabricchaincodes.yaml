@@ -888,6 +888,20 @@ spec:
                     properties:
                       cacert:
                         type: string
+                      secretRef:
+                        nullable: true
+                        properties:
+                          key:
+                            type: string
+                          name:
+                            type: string
+                          namespace:
+                            type: string
+                        required:
+                        - key
+                        - name
+                        - namespace
+                        type: object
                     required:
                     - cacert
                     type: object

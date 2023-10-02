@@ -26,6 +26,7 @@ type FabricPeerChart struct {
 	FSServer                 FSServer                      `json:"fsServer"`
 	GatewayApi               GatewayApi                    `json:"gatewayApi"`
 	Istio                    Istio                         `json:"istio"`
+	Traefik                  Traefik                       `json:"traefik"`
 	Replicas                 int                           `json:"replicas"`
 	ExternalChaincodeBuilder bool                          `json:"externalChaincodeBuilder"`
 	CouchdbUsername          string                        `json:"couchdbUsername"`
@@ -91,7 +92,15 @@ type ExternalBuilder struct {
 	Path                 string   `json:"path"`
 	PropagateEnvironment []string `json:"propagateEnvironment"`
 }
-
+type TraefikMiddleware struct {
+	Name      string `json:"name"`
+	Namespace string `json:"namespace"`
+}
+type Traefik struct {
+	Entrypoints []string            `json:"entryPoints"`
+	Middlewares []TraefikMiddleware `json:"middlewares"`
+	Hosts       []string            `json:"hosts"`
+}
 type Istio struct {
 	Port           int      `json:"port"`
 	Hosts          []string `json:"hosts"`

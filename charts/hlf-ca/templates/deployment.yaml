@@ -43,12 +43,22 @@ spec:
         - name: ca-config-tls
           configMap:
             name: {{ include "hlf-ca.fullname" . }}--config-tls
+
         - name: msp-cryptomaterial
           secret:
+{{ if and .Values.msp.caRef .Values.msp.caRef.secretName }}
+            secretName: {{ .Values.msp.caRef.secretName }}
+{{ else }}
             secretName: {{ include "hlf-ca.fullname" . }}--msp-cryptomaterial
+{{ end }}
         - name: msp-tls-cryptomaterial
           secret:
+{{ if and .Values.msp.tlsCARef .Values.msp.tlsCARef.secretName }}
+            secretName: {{ .Values.msp.tlsCARef.secretName }}
+{{ else }}
             secretName: {{ include "hlf-ca.fullname" . }}--msp-tls-cryptomaterial
+{{ end }}
+
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
       {{- toYaml . | nindent 8 }}

@@ -318,11 +318,11 @@ func GetURLForCA(certAuth *ClusterCA) (string, error) {
 	if len(certAuth.Spec.Istio.Hosts) > 0 {
 		host = certAuth.Spec.Istio.Hosts[0]
 		port = certAuth.Spec.Istio.Port
-	}else if len(certAuth.Spec.GatewayApi.Hosts) > 0{
+	} else if len(certAuth.Spec.GatewayApi.Hosts) > 0 {
 		host = certAuth.Spec.GatewayApi.Hosts[0]
 		port = certAuth.Spec.GatewayApi.Port
 
-	}else {
+	} else {
 		client, err := GetKubeClient()
 		if err != nil {
 			return "", err
@@ -447,14 +447,17 @@ func GetPeerPublicURL(clientset *kubernetes.Clientset, node hlfv1alpha1.FabricPe
 	return fmt.Sprintf("%s:%d", hostPort.Host, hostPort.Port), nil
 }
 func GetPeerHostPort(clientset *kubernetes.Clientset, node hlfv1alpha1.FabricPeer) (*HostPort, error) {
-	k8sIP, err := utils.GetPublicIPKubernetes(clientset)
-	if err != nil {
-		return nil, err
-	}
+
 	if node.Spec.Istio != nil && len(node.Spec.Istio.Hosts) > 0 {
 		return &HostPort{
 			Host: node.Spec.Istio.Hosts[0],
 			Port: node.Spec.Istio.Port,
+		}, nil
+	}
+	if node.Spec.Traefik != nil && len(node.Spec.Traefik.Hosts) > 0 {
+		return &HostPort{
+			Host: node.Spec.Traefik.Hosts[0],
+			Port: 443,
 		}, nil
 	}
 	if node.Spec.GatewayApi != nil && len(node.Spec.GatewayApi.Hosts) > 0 {
@@ -462,6 +465,10 @@ func GetPeerHostPort(clientset *kubernetes.Clientset, node hlfv1alpha1.FabricPee
 			Host: node.Spec.GatewayApi.Hosts[0],
 			Port: node.Spec.GatewayApi.Port,
 		}, nil
+	}
+	k8sIP, err := utils.GetPublicIPKubernetes(clientset)
+	if err != nil {
+		return nil, err
 	}
 	return &HostPort{
 		Host: k8sIP,
@@ -472,14 +479,17 @@ func GetPeerPrivateURL(node hlfv1alpha1.FabricPeer) string {
 	return fmt.Sprintf("%s.%s:%s", node.Name, node.Namespace, "7051")
 }
 func GetOrdererHostPort(clientset *kubernetes.Clientset, node hlfv1alpha1.FabricOrdererNode) (*HostPort, error) {
-	k8sIP, err := utils.GetPublicIPKubernetes(clientset)
-	if err != nil {
-		return nil, err
-	}
+
 	if node.Spec.Istio != nil && len(node.Spec.Istio.Hosts) > 0 {
 		return &HostPort{
 			Host: node.Spec.Istio.Hosts[0],
 			Port: node.Spec.Istio.Port,
+		}, nil
+	}
+	if node.Spec.Traefik != nil && len(node.Spec.Traefik.Hosts) > 0 {
+		return &HostPort{
+			Host: node.Spec.Traefik.Hosts[0],
+			Port: 443,
 		}, nil
 	}
 	if node.Spec.GatewayApi != nil && len(node.Spec.GatewayApi.Hosts) > 0 {
@@ -487,6 +497,10 @@ func GetOrdererHostPort(clientset *kubernetes.Clientset, node hlfv1alpha1.Fabric
 			Host: node.Spec.GatewayApi.Hosts[0],
 			Port: node.Spec.GatewayApi.Port,
 		}, nil
+	}
+	k8sIP, err := utils.GetPublicIPKubernetes(clientset)
+	if err != nil {
+		return nil, err
 	}
 	return &HostPort{
 		Host: k8sIP,
@@ -495,10 +509,6 @@ func GetOrdererHostPort(clientset *kubernetes.Clientset, node hlfv1alpha1.Fabric
 }
 
 func GetCAHostPort(clientset *kubernetes.Clientset, node hlfv1alpha1.FabricCA) (*HostPort, error) {
-	k8sIP, err := utils.GetPublicIPKubernetes(clientset)
-	if err != nil {
-		return nil, err
-	}
 	if node.Spec.Istio != nil && len(node.Spec.Istio.Hosts) > 0 {
 		return &HostPort{
 			Host: node.Spec.Istio.Hosts[0],
@@ -510,6 +520,10 @@ func GetCAHostPort(clientset *kubernetes.Clientset, node hlfv1alpha1.FabricCA) (
 			Host: node.Spec.GatewayApi.Hosts[0],
 			Port: node.Spec.GatewayApi.Port,
 		}, nil
+	}
+	k8sIP, err := utils.GetPublicIPKubernetes(clientset)
+	if err != nil {
+		return nil, err
 	}
 	return &HostPort{
 		Host: k8sIP,

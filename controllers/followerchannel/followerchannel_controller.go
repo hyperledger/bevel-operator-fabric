@@ -233,6 +233,13 @@ func (r *FabricFollowerChannelReconciler) Reconcile(ctx context.Context, req ctr
 		r.setConditionStatus(ctx, fabricFollowerChannel, hlfv1alpha1.FailedStatus, false, err, false)
 		return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricFollowerChannel)
 	}
+	var buf2 bytes.Buffer
+	err = protolator.DeepMarshalJSON(&buf2, cfgBlock)
+	if err != nil {
+		r.setConditionStatus(ctx, fabricFollowerChannel, hlfv1alpha1.FailedStatus, false, errors.Wrapf(err, "error converting block to JSON"), false)
+		return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricFollowerChannel)
+	}
+	log.Infof("Config block: %s", buf2.Bytes())
 	cftxGen := configtx.New(cfgBlock)
 	app := cftxGen.Application().Organization(mspID)
 	anchorPeers, err := app.AnchorPeers()

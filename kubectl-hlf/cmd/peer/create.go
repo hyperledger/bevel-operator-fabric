@@ -62,8 +62,40 @@ type createCmd struct {
 	out      io.Writer
 	errOut   io.Writer
 	peerOpts Options
+	Env      []string
 }
 
+func (c *createCmd) handleEnv() ([]corev1.EnvVar, error) {
+	var env []corev1.EnvVar
+	for _, literalSource := range c.Env {
+		keyName, value, err := ParseEnv(literalSource)
+		if err != nil {
+			return nil, err
+		}
+		env = append(env, corev1.EnvVar{
+			Name:  keyName,
+			Value: value,
+		})
+	}
+	return env, nil
+}
+
+// ParseEnv parses the source key=val pair into its component pieces.
+// This functionality is distinguished from strings.SplitN(source, "=", 2) since
+// it returns an error in the case of empty keys, values, or a missing equals sign.
+func ParseEnv(source string) (keyName, value string, err error) {
+	// leading equal is invalid
+	if strings.Index(source, "=") == 0 {
+		return "", "", fmt.Errorf("invalid formart %v, expected key=value", source)
+	}
+	// split after the first equal (so values can have the = character)
+	items := strings.SplitN(source, "=", 2)
+	if len(items) != 2 {
+		return "", "", fmt.Errorf("invalid format %v, expected key=value", source)
+	}
+
+	return items[0], items[1], nil
+}
 func (c *createCmd) validate() error {
 	return c.peerOpts.Validate()
 }
@@ -261,7 +293,10 @@ func (c *createCmd) run() error {
 			})
 		}
 	}
-
+	envVars, err := c.handleEnv()
+	if err != nil {
+		return err
+	}
 	fabricPeer := &v1alpha1.FabricPeer{
 		TypeMeta: v1.TypeMeta{
 			Kind:       "FabricPeer",
@@ -272,6 +307,7 @@ func (c *createCmd) run() error {
 			Namespace: c.peerOpts.NS,
 		},
 		Spec: v1alpha1.FabricPeerSpec{
+			Env:                      envVars,
 			ServiceMonitor:           nil,
 			HostAliases:              hostAliases,
 			Replicas:                 1,
@@ -481,7 +517,7 @@ func newCreatePeerCmd(out io.Writer, errOut io.Writer) *cobra.Command {
 	f.StringVarP(&c.peerOpts.StateDB, "statedb", "", "leveldb", "State database")
 	f.StringVarP(&c.peerOpts.IngressGateway, "istio-ingressgateway", "", "ingressgateway", "Istio ingress gateway name")
 	f.IntVarP(&c.peerOpts.IngressPort, "istio-port", "", 443, "Istio ingress port")
-	f.BoolVarP(&c.peerOpts.Leader, "leader", "", false, "Force peer to be leader")
+	f.BoolVarP(&c.peerOpts.Leader, "leader", "", true, "Force peer to be leader")
 	f.StringArrayVarP(&c.peerOpts.BootstrapPeers, "bootstrap-peer", "", []string{}, "Bootstrap peers")
 	f.StringArrayVarP(&c.peerOpts.Hosts, "hosts", "", []string{}, "External hosts")
 	f.StringArrayVarP(&c.peerOpts.GatewayApiHosts, "gateway-api-hosts", "", []string{}, "Hosts for GatewayApi")
@@ -496,5 +532,6 @@ func newCreatePeerCmd(out io.Writer, errOut io.Writer) *cobra.Command {
 	f.StringVarP(&c.peerOpts.CouchDBImage, "couchdb-repository", "", helpers.DefaultCouchDBImage, "CouchDB image")
 	f.StringVarP(&c.peerOpts.CouchDBTag, "couchdb-tag", "", helpers.DefaultCouchDBVersion, "CouchDB version")
 	f.StringVarP(&c.peerOpts.CouchDBPassword, "couchdb-password", "", "", "CouchDB password")
+	f.StringArrayVarP(&c.Env, "env", "e", []string{}, "Environment variable for the Chaincode (key=value)")
 	return cmd
 }

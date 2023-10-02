@@ -77,11 +77,14 @@ organizations:
       {{- range $orderer := $org.OrdererNodes }}
       - {{ $orderer.Name }}
  	  {{- end }}
+      {{- range $orderer := $.ExternalOrderers }}
+      - {{ $orderer.Name }}
+ 	  {{- end }}
     {{- end }}
 {{- end }}
 {{- end }}
-{{- if not .Orderers }}
-orderers: []
+{{ if and (empty .Orderers) (empty .ExternalOrderers) }}
+orderers: {}
 {{- else }}
 orderers:
 {{- range $orderer := .Orderers }}
@@ -97,10 +100,21 @@ orderers:
       pem: |
 {{ or $orderer.Status.TlsCACert $orderer.Status.TlsCert | indent 8 }}
 {{- end }}
+
+{{- range $orderer := .ExternalOrderers }}
+  {{$orderer.Name}}:
+    url: {{ $orderer.URL }}
+    grpcOptions:
+      allow-insecure: false
+    tlsCACerts:
+      pem: |
+{{ or $orderer.TLSCACert | indent 8 }}
 {{- end }}
 
-{{- if not .Peers }}
-peers: []
+{{- end }}
+
+{{ if and (empty .Peers) (empty .ExternalPeers) }}
+peers: {}
 {{- else }}
 peers:
   {{- range $peer := .Peers }}
@@ -116,6 +130,17 @@ peers:
       pem: |
 {{ $peer.Status.TlsCACert | indent 8 }}
 {{- end }}
+
+{{- range $peer := .ExternalPeers }}
+  {{$peer.Name}}:
+    url: {{ $peer.URL }}
+    grpcOptions:
+      allow-insecure: false
+    tlsCACerts:
+      pem: |
+{{ $peer.TLSCACert | indent 8 }}
+{{- end }}
+
 {{- end }}
 
 {{- if not .CertAuths }}
@@ -148,15 +173,18 @@ certificateAuthorities:
 channels:
 {{- range $channel := .Channels }}
   {{ $channel }}:
-{{- if not $.Orderers }}
+{{ if and (empty $.Orderers) (empty $.ExternalOrderers) }}
     orderers: []
 {{- else }}
     orderers:
 {{- range $orderer := $.Orderers }}
       - {{$orderer.Name}}
 {{- end }}
+{{- range $orderer := $.ExternalOrderers }}
+      - {{$orderer.Name}}
 {{- end }}
-{{- if not $.Peers }}
+{{- end }}
+{{ if and (empty $.Peers) (empty $.ExternalPeers) }}
     peers: {}
 {{- else }}
     peers:
@@ -168,6 +196,16 @@ channels:
         ledgerQuery: true
         eventSource: true
 {{- end }}
+
+{{- range $peer := $.ExternalPeers }}
+       {{$peer.Name}}:
+        discover: true
+        endorsingPeer: true
+        chaincodeQuery: true
+        ledgerQuery: true
+        eventSource: true
+{{- end }}
+
 {{- end }}
 {{- end }}
 
@@ -236,11 +274,6 @@ func (r *FabricNetworkConfigReconciler) Reconcile(ctx context.Context, req ctrl.
 			return ctrl.Result{}, err
 		}
 	}
-	tmpl, err := template.New("networkConfig").Funcs(sprig.HermeticTxtFuncMap()).Parse(tmplGoConfig)
-	if err != nil {
-		r.setConditionStatus(ctx, fabricNetworkConfig, hlfv1alpha1.FailedStatus, false, err, false)
-		return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricNetworkConfig)
-	}
 	hlfClientSet, err := operatorv1.NewForConfig(r.Config)
 	if err != nil {
 		r.setConditionStatus(ctx, fabricNetworkConfig, hlfv1alpha1.FailedStatus, false, err, false)
@@ -280,6 +313,16 @@ func (r *FabricNetworkConfigReconciler) Reconcile(ctx context.Context, req ctrl.
 	}
 	for _, v := range peerOrgs {
 		if (filterByOrgs && utils.Contains(fabricNetworkConfig.Spec.Organizations, v.MspID)) || !filterByOrgs {
+			var peers []*helpers.ClusterPeer
+			for _, peer := range v.Peers {
+				if filterByNS && !utils.Contains(fabricNetworkConfig.Spec.Namespaces, peer.Namespace) {
+					continue
+				}
+				if (filterByOrgs && utils.Contains(fabricNetworkConfig.Spec.Organizations, peer.MSPID)) || !filterByOrgs {
+					peers = append(peers, peer)
+				}
+			}
+			v.Peers = peers
 			orgMap[v.MspID] = v
 		}
 	}
@@ -363,14 +406,21 @@ func (r *FabricNetworkConfigReconciler) Reconcile(ctx context.Context, req ctrl.
 		}
 
 	}
+	tmpl, err := template.New("networkConfig").Funcs(sprig.HermeticTxtFuncMap()).Parse(tmplGoConfig)
+	if err != nil {
+		r.setConditionStatus(ctx, fabricNetworkConfig, hlfv1alpha1.FailedStatus, false, err, false)
+		return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricNetworkConfig)
+	}
 	err = tmpl.Execute(&buf, map[string]interface{}{
-		"Peers":         peers,
-		"Orderers":      orderers,
-		"Organizations": orgMap,
-		"Channels":      fabricNetworkConfig.Spec.Channels,
-		"CertAuths":     certAuths,
-		"Organization":  fabricNetworkConfig.Spec.Organization,
-		"Internal":      fabricNetworkConfig.Spec.Internal,
+		"Peers":            peers,
+		"Orderers":         orderers,
+		"ExternalPeers":    fabricNetworkConfig.Spec.ExternalPeers,
+		"ExternalOrderers": fabricNetworkConfig.Spec.ExternalOrderers,
+		"Organizations":    orgMap,
+		"Channels":         fabricNetworkConfig.Spec.Channels,
+		"CertAuths":        certAuths,
+		"Organization":     fabricNetworkConfig.Spec.Organization,
+		"Internal":         fabricNetworkConfig.Spec.Internal,
 	})
 	if err != nil {
 		r.setConditionStatus(ctx, fabricNetworkConfig, hlfv1alpha1.FailedStatus, false, err, false)

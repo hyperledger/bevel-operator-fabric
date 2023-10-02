@@ -66,7 +66,7 @@ type CA struct {
 	Password string `json:"password"`
 }
 
-// +kubebuilder:validation:Enum=couchdb;leveldb
+// +kubebuilder:validation:Enum=couchdb;leveldb;pg
 type StateDB string
 
 // Use LevelDB database
@@ -74,6 +74,9 @@ const StateDBLevelDB StateDB = "leveldb"
 
 // Use CouchDB database
 const StateDBCouchDB StateDB = "couchdb"
+
+// Use Postgres database
+const StateDBPostgres StateDB = "pg"
 
 type ExternalBuilder struct {
 	Name string `json:"name"`
@@ -177,6 +180,11 @@ type FabricPeerSpec struct {
 	// +kubebuilder:validation:Optional
 	// +nullable
 	GatewayApi *FabricGatewayApi `json:"gatewayApi"`
+
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +nullable
+	Traefik *FabricTraefik `json:"traefik"`
 	// +optional
 	// +kubebuilder:validation:Optional
 	// +nullable
@@ -293,6 +301,25 @@ type FabricIstio struct {
 	// +kubebuilder:validation:Default=ingressgateway
 	IngressGateway string `json:"ingressGateway"`
 }
+type FabricTraefikMiddleware struct {
+	// +kubebuilder:validation:MinLength=1
+	Name string `json:"name"`
+	// +kubebuilder:validation:MinLength=1
+	Namespace string `json:"namespace"`
+}
+type FabricTraefik struct {
+	Entrypoints []string `json:"entryPoints"`
+	// +nullable
+	// +kubebuilder:validation:Optional
+	// +optional
+	// +kubebuilder:validation:Default={}
+	Middlewares []FabricTraefikMiddleware `json:"middlewares,omitempty"`
+	// +nullable
+	// +kubebuilder:validation:Optional
+	// +optional
+	// +kubebuilder:validation:Default={}
+	Hosts []string `json:"hosts,omitempty"`
+}
 
 type FabricGatewayApi struct {
 	// +optional
@@ -318,6 +345,10 @@ type FabricPeerSpecGossip struct {
 }
 type Catls struct {
 	Cacert string `json:"cacert"`
+	// +optional
+	// +nullable
+	// +kubebuilder:validation:Optional
+	SecretRef *SecretRefNSKey `json:"secretRef"`
 }
 type Component struct {
 	// +kubebuilder:validation:MinLength=1
@@ -534,6 +565,12 @@ type FabricOrdererNodeSpec struct {
 	// +kubebuilder:validation:Optional
 	// +nullable
 	Istio *FabricIstio `json:"istio"`
+
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +nullable
+	Traefik *FabricTraefik `json:"traefik"`
+
 	// +optional
 	// +kubebuilder:validation:Optional
 	// +nullable
@@ -542,6 +579,11 @@ type FabricOrdererNodeSpec struct {
 	// +kubebuilder:validation:Optional
 	// +nullable
 	AdminIstio *FabricIstio `json:"adminIstio"`
+
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +nullable
+	AdminTraefik *FabricTraefik `json:"adminTraefik"`
 
 	// +nullable
 	// +kubebuilder:validation:Optional
@@ -657,7 +699,11 @@ type FabricCASpec struct {
 	// +optional
 	// +kubebuilder:validation:Optional
 	// +nullable
-	Istio    *FabricIstio     `json:"istio"`
+	Istio *FabricIstio `json:"istio"`
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +nullable
+	Traefik  *FabricTraefik   `json:"traefik"`
 	Database FabricCADatabase `json:"db"`
 	// +kubebuilder:validation:MinItems=1
 	// Hosts for the Fabric CA
@@ -796,10 +842,6 @@ type FabricCAItemConf struct {
 	// +kubebuilder:validation:Optional
 	// +nullable
 	CA *FabricCACrypto `json:"ca"`
-	// +optional
-	// +kubebuilder:validation:Optional
-	// +nullable
-	TlsCA *FabricTLSCACrypto `json:"tlsCa"`
 }
 type FabricTLSCACrypto struct {
 	Key        string             `json:"key"`
@@ -811,10 +853,22 @@ type FabricCAClientAuth struct {
 	Type     string   `json:"type"`
 	CertFile []string `json:"cert_file"`
 }
+type SecretRef struct {
+	Name string `json:"name"`
+}
+type SecretRefNSKey struct {
+	Name      string `json:"name"`
+	Namespace string `json:"namespace"`
+	Key       string `json:"key"`
+}
 type FabricCACrypto struct {
-	Key   string `json:"key"`
-	Cert  string `json:"cert"`
-	Chain string `json:"chain"`
+	Key string `json:"key"`
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +nullable
+	SecretRef *SecretRef `json:"secret"`
+	Cert      string     `json:"cert"`
+	Chain     string     `json:"chain"`
 }
 type FabricCASubject struct {
 	// +kubebuilder:default:="ca"
@@ -1480,9 +1534,32 @@ type FabricNetworkConfigSpec struct {
 	// HLF Identities to be included in the network config
 	Identities []FabricNetworkConfigIdentity `json:"identities"`
 
+	// +nullable
+	// +kubebuilder:validation:Optional
+	// +optional
+	// +kubebuilder:validation:Default={}
+	ExternalOrderers []FabricNetworkConfigExternalOrderer `json:"externalOrderers"`
+
+	// +nullable
+	// +kubebuilder:validation:Optional
+	// +optional
+	// +kubebuilder:validation:Default={}
+	ExternalPeers []FabricNetworkConfigExternalPeer `json:"externalPeers"`
+
 	SecretName string `json:"secretName"`
 }
-
+type FabricNetworkConfigExternalPeer struct {
+	Name      string `json:"name"`
+	URL       string `json:"url"`
+	TLSCACert string `json:"tlsCACert"`
+	MSPID     string `json:"mspID"`
+}
+type FabricNetworkConfigExternalOrderer struct {
+	Name      string `json:"name"`
+	URL       string `json:"url"`
+	TLSCACert string `json:"tlsCACert"`
+	MSPID     string `json:"mspID"`
+}
 type FabricNetworkConfigIdentity struct {
 	Name      string `json:"name"`
 	Namespace string `json:"namespace"`
