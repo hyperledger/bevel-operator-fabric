@@ -8,9 +8,11 @@ import (
 	"github.com/hyperledger/fabric-sdk-go/pkg/fab/resource"
 	"github.com/hyperledger/fabric-sdk-go/pkg/fabsdk"
 	"github.com/hyperledger/fabric/common/tools/protolator"
+	"github.com/hyperledger/fabric/protoutil"
 	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/helpers"
 	"github.com/spf13/cobra"
 	"io"
+	"io/ioutil"
 )
 
 type inspectChannelCmd struct {
@@ -56,6 +58,7 @@ func (c *inspectChannelCmd) run(out io.Writer) error {
 	if err != nil {
 		return err
 	}
+	ioutil.WriteFile("block.pb", protoutil.MarshalOrPanic(block), 0644)
 	cmnConfig, err := resource.ExtractConfigFromBlock(block)
 	if err != nil {
 		return err

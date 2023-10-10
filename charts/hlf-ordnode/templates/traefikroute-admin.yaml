@@ -23,7 +23,7 @@ spec:
     - match: HostSNI(`{{ . }}`)
       services:
         - name: {{ include "hlf-ordnode.fullname" $root }}
-          port: 7050
+          port: 7053
   {{ end }}
   tls:
     passthrough: true
