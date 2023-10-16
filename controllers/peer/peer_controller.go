@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"encoding/pem"
 	"fmt"
+	"helm.sh/helm/v3/pkg/release"
 	"os"
 	"reflect"
 	"strings"
@@ -356,14 +357,23 @@ func (r *FabricPeerReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 
 	cmdStatus := action.NewStatus(cfg)
 	exists := true
-	_, err = cmdStatus.Run(releaseName)
+	helmStatus, err := cmdStatus.Run(releaseName)
 	if err != nil {
 		if errors.Is(err, driver.ErrReleaseNotFound) {
+			// it doesn't exists
 			exists = false
 		} else {
-			// it doesnt exist
-			r.setConditionStatus(ctx, fabricPeer, hlfv1alpha1.FailedStatus, false, err, false)
-			return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricPeer)
+			// it doesn't exist
+			return ctrl.Result{}, err
+		}
+	}
+	if exists && helmStatus.Info.Status == release.StatusPendingUpgrade {
+		rollbackStatus := action.NewRollback(cfg)
+		rollbackStatus.Version = helmStatus.Version - 1
+		err = rollbackStatus.Run(releaseName)
+		if err != nil {
+			// it doesn't exist
+			return ctrl.Result{}, err
 		}
 	}
 	log.Debugf("Release %s exists=%v", releaseName, exists)

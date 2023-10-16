@@ -17,6 +17,7 @@ import (
 	"github.com/kfsoftware/hlf-operator/controllers/hlfmetrics"
 	"github.com/kfsoftware/hlf-operator/pkg/status"
 	"helm.sh/helm/v3/pkg/cli"
+	"helm.sh/helm/v3/pkg/release"
 	"k8s.io/kubernetes/pkg/api/v1/pod"
 	"sort"
 
@@ -906,13 +907,22 @@ func Reconcile(
 
 	cmdStatus := action.NewStatus(cfg)
 	exists := true
-	_, err = cmdStatus.Run(releaseName)
+	helmStatus, err := cmdStatus.Run(releaseName)
 	if err != nil {
 		if errors.Is(err, driver.ErrReleaseNotFound) {
 			// it doesn't exists
 			exists = false
 		} else {
-			// it doesnt exist
+			// it doesn't exist
+			return ctrl.Result{}, err
+		}
+	}
+	if exists && helmStatus.Info.Status == release.StatusPendingUpgrade {
+		rollbackStatus := action.NewRollback(cfg)
+		rollbackStatus.Version = helmStatus.Version - 1
+		err = rollbackStatus.Run(releaseName)
+		if err != nil {
+			// it doesn't exist
 			return ctrl.Result{}, err
 		}
 	}
