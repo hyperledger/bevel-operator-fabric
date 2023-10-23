@@ -1576,6 +1576,13 @@ type FabricChaincodeSpec struct {
 	// +optional
 	// +kubebuilder:validation:Default={}
 	Env []corev1.EnvVar `json:"env"`
+
+	// +kubebuilder:default=7052
+	ChaincodeServerPort int `json:"chaincodeServerPort"`
+
+	// +optional
+	// +kubebuilder:validation:Optional
+	MspID string `json:"mspID"`
 }
 
 // FabricChaincodeStatus defines the observed state of FabricChaincode

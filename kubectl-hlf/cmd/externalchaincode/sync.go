@@ -26,9 +26,10 @@ type syncExternalChaincodeCmd struct {
 
 	replicas int
 
-	tlsRequired     bool
-	ImagePullSecret []string
-	Env             []string
+	tlsRequired         bool
+	ImagePullSecret     []string
+	Env                 []string
+	chaincodeServerPort int
 }
 
 func (c *syncExternalChaincodeCmd) validate() error {
@@ -62,16 +63,17 @@ func (c *syncExternalChaincodeCmd) validate() error {
 }
 func (c syncExternalChaincodeCmd) getFabricChaincodeSpec(ctx context.Context) (v1alpha1.FabricChaincodeSpec, error) {
 	fabricChaincodeSpec := v1alpha1.FabricChaincodeSpec{
-		Image:            c.image,
-		ImagePullPolicy:  corev1.PullAlways,
-		PackageID:        c.packageID,
-		ImagePullSecrets: []corev1.LocalObjectReference{},
-		Affinity:         nil,
-		Tolerations:      []corev1.Toleration{},
-		Resources:        nil,
-		Credentials:      nil,
-		Replicas:         c.replicas,
-		Env:              []corev1.EnvVar{},
+		Image:               c.image,
+		ImagePullPolicy:     corev1.PullAlways,
+		PackageID:           c.packageID,
+		ImagePullSecrets:    []corev1.LocalObjectReference{},
+		Affinity:            nil,
+		Tolerations:         []corev1.Toleration{},
+		Resources:           nil,
+		Credentials:         nil,
+		Replicas:            c.replicas,
+		Env:                 []corev1.EnvVar{},
+		ChaincodeServerPort: c.chaincodeServerPort,
 	}
 
 	if len(c.ImagePullSecret) > 0 {
@@ -274,5 +276,6 @@ func newExternalChaincodeSyncCmd() *cobra.Command {
 	f.IntVarP(&c.replicas, "replicas", "", 1, "Number of replicas of the chaincode")
 	f.StringArrayVarP(&c.ImagePullSecret, "image-pull-secret", "s", []string{}, "Image Pull Secret for the Chaincode Image")
 	f.StringArrayVarP(&c.Env, "env", "", []string{}, "Environment variable for the Chaincode (key=value)")
+	f.IntVar(&c.chaincodeServerPort, "port", 7052, "Chaincode Server Port")
 	return cmd
 }
