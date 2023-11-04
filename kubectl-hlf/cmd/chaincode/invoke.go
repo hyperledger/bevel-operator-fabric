@@ -60,9 +60,11 @@ func (c *invokeChaincodeCmd) run(out io.Writer) error {
 		args = append(args, []byte(arg))
 	}
 	var transientMap map[string][]byte
-	err = json.Unmarshal([]byte(c.transient), &transientMap)
-	if err != nil {
-		return err
+	if c.transient != "" {
+		err = json.Unmarshal([]byte(c.transient), &transientMap)
+		if err != nil {
+			return err
+		}
 	}
 
 	response, err := ch.Execute(
