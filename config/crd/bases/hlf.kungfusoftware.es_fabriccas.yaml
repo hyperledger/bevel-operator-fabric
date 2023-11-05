@@ -914,9 +914,8 @@ spec:
                         nullable: true
                         properties:
                           name:
+                            nullable: true
                             type: string
-                        required:
-                        - name
                         type: object
                     required:
                     - cert
@@ -1661,9 +1660,8 @@ spec:
                         nullable: true
                         properties:
                           name:
+                            nullable: true
                             type: string
-                        required:
-                        - name
                         type: object
                     required:
                     - cert

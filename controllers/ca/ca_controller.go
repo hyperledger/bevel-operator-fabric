@@ -488,7 +488,7 @@ func GetConfig(conf *hlfv1alpha1.FabricCA, client *kubernetes.Clientset, chartNa
 	var caRef *SecretRef
 	signCert, signKey, err := getExistingSignCrypto(client, chartName, namespace)
 	if err != nil {
-		if conf.Spec.CA.CA != nil && conf.Spec.CA.CA.SecretRef != nil {
+		if conf.Spec.CA.CA != nil && conf.Spec.CA.CA.SecretRef != nil && conf.Spec.CA.CA.SecretRef.Name != "" {
 			caRef = &SecretRef{
 				SecretName: conf.Spec.CA.CA.SecretRef.Name,
 			}
@@ -505,7 +505,7 @@ func GetConfig(conf *hlfv1alpha1.FabricCA, client *kubernetes.Clientset, chartNa
 	var caTLSSignRef *SecretRef
 	caTLSSignCert, caTLSSignKey, err := getExistingSignTLSCrypto(client, chartName, namespace)
 	if err != nil {
-		if conf.Spec.TLSCA.CA != nil && conf.Spec.TLSCA.CA.SecretRef != nil {
+		if conf.Spec.TLSCA.CA != nil && conf.Spec.TLSCA.CA.SecretRef != nil && conf.Spec.TLSCA.CA.SecretRef.Name != "" {
 			caTLSSignRef = &SecretRef{
 				SecretName: conf.Spec.TLSCA.CA.SecretRef.Name,
 			}
@@ -784,7 +784,7 @@ func GetCAState(clientSet *kubernetes.Clientset, ca *hlfv1alpha1.FabricCA, relea
 		ns,
 	)
 	var signCrt *x509.Certificate
-	if ca.Spec.CA.CA != nil && ca.Spec.CA.CA.SecretRef != nil {
+	if ca.Spec.CA.CA != nil && ca.Spec.CA.CA.SecretRef != nil && ca.Spec.CA.CA.SecretRef.Name != "" {
 		signCrt, _, err = getAlreadyExistingCrypto(clientSet, ca.Spec.CA.CA.SecretRef.Name, ns)
 		if err != nil {
 			return nil, err
@@ -804,7 +804,7 @@ func GetCAState(clientSet *kubernetes.Clientset, ca *hlfv1alpha1.FabricCA, relea
 		ns,
 	)
 	var tlsCACrt *x509.Certificate
-	if ca.Spec.TLSCA.CA != nil && ca.Spec.TLSCA.CA.SecretRef != nil {
+	if ca.Spec.TLSCA.CA != nil && ca.Spec.TLSCA.CA.SecretRef != nil && ca.Spec.TLSCA.CA.SecretRef.Name != "" {
 		tlsCACrt, _, err = getAlreadyExistingCrypto(clientSet, ca.Spec.TLSCA.CA.SecretRef.Name, ns)
 		if err != nil {
 			return nil, err

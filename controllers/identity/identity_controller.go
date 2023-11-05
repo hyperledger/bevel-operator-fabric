@@ -71,6 +71,7 @@ func (r *FabricIdentityReconciler) addFinalizer(reqLogger logr.Logger, m *hlfv1a
 // +kubebuilder:rbac:groups=hlf.kungfusoftware.es,resources=fabricidentities/finalizers,verbs=get;update;patch
 func (r *FabricIdentityReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	reqLogger := r.Log.WithValues("hlf", req.NamespacedName)
+	reqLogger.Info("Reconciling FabricIdentity")
 	fabricIdentity := &hlfv1alpha1.FabricIdentity{}
 
 	err := r.Get(ctx, req.NamespacedName, fabricIdentity)
@@ -283,7 +284,7 @@ func (r *FabricIdentityReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 		return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricIdentity)
 	}
 	return ctrl.Result{
-		RequeueAfter: 60 * time.Second,
+		RequeueAfter: 10 * 60 * time.Second,
 	}, nil
 }
 

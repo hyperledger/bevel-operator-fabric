@@ -854,6 +854,9 @@ type FabricCAClientAuth struct {
 	CertFile []string `json:"cert_file"`
 }
 type SecretRef struct {
+	// +optional
+	// +nullable
+	// +kubebuilder:validation:Optional
 	Name string `json:"name"`
 }
 type SecretRefNSKey struct {

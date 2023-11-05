@@ -52,6 +52,7 @@ type Options struct {
 	CAPort                          int
 	CAHost                          string
 	ImagePullSecrets                []string
+	Env                             []string
 }
 
 func (o Options) Validate() error {
@@ -62,12 +63,11 @@ type createCmd struct {
 	out      io.Writer
 	errOut   io.Writer
 	peerOpts Options
-	Env      []string
 }
 
 func (c *createCmd) handleEnv() ([]corev1.EnvVar, error) {
 	var env []corev1.EnvVar
-	for _, literalSource := range c.Env {
+	for _, literalSource := range c.peerOpts.Env {
 		keyName, value, err := ParseEnv(literalSource)
 		if err != nil {
 			return nil, err
@@ -487,6 +487,7 @@ func getPeerResourceRequirements() (*corev1.ResourceRequirements, error) {
 		},
 	}, nil
 }
+
 func newCreatePeerCmd(out io.Writer, errOut io.Writer) *cobra.Command {
 	c := createCmd{out: out, errOut: errOut}
 	cmd := &cobra.Command{
@@ -532,6 +533,6 @@ func newCreatePeerCmd(out io.Writer, errOut io.Writer) *cobra.Command {
 	f.StringVarP(&c.peerOpts.CouchDBImage, "couchdb-repository", "", helpers.DefaultCouchDBImage, "CouchDB image")
 	f.StringVarP(&c.peerOpts.CouchDBTag, "couchdb-tag", "", helpers.DefaultCouchDBVersion, "CouchDB version")
 	f.StringVarP(&c.peerOpts.CouchDBPassword, "couchdb-password", "", "", "CouchDB password")
-	f.StringArrayVarP(&c.Env, "env", "e", []string{}, "Environment variable for the Chaincode (key=value)")
+	f.StringArrayVarP(&c.peerOpts.Env, "env", "e", []string{}, "Environment variable for the Chaincode (key=value)")
 	return cmd
 }

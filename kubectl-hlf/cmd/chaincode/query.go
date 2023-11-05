@@ -76,6 +76,7 @@ func (c *queryChaincodeCmd) run(out io.Writer) error {
 	}
 	return nil
 }
+
 func newQueryChaincodeCMD(out io.Writer, errOut io.Writer) *cobra.Command {
 	c := &queryChaincodeCmd{}
 	cmd := &cobra.Command{

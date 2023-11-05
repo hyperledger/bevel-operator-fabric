@@ -491,9 +491,10 @@ func (r *FabricChaincodeReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 				r.setConditionStatus(ctx, fabricChaincode, hlfv1alpha1.FailedStatus, false, err, false)
 				return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricChaincode)
 			}
+		} else {
+			r.setConditionStatus(ctx, fabricChaincode, hlfv1alpha1.FailedStatus, false, err, false)
+			return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricChaincode)
 		}
-		r.setConditionStatus(ctx, fabricChaincode, hlfv1alpha1.FailedStatus, false, err, false)
-		return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricChaincode)
 	} else {
 		deployment.Spec = appv1Deployment.Spec
 		if cryptoData.Updated {

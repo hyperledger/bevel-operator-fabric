@@ -14,6 +14,7 @@ func NewChannelCmd(stdOut io.Writer, stdErr io.Writer) *cobra.Command {
 		newUpdateChannelCMD(stdOut, stdErr),
 		newInspectChannelCMD(stdOut, stdErr),
 		newTopChannelCMD(stdOut, stdErr),
+		newSignUpdateChannelCMD(stdOut, stdErr),
 	)
 	return channelCmd
 }
