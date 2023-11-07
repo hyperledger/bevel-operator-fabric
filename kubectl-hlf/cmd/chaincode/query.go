@@ -1,13 +1,15 @@
 package chaincode
 
 import (
+	"encoding/json"
 	"fmt"
+	"io"
+
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/channel"
 	"github.com/hyperledger/fabric-sdk-go/pkg/core/config"
 	"github.com/hyperledger/fabric-sdk-go/pkg/fabsdk"
 	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/helpers"
 	"github.com/spf13/cobra"
-	"io"
 )
 
 type queryChaincodeCmd struct {
@@ -18,6 +20,7 @@ type queryChaincodeCmd struct {
 	chaincode  string
 	fcn        string
 	args       []string
+	transient  string
 }
 
 func (c *queryChaincodeCmd) validate() error {
@@ -56,12 +59,20 @@ func (c *queryChaincodeCmd) run(out io.Writer) error {
 	for _, arg := range c.args {
 		args = append(args, []byte(arg))
 	}
+	var transientMap map[string][]byte
+	if c.transient != "" {
+		err = json.Unmarshal([]byte(c.transient), &transientMap)
+		if err != nil {
+			return err 
+		}
+	}
+
 	response, err := ch.Query(
 		channel.Request{
 			ChaincodeID:     c.chaincode,
 			Fcn:             c.fcn,
 			Args:            args,
-			TransientMap:    nil,
+			TransientMap:    transientMap,
 			InvocationChain: nil,
 			IsInit:          false,
 		},
@@ -95,6 +106,7 @@ func newQueryChaincodeCMD(out io.Writer, errOut io.Writer) *cobra.Command {
 	persistentFlags.StringVarP(&c.chaincode, "chaincode", "", "", "Chaincode label")
 	persistentFlags.StringVarP(&c.fcn, "fcn", "", "", "Function name")
 	persistentFlags.StringArrayVarP(&c.args, "args", "a", []string{}, "Function arguments")
+	persistentFlags.StringVarP(&c.transient, "transient", "t", "", "Transient map")
 	cmd.MarkPersistentFlagRequired("user")
 	cmd.MarkPersistentFlagRequired("peer")
 	cmd.MarkPersistentFlagRequired("config")
