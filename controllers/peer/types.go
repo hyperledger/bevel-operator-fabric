@@ -23,6 +23,8 @@ type FSServer struct {
 }
 
 type FabricPeerChart struct {
+	PodLabels                map[string]string             `json:"podLabels"`
+	PodAnnotations           map[string]string             `json:"podAnnotations"`
 	FSServer                 FSServer                      `json:"fsServer"`
 	GatewayApi               GatewayApi                    `json:"gatewayApi"`
 	Istio                    Istio                         `json:"istio"`

@@ -1501,6 +1501,16 @@ spec:
                 required:
                 - nodeSelectorTerms
                 type: object
+              podAnnotations:
+                additionalProperties:
+                  type: string
+                nullable: true
+                type: object
+              podLabels:
+                additionalProperties:
+                  type: string
+                nullable: true
+                type: object
               resources:
                 description: ResourceRequirements describes the compute resource requirements.
                 properties:

@@ -3,6 +3,8 @@ package ordnode
 import corev1 "k8s.io/api/core/v1"
 
 type fabricOrdChart struct {
+	PodLabels                   map[string]string             `json:"podLabels"`
+	PodAnnotations              map[string]string             `json:"podAnnotations"`
 	GatewayApi                  GatewayApi                    `json:"gatewayApi"`
 	Istio                       Istio                         `json:"istio"`
 	Traefik                     Traefik                       `json:"traefik"`

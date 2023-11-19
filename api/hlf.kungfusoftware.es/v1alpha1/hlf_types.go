@@ -137,6 +137,17 @@ type GRPCProxy struct {
 
 // FabricPeerSpec defines the desired state of FabricPeer
 type FabricPeerSpec struct {
+	// +nullable
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default:={}
+	PodAnnotations map[string]string `json:"podAnnotations"`
+	// +nullable
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default:={}
+	PodLabels map[string]string `json:"podLabels"`
+
 	// +optional
 	// +nullable
 	UpdateCertificateTime *metav1.Time `json:"updateCertificateTime"`
@@ -500,6 +511,17 @@ const (
 
 // FabricOrdererNodeSpec defines the desired state of FabricOrdererNode
 type FabricOrdererNodeSpec struct {
+	// +nullable
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default:={}
+	PodAnnotations map[string]string `json:"podAnnotations"`
+	// +nullable
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default:={}
+	PodLabels map[string]string `json:"podLabels"`
+
 	// +optional
 	// +kubebuilder:validation:Optional
 	// +nullable
@@ -668,6 +690,17 @@ type FabricCADatabase struct {
 
 // FabricCASpec defines the desired state of FabricCA
 type FabricCASpec struct {
+	// +nullable
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default:={}
+	PodAnnotations map[string]string `json:"podAnnotations"`
+	// +nullable
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default:={}
+	PodLabels map[string]string `json:"podLabels"`
+
 	// +nullable
 	// +kubebuilder:validation:Optional
 	// +optional
@@ -1482,6 +1515,9 @@ type FabricOperatorAPISpec struct {
 	// +kubebuilder:validation:Default=1
 	Replicas int `json:"replicas"`
 
+	// +nullable
+	// +optional
+	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Default={}
 	PodLabels map[string]string `json:"podLabels"`
 	// +optional
@@ -1606,6 +1642,29 @@ type FabricNetworkConfigList struct {
 
 // FabricChaincodeSpec defines the desired state of FabricChaincode
 type FabricChaincodeSpec struct {
+	// +nullable
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default:={}
+	Annotations map[string]string `json:"annotations"`
+	// +nullable
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default:={}
+	Labels map[string]string `json:"labels"`
+
+	// +nullable
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default:={}
+	PodAnnotations map[string]string `json:"podAnnotations"`
+
+	// +nullable
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default:={}
+	PodLabels map[string]string `json:"podLabels"`
+
 	Image string `json:"image"`
 	// +kubebuilder:default:="IfNotPresent"
 	ImagePullPolicy corev1.PullPolicy `json:"imagePullPolicy"`

@@ -30,6 +30,13 @@ spec:
         checksum/secret--peerorg-tlsrootcert: {{ include (print $.Template.BasePath "/secret--peerorg-tlsrootcert.yaml") . | sha256sum | trunc 60 }}
         checksum/secret--tlsclientrootcert: {{ include (print $.Template.BasePath "/secret--tlsclientrootcert.yaml") . | sha256sum | trunc 60 }}
 {{ include "labels.standard" . | indent 8 }}
+  {{- with .Values.podLabels }}
+  {{- toYaml . | nindent 8 }}
+  {{- end }}
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
     spec:
       serviceAccountName: {{ template "hlf-peer.fullname" . }}
       hostAliases:

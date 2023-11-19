@@ -1373,6 +1373,16 @@ spec:
                 required:
                 - nodeSelectorTerms
                 type: object
+              podAnnotations:
+                additionalProperties:
+                  type: string
+                nullable: true
+                type: object
+              podLabels:
+                additionalProperties:
+                  type: string
+                nullable: true
+                type: object
               replicas:
                 default: 1
                 type: integer

@@ -640,6 +640,8 @@ func GetConfig(conf *hlfv1alpha1.FabricCA, client *kubernetes.Clientset, chartNa
 		}
 	}
 	var c = FabricCAChart{
+		PodLabels:        spec.PodLabels,
+		PodAnnotations:   spec.PodAnnotations,
 		ImagePullSecrets: spec.ImagePullSecrets,
 		EnvVars:          spec.Env,
 		FullNameOverride: conf.Name,

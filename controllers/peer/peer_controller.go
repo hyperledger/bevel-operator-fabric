@@ -1391,6 +1391,8 @@ func GetConfig(
 		Proxy:           spec.Resources.Proxy,
 	}
 	var c = FabricPeerChart{
+		PodLabels:        spec.PodLabels,
+		PodAnnotations:   spec.PodAnnotations,
 		EnvVars:          spec.Env,
 		Replicas:         spec.Replicas,
 		ImagePullSecrets: spec.ImagePullSecrets,

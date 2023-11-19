@@ -863,6 +863,11 @@ spec:
                         type: array
                     type: object
                 type: object
+              annotations:
+                additionalProperties:
+                  type: string
+                nullable: true
+                type: object
               args:
                 description: Arguments to the entrypoint. The container image's CMD
                   is used if this is not provided.
@@ -1070,9 +1075,24 @@ spec:
                   type: object
                 nullable: true
                 type: array
+              labels:
+                additionalProperties:
+                  type: string
+                nullable: true
+                type: object
               packageId:
                 minLength: 1
                 type: string
+              podAnnotations:
+                additionalProperties:
+                  type: string
+                nullable: true
+                type: object
+              podLabels:
+                additionalProperties:
+                  type: string
+                nullable: true
+                type: object
               replicas:
                 type: integer
               resources:

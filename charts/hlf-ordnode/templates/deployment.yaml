@@ -26,6 +26,13 @@ spec:
         checksum/secret--ordererorg-cacert: {{ include (print $.Template.BasePath "/secret--ordererorg-cacert.yaml") . | sha256sum | trunc 60 }}
         checksum/secret--ordererorg-tlsrootcert: {{ include (print $.Template.BasePath "/secret--ordererorg-tlsrootcert.yaml") . | sha256sum | trunc 60 }}
 {{ include "labels.standard" . | indent 8 }}
+  {{- with .Values.podLabels }}
+  {{- toYaml . | nindent 8 }}
+  {{- end }}
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
     spec:
       hostAliases:
 {{ toYaml .Values.hostAliases | indent 10 }}

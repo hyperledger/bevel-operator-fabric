@@ -3,6 +3,8 @@ package ca
 import corev1 "k8s.io/api/core/v1"
 
 type FabricCAChart struct {
+	PodLabels        map[string]string             `json:"podLabels"`
+	PodAnnotations   map[string]string             `json:"podAnnotations"`
 	Istio            Istio                         `json:"istio"`
 	Traefik          Traefik                       `json:"traefik"`
 	GatewayApi       GatewayApi                    `json:"gatewayApi"`

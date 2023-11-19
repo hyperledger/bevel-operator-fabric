@@ -1273,6 +1273,16 @@ spec:
                 required:
                 - nodeSelectorTerms
                 type: object
+              podAnnotations:
+                additionalProperties:
+                  type: string
+                nullable: true
+                type: object
+              podLabels:
+                additionalProperties:
+                  type: string
+                nullable: true
+                type: object
               pullPolicy:
                 default: IfNotPresent
                 description: PullPolicy describes a policy for if/when to pull a container

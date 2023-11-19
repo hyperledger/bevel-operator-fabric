@@ -1189,6 +1189,8 @@ func getConfig(
 	}
 
 	fabricOrdChart := fabricOrdChart{
+		PodLabels:                   spec.PodLabels,
+		PodAnnotations:              spec.PodAnnotations,
 		GatewayApi:                  gatewayApi,
 		Istio:                       istio,
 		Traefik:                     traefik,
