@@ -431,8 +431,8 @@ func (r *FabricMainChannelReconciler) Reconcile(ctx context.Context, req ctrl.Re
 		r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, errors.Wrapf(err, "error converting block to JSON"), false)
 		return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricMainChannel)
 	}
-	r.Log.Info(fmt.Sprintf("Config block main channel: %s", buf2.String()))
-	r.Log.Info(fmt.Sprintf("ConfigTX: %v", newConfigTx))
+	log.Debug(fmt.Sprintf("Config block main channel: %s", buf2.String()))
+	log.Debug(fmt.Sprintf("ConfigTX: %v", newConfigTx))
 	err = updateApplicationChannelConfigTx(currentConfigTx, newConfigTx)
 	if err != nil {
 		r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, errors.Wrapf(err, "failed to update application channel config"), false)

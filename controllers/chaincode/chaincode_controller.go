@@ -472,7 +472,7 @@ func (r *FabricChaincodeReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
 					Labels:      podLabels,
-					Annotations: fabricChaincode.Spec.Annotations,
+					Annotations: fabricChaincode.Spec.PodAnnotations,
 				},
 				Spec: podSpec,
 			},
@@ -575,7 +575,7 @@ func (r *FabricChaincodeReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 		}
 	}
 	r.setConditionStatus(ctx, fabricChaincode, hlfv1alpha1.RunningStatus, true, nil, false)
-	return ctrl.Result{}, nil
+	return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricChaincode)
 }
 
 var (
