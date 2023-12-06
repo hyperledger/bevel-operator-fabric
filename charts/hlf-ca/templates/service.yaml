@@ -10,7 +10,7 @@ spec:
     - port: {{ .Values.service.port }}
       targetPort: 7054
       protocol: TCP
-      name: http
+      name: https
     - port: 9443
       targetPort: 9443
       protocol: TCP
