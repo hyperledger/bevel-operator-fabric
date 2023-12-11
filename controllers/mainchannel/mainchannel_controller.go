@@ -1265,6 +1265,10 @@ func updateApplicationChannelConfigTx(currentConfigTX configtx.ConfigTx, newConf
 	if err != nil {
 		return errors.Wrapf(err, "failed to set ACLs")
 	}
+	err = currentConfigTX.Orderer().SetBatchTimeout(newConfigTx.Orderer.BatchTimeout)
+	if err != nil {
+		return errors.Wrapf(err, "failed to set batch timeout")
+	}
 	return nil
 }
 func updateOrdererChannelConfigTx(currentConfigTX configtx.ConfigTx, newConfigTx configtx.Channel) error {
@@ -1387,6 +1391,24 @@ func updateOrdererChannelConfigTx(currentConfigTX configtx.ConfigTx, newConfigTx
 		}
 	}
 
+	err = currentConfigTX.Orderer().BatchSize().SetMaxMessageCount(
+		newConfigTx.Orderer.BatchSize.MaxMessageCount,
+	)
+	if err != nil {
+		return errors.Wrapf(err, "failed to set max message count")
+	}
+	err = currentConfigTX.Orderer().BatchSize().SetAbsoluteMaxBytes(
+		newConfigTx.Orderer.BatchSize.AbsoluteMaxBytes,
+	)
+	if err != nil {
+		return errors.Wrapf(err, "failed to set absolute max bytes")
+	}
+	err = currentConfigTX.Orderer().BatchSize().SetPreferredMaxBytes(
+		newConfigTx.Orderer.BatchSize.PreferredMaxBytes,
+	)
+	if err != nil {
+		return errors.Wrapf(err, "failed to set preferred max bytes")
+	}
 	err = currentConfigTX.Orderer().SetPolicies(
 		newConfigTx.Orderer.Policies,
 	)

@@ -56,6 +56,8 @@ type FabricCAReconciler struct {
 	Scheme    *runtime.Scheme
 	Config    *rest.Config
 	ClientSet *kubernetes.Clientset
+	Wait      bool
+	Timeout   time.Duration
 }
 
 func parseECDSAPrivateKey(contents []byte) (*ecdsa.PrivateKey, error) {

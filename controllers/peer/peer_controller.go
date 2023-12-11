@@ -59,6 +59,8 @@ type FabricPeerReconciler struct {
 	Config                     *rest.Config
 	AutoRenewCertificates      bool
 	AutoRenewCertificatesDelta time.Duration
+	Wait                       bool
+	Timeout                    time.Duration
 }
 
 func (r *FabricPeerReconciler) addFinalizer(reqLogger logr.Logger, m *hlfv1alpha1.FabricPeer) error {
@@ -1586,61 +1588,75 @@ func createPeerService(
 			return nil, err
 		}
 	}
-	if exists {
-		return svc, nil
-	}
 	labels := map[string]string{
 		"app":     chartName,
 		"release": releaseName,
 	}
+	serviceSpec := corev1.ServiceSpec{
+		Type: peer.Spec.Service.Type,
+		Ports: []corev1.ServicePort{
+			{
+				Name:     "peer-443",
+				Protocol: "TCP",
+				Port:     443,
+				TargetPort: intstr.IntOrString{
+					Type:   intstr.Int,
+					IntVal: 7051,
+				},
+			},
+			{
+				Name:     PeerPortName,
+				Protocol: "TCP",
+				Port:     7051,
+				TargetPort: intstr.IntOrString{
+					Type:   intstr.Int,
+					IntVal: 7051,
+				},
+			},
+			{
+				Name:     ChaincodePortName,
+				Protocol: "TCP",
+				Port:     7052,
+				TargetPort: intstr.IntOrString{
+					Type:   intstr.Int,
+					IntVal: 7052,
+				},
+			},
+			{
+				Name:     EventPortName,
+				Protocol: "TCP",
+				Port:     7053,
+				TargetPort: intstr.IntOrString{
+					Type:   intstr.Int,
+					IntVal: 7053,
+				},
+			},
+			{
+				Name:     OperationsPortName,
+				Protocol: "TCP",
+				Port:     9443,
+				TargetPort: intstr.IntOrString{
+					Type:   intstr.Int,
+					IntVal: 9443,
+				},
+			},
+		},
+		Selector: labels,
+	}
+
+	if exists {
+		// update the service
+		svc.Spec = serviceSpec
+		return clientSet.CoreV1().Services(ns).Update(ctx, svc, v1.UpdateOptions{})
+	}
+
 	svc = &apiv1.Service{
 		ObjectMeta: v1.ObjectMeta{
 			Name:      svcName,
 			Namespace: ns,
 			Labels:    labels,
 		},
-		Spec: corev1.ServiceSpec{
-			Type: peer.Spec.Service.Type,
-			Ports: []corev1.ServicePort{
-				{
-					Name:     PeerPortName,
-					Protocol: "TCP",
-					Port:     7051,
-					TargetPort: intstr.IntOrString{
-						Type:   intstr.Int,
-						IntVal: 7051,
-					},
-				},
-				{
-					Name:     ChaincodePortName,
-					Protocol: "TCP",
-					Port:     7052,
-					TargetPort: intstr.IntOrString{
-						Type:   intstr.Int,
-						IntVal: 7052,
-					},
-				},
-				{
-					Name:     EventPortName,
-					Protocol: "TCP",
-					Port:     7053,
-					TargetPort: intstr.IntOrString{
-						Type:   intstr.Int,
-						IntVal: 7053,
-					},
-				},
-				{
-					Name:     OperationsPortName,
-					Protocol: "TCP",
-					Port:     9443,
-					TargetPort: intstr.IntOrString{
-						Type:   intstr.Int,
-						IntVal: 9443,
-					},
-				},
-			},
-			Selector: labels,
-		},
+		Spec:   serviceSpec,
 		Status: corev1.ServiceStatus{},
 	}
 	return clientSet.CoreV1().Services(ns).Create(ctx, svc, v1.CreateOptions{})

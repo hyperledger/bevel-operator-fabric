@@ -136,12 +136,14 @@ func main() {
 	}
 	if err = (&peer.FabricPeerReconciler{
 		Client:                     mgr.GetClient(),
+		ChartPath:                  peerChartPath,
 		Log:                        ctrl.Log.WithName("controllers").WithName("FabricPeer"),
 		Scheme:                     mgr.GetScheme(),
 		Config:                     mgr.GetConfig(),
-		ChartPath:                  peerChartPath,
 		AutoRenewCertificates:      autoRenewCertificatesPeerEnabled,
 		AutoRenewCertificatesDelta: autoRenewPeerCertificatesDelta,
+		Wait:                       false,
+		Timeout:                    0,
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "FabricPeer")
 		os.Exit(1)
@@ -163,6 +165,8 @@ func main() {
 		Config:    mgr.GetConfig(),
 		ClientSet: clientSet,
 		ChartPath: caChartPath,
+		Wait:      false,
+		Timeout:   0,
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "FabricCA")
 		os.Exit(1)
@@ -196,6 +200,8 @@ func main() {
 		ChartPath:                  ordNodeChartPath,
 		AutoRenewCertificates:      autoRenewCertificatesOrdererEnabled,
 		AutoRenewCertificatesDelta: autoRenewOrdererCertificatesDelta,
+		Wait:                       false,
+		Timeout:                    0,
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "FabricOrdererNode")
 		os.Exit(1)

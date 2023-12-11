@@ -52,6 +52,8 @@ type FabricOrdererNodeReconciler struct {
 	Config                     *rest.Config
 	AutoRenewCertificates      bool
 	AutoRenewCertificatesDelta time.Duration
+	Wait                       bool
+	Timeout                    time.Duration
 }
 
 const ordererNodeFinalizer = "finalizer.orderernode.hlf.kungfusoftware.es"
