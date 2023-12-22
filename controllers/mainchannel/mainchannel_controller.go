@@ -145,6 +145,7 @@ func (r *FabricMainChannelReconciler) Reconcile(ctx context.Context, req ctrl.Re
 		r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, err, false)
 		return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricMainChannel)
 	}
+	defer sdk.Close()
 	firstAdminOrgMSPID := fabricMainChannel.Spec.AdminPeerOrganizations[0].MSPID
 	idConfig, ok := fabricMainChannel.Spec.Identities[firstAdminOrgMSPID]
 	if !ok {
@@ -268,10 +269,15 @@ func (r *FabricMainChannelReconciler) Reconcile(ctx context.Context, req ctrl.Re
 			r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, fmt.Errorf("couldn't append certs from org %s", ordererOrg.MSPID), false)
 			return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricMainChannel)
 		}
-		idConfig, ok := fabricMainChannel.Spec.Identities[ordererOrg.MSPID]
+		idConfig, ok := fabricMainChannel.Spec.Identities[fmt.Sprintf("%s-tls", ordererOrg.MSPID)]
 		if !ok {
-			r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, fmt.Errorf("identity not found for MSPID %s", ordererOrg.MSPID), false)
-			return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricMainChannel)
+			log.Infof("Identity for MSPID %s not found, trying with normal identity", fmt.Sprintf("%s-tls", ordererOrg.MSPID))
+			// try with normal identity
+			idConfig, ok = fabricMainChannel.Spec.Identities[ordererOrg.MSPID]
+			if !ok {
+				r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, fmt.Errorf("identity not found for MSPID %s", ordererOrg.MSPID), false)
+				return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricMainChannel)
+			}
 		}
 		secret, err := clientSet.CoreV1().Secrets(idConfig.SecretNamespace).Get(ctx, idConfig.SecretName, v1.GetOptions{})
 		if err != nil {
@@ -737,18 +743,15 @@ func (r *FabricMainChannelReconciler) Reconcile(ctx context.Context, req ctrl.Re
 	fabricMainChannel.Status.Message = "Channel setup completed"
 
 	fabricMainChannel.Status.Conditions.SetCondition(status.Condition{
-		Type:               "CREATED",
-		Status:             "True",
-		LastTransitionTime: v1.Time{},
+		Type:   status.ConditionType(fabricMainChannel.Status.Status),
+		Status: "True",
 	})
 	if err := r.Status().Update(ctx, fabricMainChannel); err != nil {
 		r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, err, false)
 		return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricMainChannel)
 	}
-	return ctrl.Result{
-		Requeue:      false,
-		RequeueAfter: 0,
-	}, nil
+	r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.RunningStatus, true, nil, false)
+	return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricMainChannel)
 }
 
 var (

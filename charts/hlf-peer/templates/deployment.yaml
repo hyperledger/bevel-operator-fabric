@@ -42,6 +42,10 @@ spec:
       hostAliases:
 {{ toYaml .Values.hostAliases | indent 10 }}
       volumes:
+# range through .Values.volumes
+  {{- if .Values.volumes }}
+{{ toYaml .Values.volumes | nindent 8 }}
+    {{- end }}
         {{- if eq .Values.peer.databaseType "CouchDB" }}
         - name: couchdb
           {{- if and .Values.persistence.couchdb.enabled ( not .Values.couchdb.external.enabled) }}
@@ -246,6 +250,10 @@ spec:
             - configMapRef:
                 name: {{ include "hlf-peer.fullname" . }}--peer
           volumeMounts:
+# range volumeMounts
+  {{- if .Values.volumeMounts }}
+{{ toYaml .Values.peerVolumeMounts | nindent 12 }}
+  {{- end }}
             - name: peerconfig
               mountPath: /var/hyperledger/fabric_cfg
             - mountPath: /var/hyperledger

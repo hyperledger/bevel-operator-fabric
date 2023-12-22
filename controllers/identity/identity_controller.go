@@ -22,6 +22,7 @@ import (
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -52,7 +53,25 @@ func (r *FabricIdentityReconciler) finalizeMainChannel(reqLogger logr.Logger, m 
 
 	return nil
 }
-
+func getCertBytesFromCATLS(client *kubernetes.Clientset, caTls hlfv1alpha1.Catls) ([]byte, error) {
+	var signCertBytes []byte
+	var err error
+	if caTls.Cacert != "" {
+		signCertBytes, err = base64.StdEncoding.DecodeString(caTls.Cacert)
+		if err != nil {
+			return nil, err
+		}
+	} else if caTls.SecretRef != nil {
+		secret, err := client.CoreV1().Secrets(caTls.SecretRef.Namespace).Get(context.Background(), caTls.SecretRef.Name, v1.GetOptions{})
+		if err != nil {
+			return nil, err
+		}
+		signCertBytes = secret.Data[caTls.SecretRef.Key]
+	} else {
+		return nil, errors.New("invalid ca tls")
+	}
+	return signCertBytes, nil
+}
 func (r *FabricIdentityReconciler) addFinalizer(reqLogger logr.Logger, m *hlfv1alpha1.FabricIdentity) error {
 	reqLogger.Info("Adding Finalizer for the MainChannel")
 	controllerutil.AddFinalizer(m, identityFinalizer)
@@ -108,7 +127,7 @@ func (r *FabricIdentityReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 		r.setConditionStatus(ctx, fabricIdentity, hlfv1alpha1.FailedStatus, false, err, false)
 		return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricIdentity)
 	}
-	tlsCert, err := base64.StdEncoding.DecodeString(fabricIdentity.Spec.Catls.Cacert)
+	tlsCert, err := getCertBytesFromCATLS(clientSet, fabricIdentity.Spec.Catls)
 	if err != nil {
 		r.setConditionStatus(ctx, fabricIdentity, hlfv1alpha1.FailedStatus, false, err, false)
 		return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricIdentity)
@@ -275,7 +294,7 @@ func (r *FabricIdentityReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 	fabricIdentity.Status.Status = hlfv1alpha1.RunningStatus
 	fabricIdentity.Status.Message = "Identity Setup"
 	fabricIdentity.Status.Conditions.SetCondition(status.Condition{
-		Type:               "CREATED",
+		Type:               status.ConditionType(fabricIdentity.Status.Status),
 		Status:             "True",
 		LastTransitionTime: v1.Time{},
 	})

@@ -3,6 +3,7 @@ package chaincode
 import (
 	"fmt"
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/channel"
+	"github.com/hyperledger/fabric-sdk-go/pkg/common/logging"
 	"github.com/hyperledger/fabric-sdk-go/pkg/core/config"
 	"github.com/hyperledger/fabric-sdk-go/pkg/fabsdk"
 	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/helpers"
@@ -78,6 +79,7 @@ func (c *invokeChaincodeCmd) run(out io.Writer) error {
 	return nil
 }
 func newInvokeChaincodeCMD(out io.Writer, errOut io.Writer) *cobra.Command {
+	logging.Initialize(helpers.HLFLoggerProvider{})
 	c := &invokeChaincodeCmd{}
 	cmd := &cobra.Command{
 		Use: "invoke",

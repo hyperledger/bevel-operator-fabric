@@ -118,7 +118,8 @@ resources:
       memory: 128Mi
 replicas: 1
 nodeSelector: { }
-
+volumes: []
+peerVolumeMounts: [ ]
 tolerations: [ ]
 
 affinity: { }
@@ -163,6 +164,8 @@ logging:
   policies: warning
 
 externalChaincodeBuilder: false
+
+deliveryClientaddressOverrides: []
 
 externalBuilders: [ ]
 

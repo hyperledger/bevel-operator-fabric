@@ -134,6 +134,11 @@ type GRPCProxy struct {
 	// +nullable
 	ImagePullSecrets []corev1.LocalObjectReference `json:"imagePullSecrets"`
 }
+type AddressOverride struct {
+	From        string `json:"from"`
+	To          string `json:"to"`
+	CACertsFile string `json:"caCertsFile"`
+}
 
 // FabricPeerSpec defines the desired state of FabricPeer
 type FabricPeerSpec struct {
@@ -147,6 +152,23 @@ type FabricPeerSpec struct {
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default:={}
 	PodLabels map[string]string `json:"podLabels"`
+
+	// +nullable
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default:={}
+	DeliveryClientaddressOverrides []AddressOverride `json:"deliveryClientaddressOverrides"`
+	// +optional
+	// +nullable
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default:={}
+	Volumes []corev1.Volume `json:"volumes"`
+
+	// +optional
+	// +nullable
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default:={}
+	PeerVolumeMounts []corev1.VolumeMount `json:"peerVolumeMounts"`
 
 	// +optional
 	// +nullable

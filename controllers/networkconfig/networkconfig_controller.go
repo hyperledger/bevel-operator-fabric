@@ -471,13 +471,16 @@ func (r *FabricNetworkConfigReconciler) Reconcile(ctx context.Context, req ctrl.
 	r.setConditionStatus(ctx, fabricNetworkConfig, hlfv1alpha1.RunningStatus, true, nil, false)
 	fca := fabricNetworkConfig.DeepCopy()
 	fca.Status.Status = hlfv1alpha1.RunningStatus
+	fca.Status.Conditions.SetCondition(status.Condition{
+		Type:   status.ConditionType(fca.Status.Status),
+		Status: "True",
+	})
 	if err := r.Status().Update(ctx, fca); err != nil {
 		log.Error(err, fmt.Sprintf("%v failed to update the application status", ErrClientK8s))
 		return reconcile.Result{}, err
 	}
-	return ctrl.Result{
-		RequeueAfter: 1 * time.Minute,
-	}, nil
+	r.setConditionStatus(ctx, fabricNetworkConfig, hlfv1alpha1.RunningStatus, true, nil, false)
+	return r.updateCRStatusOrFailReconcileWithRequeue(ctx, r.Log, fabricNetworkConfig, 1*time.Minute)
 }
 
 var (
@@ -491,6 +494,16 @@ func (r *FabricNetworkConfigReconciler) updateCRStatusOrFailReconcile(ctx contex
 		return reconcile.Result{}, err
 	}
 	return reconcile.Result{}, nil
+}
+func (r *FabricNetworkConfigReconciler) updateCRStatusOrFailReconcileWithRequeue(ctx context.Context, log logr.Logger, p *hlfv1alpha1.FabricNetworkConfig, requeueAfter time.Duration) (
+	reconcile.Result, error) {
+	if err := r.Status().Update(ctx, p); err != nil {
+		log.Error(err, fmt.Sprintf("%v failed to update the application status", ErrClientK8s))
+		return reconcile.Result{}, err
+	}
+	return reconcile.Result{
+		RequeueAfter: requeueAfter,
+	}, nil
 }
 
 func (r *FabricNetworkConfigReconciler) setConditionStatus(ctx context.Context, p *hlfv1alpha1.FabricNetworkConfig, conditionType hlfv1alpha1.DeploymentStatus, statusFlag bool, err error, statusUnknown bool) (update bool) {
