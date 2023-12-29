@@ -19,6 +19,7 @@ import (
 	"helm.sh/helm/v3/pkg/cli"
 	"helm.sh/helm/v3/pkg/release"
 	"k8s.io/kubernetes/pkg/api/v1/pod"
+	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sort"
 
 	"math/big"
@@ -51,13 +52,14 @@ import (
 // FabricCAReconciler reconciles a FabricCA object
 type FabricCAReconciler struct {
 	client.Client
-	ChartPath string
-	Log       logr.Logger
-	Scheme    *runtime.Scheme
-	Config    *rest.Config
-	ClientSet *kubernetes.Clientset
-	Wait      bool
-	Timeout   time.Duration
+	ChartPath  string
+	Log        logr.Logger
+	Scheme     *runtime.Scheme
+	Config     *rest.Config
+	ClientSet  *kubernetes.Clientset
+	Wait       bool
+	Timeout    time.Duration
+	MaxHistory int
 }
 
 func parseECDSAPrivateKey(contents []byte) (*ecdsa.PrivateKey, error) {
@@ -844,6 +846,8 @@ func (r *FabricCAReconciler) finalizeCA(reqLogger logr.Logger, m *hlfv1alpha1.Fa
 	releaseName := m.Name
 	reqLogger.Info("Successfully finalized ca")
 	cmd := action.NewUninstall(cfg)
+	cmd.Wait = r.Wait
+	cmd.Timeout = r.Timeout
 	resp, err := cmd.Run(releaseName)
 	if err != nil {
 		if strings.Compare("Release not loaded", err.Error()) != 0 {
@@ -979,9 +983,9 @@ func Reconcile(
 			return ctrl.Result{}, err
 		}
 		cmd := action.NewUpgrade(cfg)
-		cmd.Timeout = 5 * time.Minute
-		cmd.Wait = false
-		cmd.MaxHistory = 10
+		cmd.Timeout = r.Timeout
+		cmd.Wait = r.Wait
+		cmd.MaxHistory = r.MaxHistory
 		settings := cli.New()
 		chartPath, err := cmd.LocateChart(r.ChartPath, settings)
 		ch, err := loader.Load(chartPath)
@@ -1020,7 +1024,8 @@ func Reconcile(
 			return ctrl.Result{}, err
 		}
 		cmd.ReleaseName = name
-		cmd.Wait = false
+		cmd.Wait = r.Wait
+		cmd.Timeout = r.Timeout
 		ch, err := loader.Load(chart)
 		if err != nil {
 			return ctrl.Result{}, err
@@ -1126,9 +1131,12 @@ func (r *FabricCAReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 
 }
 
-func (r *FabricCAReconciler) SetupWithManager(mgr ctrl.Manager) error {
+func (r *FabricCAReconciler) SetupWithManager(mgr ctrl.Manager, maxConcurrentReconciles int) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&hlfv1alpha1.FabricCA{}).
 		Owns(&appsv1.Deployment{}).
+		WithOptions(controller.Options{
+			MaxConcurrentReconciles: maxConcurrentReconciles,
+		}).
 		Complete(r)
 }

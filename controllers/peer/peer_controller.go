@@ -61,6 +61,7 @@ type FabricPeerReconciler struct {
 	AutoRenewCertificatesDelta time.Duration
 	Wait                       bool
 	Timeout                    time.Duration
+	MaxHistory                 int
 }
 
 func (r *FabricPeerReconciler) addFinalizer(reqLogger logr.Logger, m *hlfv1alpha1.FabricPeer) error {
@@ -509,6 +510,8 @@ func (r *FabricPeerReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 		}
 	} else {
 		cmd := action.NewInstall(cfg)
+		cmd.Wait = r.Wait
+		cmd.Timeout = r.Timeout
 		name, chart, err := cmd.NameAndChart([]string{releaseName, r.ChartPath})
 		if err != nil {
 			r.setConditionStatus(ctx, fabricPeer, hlfv1alpha1.FailedStatus, false, err, false)
@@ -551,6 +554,11 @@ func (r *FabricPeerReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 			return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricPeer)
 		}
 		log.Infof("Chart installed %s", release.Name)
+		err = r.Get(ctx, req.NamespacedName, fabricPeer)
+		if err != nil {
+			r.setConditionStatus(ctx, fabricPeer, hlfv1alpha1.FailedStatus, false, err, false)
+			return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricPeer)
+		}
 		fabricPeer.Status.Status = hlfv1alpha1.PendingStatus
 		fabricPeer.Status.Conditions.SetCondition(status.Condition{
 			Type:               "DEPLOYED",
@@ -616,7 +624,6 @@ func (r *FabricPeerReconciler) upgradeChart(
 		return err
 	}
 	cmd := action.NewUpgrade(cfg)
-	cmd.MaxHistory = 5
 	err = os.Setenv("HELM_NAMESPACE", ns)
 	if err != nil {
 		return err
@@ -627,9 +634,9 @@ func (r *FabricPeerReconciler) upgradeChart(
 	if err != nil {
 		return err
 	}
-	cmd.Wait = false
-	cmd.MaxHistory = 10
-	cmd.Timeout = time.Minute * 5
+	cmd.Wait = r.Wait
+	cmd.MaxHistory = r.MaxHistory
+	cmd.Timeout = r.Timeout
 	log.Infof("Upgrading chart %s", inrec)
 	release, err := cmd.Run(releaseName, ch, inInterface)
 	if err != nil {
@@ -1496,12 +1503,12 @@ func GetConfig(
 	return &c, nil
 }
 
-func (r *FabricPeerReconciler) SetupWithManager(mgr ctrl.Manager) error {
+func (r *FabricPeerReconciler) SetupWithManager(mgr ctrl.Manager, maxConcurrentReconciles int) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&hlfv1alpha1.FabricPeer{}).
 		Owns(&appsv1.Deployment{}).
 		WithOptions(controller.Options{
-			MaxConcurrentReconciles: 1,
+			MaxConcurrentReconciles: maxConcurrentReconciles,
 		}).
 		Complete(r)
 }
@@ -1534,6 +1541,8 @@ func (r *FabricPeerReconciler) finalizePeer(reqLogger logr.Logger, peer *hlfv1al
 	releaseName := peer.Name
 	reqLogger.Info("Successfully finalized peer")
 	cmd := action.NewUninstall(cfg)
+	cmd.Wait = r.Wait
+	cmd.Timeout = r.Timeout
 	resp, err := cmd.Run(releaseName)
 	if err != nil {
 		if strings.Compare("Release not loaded", err.Error()) != 0 {

@@ -54,6 +54,7 @@ type FabricOrdererNodeReconciler struct {
 	AutoRenewCertificatesDelta time.Duration
 	Wait                       bool
 	Timeout                    time.Duration
+	MaxHistory                 int
 }
 
 const ordererNodeFinalizer = "finalizer.orderernode.hlf.kungfusoftware.es"
@@ -70,6 +71,8 @@ func (r *FabricOrdererNodeReconciler) finalizeOrderer(reqLogger logr.Logger, m *
 	releaseName := m.Name
 	reqLogger.Info("Successfully finalized orderer")
 	cmd := action.NewUninstall(cfg)
+	cmd.Wait = r.Wait
+	cmd.Timeout = r.Timeout
 	resp, err := cmd.Run(releaseName)
 	if err != nil {
 		if strings.Compare("Release not loaded", err.Error()) != 0 {
@@ -280,6 +283,9 @@ func (r *FabricOrdererNodeReconciler) Reconcile(ctx context.Context, req ctrl.Re
 		}
 	} else {
 		cmd := action.NewInstall(cfg)
+		cmd.Wait = r.Wait
+		cmd.Timeout = r.Timeout
+		cmd.ReleaseName = releaseName
 		name, chart, err := cmd.NameAndChart([]string{releaseName, r.ChartPath})
 		if err != nil {
 			return ctrl.Result{}, err
@@ -325,6 +331,11 @@ func (r *FabricOrdererNodeReconciler) Reconcile(ctx context.Context, req ctrl.Re
 			Status:             "True",
 			LastTransitionTime: v1.Time{},
 		})
+		err = r.Get(ctx, req.NamespacedName, fabricOrdererNode)
+		if err != nil {
+			reqLogger.Error(err, "Failed to get Orderer before updating it.")
+			return ctrl.Result{}, err
+		}
 		if err := r.Status().Update(ctx, fabricOrdererNode); err != nil {
 			return ctrl.Result{}, err
 		}
@@ -393,12 +404,12 @@ func (r *FabricOrdererNodeReconciler) setConditionStatus(
 	return p.Status.Conditions.SetCondition(condition())
 }
 
-func (r *FabricOrdererNodeReconciler) SetupWithManager(mgr ctrl.Manager) error {
+func (r *FabricOrdererNodeReconciler) SetupWithManager(mgr ctrl.Manager, maxReconciles int) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&hlfv1alpha1.FabricOrdererNode{}).
 		Owns(&appsv1.Deployment{}).
 		WithOptions(controller.Options{
-			MaxConcurrentReconciles: 1,
+			MaxConcurrentReconciles: maxReconciles,
 		}).
 		Complete(r)
 }
@@ -451,7 +462,6 @@ func (r *FabricOrdererNodeReconciler) upgradeChart(
 		return err
 	}
 	cmd := action.NewUpgrade(cfg)
-	cmd.MaxHistory = 5
 	err = os.Setenv("HELM_NAMESPACE", ns)
 	if err != nil {
 		return err
@@ -465,9 +475,9 @@ func (r *FabricOrdererNodeReconciler) upgradeChart(
 	if err != nil {
 		return err
 	}
-	cmd.Wait = false
-	cmd.MaxHistory = 10
-	cmd.Timeout = time.Minute * 5
+	cmd.Wait = r.Wait
+	cmd.Timeout = r.Timeout
+	cmd.MaxHistory = r.MaxHistory
 	release, err := cmd.Run(releaseName, ch, inInterface)
 	if err != nil {
 		return err
