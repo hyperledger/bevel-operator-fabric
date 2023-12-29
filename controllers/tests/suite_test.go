@@ -87,7 +87,7 @@ var _ = BeforeSuite(func(done Done) {
 		ClientSet: ClientSet,
 		ChartPath: caChartPath,
 	}
-	err = caReconciler.SetupWithManager(k8sManager)
+	err = caReconciler.SetupWithManager(k8sManager, 10)
 	Expect(err).ToNot(HaveOccurred())
 	peerChartPath, err := filepath.Abs("../../charts/hlf-peer")
 	Expect(err).ToNot(HaveOccurred())
@@ -98,7 +98,7 @@ var _ = BeforeSuite(func(done Done) {
 		Config:    RestConfig,
 		ChartPath: peerChartPath,
 	}
-	err = peerReconciler.SetupWithManager(k8sManager)
+	err = peerReconciler.SetupWithManager(k8sManager, 10)
 
 	Expect(err).ToNot(HaveOccurred())
 	ordChartPath, err := filepath.Abs("../../charts/hlf-ord")
@@ -122,7 +122,7 @@ var _ = BeforeSuite(func(done Done) {
 		ChartPath: ordNodeChartPath,
 		Config:    RestConfig,
 	}
-	err = ordNodeReconciler.SetupWithManager(k8sManager)
+	err = ordNodeReconciler.SetupWithManager(k8sManager, 10)
 	Expect(err).ToNot(HaveOccurred())
 
 	go func() {
