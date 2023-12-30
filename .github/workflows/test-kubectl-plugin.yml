@@ -52,8 +52,8 @@ jobs:
           make generate manifests install
       - name: Install Istio
         run: |
-          curl -L https://istio.io/downloadIstio | ISTIO_VERSION=1.16.1 TARGET_ARCH=x86_64 sh -
-          export PATH="$PATH:$PWD/istio-1.16.1/bin"
+          curl -L https://istio.io/downloadIstio | ISTIO_VERSION=1.20.0 TARGET_ARCH=x86_64 sh -
+          export PATH="$PATH:$PWD/istio-1.20.0/bin"
           kubectl create namespace istio-system
 
           istioctl operator init
@@ -127,8 +127,6 @@ jobs:
 
       - name: Configure DNS in Kubernetes
         run: |
-          CLUSTER_IP=$(kubectl -n istio-system get svc istio-ingressgateway -o json | jq -r .spec.clusterIP)
-          echo "CLUSTER_IP=${CLUSTER_IP}"
           kubectl apply -f - <<EOF
           kind: ConfigMap
           apiVersion: v1
@@ -142,9 +140,8 @@ jobs:
                   health {
                      lameduck 5s
                   }
-                  rewrite name regex (.*)\.localho\.st host.ingress.internal
+                  rewrite name regex (.*)\.localho\.st istio-ingressgateway.istio-system.svc.cluster.local
                   hosts {
-                    ${CLUSTER_IP} host.ingress.internal
                     fallthrough
                   }
                   ready
@@ -169,10 +166,10 @@ jobs:
       - name: Create Peer org
         run: |
           export PEER_IMAGE=hyperledger/fabric-peer
-          export PEER_VERSION=2.5.0
+          export PEER_VERSION=2.5.5
 
           export CA_IMAGE=hyperledger/fabric-ca
-          export CA_VERSION=1.5.6
+          export CA_VERSION=1.5.7
 
           kubectl hlf ca create --image=$CA_IMAGE --version=$CA_VERSION --storage-class=standard --capacity=2Gi --name=org1-ca \
               --enroll-id=enroll --hosts=org1-ca.localho.st --enroll-pw=enrollpw
@@ -190,10 +187,10 @@ jobs:
       - name: Create Orderer Org
         run: |
           export ORDERER_IMAGE=hyperledger/fabric-orderer
-          export ORDERER_VERSION=2.5.0
+          export ORDERER_VERSION=2.5.5
 
           export CA_IMAGE=hyperledger/fabric-ca
-          export CA_VERSION=1.5.6
+          export CA_VERSION=1.5.7
 
           kubectl hlf ca create --image=$CA_IMAGE --version=$CA_VERSION --storage-class=standard --capacity=2Gi --name=ord-ca \
               --enroll-id=enroll --enroll-pw=enrollpw --hosts=ord-ca.localho.st
@@ -258,7 +255,7 @@ jobs:
               --identities="OrdererMSP;admin-tls-ordservice.yaml" \
               --identities="Org1MSP;peer-org1.yaml"
 
-          kubectl wait --timeout=180s --for=condition=Created fabricmainchannels.hlf.kungfusoftware.es --all 
+          kubectl wait --timeout=180s --for=condition=RUNNING fabricmainchannels.hlf.kungfusoftware.es --all 
 
 
       - name: Join peers to channel
@@ -276,7 +273,7 @@ jobs:
               --secret-ns=default \
               --secret-key="peer-org1.yaml"
 
-          kubectl wait --timeout=180s --for=condition=Created fabricfollowerchannels.hlf.kungfusoftware.es --all 
+          kubectl wait --timeout=180s --for=condition=RUNNING fabricfollowerchannels.hlf.kungfusoftware.es --all
       - name: Get channel
         run: |
           sleep 3

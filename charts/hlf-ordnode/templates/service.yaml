@@ -7,10 +7,6 @@ metadata:
 spec:
   type: {{ .Values.service.type }}
   ports:
-    - port: 443
-      targetPort: 7050
-      protocol: TCP
-      name: grpc-443
     - port: {{ .Values.service.port }}
       targetPort: 7050
       protocol: TCP

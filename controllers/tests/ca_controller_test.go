@@ -246,7 +246,7 @@ func randomFabricCA(releaseName string, namespace string) *hlfv1alpha1.FabricCA 
 			},
 			CLRSizeLimit: 512000,
 			Image:        "hyperledger/fabric-ca",
-			Version:      "1.4.9",
+			Version:      "1.5.7",
 			Debug:        true,
 			TLS:          hlfv1alpha1.FabricCATLSConf{Subject: subject},
 			CA: hlfv1alpha1.FabricCAItemConf{
@@ -834,7 +834,7 @@ var _ = Describe("Fabric Controllers", func() {
 				},
 				CLRSizeLimit: 512000,
 				Image:        "hyperledger/fabric-ca",
-				Version:      "1.4.9",
+				Version:      "1.5.7",
 				Debug:        true,
 				TLS:          hlfv1alpha1.FabricCATLSConf{Subject: subject},
 				CA: hlfv1alpha1.FabricCAItemConf{

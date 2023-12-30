@@ -1608,15 +1608,6 @@ func createPeerService(
 		Type: peer.Spec.Service.Type,
 		Ports: []corev1.ServicePort{
 			{
-				Name:     "peer-443",
-				Protocol: "TCP",
-				Port:     443,
-				TargetPort: intstr.IntOrString{
-					Type:   intstr.Int,
-					IntVal: 7051,
-				},
-			},
-			{
 				Name:     PeerPortName,
 				Protocol: "TCP",
 				Port:     7051,

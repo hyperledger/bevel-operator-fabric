@@ -228,7 +228,6 @@ export CA_VERSION=1.5.7
 ### Configure Internal DNS
 
 ```bash
-CLUSTER_IP=$(kubectl -n istio-system get svc istio-ingressgateway -o json | jq -r .spec.clusterIP)
 kubectl apply -f - <<EOF
 kind: ConfigMap
 apiVersion: v1
@@ -242,9 +241,8 @@ data:
         health {
            lameduck 5s
         }
-        rewrite name regex (.*)\.localho\.st host.ingress.internal
+        rewrite name regex (.*)\.localho\.st istio-ingressgateway.istio-system.svc.cluster.local
         hosts {
-          ${CLUSTER_IP} host.ingress.internal
           fallthrough
         }
         ready
