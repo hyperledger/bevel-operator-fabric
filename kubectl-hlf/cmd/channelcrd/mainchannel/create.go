@@ -132,12 +132,23 @@ func (o Options) mapToFabricMainChannel() (*v1alpha1.FabricMainChannelSpec, erro
 				AdminPort: adminOrdererPort,
 			})
 		}
+		channelOrdererNodes := []v1alpha1.FabricMainChannelOrdererNode{}
+		for _, ordererNode := range nodes {
+			namespace := ordererNode.Item.Namespace
+			if namespace == "" {
+				namespace = "default"
+			}
+			channelOrdererNodes = append(channelOrdererNodes, v1alpha1.FabricMainChannelOrdererNode{
+				Name:      ordererNode.Item.Name,
+				Namespace: namespace,
+			})
+		}
 		ordererOrganizations = append(ordererOrganizations, v1alpha1.FabricMainChannelOrdererOrganization{
 			MSPID:                  mspID,
 			TLSCACert:              tlsCACert,
 			SignCACert:             signCACert,
 			OrdererEndpoints:       ordererEndpoints,
-			OrderersToJoin:         []v1alpha1.FabricMainChannelOrdererNode{},
+			OrderersToJoin:         channelOrdererNodes,
 			ExternalOrderersToJoin: ordererNodes,
 		})
 	}
