@@ -270,7 +270,7 @@ jobs:
               --mspid=Org1MSP \
               --name="demo-org1msp" \
               --orderer-certificates="./orderer-cert.pem" \
-              --orderer-urls="grpcs://orderer0-ord.localho.st:7050" \
+              --orderer-urls="grpcs://orderer0-ord.localho.st:443" \
               --anchor-peers="org1-peer0:7051" \
               --peers="org1-peer0.default" \
               --secret-name=wallet \
