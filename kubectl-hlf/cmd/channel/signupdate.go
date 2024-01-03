@@ -17,8 +17,6 @@ import (
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
 
-	"github.com/hyperledger/fabric-sdk-go/pkg/fabsdk"
-	"github.com/spf13/cobra"
 	"io"
 	"io/ioutil"
 )
