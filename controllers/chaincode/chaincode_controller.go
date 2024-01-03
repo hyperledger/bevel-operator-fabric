@@ -50,11 +50,11 @@ func CreateChaincodeCryptoMaterial(conf *hlfv1alpha1.FabricChaincode, caName str
 		TLSCert:    tlsCertString,
 		URL:        caurl,
 		Name:       caName,
-		MSPID:      "Org1MSP",
+		MSPID:      conf.Spec.MspID,
 		User:       enrollID,
 		Secret:     enrollSecret,
 		Hosts:      hosts,
-		CN:         "",
+		CN:         conf.Name,
 		Profile:    "tls",
 		Attributes: nil,
 	})
@@ -312,7 +312,7 @@ func (r *FabricChaincodeReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 	}
 	deploymentName := fmt.Sprintf("%s", fabricChaincode.Name)
 	serviceName := fmt.Sprintf("%s", fabricChaincode.Name)
-	chaincodePort := 7052
+	chaincodePort := fabricChaincode.Spec.ChaincodeServerPort
 	chaincodeAddress := fmt.Sprintf("0.0.0.0:%d", chaincodePort)
 	envVars := []corev1.EnvVar{
 		{

@@ -869,6 +869,9 @@ spec:
                 items:
                   type: string
                 type: array
+              chaincodeServerPort:
+                default: 7052
+                type: integer
               command:
                 description: Entrypoint array. Not executed within a shell. The container
                   image's ENTRYPOINT is used if this is not provided.
@@ -1056,6 +1059,8 @@ spec:
                   type: object
                 nullable: true
                 type: array
+              mspID:
+                type: string
               packageId:
                 minLength: 1
                 type: string
@@ -1129,6 +1134,7 @@ spec:
                 nullable: true
                 type: array
             required:
+            - chaincodeServerPort
             - image
             - imagePullPolicy
             - packageId

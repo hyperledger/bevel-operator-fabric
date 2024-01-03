@@ -12,19 +12,16 @@ import (
 )
 
 type createExternalChaincodeCmd struct {
-	name            string
-	namespace       string
-	image           string
-	packageID       string
-	caName          string
-	caNamespace     string
-	imagePullPolicy string
-
-	enrollId     string
-	enrollSecret string
-
-	replicas int
-
+	name             string
+	namespace        string
+	image            string
+	packageID        string
+	caName           string
+	caNamespace      string
+	imagePullPolicy  string
+	enrollId         string
+	enrollSecret     string
+	replicas         int
 	tlsRequired      bool
 	ImagePullSecrets []string
 }

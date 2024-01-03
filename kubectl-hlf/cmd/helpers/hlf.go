@@ -3,9 +3,10 @@ package helpers
 import (
 	"context"
 	"fmt"
+	"strings"
+
 	"github.com/kfsoftware/hlf-operator/controllers/utils"
 	"k8s.io/client-go/kubernetes"
-	"strings"
 
 	hlfv1alpha1 "github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
 	operatorv1 "github.com/kfsoftware/hlf-operator/pkg/client/clientset/versioned"

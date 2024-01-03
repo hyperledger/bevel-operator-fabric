@@ -3,6 +3,7 @@ package channel
 import (
 	"bytes"
 	"fmt"
+
 	"github.com/golang/protobuf/proto"
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/resmgmt"
 	"github.com/hyperledger/fabric-sdk-go/pkg/common/providers/msp"
@@ -10,10 +11,14 @@ import (
 	"github.com/hyperledger/fabric-sdk-go/pkg/core/cryptosuite"
 	"github.com/hyperledger/fabric-sdk-go/pkg/core/cryptosuite/bccsp/sw"
 	"github.com/hyperledger/fabric-sdk-go/pkg/fab"
+
 	"github.com/hyperledger/fabric-sdk-go/pkg/fabsdk"
 	mspimpl "github.com/hyperledger/fabric-sdk-go/pkg/msp"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
+
+	"github.com/hyperledger/fabric-sdk-go/pkg/fabsdk"
+	"github.com/spf13/cobra"
 	"io"
 	"io/ioutil"
 )
@@ -25,8 +30,8 @@ type signUpdateChannelCmd struct {
 	file        string
 	mspID       string
 	signatures  []string
-	output      string
 	identity    string
+	output      string
 }
 
 func (c *signUpdateChannelCmd) validate() error {
@@ -134,6 +139,7 @@ func newSignUpdateChannelCMD(stdOut io.Writer, stdErr io.Writer) *cobra.Command 
 	persistentFlags.StringVarP(&c.userName, "user", "", "", "User name for the transaction")
 	persistentFlags.StringVarP(&c.file, "file", "f", "", "Config update file")
 	persistentFlags.StringVarP(&c.output, "output", "o", "", "Output signature")
+	persistentFlags.StringVarP(&c.userName, "user", "", "", "User name for the transaction")
 	cmd.MarkPersistentFlagRequired("mspid")
 	cmd.MarkPersistentFlagRequired("channel")
 	cmd.MarkPersistentFlagRequired("config")

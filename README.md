@@ -32,18 +32,25 @@ For discussions and questions, please join the Hyperledger Foundation Discord:
 
 The channel is located under `BEVEL`, named [`bevel-operator-fabric`](https://discordapp.com/channels/905194001349627914/967823782712594442).
 
-
 ## Tutorial Videos
 
-Step by step video tutorials to setup hlf-operator in kubernetes
+Step-by-step video tutorials to setup hlf-operator in Kubernetes
 
 [![Hyperledger Fabric on Kubernetes](https://img.youtube.com/vi/e04TcJHUI5M/0.jpg)](https://www.youtube.com/playlist?list=PLuAZTZDgj0csRQuNMY8wbYqOCpzggAuMo "Hyperledger Fabric on Kubernetes")
 
+This workshop provides an in-depth hands on discussion and demonstration of using Bevel and the new Bevel-Operator-Fabric to deploy Hyperledger Fabric on Kubernetes.
+
 ## Hyperledger Meetup
 
-You can watch this video in order to see how to use it to deploy your own network:
+You can watch this video to see how to use it to deploy your own network:
 
 [![Hyperledger Fabric on Kubernetes](http://img.youtube.com/vi/namKDeJf5QI/0.jpg)](http://www.youtube.com/watch?v=namKDeJf5QI "Hyperledger Fabric on Kubernetes")
+
+## Hyperledger Workshops
+
+This workshop provides an in-depth, hands-on discussion and demonstration of using Bevel and the new Bevel-Operator-Fabric to deploy Hyperledger Fabric on Kubernetes.
+
+[![How to Deploy Hyperledger Fabric on Kubernetes with Hyperledger Bevel](https://img.youtube.com/vi/YUC12ahY5_k/0.jpg)](https://www.youtube.com/live/YUC12ahY5_k?feature=share&t=4430)
 
 ## Sponsor
 
