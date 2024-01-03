@@ -2,15 +2,21 @@ package channel
 
 import (
 	"bytes"
+	"fmt"
+
 	"github.com/golang/protobuf/proto"
-	"github.com/hyperledger/fabric-protos-go/common"
-	mspclient "github.com/hyperledger/fabric-sdk-go/pkg/client/msp"
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/resmgmt"
+	"github.com/hyperledger/fabric-sdk-go/pkg/common/providers/msp"
 	"github.com/hyperledger/fabric-sdk-go/pkg/core/config"
+	"github.com/hyperledger/fabric-sdk-go/pkg/core/cryptosuite"
+	"github.com/hyperledger/fabric-sdk-go/pkg/core/cryptosuite/bccsp/sw"
+	"github.com/hyperledger/fabric-sdk-go/pkg/fab"
 
 	"github.com/hyperledger/fabric-sdk-go/pkg/fabsdk"
-	log "github.com/sirupsen/logrus"
+	mspimpl "github.com/hyperledger/fabric-sdk-go/pkg/msp"
 	"github.com/spf13/cobra"
+	"gopkg.in/yaml.v3"
+
 	"io"
 	"io/ioutil"
 )
@@ -20,15 +26,25 @@ type signUpdateChannelCmd struct {
 	channelName string
 	userName    string
 	file        string
-	output      string
 	mspID       string
+	signatures  []string
+	identity    string
+	output      string
 }
 
 func (c *signUpdateChannelCmd) validate() error {
 	return nil
 }
 
-func (c *signUpdateChannelCmd) run() error {
+type identity struct {
+	Cert Pem `json:"cert"`
+	Key  Pem `json:"key"`
+}
+type Pem struct {
+	Pem string
+}
+
+func (c *signUpdateChannelCmd) run(out io.Writer) error {
 	configBackend := config.FromFile(c.configPath)
 	sdk, err := fabsdk.New(configBackend)
 	if err != nil {
@@ -46,21 +62,42 @@ func (c *signUpdateChannelCmd) run() error {
 	if err != nil {
 		return err
 	}
-	envelope := &common.Envelope{}
-	err = proto.Unmarshal(updateEnvelopeBytes, envelope)
-	if err != nil {
-		return err
-	}
 	configUpdateReader := bytes.NewReader(updateEnvelopeBytes)
-	mspClient, err := mspclient.New(org1AdminClientContext, mspclient.WithOrg(c.mspID))
+	sdkConfig, err := sdk.Config()
 	if err != nil {
 		return err
 	}
-	usr, err := mspClient.GetSigningIdentity(c.userName)
+	cryptoConfig := cryptosuite.ConfigFromBackend(sdkConfig)
+	cryptoSuite, err := sw.GetSuiteByConfig(cryptoConfig)
 	if err != nil {
 		return err
 	}
-	signature, err := resClient.CreateConfigSignatureFromReader(usr, configUpdateReader)
+	userStore := mspimpl.NewMemoryUserStore()
+	endpointConfig, err := fab.ConfigFromBackend(sdkConfig)
+	if err != nil {
+		return err
+	}
+	identityManager, err := mspimpl.NewIdentityManager(c.mspID, userStore, cryptoSuite, endpointConfig)
+	if err != nil {
+		return err
+	}
+	identityBytes, err := ioutil.ReadFile(c.identity)
+	if err != nil {
+		return err
+	}
+	id := &identity{}
+	err = yaml.Unmarshal(identityBytes, id)
+	if err != nil {
+		return err
+	}
+	signingIdentity, err := identityManager.CreateSigningIdentity(
+		msp.WithPrivateKey([]byte(id.Key.Pem)),
+		msp.WithCert([]byte(id.Cert.Pem)),
+	)
+	if err != nil {
+		return err
+	}
+	signature, err := resClient.CreateConfigSignatureFromReader(signingIdentity, configUpdateReader)
 	if err != nil {
 		return err
 	}
@@ -68,14 +105,20 @@ func (c *signUpdateChannelCmd) run() error {
 	if err != nil {
 		return err
 	}
-	err = ioutil.WriteFile(c.output, signatureBytes, 0777)
-	if err != nil {
-		return err
+	if c.output != "" {
+		err = ioutil.WriteFile(c.output, signatureBytes, 0644)
+		if err != nil {
+			return err
+		}
+	} else {
+		_, err = fmt.Fprint(out, signatureBytes)
+		if err != nil {
+			return err
+		}
 	}
-	log.Infof("channel signed output: %s", c.output)
 	return nil
 }
-func newSignUpdateChannelCMD(io.Writer, io.Writer) *cobra.Command {
+func newSignUpdateChannelCMD(stdOut io.Writer, stdErr io.Writer) *cobra.Command {
 	c := &signUpdateChannelCmd{}
 	cmd := &cobra.Command{
 		Use: "signupdate",
@@ -83,21 +126,21 @@ func newSignUpdateChannelCMD(io.Writer, io.Writer) *cobra.Command {
 			if err := c.validate(); err != nil {
 				return err
 			}
-			return c.run()
+			return c.run(stdOut)
 		},
 	}
 	persistentFlags := cmd.PersistentFlags()
 	persistentFlags.StringVarP(&c.mspID, "mspid", "", "", "MSP ID of the organization")
 	persistentFlags.StringVarP(&c.channelName, "channel", "", "", "Channel name")
 	persistentFlags.StringVarP(&c.configPath, "config", "", "", "Configuration file for the SDK")
-	persistentFlags.StringVarP(&c.userName, "user", "", "", "User name for the transaction")
+	persistentFlags.StringVarP(&c.identity, "identity", "", "", "Identity file")
 	persistentFlags.StringVarP(&c.file, "file", "f", "", "Config update file")
-	persistentFlags.StringVarP(&c.output, "output", "o", "", "Output signature file")
+	persistentFlags.StringVarP(&c.output, "output", "o", "", "Output signature")
+	persistentFlags.StringVarP(&c.userName, "user", "", "", "User name for the transaction")
 	cmd.MarkPersistentFlagRequired("mspid")
 	cmd.MarkPersistentFlagRequired("channel")
 	cmd.MarkPersistentFlagRequired("config")
 	cmd.MarkPersistentFlagRequired("user")
 	cmd.MarkPersistentFlagRequired("file")
-	cmd.MarkPersistentFlagRequired("output")
 	return cmd
 }

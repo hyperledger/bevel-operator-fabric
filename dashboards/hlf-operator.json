@@ -95,7 +95,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "hlf_operator_certificate_expiration_timestamp_seconds{exported_namespace=\"default\"} - time()",
+          "expr": "hlf_operator_certificate_expiration_timestamp_seconds{} - time()",
           "interval": "",
           "legendFormat": "{{exported_namespace}} / {{name}}",
           "refId": "A"

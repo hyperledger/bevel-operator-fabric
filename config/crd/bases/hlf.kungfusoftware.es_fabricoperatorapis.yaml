@@ -1118,6 +1118,7 @@ spec:
               podLabels:
                 additionalProperties:
                   type: string
+                nullable: true
                 type: object
               replicas:
                 type: integer
@@ -1197,7 +1198,6 @@ spec:
             - ingress
             - istio
             - logoUrl
-            - podLabels
             - replicas
             - tag
             type: object

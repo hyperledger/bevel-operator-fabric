@@ -134,6 +134,7 @@ func (r *FabricFollowerChannelReconciler) Reconcile(ctx context.Context, req ctr
 		r.setConditionStatus(ctx, fabricFollowerChannel, hlfv1alpha1.FailedStatus, false, err, false)
 		return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricFollowerChannel)
 	}
+	defer sdk.Close()
 	idConfig := fabricFollowerChannel.Spec.HLFIdentity
 	secret, err := clientSet.CoreV1().Secrets(idConfig.SecretNamespace).Get(ctx, idConfig.SecretName, v1.GetOptions{})
 	if err != nil {
@@ -233,6 +234,13 @@ func (r *FabricFollowerChannelReconciler) Reconcile(ctx context.Context, req ctr
 		r.setConditionStatus(ctx, fabricFollowerChannel, hlfv1alpha1.FailedStatus, false, err, false)
 		return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricFollowerChannel)
 	}
+	var buf2 bytes.Buffer
+	err = protolator.DeepMarshalJSON(&buf2, cfgBlock)
+	if err != nil {
+		r.setConditionStatus(ctx, fabricFollowerChannel, hlfv1alpha1.FailedStatus, false, errors.Wrapf(err, "error converting block to JSON"), false)
+		return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricFollowerChannel)
+	}
+	log.Infof("Config block: %s", buf2.Bytes())
 	cftxGen := configtx.New(cfgBlock)
 	app := cftxGen.Application().Organization(mspID)
 	anchorPeers, err := app.AnchorPeers()
@@ -352,15 +360,14 @@ func (r *FabricFollowerChannelReconciler) Reconcile(ctx context.Context, req ctr
 	fabricFollowerChannel.Status.Status = hlfv1alpha1.RunningStatus
 	fabricFollowerChannel.Status.Message = "Peers and anchor peers completed"
 	fabricFollowerChannel.Status.Conditions.SetCondition(status.Condition{
-		Type:               "CREATED",
-		Status:             "True",
-		LastTransitionTime: v1.Time{},
+		Type:   status.ConditionType(fabricFollowerChannel.Status.Status),
+		Status: "True",
 	})
 	if err := r.Status().Update(ctx, fabricFollowerChannel); err != nil {
 		r.setConditionStatus(ctx, fabricFollowerChannel, hlfv1alpha1.FailedStatus, false, err, false)
 		return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricFollowerChannel)
 	}
-	return ctrl.Result{}, nil
+	return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricFollowerChannel)
 }
 
 var (

@@ -30,11 +30,22 @@ spec:
         checksum/secret--peerorg-tlsrootcert: {{ include (print $.Template.BasePath "/secret--peerorg-tlsrootcert.yaml") . | sha256sum | trunc 60 }}
         checksum/secret--tlsclientrootcert: {{ include (print $.Template.BasePath "/secret--tlsclientrootcert.yaml") . | sha256sum | trunc 60 }}
 {{ include "labels.standard" . | indent 8 }}
+  {{- with .Values.podLabels }}
+  {{- toYaml . | nindent 8 }}
+  {{- end }}
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
     spec:
       serviceAccountName: {{ template "hlf-peer.fullname" . }}
       hostAliases:
 {{ toYaml .Values.hostAliases | indent 10 }}
       volumes:
+# range through .Values.volumes
+  {{- if .Values.volumes }}
+{{ toYaml .Values.volumes | nindent 8 }}
+    {{- end }}
         {{- if eq .Values.peer.databaseType "CouchDB" }}
         - name: couchdb
           {{- if and .Values.persistence.couchdb.enabled ( not .Values.couchdb.external.enabled) }}
@@ -239,6 +250,10 @@ spec:
             - configMapRef:
                 name: {{ include "hlf-peer.fullname" . }}--peer
           volumeMounts:
+# range volumeMounts
+  {{- if .Values.volumeMounts }}
+{{ toYaml .Values.peerVolumeMounts | nindent 12 }}
+  {{- end }}
             - name: peerconfig
               mountPath: /var/hyperledger/fabric_cfg
             - mountPath: /var/hyperledger

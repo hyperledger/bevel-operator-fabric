@@ -11,14 +11,17 @@ import (
 )
 
 type createIdentityCmd struct {
-	name         string
-	namespace    string
-	caName       string
-	caNamespace  string
-	ca           string
-	mspID        string
-	enrollId     string
-	enrollSecret string
+	name           string
+	namespace      string
+	caName         string
+	caNamespace    string
+	ca             string
+	mspID          string
+	enrollId       string
+	enrollSecret   string
+	caEnrollId     string
+	caEnrollSecret string
+	caType         string
 }
 
 func (c *createIdentityCmd) validate() error {
@@ -78,6 +81,16 @@ func (c *createIdentityCmd) run() error {
 		Enrollsecret: c.enrollSecret,
 		MSPID:        c.mspID,
 	}
+	if c.caEnrollId != "" && c.caEnrollSecret != "" {
+		fabricIdentitySpec.Register = &v1alpha1.FabricIdentityRegister{
+			Enrollid:       c.caEnrollId,
+			Enrollsecret:   c.caEnrollSecret,
+			Type:           c.caType,
+			Affiliation:    "",
+			MaxEnrollments: -1,
+			Attrs:          []string{},
+		}
+	}
 	fabricIdentity := &v1alpha1.FabricIdentity{
 		ObjectMeta: v1.ObjectMeta{
 			Name:      c.name,
@@ -121,5 +134,8 @@ func newIdentityCreateCMD() *cobra.Command {
 	f.StringVar(&c.mspID, "mspid", "", "MSP ID")
 	f.StringVar(&c.enrollId, "enroll-id", "", "Enroll ID")
 	f.StringVar(&c.enrollSecret, "enroll-secret", "", "Enroll Secret")
+	f.StringVar(&c.caEnrollId, "ca-enroll-id", "", "CA Enroll ID to register the user")
+	f.StringVar(&c.caEnrollSecret, "ca-enroll-secret", "", "CA Enroll Secret to register the user")
+	f.StringVar(&c.caType, "ca-type", "", "Type of the user to be registered in the CA")
 	return cmd
 }

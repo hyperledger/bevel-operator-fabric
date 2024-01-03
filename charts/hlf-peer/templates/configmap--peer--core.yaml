@@ -358,12 +358,9 @@ data:
         # A list of orderer endpoint addresses which should be overridden
         # when found in channel configurations.
         addressOverrides:
-        #  - from:
-        #    to:
-        #    caCertsFile:
-        #  - from:
-        #    to:
-        #    caCertsFile:
+    {{- if $.Values.deliveryClientaddressOverrides }}
+    {{ $.Values.deliveryClientaddressOverrides | toYaml | nindent 10 }}
+    {{- end }}
 
       # Type for the local MSP - by default it's of type bccsp
       localMspType: bccsp

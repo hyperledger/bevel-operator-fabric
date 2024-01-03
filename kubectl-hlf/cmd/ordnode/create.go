@@ -91,11 +91,14 @@ func (c *createCmd) run(args []string) error {
 	gatewayApiName := c.ordererOpts.GatewayApiName
 	gatewayApiNamespace := c.ordererOpts.GatewayApiNamespace
 	gatewayApiPort := c.ordererOpts.GatewayApiPort
-	gatewayApi := &v1alpha1.FabricGatewayApi{
-		Port:             gatewayApiPort,
-		Hosts:            []string{},
-		GatewayName:      gatewayApiName,
-		GatewayNamespace: gatewayApiNamespace,
+	var gatewayApi *v1alpha1.FabricGatewayApi
+	if c.ordererOpts.GatewayApiName != "" {
+		gatewayApi = &v1alpha1.FabricGatewayApi{
+			Port:             gatewayApiPort,
+			Hosts:            []string{},
+			GatewayName:      gatewayApiName,
+			GatewayNamespace: gatewayApiNamespace,
+		}
 	}
 	if len(c.ordererOpts.Hosts) > 0 {
 		istio = &v1alpha1.FabricIstio{
@@ -118,12 +121,7 @@ func (c *createCmd) run(args []string) error {
 		Hosts:          []string{},
 		IngressGateway: ingressGateway,
 	}
-	adminGatewayApi := &v1alpha1.FabricGatewayApi{
-		Port:             gatewayApiPort,
-		Hosts:            []string{},
-		GatewayName:      gatewayApiName,
-		GatewayNamespace: gatewayApiNamespace,
-	}
+	var adminGatewayApi *v1alpha1.FabricGatewayApi
 	if len(c.ordererOpts.AdminHosts) > 0 {
 		adminIstio = &v1alpha1.FabricIstio{
 			Port:           ingressPort,
@@ -296,9 +294,9 @@ func newCreateOrdererNodeCmd(out io.Writer, errOut io.Writer) *cobra.Command {
 	f.StringArrayVarP(&c.ordererOpts.Hosts, "hosts", "", []string{}, "Hosts")
 	f.StringArrayVarP(&c.ordererOpts.GatewayApiHosts, "gateway-api-hosts", "", []string{}, "Hosts for GatewayApi")
 	f.StringArrayVarP(&c.ordererOpts.AdminGatewayApiHosts, "admin-gateway-api-hosts", "", []string{}, "GatewayAPI Hosts for the admin API")
-	f.StringVarP(&c.ordererOpts.GatewayApiName, "gateway-api-name", "", "hlf-gateway", "Gateway-api name")
-	f.StringVarP(&c.ordererOpts.GatewayApiNamespace, "gateway-api-namespace", "", "default", "Namespace of GatewayApi")
-	f.IntVarP(&c.ordererOpts.GatewayApiPort, "gateway-api-port", "", 443, "Gateway API port")
+	f.StringVarP(&c.ordererOpts.GatewayApiName, "gateway-api-name", "", "", "Gateway-api name")
+	f.StringVarP(&c.ordererOpts.GatewayApiNamespace, "gateway-api-namespace", "", "", "Namespace of GatewayApi")
+	f.IntVarP(&c.ordererOpts.GatewayApiPort, "gateway-api-port", "", 0, "Gateway API port")
 	f.StringArrayVarP(&c.ordererOpts.AdminHosts, "admin-hosts", "", []string{}, "Hosts for the admin API(introduced in v2.3)")
 	f.BoolVarP(&c.ordererOpts.Output, "output", "o", false, "Output in yaml")
 	f.StringArrayVarP(&c.ordererOpts.HostAliases, "host-aliases", "", []string{}, "Host aliases (e.g.: \"1.2.3.4:osn2.example.com,peer1.example.com\")")

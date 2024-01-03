@@ -80,6 +80,36 @@ spec:
                 required:
                 - ingressGateway
                 type: object
+              adminTraefik:
+                nullable: true
+                properties:
+                  entryPoints:
+                    items:
+                      type: string
+                    type: array
+                  hosts:
+                    items:
+                      type: string
+                    nullable: true
+                    type: array
+                  middlewares:
+                    items:
+                      properties:
+                        name:
+                          minLength: 1
+                          type: string
+                        namespace:
+                          minLength: 1
+                          type: string
+                      required:
+                      - name
+                      - namespace
+                      type: object
+                    nullable: true
+                    type: array
+                required:
+                - entryPoints
+                type: object
               affinity:
                 description: Affinity is a group of affinity scheduling rules.
                 nullable: true
@@ -1243,6 +1273,16 @@ spec:
                 required:
                 - nodeSelectorTerms
                 type: object
+              podAnnotations:
+                additionalProperties:
+                  type: string
+                nullable: true
+                type: object
+              podLabels:
+                additionalProperties:
+                  type: string
+                nullable: true
+                type: object
               pullPolicy:
                 default: IfNotPresent
                 description: PullPolicy describes a policy for if/when to pull a container
@@ -1296,6 +1336,20 @@ spec:
                             properties:
                               cacert:
                                 type: string
+                              secretRef:
+                                nullable: true
+                                properties:
+                                  key:
+                                    type: string
+                                  name:
+                                    type: string
+                                  namespace:
+                                    type: string
+                                required:
+                                - key
+                                - name
+                                - namespace
+                                type: object
                             required:
                             - cacert
                             type: object
@@ -1345,6 +1399,20 @@ spec:
                             properties:
                               cacert:
                                 type: string
+                              secretRef:
+                                nullable: true
+                                properties:
+                                  key:
+                                    type: string
+                                  name:
+                                    type: string
+                                  namespace:
+                                    type: string
+                                required:
+                                - key
+                                - name
+                                - namespace
+                                type: object
                             required:
                             - cacert
                             type: object
@@ -1492,6 +1560,36 @@ spec:
                   type: object
                 nullable: true
                 type: array
+              traefik:
+                nullable: true
+                properties:
+                  entryPoints:
+                    items:
+                      type: string
+                    type: array
+                  hosts:
+                    items:
+                      type: string
+                    nullable: true
+                    type: array
+                  middlewares:
+                    items:
+                      properties:
+                        name:
+                          minLength: 1
+                          type: string
+                        namespace:
+                          minLength: 1
+                          type: string
+                      required:
+                      - name
+                      - namespace
+                      type: object
+                    nullable: true
+                    type: array
+                required:
+                - entryPoints
+                type: object
               updateCertificateTime:
                 format: date-time
                 nullable: true

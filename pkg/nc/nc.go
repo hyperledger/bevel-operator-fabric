@@ -117,7 +117,7 @@ certificateAuthorities:
 {{if $ca.EnrollID }}
     registrar:
         enrollId: {{ $ca.EnrollID }}
-        enrollSecret: {{ $ca.EnrollSecret }}
+        enrollSecret: "{{ $ca.EnrollSecret }}"
 {{ end }}
     caName: {{ $ca.CAName }}
     tlsCACerts:
@@ -239,69 +239,6 @@ func GenerateNetworkConfig(channel *hlfv1alpha1.FabricMainChannel, kubeClientset
 		}
 		orgs = append(orgs, org)
 	}
-	//for _, certAuth := range certAuths {
-	//	tlsCACertPem := certAuth.Status.TLSCACert
-	//	roots := x509.NewCertPool()
-	//	ok := roots.AppendCertsFromPEM([]byte(tlsCACertPem))
-	//	if !ok {
-	//		panic("failed to parse root certificate")
-	//	}
-	//	for mspID, org := range orgMap {
-	//		for _, peer := range org.Peers {
-	//			block, _ := pem.Decode([]byte(peer.Status.TlsCert))
-	//			if block == nil {
-	//				continue
-	//			}
-	//			cert, err := x509.ParseCertificate(block.Bytes)
-	//			if err != nil {
-	//				continue
-	//			}
-	//			opts := x509.VerifyOptions{
-	//				Roots:         roots,
-	//				Intermediates: x509.NewCertPool(),
-	//			}
-	//
-	//			if _, err := cert.Verify(opts); err == nil {
-	//				orgMap[mspID].CertAuths = append(orgMap[mspID].CertAuths, certAuth)
-	//			}
-	//		}
-	//	}
-	//	for _, ord := range ordererNodes {
-	//		block, _ := pem.Decode([]byte(ord.Status.TlsCert))
-	//		if block == nil {
-	//			continue
-	//		}
-	//		cert, err := x509.ParseCertificate(block.Bytes)
-	//		if err != nil {
-	//			continue
-	//		}
-	//		opts := x509.VerifyOptions{
-	//			Roots:         roots,
-	//			Intermediates: x509.NewCertPool(),
-	//		}
-	//		if _, err := cert.Verify(opts); err == nil {
-	//			_, ok = orgMap[ord.Spec.MspID]
-	//			if !ok {
-	//				orgMap[ord.Spec.MspID] = &Organization{
-	//					Type:         helpers.OrdererType,
-	//					MspID:        "",
-	//					OrdererNodes: []*helpers.ClusterOrdererNode{},
-	//					Peers:        []*helpers.ClusterPeer{},
-	//					CertAuths:    []*helpers.ClusterCA{certAuth},
-	//				}
-	//			} else {
-	//				orgMap[ord.Spec.MspID].CertAuths = append(orgMap[ord.Spec.MspID].CertAuths, certAuth)
-	//			}
-	//		}
-	//	}
-	//
-	//}
-	//for _, ord := range ordererNodes {
-	//	orgMap[ord.Spec.MspID].OrdererNodes = append(orgMap[ord.Spec.MspID].OrdererNodes, ord)
-	//}
-	//for _, peer := range clusterPeers {
-	//	peers = append(peers, peer)
-	//}
 	err = tmpl.Execute(&buf, map[string]interface{}{
 		"Peers":         peers,
 		"Orderers":      ordererNodes,

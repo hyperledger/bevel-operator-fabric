@@ -1,0 +1,31 @@
+{{ if .Values.adminTraefik.hosts }}
+{{- $root := . -}}
+
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRouteTCP
+metadata:
+  name: {{ include "hlf-ordnode.fullname" . }}-admin
+spec:
+  {{ if .Values.adminTraefik.middlewares }}
+  middlewares:
+{{- range .Values.adminTraefik.middlewares }}
+    - name: {{ .name }}
+      namespace: {{ .namespace }}
+{{- end }}
+{{- end }}
+
+  entryPoints:
+  {{ range .Values.adminTraefik.entryPoints }}
+    - {{ . }}
+  {{ end }}
+  routes:
+  {{- range .Values.adminTraefik.hosts }}
+    - match: HostSNI(`{{ . }}`)
+      services:
+        - name: {{ include "hlf-ordnode.fullname" $root }}
+          port: 7053
+  {{ end }}
+  tls:
+    passthrough: true
+
+{{- end }}

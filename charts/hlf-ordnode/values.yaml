@@ -8,13 +8,7 @@ genesis: CiIaIDucvmxr45nIpNz5bdNbGR37tbG28dfCtU2Uz8ixeKBAEuhDCuVDCuJDCnwKXggBEAE
 bootstrapMethod: "none"
 channelParticipationEnabled: false
 
-resources:
-  limits:
-    cpu: 100m
-    memory: 128Mi
-  requests:
-    cpu: 100m
-    memory: 128Mi
+resources: {}
 
 proxy:
   enabled: false

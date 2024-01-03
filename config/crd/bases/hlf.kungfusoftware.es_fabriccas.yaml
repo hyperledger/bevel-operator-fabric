@@ -910,6 +910,13 @@ spec:
                         type: string
                       key:
                         type: string
+                      secret:
+                        nullable: true
+                        properties:
+                          name:
+                            nullable: true
+                            type: string
+                        type: object
                     required:
                     - cert
                     - chain
@@ -1181,32 +1188,6 @@ spec:
                     - OU
                     - ST
                     - cn
-                    type: object
-                  tlsCa:
-                    nullable: true
-                    properties:
-                      cert:
-                        type: string
-                      clientAuth:
-                        properties:
-                          cert_file:
-                            items:
-                              type: string
-                            type: array
-                          type:
-                            description: NoClientCert, RequestClientCert, RequireAnyClientCert,
-                              VerifyClientCertIfGiven and RequireAndVerifyClientCert.
-                            type: string
-                        required:
-                        - cert_file
-                        - type
-                        type: object
-                      key:
-                        type: string
-                    required:
-                    - cert
-                    - clientAuth
-                    - key
                     type: object
                 required:
                 - bccsp
@@ -1520,6 +1501,16 @@ spec:
                 required:
                 - nodeSelectorTerms
                 type: object
+              podAnnotations:
+                additionalProperties:
+                  type: string
+                nullable: true
+                type: object
+              podLabels:
+                additionalProperties:
+                  type: string
+                nullable: true
+                type: object
               resources:
                 description: ResourceRequirements describes the compute resource requirements.
                 properties:
@@ -1675,6 +1666,13 @@ spec:
                         type: string
                       key:
                         type: string
+                      secret:
+                        nullable: true
+                        properties:
+                          name:
+                            nullable: true
+                            type: string
+                        type: object
                     required:
                     - cert
                     - chain
@@ -1947,32 +1945,6 @@ spec:
                     - ST
                     - cn
                     type: object
-                  tlsCa:
-                    nullable: true
-                    properties:
-                      cert:
-                        type: string
-                      clientAuth:
-                        properties:
-                          cert_file:
-                            items:
-                              type: string
-                            type: array
-                          type:
-                            description: NoClientCert, RequestClientCert, RequireAnyClientCert,
-                              VerifyClientCertIfGiven and RequireAndVerifyClientCert.
-                            type: string
-                        required:
-                        - cert_file
-                        - type
-                        type: object
-                      key:
-                        type: string
-                    required:
-                    - cert
-                    - clientAuth
-                    - key
-                    type: object
                 required:
                 - bccsp
                 - cfg
@@ -2023,6 +1995,36 @@ spec:
                   type: object
                 nullable: true
                 type: array
+              traefik:
+                nullable: true
+                properties:
+                  entryPoints:
+                    items:
+                      type: string
+                    type: array
+                  hosts:
+                    items:
+                      type: string
+                    nullable: true
+                    type: array
+                  middlewares:
+                    items:
+                      properties:
+                        name:
+                          minLength: 1
+                          type: string
+                        namespace:
+                          minLength: 1
+                          type: string
+                      required:
+                      - name
+                      - namespace
+                      type: object
+                    nullable: true
+                    type: array
+                required:
+                - entryPoints
+                type: object
               version:
                 minLength: 1
                 type: string

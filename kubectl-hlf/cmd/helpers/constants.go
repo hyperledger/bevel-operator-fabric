@@ -8,10 +8,10 @@ const (
 	DefaultStorageclass = ""
 
 	DefaultCAImage   = "hyperledger/fabric-ca"
-	DefaultCAVersion = "1.4.9"
+	DefaultCAVersion = "1.5.7"
 
 	DefaultPeerImage   = "hyperledger/fabric-peer"
-	DefaultPeerVersion = "2.4.9"
+	DefaultPeerVersion = "2.5.5"
 
 	DefaultOperationsConsoleImage   = "ghcr.io/hyperledger-labs/fabric-console"
 	DefaultOperationsConsoleVersion = "latest"
@@ -29,5 +29,5 @@ const (
 	DefaultCouchDBVersion = "3.1.1"
 
 	DefaultOrdererImage   = "hyperledger/fabric-orderer"
-	DefaultOrdererVersion = "amd64-2.4.9"
+	DefaultOrdererVersion = "2.5.5"
 )

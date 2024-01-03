@@ -22,7 +22,6 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/amplitude/analytics-go/amplitude"
 	"github.com/kfsoftware/hlf-operator/controllers/chaincode"
 	"github.com/kfsoftware/hlf-operator/controllers/console"
 	"github.com/kfsoftware/hlf-operator/controllers/followerchannel"
@@ -75,6 +74,10 @@ func main() {
 	var autoRenewOrdererCertificatesDelta time.Duration
 	var autoRenewPeerCertificatesDelta time.Duration
 	var autoRenewIdentityCertificatesDelta time.Duration
+	var helmChartWait bool
+	var helmChartTimeout time.Duration
+	var maxHistory int
+	var maxReconciles int
 	flag.StringVar(&metricsAddr, "metrics-addr", ":8090", "The address the metric endpoint binds to.")
 	flag.DurationVar(&autoRenewOrdererCertificatesDelta, "auto-renew-orderer-certificates-delta", 15*24*time.Hour, "The delta to renew orderer certificates before expiration. Default is 15 days.")
 	flag.DurationVar(&autoRenewPeerCertificatesDelta, "auto-renew-peer-certificates-delta", 15*24*time.Hour, "The delta to renew peer certificates before expiration. Default is 15 days.")
@@ -82,11 +85,14 @@ func main() {
 	flag.BoolVar(&autoRenewCertificatesPeerEnabled, "auto-renew-peer-certificates", false, "Enable auto renew certificates for orderer and peer nodes. Default is false.")
 	flag.BoolVar(&autoRenewCertificatesOrdererEnabled, "auto-renew-orderer-certificates", false, "Enable auto renew certificates for orderer and peer nodes. Default is false.")
 	flag.BoolVar(&autoRenewCertificatesIdentityEnabled, "auto-renew-identity-certificates", true, "Enable auto renew certificates for FabricIdentity. Default is true.")
+	flag.IntVar(&maxReconciles, "max-reconciles", 10, "Max reconciles for a resource. Default is 10.")
+	flag.BoolVar(&helmChartWait, "helm-chart-wait", false, "Wait for helm chart to be deployed. Default is false.")
+	flag.IntVar(&maxHistory, "helm-max-history", 10, "Max history for helm chart. Default is 10.")
+	flag.DurationVar(&helmChartTimeout, "helm-chart-timeout", 5*time.Minute, "Timeout for helm chart to be deployed. Default is 5 minutes.")
 	flag.BoolVar(&enableLeaderElection, "enable-leader-election", false,
 		"Enable leader election for controller manager. "+
 			"Enabling this will ensure there is only one active controller manager.")
 	flag.Parse()
-
 	log.Infof("Auto renew peer certificates enabled: %t", autoRenewCertificatesPeerEnabled)
 	log.Infof("Auto renew orderer certificates enabled: %t", autoRenewCertificatesOrdererEnabled)
 	log.Infof("Auto renew peer certificates delta: %s", autoRenewPeerCertificatesDelta)
@@ -94,15 +100,6 @@ func main() {
 	// Pass a Config struct
 	// to initialize a Client struct
 	// which implements Client interface
-	analytics := amplitude.NewClient(
-		amplitude.NewConfig("569cfca546698061cf130f97745afca6"),
-	)
-	// Track events in your application
-	analytics.Track(amplitude.Event{
-		UserID:          "user-id",
-		EventType:       "Start operator",
-		EventProperties: map[string]interface{}{"source": "notification"},
-	})
 
 	ctrl.SetLogger(zap.New(zap.UseDevMode(true)))
 	kubeContext, exists := os.LookupEnv("KUBECONTEXT")
@@ -136,13 +133,16 @@ func main() {
 	}
 	if err = (&peer.FabricPeerReconciler{
 		Client:                     mgr.GetClient(),
+		ChartPath:                  peerChartPath,
 		Log:                        ctrl.Log.WithName("controllers").WithName("FabricPeer"),
 		Scheme:                     mgr.GetScheme(),
 		Config:                     mgr.GetConfig(),
-		ChartPath:                  peerChartPath,
 		AutoRenewCertificates:      autoRenewCertificatesPeerEnabled,
 		AutoRenewCertificatesDelta: autoRenewPeerCertificatesDelta,
-	}).SetupWithManager(mgr); err != nil {
+		Wait:                       helmChartWait,
+		Timeout:                    helmChartTimeout,
+		MaxHistory:                 maxHistory,
+	}).SetupWithManager(mgr, maxReconciles); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "FabricPeer")
 		os.Exit(1)
 	}
@@ -157,13 +157,16 @@ func main() {
 		os.Exit(1)
 	}
 	if err = (&ca.FabricCAReconciler{
-		Client:    mgr.GetClient(),
-		Log:       ctrl.Log.WithName("controllers").WithName("FabricCA"),
-		Scheme:    mgr.GetScheme(),
-		Config:    mgr.GetConfig(),
-		ClientSet: clientSet,
-		ChartPath: caChartPath,
-	}).SetupWithManager(mgr); err != nil {
+		Client:     mgr.GetClient(),
+		Log:        ctrl.Log.WithName("controllers").WithName("FabricCA"),
+		Scheme:     mgr.GetScheme(),
+		Config:     mgr.GetConfig(),
+		ClientSet:  clientSet,
+		ChartPath:  caChartPath,
+		Wait:       helmChartWait,
+		Timeout:    helmChartTimeout,
+		MaxHistory: maxHistory,
+	}).SetupWithManager(mgr, maxReconciles); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "FabricCA")
 		os.Exit(1)
 	}
@@ -196,7 +199,10 @@ func main() {
 		ChartPath:                  ordNodeChartPath,
 		AutoRenewCertificates:      autoRenewCertificatesOrdererEnabled,
 		AutoRenewCertificatesDelta: autoRenewOrdererCertificatesDelta,
-	}).SetupWithManager(mgr); err != nil {
+		Wait:                       helmChartWait,
+		Timeout:                    helmChartTimeout,
+		MaxHistory:                 maxHistory,
+	}).SetupWithManager(mgr, maxReconciles); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "FabricOrdererNode")
 		os.Exit(1)
 	}

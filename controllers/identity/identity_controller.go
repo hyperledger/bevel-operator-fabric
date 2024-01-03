@@ -22,6 +22,7 @@ import (
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -52,7 +53,25 @@ func (r *FabricIdentityReconciler) finalizeMainChannel(reqLogger logr.Logger, m 
 
 	return nil
 }
-
+func getCertBytesFromCATLS(client *kubernetes.Clientset, caTls hlfv1alpha1.Catls) ([]byte, error) {
+	var signCertBytes []byte
+	var err error
+	if caTls.Cacert != "" {
+		signCertBytes, err = base64.StdEncoding.DecodeString(caTls.Cacert)
+		if err != nil {
+			return nil, err
+		}
+	} else if caTls.SecretRef != nil {
+		secret, err := client.CoreV1().Secrets(caTls.SecretRef.Namespace).Get(context.Background(), caTls.SecretRef.Name, v1.GetOptions{})
+		if err != nil {
+			return nil, err
+		}
+		signCertBytes = secret.Data[caTls.SecretRef.Key]
+	} else {
+		return nil, errors.New("invalid ca tls")
+	}
+	return signCertBytes, nil
+}
 func (r *FabricIdentityReconciler) addFinalizer(reqLogger logr.Logger, m *hlfv1alpha1.FabricIdentity) error {
 	reqLogger.Info("Adding Finalizer for the MainChannel")
 	controllerutil.AddFinalizer(m, identityFinalizer)
@@ -71,6 +90,7 @@ func (r *FabricIdentityReconciler) addFinalizer(reqLogger logr.Logger, m *hlfv1a
 // +kubebuilder:rbac:groups=hlf.kungfusoftware.es,resources=fabricidentities/finalizers,verbs=get;update;patch
 func (r *FabricIdentityReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	reqLogger := r.Log.WithValues("hlf", req.NamespacedName)
+	reqLogger.Info("Reconciling FabricIdentity")
 	fabricIdentity := &hlfv1alpha1.FabricIdentity{}
 
 	err := r.Get(ctx, req.NamespacedName, fabricIdentity)
@@ -107,7 +127,7 @@ func (r *FabricIdentityReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 		r.setConditionStatus(ctx, fabricIdentity, hlfv1alpha1.FailedStatus, false, err, false)
 		return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricIdentity)
 	}
-	tlsCert, err := base64.StdEncoding.DecodeString(fabricIdentity.Spec.Catls.Cacert)
+	tlsCert, err := getCertBytesFromCATLS(clientSet, fabricIdentity.Spec.Catls)
 	if err != nil {
 		r.setConditionStatus(ctx, fabricIdentity, hlfv1alpha1.FailedStatus, false, err, false)
 		return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricIdentity)
@@ -126,6 +146,29 @@ func (r *FabricIdentityReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 	var x509Cert *x509.Certificate
 	var pk *ecdsa.PrivateKey
 	var rootCert *x509.Certificate
+	if fabricIdentity.Spec.Register != nil {
+		log.Infof("Registering user %s", fabricIdentity.Spec.Enrollid)
+		_, err = certs.RegisterUser(certs.RegisterUserRequest{
+			TLSCert:      string(tlsCert),
+			URL:          fmt.Sprintf("https://%s:%d", fabricIdentity.Spec.Cahost, fabricIdentity.Spec.Caport),
+			Name:         fabricIdentity.Spec.Caname,
+			MSPID:        fabricIdentity.Spec.MSPID,
+			EnrollID:     fabricIdentity.Spec.Register.Enrollid,
+			EnrollSecret: fabricIdentity.Spec.Register.Enrollsecret,
+			User:         fabricIdentity.Spec.Enrollid,
+			Secret:       fabricIdentity.Spec.Enrollsecret,
+			Type:         fabricIdentity.Spec.Register.Type,
+			Attributes:   []api.Attribute{},
+		})
+		if err != nil {
+			if !strings.Contains(err.Error(), "already registered") {
+				log.Errorf("Error registering user: %v", err)
+				r.setConditionStatus(ctx, fabricIdentity, hlfv1alpha1.FailedStatus, false, err, false)
+				return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricIdentity)
+			}
+		}
+	}
+
 	if secretExists {
 		// get crypto material from secret
 		certPemBytes := secret.Data["cert.pem"]
@@ -251,7 +294,7 @@ func (r *FabricIdentityReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 	fabricIdentity.Status.Status = hlfv1alpha1.RunningStatus
 	fabricIdentity.Status.Message = "Identity Setup"
 	fabricIdentity.Status.Conditions.SetCondition(status.Condition{
-		Type:               "CREATED",
+		Type:               status.ConditionType(fabricIdentity.Status.Status),
 		Status:             "True",
 		LastTransitionTime: v1.Time{},
 	})
@@ -260,7 +303,7 @@ func (r *FabricIdentityReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 		return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricIdentity)
 	}
 	return ctrl.Result{
-		RequeueAfter: 60 * time.Second,
+		RequeueAfter: 10 * 60 * time.Second,
 	}, nil
 }
 

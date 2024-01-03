@@ -66,7 +66,7 @@ type CA struct {
 	Password string `json:"password"`
 }
 
-// +kubebuilder:validation:Enum=couchdb;leveldb
+// +kubebuilder:validation:Enum=couchdb;leveldb;pg
 type StateDB string
 
 // Use LevelDB database
@@ -74,6 +74,9 @@ const StateDBLevelDB StateDB = "leveldb"
 
 // Use CouchDB database
 const StateDBCouchDB StateDB = "couchdb"
+
+// Use Postgres database
+const StateDBPostgres StateDB = "pg"
 
 type ExternalBuilder struct {
 	Name string `json:"name"`
@@ -131,9 +134,42 @@ type GRPCProxy struct {
 	// +nullable
 	ImagePullSecrets []corev1.LocalObjectReference `json:"imagePullSecrets"`
 }
+type AddressOverride struct {
+	From        string `json:"from"`
+	To          string `json:"to"`
+	CACertsFile string `json:"caCertsFile"`
+}
 
 // FabricPeerSpec defines the desired state of FabricPeer
 type FabricPeerSpec struct {
+	// +nullable
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default:={}
+	PodAnnotations map[string]string `json:"podAnnotations"`
+	// +nullable
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default:={}
+	PodLabels map[string]string `json:"podLabels"`
+
+	// +nullable
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default:={}
+	DeliveryClientaddressOverrides []AddressOverride `json:"deliveryClientaddressOverrides"`
+	// +optional
+	// +nullable
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default:={}
+	Volumes []corev1.Volume `json:"volumes"`
+
+	// +optional
+	// +nullable
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default:={}
+	PeerVolumeMounts []corev1.VolumeMount `json:"peerVolumeMounts"`
+
 	// +optional
 	// +nullable
 	UpdateCertificateTime *metav1.Time `json:"updateCertificateTime"`
@@ -177,6 +213,11 @@ type FabricPeerSpec struct {
 	// +kubebuilder:validation:Optional
 	// +nullable
 	GatewayApi *FabricGatewayApi `json:"gatewayApi"`
+
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +nullable
+	Traefik *FabricTraefik `json:"traefik"`
 	// +optional
 	// +kubebuilder:validation:Optional
 	// +nullable
@@ -293,6 +334,25 @@ type FabricIstio struct {
 	// +kubebuilder:validation:Default=ingressgateway
 	IngressGateway string `json:"ingressGateway"`
 }
+type FabricTraefikMiddleware struct {
+	// +kubebuilder:validation:MinLength=1
+	Name string `json:"name"`
+	// +kubebuilder:validation:MinLength=1
+	Namespace string `json:"namespace"`
+}
+type FabricTraefik struct {
+	Entrypoints []string `json:"entryPoints"`
+	// +nullable
+	// +kubebuilder:validation:Optional
+	// +optional
+	// +kubebuilder:validation:Default={}
+	Middlewares []FabricTraefikMiddleware `json:"middlewares,omitempty"`
+	// +nullable
+	// +kubebuilder:validation:Optional
+	// +optional
+	// +kubebuilder:validation:Default={}
+	Hosts []string `json:"hosts,omitempty"`
+}
 
 type FabricGatewayApi struct {
 	// +optional
@@ -318,6 +378,10 @@ type FabricPeerSpecGossip struct {
 }
 type Catls struct {
 	Cacert string `json:"cacert"`
+	// +optional
+	// +nullable
+	// +kubebuilder:validation:Optional
+	SecretRef *SecretRefNSKey `json:"secretRef"`
 }
 type Component struct {
 	// +kubebuilder:validation:MinLength=1
@@ -469,6 +533,17 @@ const (
 
 // FabricOrdererNodeSpec defines the desired state of FabricOrdererNode
 type FabricOrdererNodeSpec struct {
+	// +nullable
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default:={}
+	PodAnnotations map[string]string `json:"podAnnotations"`
+	// +nullable
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default:={}
+	PodLabels map[string]string `json:"podLabels"`
+
 	// +optional
 	// +kubebuilder:validation:Optional
 	// +nullable
@@ -534,6 +609,12 @@ type FabricOrdererNodeSpec struct {
 	// +kubebuilder:validation:Optional
 	// +nullable
 	Istio *FabricIstio `json:"istio"`
+
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +nullable
+	Traefik *FabricTraefik `json:"traefik"`
+
 	// +optional
 	// +kubebuilder:validation:Optional
 	// +nullable
@@ -542,6 +623,11 @@ type FabricOrdererNodeSpec struct {
 	// +kubebuilder:validation:Optional
 	// +nullable
 	AdminIstio *FabricIstio `json:"adminIstio"`
+
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +nullable
+	AdminTraefik *FabricTraefik `json:"adminTraefik"`
 
 	// +nullable
 	// +kubebuilder:validation:Optional
@@ -627,6 +713,17 @@ type FabricCADatabase struct {
 // FabricCASpec defines the desired state of FabricCA
 type FabricCASpec struct {
 	// +nullable
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default:={}
+	PodAnnotations map[string]string `json:"podAnnotations"`
+	// +nullable
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default:={}
+	PodLabels map[string]string `json:"podLabels"`
+
+	// +nullable
 	// +kubebuilder:validation:Optional
 	// +optional
 	Affinity *corev1.Affinity `json:"affinity"`
@@ -657,7 +754,11 @@ type FabricCASpec struct {
 	// +optional
 	// +kubebuilder:validation:Optional
 	// +nullable
-	Istio    *FabricIstio     `json:"istio"`
+	Istio *FabricIstio `json:"istio"`
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +nullable
+	Traefik  *FabricTraefik   `json:"traefik"`
 	Database FabricCADatabase `json:"db"`
 	// +kubebuilder:validation:MinItems=1
 	// Hosts for the Fabric CA
@@ -796,10 +897,6 @@ type FabricCAItemConf struct {
 	// +kubebuilder:validation:Optional
 	// +nullable
 	CA *FabricCACrypto `json:"ca"`
-	// +optional
-	// +kubebuilder:validation:Optional
-	// +nullable
-	TlsCA *FabricTLSCACrypto `json:"tlsCa"`
 }
 type FabricTLSCACrypto struct {
 	Key        string             `json:"key"`
@@ -811,10 +908,25 @@ type FabricCAClientAuth struct {
 	Type     string   `json:"type"`
 	CertFile []string `json:"cert_file"`
 }
+type SecretRef struct {
+	// +optional
+	// +nullable
+	// +kubebuilder:validation:Optional
+	Name string `json:"name"`
+}
+type SecretRefNSKey struct {
+	Name      string `json:"name"`
+	Namespace string `json:"namespace"`
+	Key       string `json:"key"`
+}
 type FabricCACrypto struct {
-	Key   string `json:"key"`
-	Cert  string `json:"cert"`
-	Chain string `json:"chain"`
+	Key string `json:"key"`
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +nullable
+	SecretRef *SecretRef `json:"secret"`
+	Cert      string     `json:"cert"`
+	Chain     string     `json:"chain"`
 }
 type FabricCASubject struct {
 	// +kubebuilder:default:="ca"
@@ -1425,6 +1537,9 @@ type FabricOperatorAPISpec struct {
 	// +kubebuilder:validation:Default=1
 	Replicas int `json:"replicas"`
 
+	// +nullable
+	// +optional
+	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Default={}
 	PodLabels map[string]string `json:"podLabels"`
 	// +optional
@@ -1480,9 +1595,32 @@ type FabricNetworkConfigSpec struct {
 	// HLF Identities to be included in the network config
 	Identities []FabricNetworkConfigIdentity `json:"identities"`
 
+	// +nullable
+	// +kubebuilder:validation:Optional
+	// +optional
+	// +kubebuilder:validation:Default={}
+	ExternalOrderers []FabricNetworkConfigExternalOrderer `json:"externalOrderers"`
+
+	// +nullable
+	// +kubebuilder:validation:Optional
+	// +optional
+	// +kubebuilder:validation:Default={}
+	ExternalPeers []FabricNetworkConfigExternalPeer `json:"externalPeers"`
+
 	SecretName string `json:"secretName"`
 }
-
+type FabricNetworkConfigExternalPeer struct {
+	Name      string `json:"name"`
+	URL       string `json:"url"`
+	TLSCACert string `json:"tlsCACert"`
+	MSPID     string `json:"mspID"`
+}
+type FabricNetworkConfigExternalOrderer struct {
+	Name      string `json:"name"`
+	URL       string `json:"url"`
+	TLSCACert string `json:"tlsCACert"`
+	MSPID     string `json:"mspID"`
+}
 type FabricNetworkConfigIdentity struct {
 	Name      string `json:"name"`
 	Namespace string `json:"namespace"`
@@ -1526,6 +1664,29 @@ type FabricNetworkConfigList struct {
 
 // FabricChaincodeSpec defines the desired state of FabricChaincode
 type FabricChaincodeSpec struct {
+	// +nullable
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default:={}
+	Annotations map[string]string `json:"annotations"`
+	// +nullable
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default:={}
+	Labels map[string]string `json:"labels"`
+
+	// +nullable
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default:={}
+	PodAnnotations map[string]string `json:"podAnnotations"`
+
+	// +nullable
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default:={}
+	PodLabels map[string]string `json:"podLabels"`
+
 	Image string `json:"image"`
 	// +kubebuilder:default:="IfNotPresent"
 	ImagePullPolicy corev1.PullPolicy `json:"imagePullPolicy"`
@@ -1682,7 +1843,7 @@ type FabricIdentityRegister struct {
 	Enrollsecret string `json:"enrollsecret"`
 	// +kubebuilder:validation:MinLength=1
 	Type string `json:"type"`
-	// +kubebuilder:validation:MinLength=1
+
 	Affiliation string `json:"affiliation"`
 
 	MaxEnrollments int `json:"maxenrollments"`

@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"encoding/pem"
 	"fmt"
+	"helm.sh/helm/v3/pkg/release"
 	"os"
 	"reflect"
 	"strings"
@@ -58,6 +59,9 @@ type FabricPeerReconciler struct {
 	Config                     *rest.Config
 	AutoRenewCertificates      bool
 	AutoRenewCertificatesDelta time.Duration
+	Wait                       bool
+	Timeout                    time.Duration
+	MaxHistory                 int
 }
 
 func (r *FabricPeerReconciler) addFinalizer(reqLogger logr.Logger, m *hlfv1alpha1.FabricPeer) error {
@@ -356,14 +360,23 @@ func (r *FabricPeerReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 
 	cmdStatus := action.NewStatus(cfg)
 	exists := true
-	_, err = cmdStatus.Run(releaseName)
+	helmStatus, err := cmdStatus.Run(releaseName)
 	if err != nil {
 		if errors.Is(err, driver.ErrReleaseNotFound) {
+			// it doesn't exists
 			exists = false
 		} else {
-			// it doesnt exist
-			r.setConditionStatus(ctx, fabricPeer, hlfv1alpha1.FailedStatus, false, err, false)
-			return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricPeer)
+			// it doesn't exist
+			return ctrl.Result{}, err
+		}
+	}
+	if exists && helmStatus.Info.Status == release.StatusPendingUpgrade {
+		rollbackStatus := action.NewRollback(cfg)
+		rollbackStatus.Version = helmStatus.Version - 1
+		err = rollbackStatus.Run(releaseName)
+		if err != nil {
+			// it doesn't exist
+			return ctrl.Result{}, err
 		}
 	}
 	log.Debugf("Release %s exists=%v", releaseName, exists)
@@ -497,6 +510,8 @@ func (r *FabricPeerReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 		}
 	} else {
 		cmd := action.NewInstall(cfg)
+		cmd.Wait = r.Wait
+		cmd.Timeout = r.Timeout
 		name, chart, err := cmd.NameAndChart([]string{releaseName, r.ChartPath})
 		if err != nil {
 			r.setConditionStatus(ctx, fabricPeer, hlfv1alpha1.FailedStatus, false, err, false)
@@ -539,6 +554,11 @@ func (r *FabricPeerReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 			return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricPeer)
 		}
 		log.Infof("Chart installed %s", release.Name)
+		err = r.Get(ctx, req.NamespacedName, fabricPeer)
+		if err != nil {
+			r.setConditionStatus(ctx, fabricPeer, hlfv1alpha1.FailedStatus, false, err, false)
+			return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricPeer)
+		}
 		fabricPeer.Status.Status = hlfv1alpha1.PendingStatus
 		fabricPeer.Status.Conditions.SetCondition(status.Condition{
 			Type:               "DEPLOYED",
@@ -604,7 +624,6 @@ func (r *FabricPeerReconciler) upgradeChart(
 		return err
 	}
 	cmd := action.NewUpgrade(cfg)
-	cmd.MaxHistory = 5
 	err = os.Setenv("HELM_NAMESPACE", ns)
 	if err != nil {
 		return err
@@ -615,8 +634,9 @@ func (r *FabricPeerReconciler) upgradeChart(
 	if err != nil {
 		return err
 	}
-	cmd.Wait = true
-	cmd.Timeout = time.Minute * 5
+	cmd.Wait = r.Wait
+	cmd.MaxHistory = r.MaxHistory
+	cmd.Timeout = r.Timeout
 	log.Infof("Upgrading chart %s", inrec)
 	release, err := cmd.Run(releaseName, ch, inInterface)
 	if err != nil {
@@ -887,6 +907,26 @@ func ReenrollTLSCryptoMaterial(
 	return tlsCert, tlsKey, tlsRootCert, nil
 }
 
+func getCertBytesFromCATLS(client *kubernetes.Clientset, caTls hlfv1alpha1.Catls) ([]byte, error) {
+	var signCertBytes []byte
+	var err error
+	if caTls.Cacert != "" {
+		signCertBytes, err = base64.StdEncoding.DecodeString(caTls.Cacert)
+		if err != nil {
+			return nil, err
+		}
+	} else if caTls.SecretRef != nil {
+		secret, err := client.CoreV1().Secrets(caTls.SecretRef.Namespace).Get(context.Background(), caTls.SecretRef.Name, v1.GetOptions{})
+		if err != nil {
+			return nil, err
+		}
+		signCertBytes = secret.Data[caTls.SecretRef.Key]
+	} else {
+		return nil, errors.New("invalid ca tls")
+	}
+	return signCertBytes, nil
+}
+
 func GetConfig(
 	conf *hlfv1alpha1.FabricPeer,
 	client *kubernetes.Clientset,
@@ -924,7 +964,7 @@ func GetConfig(
 			return nil, errors.Wrapf(err, "failed to parse tls private key")
 		}
 	} else if refreshCerts {
-		cacert, err := base64.StdEncoding.DecodeString(tlsParams.Catls.Cacert)
+		cacert, err := getCertBytesFromCATLS(client, tlsParams.Catls)
 		if err != nil {
 			return nil, errors.Wrapf(err, "failed to decode tls ca cert")
 		}
@@ -967,7 +1007,7 @@ func GetConfig(
 	} else {
 		tlsCert, tlsKey, tlsRootCert, err = getExistingTLSCrypto(client, chartName, namespace)
 		if err != nil {
-			cacert, err := base64.StdEncoding.DecodeString(tlsParams.Catls.Cacert)
+			cacert, err := getCertBytesFromCATLS(client, tlsParams.Catls)
 			if err != nil {
 				return nil, err
 			}
@@ -986,7 +1026,7 @@ func GetConfig(
 		}
 	}
 	if refreshCerts {
-		cacert, err := base64.StdEncoding.DecodeString(tlsParams.Catls.Cacert)
+		cacert, err := getCertBytesFromCATLS(client, tlsParams.Catls)
 		if err != nil {
 			return nil, err
 		}
@@ -1005,7 +1045,7 @@ func GetConfig(
 	} else {
 		tlsOpsCert, tlsOpsKey, _, err = getExistingTLSOPSCrypto(client, chartName, namespace)
 		if err != nil {
-			cacert, err := base64.StdEncoding.DecodeString(tlsParams.Catls.Cacert)
+			cacert, err := getCertBytesFromCATLS(client, tlsParams.Catls)
 			if err != nil {
 				return nil, err
 			}
@@ -1043,7 +1083,7 @@ func GetConfig(
 			return nil, errors.Wrapf(err, "failed to parse sign private key")
 		}
 	} else if refreshCerts {
-		cacert, err := base64.StdEncoding.DecodeString(signParams.Catls.Cacert)
+		cacert, err := getCertBytesFromCATLS(client, signParams.Catls)
 		if err != nil {
 			return nil, errors.Wrapf(err, "failed to decode sign ca cert")
 		}
@@ -1086,7 +1126,7 @@ func GetConfig(
 	} else {
 		signCert, signKey, signRootCert, err = getExistingSignCrypto(client, chartName, namespace)
 		if err != nil {
-			cacert, err := base64.StdEncoding.DecodeString(signParams.Catls.Cacert)
+			cacert, err := getCertBytesFromCATLS(client, signParams.Catls)
 			if err != nil {
 				return nil, err
 			}
@@ -1196,6 +1236,8 @@ func GetConfig(
 		stateDb = "CouchDB"
 	case hlfv1alpha1.StateDBLevelDB:
 		stateDb = "goleveldb"
+	case hlfv1alpha1.StateDBPostgres:
+		stateDb = "pg"
 	default:
 		stateDb = "goleveldb"
 	}
@@ -1231,6 +1273,23 @@ func GetConfig(
 			Port:           0,
 			Hosts:          []string{},
 			IngressGateway: "",
+		}
+	}
+	traefik := Traefik{}
+	if spec.Traefik != nil {
+		var middlewares []TraefikMiddleware
+		if spec.Traefik.Middlewares != nil {
+			for _, middleware := range spec.Traefik.Middlewares {
+				middlewares = append(middlewares, TraefikMiddleware{
+					Name:      middleware.Name,
+					Namespace: middleware.Namespace,
+				})
+			}
+		}
+		traefik = Traefik{
+			Entrypoints: spec.Traefik.Entrypoints,
+			Middlewares: middlewares,
+			Hosts:       spec.Traefik.Hosts,
 		}
 	}
 	var gatewayApi GatewayApi
@@ -1341,11 +1400,17 @@ func GetConfig(
 		Proxy:           spec.Resources.Proxy,
 	}
 	var c = FabricPeerChart{
-		EnvVars:          spec.Env,
-		Replicas:         spec.Replicas,
-		ImagePullSecrets: spec.ImagePullSecrets,
-		GatewayApi:       gatewayApi,
-		Istio:            istio,
+		DeliveryClientaddressOverrides: spec.DeliveryClientaddressOverrides,
+		Volumes:                        spec.Volumes,
+		PeerVolumeMounts:               spec.PeerVolumeMounts,
+		PodLabels:                      spec.PodLabels,
+		PodAnnotations:                 spec.PodAnnotations,
+		EnvVars:                        spec.Env,
+		Replicas:                       spec.Replicas,
+		ImagePullSecrets:               spec.ImagePullSecrets,
+		GatewayApi:                     gatewayApi,
+		Istio:                          istio,
+		Traefik:                        traefik,
 		Image: Image{
 			Repository: spec.Image,
 			Tag:        spec.Tag,
@@ -1438,12 +1503,12 @@ func GetConfig(
 	return &c, nil
 }
 
-func (r *FabricPeerReconciler) SetupWithManager(mgr ctrl.Manager) error {
+func (r *FabricPeerReconciler) SetupWithManager(mgr ctrl.Manager, maxConcurrentReconciles int) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&hlfv1alpha1.FabricPeer{}).
 		Owns(&appsv1.Deployment{}).
 		WithOptions(controller.Options{
-			MaxConcurrentReconciles: 1,
+			MaxConcurrentReconciles: maxConcurrentReconciles,
 		}).
 		Complete(r)
 }
@@ -1476,6 +1541,8 @@ func (r *FabricPeerReconciler) finalizePeer(reqLogger logr.Logger, peer *hlfv1al
 	releaseName := peer.Name
 	reqLogger.Info("Successfully finalized peer")
 	cmd := action.NewUninstall(cfg)
+	cmd.Wait = r.Wait
+	cmd.Timeout = r.Timeout
 	resp, err := cmd.Run(releaseName)
 	if err != nil {
 		if strings.Compare("Release not loaded", err.Error()) != 0 {
@@ -1533,61 +1600,66 @@ func createPeerService(
 			return nil, err
 		}
 	}
-	if exists {
-		return svc, nil
-	}
 	labels := map[string]string{
 		"app":     chartName,
 		"release": releaseName,
 	}
+	serviceSpec := corev1.ServiceSpec{
+		Type: peer.Spec.Service.Type,
+		Ports: []corev1.ServicePort{
+			{
+				Name:     PeerPortName,
+				Protocol: "TCP",
+				Port:     7051,
+				TargetPort: intstr.IntOrString{
+					Type:   intstr.Int,
+					IntVal: 7051,
+				},
+			},
+			{
+				Name:     ChaincodePortName,
+				Protocol: "TCP",
+				Port:     7052,
+				TargetPort: intstr.IntOrString{
+					Type:   intstr.Int,
+					IntVal: 7052,
+				},
+			},
+			{
+				Name:     EventPortName,
+				Protocol: "TCP",
+				Port:     7053,
+				TargetPort: intstr.IntOrString{
+					Type:   intstr.Int,
+					IntVal: 7053,
+				},
+			},
+			{
+				Name:     OperationsPortName,
+				Protocol: "TCP",
+				Port:     9443,
+				TargetPort: intstr.IntOrString{
+					Type:   intstr.Int,
+					IntVal: 9443,
+				},
+			},
+		},
+		Selector: labels,
+	}
+
+	if exists {
+		// update the service
+		svc.Spec = serviceSpec
+		return clientSet.CoreV1().Services(ns).Update(ctx, svc, v1.UpdateOptions{})
+	}
+
 	svc = &apiv1.Service{
 		ObjectMeta: v1.ObjectMeta{
 			Name:      svcName,
 			Namespace: ns,
 			Labels:    labels,
 		},
-		Spec: corev1.ServiceSpec{
-			Type: peer.Spec.Service.Type,
-			Ports: []corev1.ServicePort{
-				{
-					Name:     PeerPortName,
-					Protocol: "TCP",
-					Port:     7051,
-					TargetPort: intstr.IntOrString{
-						Type:   intstr.Int,
-						IntVal: 7051,
-					},
-				},
-				{
-					Name:     ChaincodePortName,
-					Protocol: "TCP",
-					Port:     7052,
-					TargetPort: intstr.IntOrString{
-						Type:   intstr.Int,
-						IntVal: 7052,
-					},
-				},
-				{
-					Name:     EventPortName,
-					Protocol: "TCP",
-					Port:     7053,
-					TargetPort: intstr.IntOrString{
-						Type:   intstr.Int,
-						IntVal: 7053,
-					},
-				},
-				{
-					Name:     OperationsPortName,
-					Protocol: "TCP",
-					Port:     9443,
-					TargetPort: intstr.IntOrString{
-						Type:   intstr.Int,
-						IntVal: 9443,
-					},
-				},
-			},
-			Selector: labels,
-		},
+		Spec:   serviceSpec,
 		Status: corev1.ServiceStatus{},
 	}
 	return clientSet.CoreV1().Services(ns).Create(ctx, svc, v1.CreateOptions{})

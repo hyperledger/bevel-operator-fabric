@@ -3,10 +3,14 @@ package ordnode
 import corev1 "k8s.io/api/core/v1"
 
 type fabricOrdChart struct {
+	PodLabels                   map[string]string             `json:"podLabels"`
+	PodAnnotations              map[string]string             `json:"podAnnotations"`
 	GatewayApi                  GatewayApi                    `json:"gatewayApi"`
 	Istio                       Istio                         `json:"istio"`
+	Traefik                     Traefik                       `json:"traefik"`
 	AdminGatewayApi             GatewayApi                    `json:"adminGatewayApi"`
 	AdminIstio                  Istio                         `json:"adminIstio"`
+	AdminTraefik                Traefik                       `json:"adminTraefik"`
 	Replicas                    int                           `json:"replicas"`
 	Genesis                     string                        `json:"genesis"`
 	ChannelParticipationEnabled bool                          `json:"channelParticipationEnabled"`
@@ -49,7 +53,15 @@ type GRPCProxy struct {
 	// +nullable
 	Resources *corev1.ResourceRequirements `json:"resources"`
 }
-
+type TraefikMiddleware struct {
+	Name      string `json:"name"`
+	Namespace string `json:"namespace"`
+}
+type Traefik struct {
+	Entrypoints []string            `json:"entryPoints"`
+	Middlewares []TraefikMiddleware `json:"middlewares"`
+	Hosts       []string            `json:"hosts"`
+}
 type ServiceMonitor struct {
 	Enabled           bool              `json:"enabled"`
 	Labels            map[string]string `json:"labels"`

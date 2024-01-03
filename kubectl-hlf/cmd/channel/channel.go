@@ -1,9 +1,10 @@
 package channel
 
 import (
+	"io"
+
 	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/channel/consenter"
 	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/channel/ordorg"
-	"io"
 
 	"github.com/spf13/cobra"
 )
@@ -21,6 +22,7 @@ func NewChannelCmd(stdOut io.Writer, stdErr io.Writer) *cobra.Command {
 		newGenerateChannelCMD(stdOut, stdErr),
 		newInspectChannelCMD(stdOut, stdErr),
 		newTopChannelCMD(stdOut, stdErr),
+		newSignUpdateChannelCMD(stdOut, stdErr),
 		newAddOrgToChannelCMD(stdOut, stdErr),
 		ordorg.NewOrdOrgCmd(stdOut, stdErr),
 		consenter.NewConsenterCmd(stdOut, stdErr),

@@ -49,6 +49,44 @@ spec:
                 items:
                   type: string
                 type: array
+              externalOrderers:
+                items:
+                  properties:
+                    mspID:
+                      type: string
+                    name:
+                      type: string
+                    tlsCACert:
+                      type: string
+                    url:
+                      type: string
+                  required:
+                  - mspID
+                  - name
+                  - tlsCACert
+                  - url
+                  type: object
+                nullable: true
+                type: array
+              externalPeers:
+                items:
+                  properties:
+                    mspID:
+                      type: string
+                    name:
+                      type: string
+                    tlsCACert:
+                      type: string
+                    url:
+                      type: string
+                  required:
+                  - mspID
+                  - name
+                  - tlsCACert
+                  - url
+                  type: object
+                nullable: true
+                type: array
               identities:
                 description: HLF Identities to be included in the network config
                 items:

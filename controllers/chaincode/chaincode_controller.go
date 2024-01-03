@@ -453,11 +453,16 @@ func (r *FabricChaincodeReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 		Tolerations:      fabricChaincode.Spec.Tolerations,
 	}
 	replicas := fabricChaincode.Spec.Replicas
+	podLabels := labels
+	for key, value := range fabricChaincode.Spec.PodLabels {
+		podLabels[key] = value
+	}
 	appv1Deployment := &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      deploymentName,
-			Namespace: ns,
-			Labels:    labels,
+			Name:        deploymentName,
+			Namespace:   ns,
+			Labels:      labels,
+			Annotations: fabricChaincode.Spec.Annotations,
 		},
 		Spec: appsv1.DeploymentSpec{
 			Replicas: func(i int32) *int32 { return &i }(int32(replicas)),
@@ -466,7 +471,8 @@ func (r *FabricChaincodeReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 			},
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
-					Labels: labels,
+					Labels:      podLabels,
+					Annotations: fabricChaincode.Spec.PodAnnotations,
 				},
 				Spec: podSpec,
 			},
@@ -491,9 +497,10 @@ func (r *FabricChaincodeReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 				r.setConditionStatus(ctx, fabricChaincode, hlfv1alpha1.FailedStatus, false, err, false)
 				return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricChaincode)
 			}
+		} else {
+			r.setConditionStatus(ctx, fabricChaincode, hlfv1alpha1.FailedStatus, false, err, false)
+			return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricChaincode)
 		}
-		r.setConditionStatus(ctx, fabricChaincode, hlfv1alpha1.FailedStatus, false, err, false)
-		return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricChaincode)
 	} else {
 		deployment.Spec = appv1Deployment.Spec
 		if cryptoData.Updated {
@@ -568,7 +575,7 @@ func (r *FabricChaincodeReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 		}
 	}
 	r.setConditionStatus(ctx, fabricChaincode, hlfv1alpha1.RunningStatus, true, nil, false)
-	return ctrl.Result{}, nil
+	return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricChaincode)
 }
 
 var (

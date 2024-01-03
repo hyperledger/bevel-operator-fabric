@@ -8,6 +8,12 @@ istio:
   hosts: []
   ingressGateway: ingressgateway
 
+traefik:
+  entryPoints: []
+  middlewares: []
+  hosts: []
+
+
 dockerSocketPath: /var/run/docker.sock
 
 envVars: []
@@ -87,13 +93,7 @@ couchdb:
   pullPolicy: IfNotPresent
 
 resources:
-  peer:
-    limits:
-      cpu: 100m
-      memory: 128Mi
-    requests:
-      cpu: 100m
-      memory: 128Mi
+  peer: {}
   couchdbExporter:
     limits:
       cpu: 300m
@@ -101,13 +101,7 @@ resources:
     requests:
       cpu: 100m
       memory: 64Mi
-  couchdb:
-    limits:
-      cpu: 100m
-      memory: 128Mi
-    requests:
-      cpu: 100m
-      memory: 128Mi
+  couchdb: {}
   chaincode:
     limits:
       cpu: 100m
@@ -124,7 +118,8 @@ resources:
       memory: 128Mi
 replicas: 1
 nodeSelector: { }
-
+volumes: []
+peerVolumeMounts: [ ]
 tolerations: [ ]
 
 affinity: { }
@@ -169,6 +164,8 @@ logging:
   policies: warning
 
 externalChaincodeBuilder: false
+
+deliveryClientaddressOverrides: []
 
 externalBuilders: [ ]
 

@@ -57,6 +57,20 @@ spec:
                 properties:
                   cacert:
                     type: string
+                  secretRef:
+                    nullable: true
+                    properties:
+                      key:
+                        type: string
+                      name:
+                        type: string
+                      namespace:
+                        type: string
+                    required:
+                    - key
+                    - name
+                    - namespace
+                    type: object
                 required:
                 - cacert
                 type: object
@@ -73,7 +87,6 @@ spec:
                 nullable: true
                 properties:
                   affiliation:
-                    minLength: 1
                     type: string
                   attrs:
                     items:

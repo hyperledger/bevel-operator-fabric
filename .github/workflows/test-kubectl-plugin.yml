@@ -52,8 +52,8 @@ jobs:
           make generate manifests install
       - name: Install Istio
         run: |
-          curl -L https://istio.io/downloadIstio | ISTIO_VERSION=1.16.1 TARGET_ARCH=x86_64 sh -
-          export PATH="$PATH:$PWD/istio-1.16.1/bin"
+          curl -L https://istio.io/downloadIstio | ISTIO_VERSION=1.20.0 TARGET_ARCH=x86_64 sh -
+          export PATH="$PATH:$PWD/istio-1.20.0/bin"
           kubectl create namespace istio-system
 
           istioctl operator init
@@ -129,6 +129,7 @@ jobs:
         run: |
           CLUSTER_IP=$(kubectl -n istio-system get svc istio-ingressgateway -o json | jq -r .spec.clusterIP)
           echo "CLUSTER_IP=${CLUSTER_IP}"
+
           kubectl apply -f - <<EOF
           kind: ConfigMap
           apiVersion: v1
@@ -169,10 +170,10 @@ jobs:
       - name: Create Peer org
         run: |
           export PEER_IMAGE=hyperledger/fabric-peer
-          export PEER_VERSION=2.5.0
+          export PEER_VERSION=2.5.5
 
           export CA_IMAGE=hyperledger/fabric-ca
-          export CA_VERSION=1.5.6
+          export CA_VERSION=1.5.7
 
           kubectl hlf ca create --image=$CA_IMAGE --version=$CA_VERSION --storage-class=standard --capacity=2Gi --name=org1-ca \
               --enroll-id=enroll --hosts=org1-ca.localho.st --enroll-pw=enrollpw
@@ -190,10 +191,10 @@ jobs:
       - name: Create Orderer Org
         run: |
           export ORDERER_IMAGE=hyperledger/fabric-orderer
-          export ORDERER_VERSION=2.5.0
+          export ORDERER_VERSION=2.5.5
 
           export CA_IMAGE=hyperledger/fabric-ca
-          export CA_VERSION=1.5.6
+          export CA_VERSION=1.5.7
 
           kubectl hlf ca create --image=$CA_IMAGE --version=$CA_VERSION --storage-class=standard --capacity=2Gi --name=ord-ca \
               --enroll-id=enroll --enroll-pw=enrollpw --hosts=ord-ca.localho.st
@@ -203,7 +204,7 @@ jobs:
               --type=orderer --enroll-id enroll --enroll-secret=enrollpw --mspid=OrdererMSP
 
           kubectl hlf ordnode create --image=$ORDERER_IMAGE --version=$ORDERER_VERSION \
-              --storage-class=standard --enroll-id=orderer --mspid=OrdererMSP --hosts=orderer0-ord.localho.st \
+              --storage-class=standard --enroll-id=orderer --mspid=OrdererMSP --hosts=orderer0-ord.localho.st --admin-hosts=admin-orderer0-ord.localho.st \
               --enroll-pw=ordererpw --capacity=2Gi --name=ord-node1 --ca-name=ord-ca.default
           kubectl wait --timeout=180s --for=condition=Running fabricorderernodes.hlf.kungfusoftware.es --all
       - name: Prepare Connection string for Orderer Node
@@ -253,12 +254,12 @@ jobs:
               --admin-peer-orgs=Org1MSP \
               --secret-name=wallet \
               --secret-ns=default \
-              --consenters=ord-node1.default:7050 \
+              --consenters=orderer0-ord.localho.st:7050 \
               --consenter-certificates=./orderer-cert.pem \
               --identities="OrdererMSP;admin-tls-ordservice.yaml" \
               --identities="Org1MSP;peer-org1.yaml"
 
-          kubectl wait --timeout=180s --for=condition=Created fabricmainchannels.hlf.kungfusoftware.es --all 
+          kubectl wait --timeout=180s --for=condition=RUNNING fabricmainchannels.hlf.kungfusoftware.es --all 
 
 
       - name: Join peers to channel
@@ -269,14 +270,14 @@ jobs:
               --mspid=Org1MSP \
               --name="demo-org1msp" \
               --orderer-certificates="./orderer-cert.pem" \
-              --orderer-urls="grpcs://ord-node1.default:7050" \
+              --orderer-urls="grpcs://orderer0-ord.localho.st:443" \
               --anchor-peers="org1-peer0:7051" \
               --peers="org1-peer0.default" \
               --secret-name=wallet \
               --secret-ns=default \
               --secret-key="peer-org1.yaml"
 
-          kubectl wait --timeout=180s --for=condition=Created fabricfollowerchannels.hlf.kungfusoftware.es --all 
+          kubectl wait --timeout=180s --for=condition=RUNNING fabricfollowerchannels.hlf.kungfusoftware.es --all
       - name: Get channel
         run: |
           sleep 3
@@ -350,14 +351,17 @@ jobs:
         run: |
           kubectl get nodes -o=wide
           kubectl get pods -o=wide -A
+          kubectl get service -o=wide -A
           kubectl get crds
           kubectl get fabricpeers.hlf.kungfusoftware.es  -A -o=custom-columns='NAME:metadata.name,NAMESPACE:metadata.namespace,STATE:status.status,MESSAGE:status.message'
           kubectl get fabricorderernodes.hlf.kungfusoftware.es  -A -o=custom-columns='NAME:metadata.name,NAMESPACE:metadata.namespace,STATE:status.status,MESSAGE:status.message'
           kubectl get fabriccas.hlf.kungfusoftware.es -A -o=custom-columns='NAME:metadata.name,NAMESPACE:metadata.namespace,STATE:status.status,MESSAGE:status.message'
           kubectl get fabricmainchannels.hlf.kungfusoftware.es -A -o=custom-columns='NAME:metadata.name,NAMESPACE:metadata.namespace,STATE:status.status,MESSAGE:status.message'
           kubectl get fabricfollowerchannels.hlf.kungfusoftware.es -A -o=custom-columns='NAME:metadata.name,NAMESPACE:metadata.namespace,STATE:status.status,MESSAGE:status.message'
+          kubectl get configmap coredns -n kube-system -o yaml
 
           kubectl get fabricmainchannels  -o yaml
+          kubectl get fabricfollowerchannels  -o yaml
 
           POD=$(kubectl get pod -l 'release in (org1-peer0)'  -o jsonpath="{.items[0].metadata.name}")
           kubectl logs $POD -c peer

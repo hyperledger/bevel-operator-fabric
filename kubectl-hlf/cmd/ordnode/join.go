@@ -99,10 +99,16 @@ func (c *joinChannelCmd) run() error {
 	if err != nil {
 		return err
 	}
+
 	defer chResponse.Body.Close()
 	log.Infof("Status code=%d", chResponse.StatusCode)
 	if chResponse.StatusCode != 201 {
-		return errors.Errorf("error joining channel, got status code=%d", chResponse.StatusCode)
+		errorResponse := &map[string]interface{}{}
+		err = json.NewDecoder(chResponse.Body).Decode(errorResponse)
+		if err != nil {
+			return err
+		}
+		return errors.Errorf("error joining channel, got status code=%d %v", chResponse.StatusCode, errorResponse)
 	}
 	chInfo := &osnadmin.ChannelInfo{}
 	err = json.NewDecoder(chResponse.Body).Decode(chInfo)

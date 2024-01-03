@@ -863,6 +863,11 @@ spec:
                         type: array
                     type: object
                 type: object
+              annotations:
+                additionalProperties:
+                  type: string
+                nullable: true
+                type: object
               args:
                 description: Arguments to the entrypoint. The container image's CMD
                   is used if this is not provided.
@@ -891,6 +896,20 @@ spec:
                     properties:
                       cacert:
                         type: string
+                      secretRef:
+                        nullable: true
+                        properties:
+                          key:
+                            type: string
+                          name:
+                            type: string
+                          namespace:
+                            type: string
+                        required:
+                        - key
+                        - name
+                        - namespace
+                        type: object
                     required:
                     - cacert
                     type: object
@@ -1059,11 +1078,26 @@ spec:
                   type: object
                 nullable: true
                 type: array
+              labels:
+                additionalProperties:
+                  type: string
+                nullable: true
+                type: object
               mspID:
                 type: string
               packageId:
                 minLength: 1
                 type: string
+              podAnnotations:
+                additionalProperties:
+                  type: string
+                nullable: true
+                type: object
+              podLabels:
+                additionalProperties:
+                  type: string
+                nullable: true
+                type: object
               replicas:
                 type: integer
               resources:

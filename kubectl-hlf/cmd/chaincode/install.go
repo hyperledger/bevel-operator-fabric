@@ -57,10 +57,7 @@ func (c *installChaincodeCmd) run() error {
 	if err != nil {
 		return err
 	}
-	chLng, ok := pb.ChaincodeSpec_Type_value[strings.ToUpper(c.chaincodeLanguage)]
-	if !ok {
-		return errors.Errorf("Language %s not valid", c.chaincodeLanguage)
-	}
+
 	var pkg []byte
 	if strings.HasSuffix(c.chaincodePath, ".tar.gz") || strings.HasSuffix(c.chaincodePath, ".tgz") {
 		pkg, err = ioutil.ReadFile(c.chaincodePath)
@@ -68,6 +65,10 @@ func (c *installChaincodeCmd) run() error {
 			return err
 		}
 	} else {
+		chLng, ok := pb.ChaincodeSpec_Type_value[strings.ToUpper(c.chaincodeLanguage)]
+		if !ok {
+			return errors.Errorf("Language %s not valid", c.chaincodeLanguage)
+		}
 		pkg, err = lifecycle.NewCCPackage(&lifecycle.Descriptor{
 			Path:  c.chaincodePath,
 			Type:  pb.ChaincodeSpec_Type(chLng),

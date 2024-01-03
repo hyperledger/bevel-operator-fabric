@@ -396,7 +396,7 @@ func (r *FabricOperatorAPIReconciler) upgradeChart(
 	if err != nil {
 		return err
 	}
-	cmd.Wait = true
+	cmd.Wait = false
 	cmd.Timeout = time.Minute * 5
 	release, err := cmd.Run(releaseName, ch, inInterface)
 	if err != nil {

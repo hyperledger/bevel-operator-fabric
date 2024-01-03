@@ -21,6 +21,7 @@ type CreateOptions struct {
 	Name       string
 	Internal   bool
 	SecretName string
+	Channels   []string
 }
 
 func (o CreateOptions) Validate() error {
@@ -79,12 +80,15 @@ func (c *createCmd) run(args []string) error {
 			Namespace: c.opts.NS,
 		},
 		Spec: hlfv1alpha1.FabricNetworkConfigSpec{
-			Organization:  "",
-			Internal:      c.opts.Internal,
-			Organizations: c.opts.Orgs,
-			Namespaces:    namespaces,
-			SecretName:    secretName,
-			Identities:    identities,
+			Organization:     "",
+			Internal:         c.opts.Internal,
+			Organizations:    c.opts.Orgs,
+			Namespaces:       namespaces,
+			Channels:         c.opts.Channels,
+			Identities:       identities,
+			ExternalOrderers: []hlfv1alpha1.FabricNetworkConfigExternalOrderer{},
+			ExternalPeers:    []hlfv1alpha1.FabricNetworkConfigExternalPeer{},
+			SecretName:       secretName,
 		},
 	}
 	_, err = oclient.HlfV1alpha1().FabricNetworkConfigs(c.opts.NS).Create(
@@ -114,6 +118,7 @@ func newCreateNetworkConfigCmd(out io.Writer, errOut io.Writer) *cobra.Command {
 	}
 	f := cmd.Flags()
 	f.StringSliceVarP(&c.opts.Orgs, "orgs", "o", []string{}, "Organizations to inspect")
+	f.StringSliceVarP(&c.opts.Channels, "channels", "c", []string{}, "Channels to inspect")
 	f.StringVar(&c.opts.Name, "name", "", "Name of the Network Config to create")
 	f.StringVar(&c.opts.SecretName, "secret", "", "Secret name to store the network config")
 	f.StringVarP(&c.opts.NS, "namespace", "n", helpers.DefaultNamespace, "Namespace scope for this request")
