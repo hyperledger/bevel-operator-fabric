@@ -134,7 +134,6 @@ func newSignUpdateChannelCMD(stdOut io.Writer, stdErr io.Writer) *cobra.Command 
 	persistentFlags.StringVarP(&c.channelName, "channel", "", "", "Channel name")
 	persistentFlags.StringVarP(&c.configPath, "config", "", "", "Configuration file for the SDK")
 	persistentFlags.StringVarP(&c.identity, "identity", "", "", "Identity file")
-	persistentFlags.StringVarP(&c.userName, "user", "", "", "User name for the transaction")
 	persistentFlags.StringVarP(&c.file, "file", "f", "", "Config update file")
 	persistentFlags.StringVarP(&c.output, "output", "o", "", "Output signature")
 	persistentFlags.StringVarP(&c.userName, "user", "", "", "User name for the transaction")
