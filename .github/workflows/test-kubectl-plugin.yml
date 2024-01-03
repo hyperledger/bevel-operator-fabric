@@ -127,6 +127,9 @@ jobs:
 
       - name: Configure DNS in Kubernetes
         run: |
+          CLUSTER_IP=$(kubectl -n istio-system get svc istio-ingressgateway -o json | jq -r .spec.clusterIP)
+          echo "CLUSTER_IP=${CLUSTER_IP}"
+
           kubectl apply -f - <<EOF
           kind: ConfigMap
           apiVersion: v1
@@ -140,8 +143,9 @@ jobs:
                   health {
                      lameduck 5s
                   }
-                  rewrite name regex (.*)\.localho\.st istio-ingressgateway.istio-system.svc.cluster.local
+                  rewrite name regex (.*)\.localho\.st host.ingress.internal
                   hosts {
+                    ${CLUSTER_IP} host.ingress.internal
                     fallthrough
                   }
                   ready
