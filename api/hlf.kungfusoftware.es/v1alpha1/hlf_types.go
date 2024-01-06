@@ -1581,6 +1581,18 @@ type FabricOperatorAPISpec struct {
 	Resources *corev1.ResourceRequirements `json:"resources"`
 }
 
+type FabricNetworkConfigOrgPeer struct {
+	Name      string `json:"name"`
+	Namespace string `json:"namespace"`
+}
+type FabricNetworkConfigOrganization struct {
+	Peers []FabricNetworkConfigOrgPeer `json:"peers"`
+}
+type FabricNetworkConfigCA struct {
+	Name      string `json:"name"`
+	Namespace string `json:"namespace"`
+}
+
 // FabricNetworkConfigSpec defines the desired state of FabricNetworkConfig
 type FabricNetworkConfigSpec struct {
 	Organization string `json:"organization"`
@@ -1588,8 +1600,17 @@ type FabricNetworkConfigSpec struct {
 	Internal bool `json:"internal"`
 
 	Organizations []string `json:"organizations"`
-
-	Namespaces []string `json:"namespaces"`
+	// +kubebuilder:validation:Default={}
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +nullable
+	OrganizationConfig map[string]FabricNetworkConfigOrganization `json:"organizationConfig"`
+	Namespaces         []string                                   `json:"namespaces"`
+	// +nullable
+	// +kubebuilder:validation:Optional
+	// +optional
+	// +kubebuilder:validation:Default={}
+	CertificateAuthorities []FabricNetworkConfigCA `json:"certificateAuthorities"`
 
 	Channels []string `json:"channels"`
 	// HLF Identities to be included in the network config

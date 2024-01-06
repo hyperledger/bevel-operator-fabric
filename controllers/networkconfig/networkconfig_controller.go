@@ -396,6 +396,7 @@ func (r *FabricNetworkConfigReconciler) Reconcile(ctx context.Context, req ctrl.
 			Key:  string(keyBytes),
 		})
 	}
+
 	var peers []*helpers.ClusterPeer
 	for _, peer := range clusterPeers {
 		if filterByNS && !utils.Contains(fabricNetworkConfig.Spec.Namespaces, peer.Namespace) {
@@ -406,6 +407,37 @@ func (r *FabricNetworkConfigReconciler) Reconcile(ctx context.Context, req ctrl.
 		}
 
 	}
+	for mspID, org := range fabricNetworkConfig.Spec.OrganizationConfig {
+		if len(org.Peers) > 0 {
+			// iterate through clusterpeers and remove the ones that are not in the list
+			// peers = peer0-org1 peer1-org1 peer1-ch-org1
+			// org peers
+			for _, peer := range org.Peers {
+				for idx, p := range peers {
+					if p.Name == peer.Name && p.Namespace == peer.Namespace {
+						// keep
+					} else {
+						// remove
+						peers = append(peers[:idx], peers[idx+1:]...)
+					}
+				}
+				_, ok := orgMap[mspID]
+				if !ok {
+					continue
+				}
+				for idx, p := range orgMap[mspID].Peers {
+					if p.Name == peer.Name && p.Namespace == peer.Namespace {
+						// keep
+					} else {
+						// remove
+						orgMap[mspID].Peers = append(orgMap[mspID].Peers[:idx], orgMap[mspID].Peers[idx+1:]...)
+					}
+				}
+
+			}
+		}
+	}
+
 	tmpl, err := template.New("networkConfig").Funcs(sprig.HermeticTxtFuncMap()).Parse(tmplGoConfig)
 	if err != nil {
 		r.setConditionStatus(ctx, fabricNetworkConfig, hlfv1alpha1.FailedStatus, false, err, false)

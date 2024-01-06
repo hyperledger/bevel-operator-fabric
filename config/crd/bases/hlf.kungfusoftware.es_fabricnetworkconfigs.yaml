@@ -45,6 +45,19 @@ spec:
           spec:
             description: FabricNetworkConfigSpec defines the desired state of FabricNetworkConfig
             properties:
+              certificateAuthorities:
+                items:
+                  properties:
+                    name:
+                      type: string
+                    namespace:
+                      type: string
+                  required:
+                  - name
+                  - namespace
+                  type: object
+                nullable: true
+                type: array
               channels:
                 items:
                   type: string
@@ -108,6 +121,26 @@ spec:
                 type: array
               organization:
                 type: string
+              organizationConfig:
+                additionalProperties:
+                  properties:
+                    peers:
+                      items:
+                        properties:
+                          name:
+                            type: string
+                          namespace:
+                            type: string
+                        required:
+                        - name
+                        - namespace
+                        type: object
+                      type: array
+                  required:
+                  - peers
+                  type: object
+                nullable: true
+                type: object
               organizations:
                 items:
                   type: string
