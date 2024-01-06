@@ -14,6 +14,7 @@ resources:
   - bases/hlf.kungfusoftware.es_fabricoperatorapis.yaml
   - bases/hlf.kungfusoftware.es_fabricmainchannels.yaml
   - bases/hlf.kungfusoftware.es_fabricfollowerchannels.yaml
+  - bases/hlf.kungfusoftware.es_fabricchaincodetemplates.yaml
 # +kubebuilder:scaffold:crdkustomizeresource
 
 patchesStrategicMerge:
