@@ -311,6 +311,19 @@ func (r *FabricNetworkConfigReconciler) Reconcile(ctx context.Context, req ctrl.
 		}
 		certAuths = append(certAuths, ca)
 	}
+	// filter by cas included, if any
+	if len(fabricNetworkConfig.Spec.CertificateAuthorities) > 0 {
+		var cas []*helpers.ClusterCA
+		for _, ca := range certAuths {
+			for _, fabricNetworkConfigCA := range fabricNetworkConfig.Spec.CertificateAuthorities {
+				log.Infof("NAME=%s NAMECA=%s  NS=%s NSCA=%s", ca.Item.Name, fabricNetworkConfigCA.Name, ca.Item.Namespace, fabricNetworkConfigCA.Namespace)
+				if ca.Item.Name == fabricNetworkConfigCA.Name && ca.Item.Namespace == fabricNetworkConfigCA.Namespace {
+					cas = append(cas, ca)
+				}
+			}
+		}
+		certAuths = cas
+	}
 	for _, v := range peerOrgs {
 		if (filterByOrgs && utils.Contains(fabricNetworkConfig.Spec.Organizations, v.MspID)) || !filterByOrgs {
 			var peers []*helpers.ClusterPeer
@@ -412,29 +425,25 @@ func (r *FabricNetworkConfigReconciler) Reconcile(ctx context.Context, req ctrl.
 			// iterate through clusterpeers and remove the ones that are not in the list
 			// peers = peer0-org1 peer1-org1 peer1-ch-org1
 			// org peers
+			var orgPeers []*helpers.ClusterPeer
+			for _, peer := range org.Peers {
+				for _, p := range peers {
+					if p.Object.Name == peer.Name && p.Object.Namespace == peer.Namespace {
+						orgPeers = append(orgPeers, p)
+					} else {
+						// delete from peers
+					}
+				}
+			}
 			for _, peer := range org.Peers {
 				for idx, p := range peers {
-					if p.Name == peer.Name && p.Namespace == peer.Namespace {
-						// keep
-					} else {
-						// remove
+					if p.MSPID == mspID && (p.Object.Name != peer.Name || p.Object.Namespace != peer.Namespace) {
 						peers = append(peers[:idx], peers[idx+1:]...)
+						break
 					}
 				}
-				_, ok := orgMap[mspID]
-				if !ok {
-					continue
-				}
-				for idx, p := range orgMap[mspID].Peers {
-					if p.Name == peer.Name && p.Namespace == peer.Namespace {
-						// keep
-					} else {
-						// remove
-						orgMap[mspID].Peers = append(orgMap[mspID].Peers[:idx], orgMap[mspID].Peers[idx+1:]...)
-					}
-				}
-
 			}
+			orgMap[mspID].Peers = orgPeers
 		}
 	}
 
