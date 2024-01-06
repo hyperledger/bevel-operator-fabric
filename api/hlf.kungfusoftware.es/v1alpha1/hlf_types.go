@@ -1683,8 +1683,18 @@ type FabricNetworkConfigList struct {
 	Items           []FabricNetworkConfig `json:"items"`
 }
 
+type FabricChaincodeTemplateRef struct {
+	Name      string `json:"name"`
+	Namespace string `json:"namespace"`
+}
+
 // FabricChaincodeSpec defines the desired state of FabricChaincode
 type FabricChaincodeSpec struct {
+	// +nullable
+	// +optional
+	// +kubebuilder:validation:Optional
+	Template *FabricChaincodeTemplateRef `json:"template"`
+
 	// +nullable
 	// +optional
 	// +kubebuilder:validation:Optional
@@ -1765,6 +1775,45 @@ type FabricChaincodeSpec struct {
 	// +optional
 	// +kubebuilder:validation:Optional
 	MspID string `json:"mspID"`
+}
+
+func (in *FabricChaincodeSpec) ApplyDefaultValuesFromTemplate(template *FabricChaincodeTemplate) {
+	if in.ImagePullPolicy == "" {
+		in.ImagePullPolicy = template.Spec.ImagePullPolicy
+	}
+	if in.ImagePullSecrets == nil || len(in.ImagePullSecrets) == 0 {
+		in.ImagePullSecrets = template.Spec.ImagePullSecrets
+	}
+	if in.Command == nil || len(in.Command) == 0 {
+		in.Command = template.Spec.Command
+	}
+	if in.Args == nil || len(in.Args) == 0 {
+		in.Args = template.Spec.Args
+	}
+	if in.Affinity == nil {
+		in.Affinity = template.Spec.Affinity
+	}
+	if in.Tolerations == nil || len(in.Tolerations) == 0 {
+		in.Tolerations = template.Spec.Tolerations
+	}
+	if in.Resources == nil {
+		in.Resources = template.Spec.Resources
+	}
+	if in.Credentials == nil {
+		in.Credentials = template.Spec.Credentials
+	}
+	if in.Replicas == 0 {
+		in.Replicas = template.Spec.Replicas
+	}
+	if in.Env == nil || len(in.Env) == 0 {
+		in.Env = template.Spec.Env
+	}
+	if in.ChaincodeServerPort == 0 {
+		in.ChaincodeServerPort = template.Spec.ChaincodeServerPort
+	}
+	if in.MspID == "" {
+		in.MspID = template.Spec.MspID
+	}
 }
 
 // FabricChaincodeStatus defines the observed state of FabricChaincode

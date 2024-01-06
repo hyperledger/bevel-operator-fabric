@@ -10,6 +10,7 @@ import (
 	hlfv1alpha1 "github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
 	"github.com/kfsoftware/hlf-operator/controllers/certs"
 	"github.com/kfsoftware/hlf-operator/controllers/utils"
+	operatorv1 "github.com/kfsoftware/hlf-operator/pkg/client/clientset/versioned"
 	"github.com/kfsoftware/hlf-operator/pkg/status"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
@@ -24,6 +25,9 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
+	"sigs.k8s.io/controller-runtime/pkg/handler"
+	"sigs.k8s.io/controller-runtime/pkg/reconcile"
+	"sigs.k8s.io/controller-runtime/pkg/source"
 	"time"
 )
 
@@ -290,7 +294,27 @@ func (r *FabricChaincodeReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 			return ctrl.Result{}, err
 		}
 	}
-	r.Log.Info(fmt.Sprintf("Chaincode %s reconciled", req.NamespacedName))
+	r.Log.Info(fmt.Sprintf("Reconciling chaincode %s", req.NamespacedName))
+	hlfClientSet, err := operatorv1.NewForConfig(r.Config)
+	if err != nil {
+		r.setConditionStatus(ctx, fabricChaincode, hlfv1alpha1.FailedStatus, false, err, false)
+		return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricChaincode)
+	}
+	// apply default values if there's a template
+	if fabricChaincode.Spec.Template != nil {
+		fabricChaincodeTemplate, err := hlfClientSet.HlfV1alpha1().FabricChaincodeTemplates(fabricChaincode.Spec.Template.Namespace).Get(
+			ctx,
+			fabricChaincode.Spec.Template.Name,
+			metav1.GetOptions{},
+		)
+		if err != nil {
+			r.setConditionStatus(ctx, fabricChaincode, hlfv1alpha1.FailedStatus, false, err, false)
+			return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricChaincode)
+		}
+		// apply default values from the template into `fabricChaincode.spec`
+		r.Log.Info(fmt.Sprintf("Applying default values from template %s", fabricChaincode.Spec.Template.Name))
+		fabricChaincode.Spec.ApplyDefaultValuesFromTemplate(fabricChaincodeTemplate)
+	}
 	ns := req.Namespace
 	if ns == "" {
 		ns = "default"
@@ -633,11 +657,49 @@ func (r *FabricChaincodeReconciler) setConditionStatus(ctx context.Context, p *h
 	return p.Status.Conditions.SetCondition(condition())
 }
 
+// enqueueRequestForOwningResource returns an event handler for all Chaincodes objects having
+// owningGatewayLabel
+func (r *FabricChaincodeReconciler) enqueueRequestForOwningResource() handler.EventHandler {
+	return handler.EnqueueRequestsFromMapFunc(func(object client.Object) []reconcile.Request {
+		scopedLog := log.WithFields(log.Fields{
+			"controller": "chaincode",
+			"name":       object.GetName(),
+		})
+		// Get the list of all Chaincodes that owns this resource
+		list := &hlfv1alpha1.FabricChaincodeList{}
+		if err := r.List(context.Background(), list); err != nil {
+			return nil
+		}
+		scopedLog.Infof("Enqueueing reconcile requests for %d Chaincode", len(list.Items))
+		// Return empty reconcile request to skip reconciliation
+		if len(list.Items) == 0 {
+			return nil
+		}
+		// Loop through all found Chaincode, and enqueue a reconcile request for them
+		requests := make([]reconcile.Request, 0, len(list.Items))
+		for _, item := range list.Items {
+			requests = append(requests, reconcile.Request{
+				NamespacedName: client.ObjectKey{
+					Name:      item.Name,
+					Namespace: item.Namespace,
+				},
+			})
+		}
+		return requests
+	})
+}
+
 func (r *FabricChaincodeReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	managedBy := ctrl.NewControllerManagedBy(mgr)
 	return managedBy.
 		For(&hlfv1alpha1.FabricChaincode{}).
 		Owns(&corev1.Secret{}).
+		Watches(
+			&source.Kind{
+				Type: &hlfv1alpha1.FabricChaincodeTemplate{},
+			},
+			r.enqueueRequestForOwningResource(),
+		).
 		Complete(r)
 }
 
