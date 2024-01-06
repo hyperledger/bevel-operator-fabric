@@ -2259,16 +2259,12 @@ type FabricChaincodeTemplateStatus struct {
 }
 
 // +genclient
-// +genclient:nonNamespaced
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 // +k8s:defaulter-gen=true
 // +kubebuilder:subresource:status
-// +kubebuilder:resource:scope=Cluster,shortName=fabricchaincodetemplate,singular=fabricchaincodetemplate
+// +kubebuilder:resource:scope=Namespaced,shortName=fabricchaincodetemplate,singular=fabricchaincodetemplate
 // +kubebuilder:printcolumn:name="State",type="string",JSONPath=".status.status"
 // +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
-// +kubebuilder:object:root=true
-// +kubebuilder:subresource:status
-// +k8s:openapi-gen=true
 
 // FabricChaincodeTemplate is the Schema for the hlfs API
 type FabricChaincodeTemplate struct {
@@ -2371,7 +2367,7 @@ type FabricChaincodeTemplateSpec struct {
 
 func init() {
 	SchemeBuilder.Register(&FabricPeer{}, &FabricPeerList{})
-	SchemeBuilder.Register(&FabricChaincode{}, &FabricChaincodeList{})
+	SchemeBuilder.Register(&FabricChaincodeTemplate{}, &FabricChaincodeTemplateList{})
 	SchemeBuilder.Register(&FabricOrderingService{}, &FabricOrderingServiceList{})
 	SchemeBuilder.Register(&FabricCA{}, &FabricCAList{})
 	SchemeBuilder.Register(&FabricOrdererNode{}, &FabricOrdererNodeList{})
