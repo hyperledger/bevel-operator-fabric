@@ -1,0 +1,396 @@
+certificateAuthorities:
+  bwx-ca-bwfmsp-1eqe.hlf:
+    caName: ca
+    registrar:
+      enrollId: enroll
+      enrollSecret: enrollpw
+    tlsCACerts:
+      pem:
+        - |
+          -----BEGIN CERTIFICATE-----
+          MIICljCCAj2gAwIBAgIQHRcIMQ0p1Knz37W2nN4pOjAKBggqhkjOPQQDAjBaMQsw
+          CQYDVQQGEwJVUzERMA8GA1UEBxMIQnJ1c3NlbHMxETAPBgNVBAkTCEJydXNzZWxz
+          MRAwDgYDVQQKEwdGdWppdHN1MRMwEQYDVQQLEwpCbG9ja2NoYWluMB4XDTIyMDYz
+          MDA4NTgwNVoXDTMyMDcwMTA4NTgwNVowWjELMAkGA1UEBhMCVVMxETAPBgNVBAcT
+          CEJydXNzZWxzMREwDwYDVQQJEwhCcnVzc2VsczEQMA4GA1UEChMHRnVqaXRzdTET
+          MBEGA1UECxMKQmxvY2tjaGFpbjBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABKnq
+          Jx2fRcIRUfkvyBdn3DFbOfFcQF81K32MXX/ptl9Wapi7dpy9vIsCU55FDrvy0hc6
+          D45RXnDGYi61SRXFv7qjgeQwgeEwDgYDVR0PAQH/BAQDAgGmMB0GA1UdJQQWMBQG
+          CCsGAQUFBwMCBggrBgEFBQcDATAPBgNVHRMBAf8EBTADAQH/MCkGA1UdDgQiBCAb
+          HjfFivBXLun79Hs7tb0h90zdV2qyZiemngjNCo4MKDB0BgNVHREEbTBrghZid3gt
+          Y2EtYndmbXNwLTFlcWUuaGxmghJid3gtY2EtYndmbXNwLTFlcWWCCWxvY2FsaG9z
+          dIImYnd4LWNhLWJ3Zm1zcC5obGYuYnd4LXVhdC5yZWRsZWRnZXIuZXWHBH8AAAGH
+          BAoHAAQwCgYIKoZIzj0EAwIDRwAwRAIgNgWxZpAmHDGm1CIXpfKOb5J2uMt2Q8J8
+          KzxXSSioFxwCICT46X5Zmgwr17A/+DjT1n72BMH+ERlKY+qVfq7sDlwz
+          -----END CERTIFICATE-----
+    url: https://bwx-ca-bwfmsp.hlf.bwx-uat.redledger.eu:443
+  bwx-ca-bwtmsp-9fae.hlf:
+    caName: ca
+    registrar:
+      enrollId: enroll
+      enrollSecret: enrollpw
+    tlsCACerts:
+      pem:
+        - |
+          -----BEGIN CERTIFICATE-----
+          MIICmDCCAj6gAwIBAgIRANLSCCkezKrG1glLmegxQXkwCgYIKoZIzj0EAwIwWjEL
+          MAkGA1UEBhMCVVMxETAPBgNVBAcTCEJydXNzZWxzMREwDwYDVQQJEwhCcnVzc2Vs
+          czEQMA4GA1UEChMHRnVqaXRzdTETMBEGA1UECxMKQmxvY2tjaGFpbjAeFw0yMjA2
+          MzAwODQ0NDRaFw0zMjA3MDEwODQ0NDRaMFoxCzAJBgNVBAYTAlVTMREwDwYDVQQH
+          EwhCcnVzc2VsczERMA8GA1UECRMIQnJ1c3NlbHMxEDAOBgNVBAoTB0Z1aml0c3Ux
+          EzARBgNVBAsTCkJsb2NrY2hhaW4wWTATBgcqhkjOPQIBBggqhkjOPQMBBwNCAAR+
+          dO+IlZE+3W0m1Dezsu7BS588iCBbQ9+Klm7q3bszlFEpLZpIThp+IH24zGw+fCjj
+          IcjzfqD0J2BduHS7Uhz1o4HkMIHhMA4GA1UdDwEB/wQEAwIBpjAdBgNVHSUEFjAU
+          BggrBgEFBQcDAgYIKwYBBQUHAwEwDwYDVR0TAQH/BAUwAwEB/zApBgNVHQ4EIgQg
+          iNgKfHkFFIbdAyLoqYonefVeSNOTEraB8S3/phqU+ugwdAYDVR0RBG0wa4IWYnd4
+          LWNhLWJ3dG1zcC05ZmFlLmhsZoISYnd4LWNhLWJ3dG1zcC05ZmFlgglsb2NhbGhv
+          c3SCJmJ3eC1jYS1id3Rtc3AuaGxmLmJ3eC11YXQucmVkbGVkZ2VyLmV1hwR/AAAB
+          hwQKBwAEMAoGCCqGSM49BAMCA0gAMEUCIAyt06brE3Gsle6v6aRQn/VajfRbr38r
+          brcPvRUe+YgRAiEAz7MIZOzMsx5/Lj3oqWIXPXR220Sqcpj0cGBXkUvgzpc=
+          -----END CERTIFICATE-----
+    url: https://bwx-ca-bwtmsp.hlf.bwx-uat.redledger.eu:443
+  bwx-ca-bwxmsp-wus7.hlf:
+    caName: ca
+    registrar:
+      enrollId: enroll
+      enrollSecret: enrollpw
+    tlsCACerts:
+      pem:
+        - |
+          -----BEGIN CERTIFICATE-----
+          MIICljCCAj2gAwIBAgIQe6lVY/a6dwQ+SiZ6zaMCLTAKBggqhkjOPQQDAjBaMQsw
+          CQYDVQQGEwJVUzERMA8GA1UEBxMIQnJ1c3NlbHMxETAPBgNVBAkTCEJydXNzZWxz
+          MRAwDgYDVQQKEwdGdWppdHN1MRMwEQYDVQQLEwpCbG9ja2NoYWluMB4XDTIyMDYz
+          MDA4NDExOFoXDTMyMDcwMTA4NDExOFowWjELMAkGA1UEBhMCVVMxETAPBgNVBAcT
+          CEJydXNzZWxzMREwDwYDVQQJEwhCcnVzc2VsczEQMA4GA1UEChMHRnVqaXRzdTET
+          MBEGA1UECxMKQmxvY2tjaGFpbjBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABJ/6
+          PGmf/sWpX7iw0zKcmD6QhKq4U/kcHpZJqTGqWrDKaIwFN3I3sLmf/OTc3tOlNMzP
+          /l7UmvFTbiHqQ6G2jWijgeQwgeEwDgYDVR0PAQH/BAQDAgGmMB0GA1UdJQQWMBQG
+          CCsGAQUFBwMCBggrBgEFBQcDATAPBgNVHRMBAf8EBTADAQH/MCkGA1UdDgQiBCAI
+          koEnbF1SIHVdxKRlD8MY9e5zYqJJUhR6I99sMlHlUTB0BgNVHREEbTBrghZid3gt
+          Y2EtYnd4bXNwLXd1czcuaGxmghJid3gtY2EtYnd4bXNwLXd1czeCCWxvY2FsaG9z
+          dIImYnd4LWNhLWJ3eG1zcC5obGYuYnd4LXVhdC5yZWRsZWRnZXIuZXWHBH8AAAGH
+          BAoHAAQwCgYIKoZIzj0EAwIDRwAwRAIgOrY+oAP1Y7c6J1j1PIRr8mAmIv6FGnf1
+          WplEQAXmWHUCIG86h7BHqZUNGvBFoEhKMVnz4IWADXMVWT/EqHhQiIDi
+          -----END CERTIFICATE-----
+    url: https://bwx-ca-bwxmsp.hlf.bwx-uat.redledger.eu:443
+  bwx-ca-orderermsp-ue6v.hlf:
+    caName: ca
+    registrar:
+      enrollId: enroll
+      enrollSecret: enrollpw
+    tlsCACerts:
+      pem:
+        - |
+          -----BEGIN CERTIFICATE-----
+          MIICpTCCAkugAwIBAgIRAPCAD8dgUyynCB8Tj3ipGycwCgYIKoZIzj0EAwIwWjEL
+          MAkGA1UEBhMCVVMxETAPBgNVBAcTCEJydXNzZWxzMREwDwYDVQQJEwhCcnVzc2Vs
+          czEQMA4GA1UEChMHRnVqaXRzdTETMBEGA1UECxMKQmxvY2tjaGFpbjAeFw0yMjA2
+          MzAwOTA1MjhaFw0zMjA3MDEwOTA1MjhaMFoxCzAJBgNVBAYTAlVTMREwDwYDVQQH
+          EwhCcnVzc2VsczERMA8GA1UECRMIQnJ1c3NlbHMxEDAOBgNVBAoTB0Z1aml0c3Ux
+          EzARBgNVBAsTCkJsb2NrY2hhaW4wWTATBgcqhkjOPQIBBggqhkjOPQMBBwNCAAS9
+          n86JxeAUr+NMOEoGHb/ZVmEF5+BcIppNhCX1Gi02Qkyiku94/zMEHdS4xzkkORRg
+          CIH8HLzQsikIpuDjh72Lo4HxMIHuMA4GA1UdDwEB/wQEAwIBpjAdBgNVHSUEFjAU
+          BggrBgEFBQcDAgYIKwYBBQUHAwEwDwYDVR0TAQH/BAUwAwEB/zApBgNVHQ4EIgQg
+          DudWSW3wGunBaBqTfMuGnil8upvjU82PvLr0E/rM6cAwgYAGA1UdEQR5MHeCGmJ3
+          eC1jYS1vcmRlcmVybXNwLXVlNnYuaGxmghZid3gtY2Etb3JkZXJlcm1zcC11ZTZ2
+          gglsb2NhbGhvc3SCKmJ3eC1jYS1vcmRlcmVybXNwLmhsZi5id3gtdWF0LnJlZGxl
+          ZGdlci5ldYcEfwAAAYcECgcABDAKBggqhkjOPQQDAgNIADBFAiEA127hPpImMJOt
+          gqoS3iZe+s81yZVweEQgKRCuQ8LFQO0CIHUTLlH4hhcgt66m3dPs4lztHbWJ69ap
+          71V3We3Qft0D
+          -----END CERTIFICATE-----
+    url: https://bwx-ca-orderermsp.hlf.bwx-uat.redledger.eu:443
+channels:
+  bwx:
+    orderers:
+      - bwx-orderermsp-orderer0-5zlt.hlf
+      - bwx-orderermsp-orderer1-2rjs.hlf
+      - bwx-orderermsp-orderer2-3ejg.hlf
+    peers:
+      bwx-bwfmsp-peer0-wgsh.hlf:
+        chaincodeQuery: true
+        discover: true
+        endorsingPeer: true
+        eventSource: true
+        ledgerQuery: true
+      bwx-bwtmsp-peer0-riy3.hlf:
+        chaincodeQuery: true
+        discover: true
+        endorsingPeer: true
+        eventSource: true
+        ledgerQuery: true
+      bwx-bwxmsp-peer0-9qak.hlf:
+        chaincodeQuery: true
+        discover: true
+        endorsingPeer: true
+        eventSource: true
+        ledgerQuery: true
+client:
+  organization: <no value>
+name: hlf-network
+orderers:
+  bwx-orderermsp-orderer0-5zlt.hlf:
+    grpcOptions:
+      allow-insecure: false
+    tlsCACerts:
+      pem: |
+        -----BEGIN CERTIFICATE-----
+        MIICQDCCAeagAwIBAgIRAI4kx6Ae8z2E7FULxJD9ZAUwCgYIKoZIzj0EAwIwajEL
+        MAkGA1UEBhMCQkUxETAPBgNVBAcTCEJydXNzZWxzMREwDwYDVQQJEwhCcnVzc2Vs
+        czEQMA4GA1UEChMHRnVqaXRzdTETMBEGA1UECxMKQmxvY2tjaGFpbjEOMAwGA1UE
+        AxMFdGxzY2EwHhcNMjIwNjMwMDkwNTI4WhcNMzIwNzAxMDkwNTI4WjBqMQswCQYD
+        VQQGEwJCRTERMA8GA1UEBxMIQnJ1c3NlbHMxETAPBgNVBAkTCEJydXNzZWxzMRAw
+        DgYDVQQKEwdGdWppdHN1MRMwEQYDVQQLEwpCbG9ja2NoYWluMQ4wDAYDVQQDEwV0
+        bHNjYTBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABKHtcl6OCOBsqbt4eCkl37Bd
+        5+EIiWu6zx0YGOaxrCve4lNqoXuUUzhUFk40lS2jK+WSglRP6LJHhmXsHtW4yMGj
+        bTBrMA4GA1UdDwEB/wQEAwIBpjAdBgNVHSUEFjAUBggrBgEFBQcDAgYIKwYBBQUH
+        AwEwDwYDVR0TAQH/BAUwAwEB/zApBgNVHQ4EIgQgsXwyD5XK2Xa+utk4cIFoLOLO
+        iXghm3zuC2NAqHBWc2YwCgYIKoZIzj0EAwIDSAAwRQIhAKT1BvyltvaoTSvlWYHW
+        RkgrmIalEIaKeyidluHCCEKkAiBYmsaeCmXvuSlfT52Yni07dbjTID4Ge+/wMct4
+        XxTVBw==
+        -----END CERTIFICATE-----
+    url: grpcs://bwx-orderermsp-orderer0.hlf.bwx-uat.redledger.eu:443
+  bwx-orderermsp-orderer1-2rjs.hlf:
+    grpcOptions:
+      allow-insecure: false
+    tlsCACerts:
+      pem: |
+        -----BEGIN CERTIFICATE-----
+        MIICQDCCAeagAwIBAgIRAI4kx6Ae8z2E7FULxJD9ZAUwCgYIKoZIzj0EAwIwajEL
+        MAkGA1UEBhMCQkUxETAPBgNVBAcTCEJydXNzZWxzMREwDwYDVQQJEwhCcnVzc2Vs
+        czEQMA4GA1UEChMHRnVqaXRzdTETMBEGA1UECxMKQmxvY2tjaGFpbjEOMAwGA1UE
+        AxMFdGxzY2EwHhcNMjIwNjMwMDkwNTI4WhcNMzIwNzAxMDkwNTI4WjBqMQswCQYD
+        VQQGEwJCRTERMA8GA1UEBxMIQnJ1c3NlbHMxETAPBgNVBAkTCEJydXNzZWxzMRAw
+        DgYDVQQKEwdGdWppdHN1MRMwEQYDVQQLEwpCbG9ja2NoYWluMQ4wDAYDVQQDEwV0
+        bHNjYTBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABKHtcl6OCOBsqbt4eCkl37Bd
+        5+EIiWu6zx0YGOaxrCve4lNqoXuUUzhUFk40lS2jK+WSglRP6LJHhmXsHtW4yMGj
+        bTBrMA4GA1UdDwEB/wQEAwIBpjAdBgNVHSUEFjAUBggrBgEFBQcDAgYIKwYBBQUH
+        AwEwDwYDVR0TAQH/BAUwAwEB/zApBgNVHQ4EIgQgsXwyD5XK2Xa+utk4cIFoLOLO
+        iXghm3zuC2NAqHBWc2YwCgYIKoZIzj0EAwIDSAAwRQIhAKT1BvyltvaoTSvlWYHW
+        RkgrmIalEIaKeyidluHCCEKkAiBYmsaeCmXvuSlfT52Yni07dbjTID4Ge+/wMct4
+        XxTVBw==
+        -----END CERTIFICATE-----
+    url: grpcs://bwx-orderermsp-orderer1.hlf.bwx-uat.redledger.eu:443
+  bwx-orderermsp-orderer2-3ejg.hlf:
+    grpcOptions:
+      allow-insecure: false
+    tlsCACerts:
+      pem: |
+        -----BEGIN CERTIFICATE-----
+        MIICQDCCAeagAwIBAgIRAI4kx6Ae8z2E7FULxJD9ZAUwCgYIKoZIzj0EAwIwajEL
+        MAkGA1UEBhMCQkUxETAPBgNVBAcTCEJydXNzZWxzMREwDwYDVQQJEwhCcnVzc2Vs
+        czEQMA4GA1UEChMHRnVqaXRzdTETMBEGA1UECxMKQmxvY2tjaGFpbjEOMAwGA1UE
+        AxMFdGxzY2EwHhcNMjIwNjMwMDkwNTI4WhcNMzIwNzAxMDkwNTI4WjBqMQswCQYD
+        VQQGEwJCRTERMA8GA1UEBxMIQnJ1c3NlbHMxETAPBgNVBAkTCEJydXNzZWxzMRAw
+        DgYDVQQKEwdGdWppdHN1MRMwEQYDVQQLEwpCbG9ja2NoYWluMQ4wDAYDVQQDEwV0
+        bHNjYTBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABKHtcl6OCOBsqbt4eCkl37Bd
+        5+EIiWu6zx0YGOaxrCve4lNqoXuUUzhUFk40lS2jK+WSglRP6LJHhmXsHtW4yMGj
+        bTBrMA4GA1UdDwEB/wQEAwIBpjAdBgNVHSUEFjAUBggrBgEFBQcDAgYIKwYBBQUH
+        AwEwDwYDVR0TAQH/BAUwAwEB/zApBgNVHQ4EIgQgsXwyD5XK2Xa+utk4cIFoLOLO
+        iXghm3zuC2NAqHBWc2YwCgYIKoZIzj0EAwIDSAAwRQIhAKT1BvyltvaoTSvlWYHW
+        RkgrmIalEIaKeyidluHCCEKkAiBYmsaeCmXvuSlfT52Yni07dbjTID4Ge+/wMct4
+        XxTVBw==
+        -----END CERTIFICATE-----
+    url: grpcs://bwx-orderermsp-orderer2.hlf.bwx-uat.redledger.eu:443
+organizations:
+  bwfmsp:
+    cryptoPath: /tmp/cryptopath
+    mspid: bwfmsp
+    orderers: []
+    peers:
+      - bwx-bwfmsp-peer0-wgsh.hlf
+    users:
+      admin:
+        cert:
+          pem: |
+            -----BEGIN CERTIFICATE-----
+            MIICTzCCAfagAwIBAgIUN2GU8FivHOjZ5xIZTIQCHze2pJQwCgYIKoZIzj0EAwIw
+            ZzELMAkGA1UEBhMCVVMxETAPBgNVBAcTCEJydXNzZWxzMREwDwYDVQQJEwhCcnVz
+            c2VsczEQMA4GA1UEChMHRnVqaXRzdTETMBEGA1UECxMKQmxvY2tjaGFpbjELMAkG
+            A1UEAxMCY2EwHhcNMjIwNjMwMDg1ODA1WhcNMjMwNzA0MDk1OTAwWjAgMQ4wDAYD
+            VQQLEwVhZG1pbjEOMAwGA1UEAxMFYWRtaW4wWTATBgcqhkjOPQIBBggqhkjOPQMB
+            BwNCAARP/KUTkxfRWfVrKD9PX7fKv/GDAAVqft6HiL4LdH1RHx8xSOVosVru7xdf
+            ARdynrgUMKSGslb0X5ySuPZFg0eNo4HGMIHDMA4GA1UdDwEB/wQEAwIHgDAMBgNV
+            HRMBAf8EAjAAMB0GA1UdDgQWBBTpqJjwHFMI95eOFdweXPu4a59qiDArBgNVHSME
+            JDAigCBvFVnK0XnQaWMu/Q2cZWdpGNB5I7XkVPWwWpv9orbVnjBXBggqAwQFBgcI
+            AQRLeyJhdHRycyI6eyJoZi5BZmZpbGlhdGlvbiI6IiIsImhmLkVucm9sbG1lbnRJ
+            RCI6ImFkbWluIiwiaGYuVHlwZSI6ImFkbWluIn19MAoGCCqGSM49BAMCA0cAMEQC
+            IE3lhGUhjL8oXxF9lx3Fy/beJIuyMFAOQx7YPfpzSf+qAiBCk5ggSAW3e3FknHH+
+            XYqaotf2IIpuM6LY+TflRMa5gQ==
+            -----END CERTIFICATE-----
+        key:
+          pem: |
+            -----BEGIN PRIVATE KEY-----
+            MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgRPMGV81yob+K03ie
+            WRvdOkaNVTr2/X2bRGLCEcj+tMehRANCAARP/KUTkxfRWfVrKD9PX7fKv/GDAAVq
+            ft6HiL4LdH1RHx8xSOVosVru7xdfARdynrgUMKSGslb0X5ySuPZFg0eN
+            -----END PRIVATE KEY-----
+  bwtmsp:
+    cryptoPath: /tmp/cryptopath
+    mspid: bwtmsp
+    orderers: []
+    peers:
+      - bwx-bwtmsp-peer0-riy3.hlf
+    users:
+      admin:
+        cert:
+          pem: |
+            -----BEGIN CERTIFICATE-----
+            MIICUDCCAfagAwIBAgIUDVoP0dFRGI40u681NxklMYrMSGcwCgYIKoZIzj0EAwIw
+            ZzELMAkGA1UEBhMCVVMxETAPBgNVBAcTCEJydXNzZWxzMREwDwYDVQQJEwhCcnVz
+            c2VsczEQMA4GA1UEChMHRnVqaXRzdTETMBEGA1UECxMKQmxvY2tjaGFpbjELMAkG
+            A1UEAxMCY2EwHhcNMjIwNjMwMDg0NDQ0WhcNMjMwNzA0MDk1OTAwWjAgMQ4wDAYD
+            VQQLEwVhZG1pbjEOMAwGA1UEAxMFYWRtaW4wWTATBgcqhkjOPQIBBggqhkjOPQMB
+            BwNCAAS5SVjJS5mDBS8uoY6oMX+NqjsoW33ywRJxeu34IL9oCo2zDLry2KD/Pcxx
+            27WrDpecIAK/keDGGqZBySnVFRLGo4HGMIHDMA4GA1UdDwEB/wQEAwIHgDAMBgNV
+            HRMBAf8EAjAAMB0GA1UdDgQWBBRAp76sfITOSQ7/Jc//PLGxuOTS9DArBgNVHSME
+            JDAigCAZJWewTPF4f8i4bOtk3lQU418Uxu3vQ7glalSMUAwptjBXBggqAwQFBgcI
+            AQRLeyJhdHRycyI6eyJoZi5BZmZpbGlhdGlvbiI6IiIsImhmLkVucm9sbG1lbnRJ
+            RCI6ImFkbWluIiwiaGYuVHlwZSI6ImFkbWluIn19MAoGCCqGSM49BAMCA0gAMEUC
+            IQCG4JTMuJxDQkhxamIvxfsw97RmUYsLfvHoToltuW6igAIgO2jbOLvF4oENK7XF
+            0V09EZF8tpxQYdImwy+8rmjHiIc=
+            -----END CERTIFICATE-----
+        key:
+          pem: |
+            -----BEGIN PRIVATE KEY-----
+            MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgnMIUhmQy04Od7NDp
+            Q634E3omMHwk4IArsQteTadofx2hRANCAAS5SVjJS5mDBS8uoY6oMX+NqjsoW33y
+            wRJxeu34IL9oCo2zDLry2KD/Pcxx27WrDpecIAK/keDGGqZBySnVFRLG
+            -----END PRIVATE KEY-----
+  bwxmsp:
+    cryptoPath: /tmp/cryptopath
+    mspid: bwxmsp
+    orderers: []
+    peers:
+      - bwx-bwxmsp-peer0-9qak.hlf
+    users:
+      admin:
+        cert:
+          pem: |
+            -----BEGIN CERTIFICATE-----
+            MIICUDCCAfagAwIBAgIUZrTpDhj57iqZxfmSLw8Df4OMoZcwCgYIKoZIzj0EAwIw
+            ZzELMAkGA1UEBhMCVVMxETAPBgNVBAcTCEJydXNzZWxzMREwDwYDVQQJEwhCcnVz
+            c2VsczEQMA4GA1UEChMHRnVqaXRzdTETMBEGA1UECxMKQmxvY2tjaGFpbjELMAkG
+            A1UEAxMCY2EwHhcNMjIwNjMwMDg0MTE4WhcNMjMwNzA0MTAwMDAwWjAgMQ4wDAYD
+            VQQLEwVhZG1pbjEOMAwGA1UEAxMFYWRtaW4wWTATBgcqhkjOPQIBBggqhkjOPQMB
+            BwNCAARqeebELEURHk+pl4pSNPULBxQ/KBCwVEkF5dPGY3bvSM6Cpzjeof65w40T
+            if1eVN74Fh1YSjaynh24tYxlEkzKo4HGMIHDMA4GA1UdDwEB/wQEAwIHgDAMBgNV
+            HRMBAf8EAjAAMB0GA1UdDgQWBBQpcCF3aS1TgHSkEPkvT47f1kF/KjArBgNVHSME
+            JDAigCAihViOUy141Q+Am1hjrSa8yUHEDLRBti05ZHNMi2+ERjBXBggqAwQFBgcI
+            AQRLeyJhdHRycyI6eyJoZi5BZmZpbGlhdGlvbiI6IiIsImhmLkVucm9sbG1lbnRJ
+            RCI6ImFkbWluIiwiaGYuVHlwZSI6ImFkbWluIn19MAoGCCqGSM49BAMCA0gAMEUC
+            IQCDZzgVv52dhmMTvtkFSIl2lnaAcqxCZomBFpjdvmlaYQIgCIajokc0hXNOcjhX
+            fvr7bx+frVYUIsnVscGSgEkg0hc=
+            -----END CERTIFICATE-----
+        key:
+          pem: |
+            -----BEGIN PRIVATE KEY-----
+            MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgWRDltLWiYogpmtxR
+            zklmVQfQJbm6XQuD8EewA1zXTsGhRANCAARqeebELEURHk+pl4pSNPULBxQ/KBCw
+            VEkF5dPGY3bvSM6Cpzjeof65w40Tif1eVN74Fh1YSjaynh24tYxlEkzK
+            -----END PRIVATE KEY-----
+  orderermsp:
+    cryptoPath: /tmp/cryptopath
+    mspid: orderermsp
+    orderers:
+      - bwx-orderermsp-orderer0-5zlt.hlf
+      - bwx-orderermsp-orderer1-2rjs.hlf
+      - bwx-orderermsp-orderer2-3ejg.hlf
+    peers: []
+    users:
+      admin:
+        cert:
+          pem: |
+            -----BEGIN CERTIFICATE-----
+            MIICUDCCAfagAwIBAgIUQx1V2G/YJBpvIptJ4CTYNgYExZQwCgYIKoZIzj0EAwIw
+            ZzELMAkGA1UEBhMCVVMxETAPBgNVBAcTCEJydXNzZWxzMREwDwYDVQQJEwhCcnVz
+            c2VsczEQMA4GA1UEChMHRnVqaXRzdTETMBEGA1UECxMKQmxvY2tjaGFpbjELMAkG
+            A1UEAxMCY2EwHhcNMjIwNjMwMDkwNTI4WhcNMjMwNzA0MDk1NjAwWjAgMQ4wDAYD
+            VQQLEwVhZG1pbjEOMAwGA1UEAxMFYWRtaW4wWTATBgcqhkjOPQIBBggqhkjOPQMB
+            BwNCAAQ9aOnUFq7xKK6sDuTS0HwoPEt7jagoVZ2Q0TsK5yTNFf2siEYbXXHLKHAZ
+            M4uT0FbOWH3m0XtHUEzoBjTikKDAo4HGMIHDMA4GA1UdDwEB/wQEAwIHgDAMBgNV
+            HRMBAf8EAjAAMB0GA1UdDgQWBBSs9m64XS6QuBP9qxrnoWY/L/dOGDArBgNVHSME
+            JDAigCDjVhj9UPsiuiPNEOcAMXNbiD7MShpFPKhVb3YNv4JPgjBXBggqAwQFBgcI
+            AQRLeyJhdHRycyI6eyJoZi5BZmZpbGlhdGlvbiI6IiIsImhmLkVucm9sbG1lbnRJ
+            RCI6ImFkbWluIiwiaGYuVHlwZSI6ImFkbWluIn19MAoGCCqGSM49BAMCA0gAMEUC
+            IQCg0n9VTi/Bv+9X7TMlgg3B44rnvuhSuoCNXPYnTNqQTQIgAJf+tWy3sA3JqgRP
+            spWVcEjAee5UABcO3mNC5Ob48iA=
+            -----END CERTIFICATE-----
+        key:
+          pem: |
+            -----BEGIN PRIVATE KEY-----
+            MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgmhERldxo96L94bzi
+            Pc4XCRuCzf2hj7LnDKlqrBc01tChRANCAAQ9aOnUFq7xKK6sDuTS0HwoPEt7jago
+            VZ2Q0TsK5yTNFf2siEYbXXHLKHAZM4uT0FbOWH3m0XtHUEzoBjTikKDA
+            -----END PRIVATE KEY-----
+peers:
+  bwx-bwfmsp-peer0-wgsh.hlf:
+    grpcOptions:
+      allow-insecure: false
+      hostnameOverride: ""
+      ssl-target-name-override: ""
+    tlsCACerts:
+      pem: |
+        -----BEGIN CERTIFICATE-----
+        MIICQDCCAeagAwIBAgIRAML9WIk2YVyWe3wJNKq2n0EwCgYIKoZIzj0EAwIwajEL
+        MAkGA1UEBhMCQkUxETAPBgNVBAcTCEJydXNzZWxzMREwDwYDVQQJEwhCcnVzc2Vs
+        czEQMA4GA1UEChMHRnVqaXRzdTETMBEGA1UECxMKQmxvY2tjaGFpbjEOMAwGA1UE
+        AxMFdGxzY2EwHhcNMjIwNjMwMDg1ODA1WhcNMzIwNzAxMDg1ODA1WjBqMQswCQYD
+        VQQGEwJCRTERMA8GA1UEBxMIQnJ1c3NlbHMxETAPBgNVBAkTCEJydXNzZWxzMRAw
+        DgYDVQQKEwdGdWppdHN1MRMwEQYDVQQLEwpCbG9ja2NoYWluMQ4wDAYDVQQDEwV0
+        bHNjYTBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABHRVqsNU1vOJXGju/N3fGs3j
+        nIVD+52OXT2jQnPwO0UBLYpsh6a50j2AuqzcN951dkzSLC7tuAo0y12WQAjjebSj
+        bTBrMA4GA1UdDwEB/wQEAwIBpjAdBgNVHSUEFjAUBggrBgEFBQcDAgYIKwYBBQUH
+        AwEwDwYDVR0TAQH/BAUwAwEB/zApBgNVHQ4EIgQgFEAbLgQpYDu74iIjSdUsz7Tc
+        Iyyd6br/WoNMPO4u2lEwCgYIKoZIzj0EAwIDSAAwRQIhAO+5od+pY4LZpr12JZ4p
+        23EYy9EJax8s4jW3rpW65klAAiAQ7Qt0q0+WyAKJKoIaaeGMaA9sGtn63h5G8LiO
+        sZleag==
+        -----END CERTIFICATE-----
+    url: grpcs://bwx-bwfmsp-peer0.hlf.bwx-uat.redledger.eu:443
+  bwx-bwtmsp-peer0-riy3.hlf:
+    grpcOptions:
+      allow-insecure: false
+      hostnameOverride: ""
+      ssl-target-name-override: ""
+    tlsCACerts:
+      pem: |
+        -----BEGIN CERTIFICATE-----
+        MIICQDCCAeWgAwIBAgIQY3voltJC6KodG2ddf3/KejAKBggqhkjOPQQDAjBqMQsw
+        CQYDVQQGEwJCRTERMA8GA1UEBxMIQnJ1c3NlbHMxETAPBgNVBAkTCEJydXNzZWxz
+        MRAwDgYDVQQKEwdGdWppdHN1MRMwEQYDVQQLEwpCbG9ja2NoYWluMQ4wDAYDVQQD
+        EwV0bHNjYTAeFw0yMjA2MzAwODQ0NDRaFw0zMjA3MDEwODQ0NDRaMGoxCzAJBgNV
+        BAYTAkJFMREwDwYDVQQHEwhCcnVzc2VsczERMA8GA1UECRMIQnJ1c3NlbHMxEDAO
+        BgNVBAoTB0Z1aml0c3UxEzARBgNVBAsTCkJsb2NrY2hhaW4xDjAMBgNVBAMTBXRs
+        c2NhMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEcjsjOM2yBm4P0efLRjDau+5C
+        zC1Dv1GnbOcxdJoJOGbRol+RwJSV+8iZVkQMDYOUXUH6SXwKjm0Wf4pBegTymKNt
+        MGswDgYDVR0PAQH/BAQDAgGmMB0GA1UdJQQWMBQGCCsGAQUFBwMCBggrBgEFBQcD
+        ATAPBgNVHRMBAf8EBTADAQH/MCkGA1UdDgQiBCBXlO3K91udjm3ecAcgWX1cl1/x
+        UnpJ2VA8CnlGI6gMRDAKBggqhkjOPQQDAgNJADBGAiEA1wUQg6naNagZ5poq0mlX
+        4Cbsk0060M1iDgtiA/iP+u8CIQCPUcJ4xN0apKGWM5acL36hXJvm9oWx8wIQNuoo
+        nYHzRQ==
+        -----END CERTIFICATE-----
+    url: grpcs://bwx-bwtmsp-peer0.hlf.bwx-uat.redledger.eu:443
+  bwx-bwxmsp-peer0-9qak.hlf:
+    grpcOptions:
+      allow-insecure: false
+      hostnameOverride: ""
+      ssl-target-name-override: ""
+    tlsCACerts:
+      pem: |
+        -----BEGIN CERTIFICATE-----
+        MIICPzCCAeWgAwIBAgIQf1ZUX9THt8z5ZQ34SSnB0DAKBggqhkjOPQQDAjBqMQsw
+        CQYDVQQGEwJCRTERMA8GA1UEBxMIQnJ1c3NlbHMxETAPBgNVBAkTCEJydXNzZWxz
+        MRAwDgYDVQQKEwdGdWppdHN1MRMwEQYDVQQLEwpCbG9ja2NoYWluMQ4wDAYDVQQD
+        EwV0bHNjYTAeFw0yMjA2MzAwODQxMThaFw0zMjA3MDEwODQxMThaMGoxCzAJBgNV
+        BAYTAkJFMREwDwYDVQQHEwhCcnVzc2VsczERMA8GA1UECRMIQnJ1c3NlbHMxEDAO
+        BgNVBAoTB0Z1aml0c3UxEzARBgNVBAsTCkJsb2NrY2hhaW4xDjAMBgNVBAMTBXRs
+        c2NhMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE7kEtxJG84I4MGHfF0LUccFeZ
+        W1ErSdi7kE6admDqadA8QbiVXKwpTTutvYRBY20axwRPpRLBHafauxZ0tk/Y8aNt
+        MGswDgYDVR0PAQH/BAQDAgGmMB0GA1UdJQQWMBQGCCsGAQUFBwMCBggrBgEFBQcD
+        ATAPBgNVHRMBAf8EBTADAQH/MCkGA1UdDgQiBCBasL+kcvZ5k9CKl2lvcMCsxBCT
+        wuX81vq02zy5uITniDAKBggqhkjOPQQDAgNIADBFAiEA1v/qmFW2b7cpTffVmU2k
+        sS3BfdvaY6o5jUVwaPJ/Ff0CIGw1LupWFwYVRLqIfDsGaIBh6NlvE3LtdxTnGNK/
+        LhxM
+        -----END CERTIFICATE-----
+    url: grpcs://bwx-bwxmsp-peer0.hlf.bwx-uat.redledger.eu:443
+version: 1.0.0

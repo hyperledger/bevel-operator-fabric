@@ -1,0 +1,645 @@
+
+name: hlf-network
+version: 1.0.0
+client:
+  organization: ""
+organizations:
+  
+  OrdererMSP:
+    mspid: OrdererMSP
+    cryptoPath: /tmp/cryptopath
+    users:
+      orderermsp-admin-kfs:
+        cert:
+          pem: |
+            -----BEGIN CERTIFICATE-----
+            MIIB9zCCAZ6gAwIBAgIULdieo6PeRh9RE+kInUt2CAhBVwAwCgYIKoZIzj0EAwIw
+            ajELMAkGA1UEBhMCRVMxETAPBgNVBAcTCEFsaWNhbnRlMREwDwYDVQQJEwhBbGlj
+            YW50ZTEZMBcGA1UEChMQS3VuZyBGdSBTb2Z0d2FyZTENMAsGA1UECxMEVGVjaDEL
+            MAkGA1UEAxMCY2EwHhcNMjMwNTA2MTYzMjE4WhcNMjQwNTA2MTYzMzAwWjAgMQ4w
+            DAYDVQQLEwVhZG1pbjEOMAwGA1UEAxMFYWRtaW4wWTATBgcqhkjOPQIBBggqhkjO
+            PQMBBwNCAAQpBVgXAlV4+5i32q8sU21Nc8/f6N7iMdkSWlqz++YBForr3nbccZwS
+            Gaz14XAy9mBXf63CTMYD283uDduzYAqko2wwajAOBgNVHQ8BAf8EBAMCB4AwDAYD
+            VR0TAQH/BAIwADAdBgNVHQ4EFgQUJrZnTY+pt6Mbj7TZCHyU6YClxqcwKwYDVR0j
+            BCQwIoAgUkfdCmCxaK/TfihZlOzkzDZIwEVYWGotJif+SAyrGm8wCgYIKoZIzj0E
+            AwIDRwAwRAIgMZtoAsD6uinYz5KwZ/YPSKDk0lqRM1n0rKq+eIen2i8CIHDMn8HM
+            A+3/LBLMsZVOBLa0HET+xVbknLN6XwRGRyM9
+            -----END CERTIFICATE-----
+            
+        key:
+          pem: |
+            -----BEGIN PRIVATE KEY-----
+            MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgA6YLXGvmH7F8QIu8
+            D3fNV1MB/4lwvsyG1Oe2bggv+1ShRANCAAQpBVgXAlV4+5i32q8sU21Nc8/f6N7i
+            MdkSWlqz++YBForr3nbccZwSGaz14XAy9mBXf63CTMYD283uDduzYAqk
+            -----END PRIVATE KEY-----
+            
+      orderermsp-admin-tls-kfs:
+        cert:
+          pem: |
+            -----BEGIN CERTIFICATE-----
+            MIIB+zCCAaGgAwIBAgIUTkwz2y0k4C/dr/YuPVDmlAiVpYgwCgYIKoZIzj0EAwIw
+            bTELMAkGA1UEBhMCRVMxETAPBgNVBAcTCEFsaWNhbnRlMREwDwYDVQQJEwhBbGlj
+            YW50ZTEZMBcGA1UEChMQS3VuZyBGdSBTb2Z0d2FyZTENMAsGA1UECxMEVGVjaDEO
+            MAwGA1UEAxMFdGxzY2EwHhcNMjMwNTA2MTYzMjE4WhcNMjQwNTA2MTYzMzAwWjAg
+            MQ4wDAYDVQQLEwVhZG1pbjEOMAwGA1UEAxMFYWRtaW4wWTATBgcqhkjOPQIBBggq
+            hkjOPQMBBwNCAAQtScbb/ncp8WLa2ns1iPAP1rGl0PBdkVXunyA2BJuSYnk8VLqz
+            7vuDQJ8Y735VklQH5b9l93AFAPvji+lBZD7to2wwajAOBgNVHQ8BAf8EBAMCB4Aw
+            DAYDVR0TAQH/BAIwADAdBgNVHQ4EFgQU7V+zRzQLLWrQZLtlV7hQjytWk6IwKwYD
+            VR0jBCQwIoAgtBSgELmDzok9otfu4G4qgE3MIovOFV8Af1eLQuxJSRMwCgYIKoZI
+            zj0EAwIDSAAwRQIhAOD3cyhVtjeTGodUgkHY3kflWJDhOpP0JorG3wPM2dSjAiBA
+            SUCtHEcv/l9X/sbNlZXWvuyEQGrLeiYRp4c56TpYZw==
+            -----END CERTIFICATE-----
+            
+        key:
+          pem: |
+            -----BEGIN PRIVATE KEY-----
+            MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgEwI7J0RsvOGzoP3d
+            vMzjArhzUUqO8eRPMcGPaDxByb+hRANCAAQtScbb/ncp8WLa2ns1iPAP1rGl0PBd
+            kVXunyA2BJuSYnk8VLqz7vuDQJ8Y735VklQH5b9l93AFAPvji+lBZD7t
+            -----END PRIVATE KEY-----
+            
+      orderermsp-client-kfs:
+        cert:
+          pem: |
+            -----BEGIN CERTIFICATE-----
+            MIIB+TCCAaCgAwIBAgIULt8oFDcsmMlw5tIovIeu5YpoP9UwCgYIKoZIzj0EAwIw
+            ajELMAkGA1UEBhMCRVMxETAPBgNVBAcTCEFsaWNhbnRlMREwDwYDVQQJEwhBbGlj
+            YW50ZTEZMBcGA1UEChMQS3VuZyBGdSBTb2Z0d2FyZTENMAsGA1UECxMEVGVjaDEL
+            MAkGA1UEAxMCY2EwHhcNMjMwNTA2MTYzMjE4WhcNMjQwNTA2MTYzMzAwWjAiMQ8w
+            DQYDVQQLEwZjbGllbnQxDzANBgNVBAMTBmNsaWVudDBZMBMGByqGSM49AgEGCCqG
+            SM49AwEHA0IABNnNJPkov9IVmpolDGzDEPG8iymnInrxSuH7lUUZebrDXeZMKRfK
+            8PFmEEk+09fdqC9dqUdx9qG//VxbN3gdVXqjbDBqMA4GA1UdDwEB/wQEAwIHgDAM
+            BgNVHRMBAf8EAjAAMB0GA1UdDgQWBBSmzwFeunDiuiVPvenmc4cRqU3pTzArBgNV
+            HSMEJDAigCBSR90KYLFor9N+KFmU7OTMNkjARVhYai0mJ/5IDKsabzAKBggqhkjO
+            PQQDAgNHADBEAiAm87wXPZKMfc25AAZWMRKWAvUWNPkITMci25EzJX7y3AIgDZyo
+            ZNQEudXAadXniG8KG7+KASX4F7D2f1SUn7NyI1g=
+            -----END CERTIFICATE-----
+            
+        key:
+          pem: |
+            -----BEGIN PRIVATE KEY-----
+            MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgsryStq1b1pqpUK2Z
+            CSoEfNEmL687KFzV6RrhDCCaecShRANCAATZzST5KL/SFZqaJQxswxDxvIsppyJ6
+            8Urh+5VFGXm6w13mTCkXyvDxZhBJPtPX3agvXalHcfahv/1cWzd4HVV6
+            -----END PRIVATE KEY-----
+            
+    peers: []
+    orderers:
+      - orderermsp-orderer0.kfs
+      - orderermsp-orderer1.kfs
+      - orderermsp-orderer2.kfs
+  Org1MSP:
+    mspid: Org1MSP
+    cryptoPath: /tmp/cryptopath
+    users:
+      org1msp-admin-kfs:
+        cert:
+          pem: |
+            -----BEGIN CERTIFICATE-----
+            MIIB+DCCAZ6gAwIBAgIULY9HpgBK3uQSQPBYE6+9gisTdTowCgYIKoZIzj0EAwIw
+            ajELMAkGA1UEBhMCRVMxETAPBgNVBAcTCEFsaWNhbnRlMREwDwYDVQQJEwhBbGlj
+            YW50ZTEZMBcGA1UEChMQS3VuZyBGdSBTb2Z0d2FyZTENMAsGA1UECxMEVGVjaDEL
+            MAkGA1UEAxMCY2EwHhcNMjMwNTA2MTYzNjQ0WhcNMjQwNTA2MTYzODAwWjAgMQ4w
+            DAYDVQQLEwVhZG1pbjEOMAwGA1UEAxMFYWRtaW4wWTATBgcqhkjOPQIBBggqhkjO
+            PQMBBwNCAARyyiNsQHwRY/YLk8PhpU5i2wDeK4rd9P0afr7igse6oiPxIM4M1iFh
+            /NcT7IHf4BEzyU+hfHdoZ6WOY3kX95kao2wwajAOBgNVHQ8BAf8EBAMCB4AwDAYD
+            VR0TAQH/BAIwADAdBgNVHQ4EFgQUmpxwKByHtduQCfszQ3NXM5Ovn+UwKwYDVR0j
+            BCQwIoAgWivoI6D8gs+ciePsbmDeZZgrnBkhYP9AUlgtc4XAUWQwCgYIKoZIzj0E
+            AwIDSAAwRQIhAJDDKOZ3RGkPhkXE8m/8MgSkdsDzfB+QeNX4VPF7sJogAiAzVzu0
+            4n03p1CA3EpHgqlKL5+KIuDqh94S8Paj5/dfAw==
+            -----END CERTIFICATE-----
+            
+        key:
+          pem: |
+            -----BEGIN PRIVATE KEY-----
+            MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQg5hKs7keNZ6zHrnHb
+            mjjP46doKJQfqqrQV7+3EdPRcbGhRANCAARyyiNsQHwRY/YLk8PhpU5i2wDeK4rd
+            9P0afr7igse6oiPxIM4M1iFh/NcT7IHf4BEzyU+hfHdoZ6WOY3kX95ka
+            -----END PRIVATE KEY-----
+            
+      org1msp-admin-tls-kfs:
+        cert:
+          pem: |
+            -----BEGIN CERTIFICATE-----
+            MIIB+jCCAaGgAwIBAgIUVdnvIq5rKOKhj7hPoRxyFKO4DEEwCgYIKoZIzj0EAwIw
+            bTELMAkGA1UEBhMCRVMxETAPBgNVBAcTCEFsaWNhbnRlMREwDwYDVQQJEwhBbGlj
+            YW50ZTEZMBcGA1UEChMQS3VuZyBGdSBTb2Z0d2FyZTENMAsGA1UECxMEVGVjaDEO
+            MAwGA1UEAxMFdGxzY2EwHhcNMjMwNTA2MTYzNjQ0WhcNMjQwNTA2MTYzODAwWjAg
+            MQ4wDAYDVQQLEwVhZG1pbjEOMAwGA1UEAxMFYWRtaW4wWTATBgcqhkjOPQIBBggq
+            hkjOPQMBBwNCAARvSmZRddwnrFQE3mHwSWJMLm/jLPuEHaSpAUXCEO9lZh5//CIY
+            gFrxmye3eh4P/GV4k9j2+hRrcskuMfRG835eo2wwajAOBgNVHQ8BAf8EBAMCB4Aw
+            DAYDVR0TAQH/BAIwADAdBgNVHQ4EFgQU0VmhmaTam8prgR1tXp/OTlFOZLowKwYD
+            VR0jBCQwIoAg4vRX3iv4VrfEWSRflAzoXbUblPwndcBsz5E6TmaoTHEwCgYIKoZI
+            zj0EAwIDRwAwRAIgSJAAMoMuFrPS+wN1+pVHPOHGFp2AueAil6/QD+ySWQ4CIC6S
+            V9JrLnqSVjEQ56s7vWptrLZRoRLMB+UpkCdQoJId
+            -----END CERTIFICATE-----
+            
+        key:
+          pem: |
+            -----BEGIN PRIVATE KEY-----
+            MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQg+RqA+A8QMwzFUAy5
+            +6tXt6L/XmpskxlY39fBEojGGWyhRANCAARvSmZRddwnrFQE3mHwSWJMLm/jLPuE
+            HaSpAUXCEO9lZh5//CIYgFrxmye3eh4P/GV4k9j2+hRrcskuMfRG835e
+            -----END PRIVATE KEY-----
+            
+      org1msp-client-kfs:
+        cert:
+          pem: |
+            -----BEGIN CERTIFICATE-----
+            MIIB+TCCAaCgAwIBAgIUE8xvGJ6QAJBB5062xnsY0tZ4Rs8wCgYIKoZIzj0EAwIw
+            ajELMAkGA1UEBhMCRVMxETAPBgNVBAcTCEFsaWNhbnRlMREwDwYDVQQJEwhBbGlj
+            YW50ZTEZMBcGA1UEChMQS3VuZyBGdSBTb2Z0d2FyZTENMAsGA1UECxMEVGVjaDEL
+            MAkGA1UEAxMCY2EwHhcNMjMwNTA2MTYzNjQ0WhcNMjQwNTA2MTYzODAwWjAiMQ8w
+            DQYDVQQLEwZjbGllbnQxDzANBgNVBAMTBmNsaWVudDBZMBMGByqGSM49AgEGCCqG
+            SM49AwEHA0IABKfFaY2UPr/fvp1GrBuBjAC+axXTkIfhA0UyOK7ycVcHMsFB8/gQ
+            6DRurYAbNr9XvY1oEQJUFuwpDLEf467bh0ajbDBqMA4GA1UdDwEB/wQEAwIHgDAM
+            BgNVHRMBAf8EAjAAMB0GA1UdDgQWBBSGvGZpJsb81PX2JV0w+CireXp0mzArBgNV
+            HSMEJDAigCBaK+gjoPyCz5yJ4+xuYN5lmCucGSFg/0BSWC1zhcBRZDAKBggqhkjO
+            PQQDAgNHADBEAiB39cmOqOGT+1G1Dw5a/YngPrSCwK+Wt91v5f8Y3pU/OAIgPGTY
+            l6gTa8DF5uaXw1jIdgJGAMBhFRX9lJ1WvRkc5Z4=
+            -----END CERTIFICATE-----
+            
+        key:
+          pem: |
+            -----BEGIN PRIVATE KEY-----
+            MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgCnPE/sf2XmsbB0+F
+            5z7+zIe1a2YEREDYfXgI/9Ma3BuhRANCAASnxWmNlD6/376dRqwbgYwAvmsV05CH
+            4QNFMjiu8nFXBzLBQfP4EOg0bq2AGza/V72NaBECVBbsKQyxH+Ou24dG
+            -----END PRIVATE KEY-----
+            
+    peers:
+      - org1msp-peer0.kfs
+      - org1msp-peer1.kfs
+    orderers: []
+  Org2MSP:
+    mspid: Org2MSP
+    cryptoPath: /tmp/cryptopath
+    users:
+      org2msp-admin-kfs:
+        cert:
+          pem: |
+            -----BEGIN CERTIFICATE-----
+            MIIB+DCCAZ6gAwIBAgIUeC3osmRBmiHEaDZ0TG3Uh3MqI/AwCgYIKoZIzj0EAwIw
+            ajELMAkGA1UEBhMCRVMxETAPBgNVBAcTCEFsaWNhbnRlMREwDwYDVQQJEwhBbGlj
+            YW50ZTEZMBcGA1UEChMQS3VuZyBGdSBTb2Z0d2FyZTENMAsGA1UECxMEVGVjaDEL
+            MAkGA1UEAxMCY2EwHhcNMjMwNTA2MTYzOTM5WhcNMjQwNTA2MTY0MDAwWjAgMQ4w
+            DAYDVQQLEwVhZG1pbjEOMAwGA1UEAxMFYWRtaW4wWTATBgcqhkjOPQIBBggqhkjO
+            PQMBBwNCAAR6BXDePi1gvhz1YqSGFL6BQZp7stxt6xhP9OqaAqlI28j4u0/6RJf+
+            vry+PPHRb07MQFpQMYAXvgcyMTV9QolGo2wwajAOBgNVHQ8BAf8EBAMCB4AwDAYD
+            VR0TAQH/BAIwADAdBgNVHQ4EFgQU23lb44thN/zVQvGrQJrKyp9A0vAwKwYDVR0j
+            BCQwIoAgzMkzMHcOi0Binawk6leQfuvCXJMXIJdzvBSrvAY5HugwCgYIKoZIzj0E
+            AwIDSAAwRQIhAKAFvPWHfQZhYrHNGnqI/iJN6deYulR6j8f4XKIiUhCuAiAnM4Gh
+            aVDNIcW18kZHeJ+U6O8Qj5ChYH3XzL6boBhzlQ==
+            -----END CERTIFICATE-----
+            
+        key:
+          pem: |
+            -----BEGIN PRIVATE KEY-----
+            MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgiRGcoR75Dwqb9hEO
+            vdldsOE7i74FTi1/SM78+6qCfQehRANCAAR6BXDePi1gvhz1YqSGFL6BQZp7stxt
+            6xhP9OqaAqlI28j4u0/6RJf+vry+PPHRb07MQFpQMYAXvgcyMTV9QolG
+            -----END PRIVATE KEY-----
+            
+      org2msp-admin-tls-kfs:
+        cert:
+          pem: |
+            -----BEGIN CERTIFICATE-----
+            MIIB+jCCAaGgAwIBAgIUcOErCZSLmLjuPHGKJl5RO1Sdm1YwCgYIKoZIzj0EAwIw
+            bTELMAkGA1UEBhMCRVMxETAPBgNVBAcTCEFsaWNhbnRlMREwDwYDVQQJEwhBbGlj
+            YW50ZTEZMBcGA1UEChMQS3VuZyBGdSBTb2Z0d2FyZTENMAsGA1UECxMEVGVjaDEO
+            MAwGA1UEAxMFdGxzY2EwHhcNMjMwNTA2MTYzOTM5WhcNMjQwNTA2MTY0MDAwWjAg
+            MQ4wDAYDVQQLEwVhZG1pbjEOMAwGA1UEAxMFYWRtaW4wWTATBgcqhkjOPQIBBggq
+            hkjOPQMBBwNCAAQeFpG6VwHyw3oW36/h7eaoeTli7XPxC81ZxtYsdM+stKFea6/D
+            /1mW8wcrEwh9XNPTo3wOTdFuGWiEt/yyZDxZo2wwajAOBgNVHQ8BAf8EBAMCB4Aw
+            DAYDVR0TAQH/BAIwADAdBgNVHQ4EFgQUF8/NDrd5bAPKtP2c12pxVSD396wwKwYD
+            VR0jBCQwIoAg7RUXKQWJtLv7sBgL1FxZcBiAK0PwlQTKmlx6laEIfiYwCgYIKoZI
+            zj0EAwIDRwAwRAIge2Fe8Zs5EvUbdGT5EBsABxzgD2Wint7Od/u9ko7GUY0CIBJv
+            ejcJaMFRsl8G4MgMAMaCq6FtAEhsPpx1ECEBpNq/
+            -----END CERTIFICATE-----
+            
+        key:
+          pem: |
+            -----BEGIN PRIVATE KEY-----
+            MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgYxBCwB8YB/SkaN+a
+            /9GrbojSoppNpxPuNwhM9Wqb6LKhRANCAAQeFpG6VwHyw3oW36/h7eaoeTli7XPx
+            C81ZxtYsdM+stKFea6/D/1mW8wcrEwh9XNPTo3wOTdFuGWiEt/yyZDxZ
+            -----END PRIVATE KEY-----
+            
+      org2msp-client-kfs:
+        cert:
+          pem: |
+            -----BEGIN CERTIFICATE-----
+            MIIB+TCCAaCgAwIBAgIUCRGOS9HAGktnNOPTQ2x+rcgqzD8wCgYIKoZIzj0EAwIw
+            ajELMAkGA1UEBhMCRVMxETAPBgNVBAcTCEFsaWNhbnRlMREwDwYDVQQJEwhBbGlj
+            YW50ZTEZMBcGA1UEChMQS3VuZyBGdSBTb2Z0d2FyZTENMAsGA1UECxMEVGVjaDEL
+            MAkGA1UEAxMCY2EwHhcNMjMwNTA2MTYzOTM5WhcNMjQwNTA2MTY0MTAwWjAiMQ8w
+            DQYDVQQLEwZjbGllbnQxDzANBgNVBAMTBmNsaWVudDBZMBMGByqGSM49AgEGCCqG
+            SM49AwEHA0IABG8e9sM4EF8+PZFqWhvl55mjGnoa4SGbE+MbspJiOf997RK2qQs3
+            iRzegIKtl1+ZCOc6L/TvWkKXaiBSDL0yR1ejbDBqMA4GA1UdDwEB/wQEAwIHgDAM
+            BgNVHRMBAf8EAjAAMB0GA1UdDgQWBBSxdvTIe0SLI9qnw28l3JM89HuAqTArBgNV
+            HSMEJDAigCDMyTMwdw6LQGKdrCTqV5B+68Jckxcgl3O8FKu8Bjke6DAKBggqhkjO
+            PQQDAgNHADBEAiBFX0n/e7/zoG+Tqsm8j9bb+98RgM+ScIjx6s2dsNmLGwIgVxh7
+            /4pGO35qvqIe1oC8axfue2ZXwHOezkm1OKxpKtc=
+            -----END CERTIFICATE-----
+            
+        key:
+          pem: |
+            -----BEGIN PRIVATE KEY-----
+            MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgBQv6E4iU4NoIGs60
+            Njv3Ygq+MgGsBEVUejKZLkF5aNahRANCAARvHvbDOBBfPj2Ralob5eeZoxp6GuEh
+            mxPjG7KSYjn/fe0StqkLN4kc3oCCrZdfmQjnOi/071pCl2ogUgy9MkdX
+            -----END PRIVATE KEY-----
+            
+    peers:
+      - org2msp-peer0.kfs
+      - org2msp-peer1.kfs
+    orderers: []
+orderers:
+  orderermsp-orderer0.kfs:
+
+    url: grpcs://orderermsp-orderer0.kfs.localho.st:443
+
+    grpcOptions:
+      allow-insecure: false
+    tlsCACerts:
+      pem: |
+        -----BEGIN CERTIFICATE-----
+        MIICRDCCAeugAwIBAgIQfPjdsnW7wXXoJl+QjjROcTAKBggqhkjOPQQDAjBtMQsw
+        CQYDVQQGEwJFUzERMA8GA1UEBxMIQWxpY2FudGUxETAPBgNVBAkTCEFsaWNhbnRl
+        MRkwFwYDVQQKExBLdW5nIEZ1IFNvZnR3YXJlMQ0wCwYDVQQLEwRUZWNoMQ4wDAYD
+        VQQDEwV0bHNjYTAeFw0yMzA1MDYxNjMyMThaFw0zMzA1MDcxNjMyMThaMG0xCzAJ
+        BgNVBAYTAkVTMREwDwYDVQQHEwhBbGljYW50ZTERMA8GA1UECRMIQWxpY2FudGUx
+        GTAXBgNVBAoTEEt1bmcgRnUgU29mdHdhcmUxDTALBgNVBAsTBFRlY2gxDjAMBgNV
+        BAMTBXRsc2NhMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEV7TBTn6d+bhRWj+f
+        CHm646WduM7nBojl96NYFrfY+zgB48TUyl33zYBPNyhSQYBZO9IN7QrhSvwGYUfM
+        eewtv6NtMGswDgYDVR0PAQH/BAQDAgGmMB0GA1UdJQQWMBQGCCsGAQUFBwMCBggr
+        BgEFBQcDATAPBgNVHRMBAf8EBTADAQH/MCkGA1UdDgQiBCC0FKAQuYPOiT2i1+7g
+        biqATcwii84VXwB/V4tC7ElJEzAKBggqhkjOPQQDAgNHADBEAiA7hwwQqCqZt3cG
+        01zla1zO25ghCUOvTx1h0zUDgdkLYgIgYH7ggA6tcd/lLi6rz+yDniOvrR54m/Pz
+        jVukwWuG7wM=
+        -----END CERTIFICATE-----
+        
+  orderermsp-orderer1.kfs:
+
+    url: grpcs://orderermsp-orderer1.kfs.localho.st:443
+
+    grpcOptions:
+      allow-insecure: false
+    tlsCACerts:
+      pem: |
+        -----BEGIN CERTIFICATE-----
+        MIICRDCCAeugAwIBAgIQfPjdsnW7wXXoJl+QjjROcTAKBggqhkjOPQQDAjBtMQsw
+        CQYDVQQGEwJFUzERMA8GA1UEBxMIQWxpY2FudGUxETAPBgNVBAkTCEFsaWNhbnRl
+        MRkwFwYDVQQKExBLdW5nIEZ1IFNvZnR3YXJlMQ0wCwYDVQQLEwRUZWNoMQ4wDAYD
+        VQQDEwV0bHNjYTAeFw0yMzA1MDYxNjMyMThaFw0zMzA1MDcxNjMyMThaMG0xCzAJ
+        BgNVBAYTAkVTMREwDwYDVQQHEwhBbGljYW50ZTERMA8GA1UECRMIQWxpY2FudGUx
+        GTAXBgNVBAoTEEt1bmcgRnUgU29mdHdhcmUxDTALBgNVBAsTBFRlY2gxDjAMBgNV
+        BAMTBXRsc2NhMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEV7TBTn6d+bhRWj+f
+        CHm646WduM7nBojl96NYFrfY+zgB48TUyl33zYBPNyhSQYBZO9IN7QrhSvwGYUfM
+        eewtv6NtMGswDgYDVR0PAQH/BAQDAgGmMB0GA1UdJQQWMBQGCCsGAQUFBwMCBggr
+        BgEFBQcDATAPBgNVHRMBAf8EBTADAQH/MCkGA1UdDgQiBCC0FKAQuYPOiT2i1+7g
+        biqATcwii84VXwB/V4tC7ElJEzAKBggqhkjOPQQDAgNHADBEAiA7hwwQqCqZt3cG
+        01zla1zO25ghCUOvTx1h0zUDgdkLYgIgYH7ggA6tcd/lLi6rz+yDniOvrR54m/Pz
+        jVukwWuG7wM=
+        -----END CERTIFICATE-----
+        
+  orderermsp-orderer2.kfs:
+
+    url: grpcs://orderermsp-orderer2.kfs.localho.st:443
+
+    grpcOptions:
+      allow-insecure: false
+    tlsCACerts:
+      pem: |
+        -----BEGIN CERTIFICATE-----
+        MIICRDCCAeugAwIBAgIQfPjdsnW7wXXoJl+QjjROcTAKBggqhkjOPQQDAjBtMQsw
+        CQYDVQQGEwJFUzERMA8GA1UEBxMIQWxpY2FudGUxETAPBgNVBAkTCEFsaWNhbnRl
+        MRkwFwYDVQQKExBLdW5nIEZ1IFNvZnR3YXJlMQ0wCwYDVQQLEwRUZWNoMQ4wDAYD
+        VQQDEwV0bHNjYTAeFw0yMzA1MDYxNjMyMThaFw0zMzA1MDcxNjMyMThaMG0xCzAJ
+        BgNVBAYTAkVTMREwDwYDVQQHEwhBbGljYW50ZTERMA8GA1UECRMIQWxpY2FudGUx
+        GTAXBgNVBAoTEEt1bmcgRnUgU29mdHdhcmUxDTALBgNVBAsTBFRlY2gxDjAMBgNV
+        BAMTBXRsc2NhMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEV7TBTn6d+bhRWj+f
+        CHm646WduM7nBojl96NYFrfY+zgB48TUyl33zYBPNyhSQYBZO9IN7QrhSvwGYUfM
+        eewtv6NtMGswDgYDVR0PAQH/BAQDAgGmMB0GA1UdJQQWMBQGCCsGAQUFBwMCBggr
+        BgEFBQcDATAPBgNVHRMBAf8EBTADAQH/MCkGA1UdDgQiBCC0FKAQuYPOiT2i1+7g
+        biqATcwii84VXwB/V4tC7ElJEzAKBggqhkjOPQQDAgNHADBEAiA7hwwQqCqZt3cG
+        01zla1zO25ghCUOvTx1h0zUDgdkLYgIgYH7ggA6tcd/lLi6rz+yDniOvrR54m/Pz
+        jVukwWuG7wM=
+        -----END CERTIFICATE-----
+        
+peers:
+  org1msp-peer0.kfs:
+
+    url: grpcs://org1msp-peer0.kfs.localho.st:443
+
+    grpcOptions:
+      allow-insecure: false
+    tlsCACerts:
+      pem: |
+        -----BEGIN CERTIFICATE-----
+        MIICRzCCAeygAwIBAgIRAP4jNkJiKamOornKuig9xfIwCgYIKoZIzj0EAwIwbTEL
+        MAkGA1UEBhMCRVMxETAPBgNVBAcTCEFsaWNhbnRlMREwDwYDVQQJEwhBbGljYW50
+        ZTEZMBcGA1UEChMQS3VuZyBGdSBTb2Z0d2FyZTENMAsGA1UECxMEVGVjaDEOMAwG
+        A1UEAxMFdGxzY2EwHhcNMjMwNTA2MTYzNjQ0WhcNMzMwNTA3MTYzNjQ0WjBtMQsw
+        CQYDVQQGEwJFUzERMA8GA1UEBxMIQWxpY2FudGUxETAPBgNVBAkTCEFsaWNhbnRl
+        MRkwFwYDVQQKExBLdW5nIEZ1IFNvZnR3YXJlMQ0wCwYDVQQLEwRUZWNoMQ4wDAYD
+        VQQDEwV0bHNjYTBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABNeOUp8wTF6are6G
+        386SwwoHhsurBKLsW+rDeSryh6TOpAyB9jVS3J7Af8iDUvM5mjSMgtgZ1uwRaxZe
+        jvXiBa2jbTBrMA4GA1UdDwEB/wQEAwIBpjAdBgNVHSUEFjAUBggrBgEFBQcDAgYI
+        KwYBBQUHAwEwDwYDVR0TAQH/BAUwAwEB/zApBgNVHQ4EIgQg4vRX3iv4VrfEWSRf
+        lAzoXbUblPwndcBsz5E6TmaoTHEwCgYIKoZIzj0EAwIDSQAwRgIhANz5Y3oTnth9
+        1q9jvYZX3LkwG565bZj534Fjr0vTKQacAiEA9BPyPwdwi2MBch5yTEFEil/fTrGS
+        8mRncX20lEj8Jkw=
+        -----END CERTIFICATE-----
+        
+  org1msp-peer1.kfs:
+
+    url: grpcs://org1msp-peer1.kfs.localho.st:443
+
+    grpcOptions:
+      allow-insecure: false
+    tlsCACerts:
+      pem: |
+        -----BEGIN CERTIFICATE-----
+        MIICRzCCAeygAwIBAgIRAP4jNkJiKamOornKuig9xfIwCgYIKoZIzj0EAwIwbTEL
+        MAkGA1UEBhMCRVMxETAPBgNVBAcTCEFsaWNhbnRlMREwDwYDVQQJEwhBbGljYW50
+        ZTEZMBcGA1UEChMQS3VuZyBGdSBTb2Z0d2FyZTENMAsGA1UECxMEVGVjaDEOMAwG
+        A1UEAxMFdGxzY2EwHhcNMjMwNTA2MTYzNjQ0WhcNMzMwNTA3MTYzNjQ0WjBtMQsw
+        CQYDVQQGEwJFUzERMA8GA1UEBxMIQWxpY2FudGUxETAPBgNVBAkTCEFsaWNhbnRl
+        MRkwFwYDVQQKExBLdW5nIEZ1IFNvZnR3YXJlMQ0wCwYDVQQLEwRUZWNoMQ4wDAYD
+        VQQDEwV0bHNjYTBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABNeOUp8wTF6are6G
+        386SwwoHhsurBKLsW+rDeSryh6TOpAyB9jVS3J7Af8iDUvM5mjSMgtgZ1uwRaxZe
+        jvXiBa2jbTBrMA4GA1UdDwEB/wQEAwIBpjAdBgNVHSUEFjAUBggrBgEFBQcDAgYI
+        KwYBBQUHAwEwDwYDVR0TAQH/BAUwAwEB/zApBgNVHQ4EIgQg4vRX3iv4VrfEWSRf
+        lAzoXbUblPwndcBsz5E6TmaoTHEwCgYIKoZIzj0EAwIDSQAwRgIhANz5Y3oTnth9
+        1q9jvYZX3LkwG565bZj534Fjr0vTKQacAiEA9BPyPwdwi2MBch5yTEFEil/fTrGS
+        8mRncX20lEj8Jkw=
+        -----END CERTIFICATE-----
+        
+  org2msp-peer0.kfs:
+
+    url: grpcs://org2msp-peer0.kfs.localho.st:443
+
+    grpcOptions:
+      allow-insecure: false
+    tlsCACerts:
+      pem: |
+        -----BEGIN CERTIFICATE-----
+        MIICRDCCAeugAwIBAgIQVPjROMIeIG6Mw9C6UEsY1TAKBggqhkjOPQQDAjBtMQsw
+        CQYDVQQGEwJFUzERMA8GA1UEBxMIQWxpY2FudGUxETAPBgNVBAkTCEFsaWNhbnRl
+        MRkwFwYDVQQKExBLdW5nIEZ1IFNvZnR3YXJlMQ0wCwYDVQQLEwRUZWNoMQ4wDAYD
+        VQQDEwV0bHNjYTAeFw0yMzA1MDYxNjM5MzlaFw0zMzA1MDcxNjM5MzlaMG0xCzAJ
+        BgNVBAYTAkVTMREwDwYDVQQHEwhBbGljYW50ZTERMA8GA1UECRMIQWxpY2FudGUx
+        GTAXBgNVBAoTEEt1bmcgRnUgU29mdHdhcmUxDTALBgNVBAsTBFRlY2gxDjAMBgNV
+        BAMTBXRsc2NhMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEUUgH61R1DHQuQEcH
+        k+mzffLN3Ha0JS7SJc08MjHT4S9AowrOR44IbxnwIBtci+cKtAoAvWeNyPKa2iKM
+        bdnDs6NtMGswDgYDVR0PAQH/BAQDAgGmMB0GA1UdJQQWMBQGCCsGAQUFBwMCBggr
+        BgEFBQcDATAPBgNVHRMBAf8EBTADAQH/MCkGA1UdDgQiBCDtFRcpBYm0u/uwGAvU
+        XFlwGIArQ/CVBMqaXHqVoQh+JjAKBggqhkjOPQQDAgNHADBEAiA+TlsZvNELp8ab
+        tV7NjExXUnUDiAxgplDvbqsSWBP1BgIgINhqvcbBc5yQ2IvMvinAZEmfMhEvyZml
+        SxcyPWoMz+s=
+        -----END CERTIFICATE-----
+        
+  org2msp-peer1.kfs:
+
+    url: grpcs://org2msp-peer1.kfs.localho.st:443
+
+    grpcOptions:
+      allow-insecure: false
+    tlsCACerts:
+      pem: |
+        -----BEGIN CERTIFICATE-----
+        MIICRDCCAeugAwIBAgIQVPjROMIeIG6Mw9C6UEsY1TAKBggqhkjOPQQDAjBtMQsw
+        CQYDVQQGEwJFUzERMA8GA1UEBxMIQWxpY2FudGUxETAPBgNVBAkTCEFsaWNhbnRl
+        MRkwFwYDVQQKExBLdW5nIEZ1IFNvZnR3YXJlMQ0wCwYDVQQLEwRUZWNoMQ4wDAYD
+        VQQDEwV0bHNjYTAeFw0yMzA1MDYxNjM5MzlaFw0zMzA1MDcxNjM5MzlaMG0xCzAJ
+        BgNVBAYTAkVTMREwDwYDVQQHEwhBbGljYW50ZTERMA8GA1UECRMIQWxpY2FudGUx
+        GTAXBgNVBAoTEEt1bmcgRnUgU29mdHdhcmUxDTALBgNVBAsTBFRlY2gxDjAMBgNV
+        BAMTBXRsc2NhMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEUUgH61R1DHQuQEcH
+        k+mzffLN3Ha0JS7SJc08MjHT4S9AowrOR44IbxnwIBtci+cKtAoAvWeNyPKa2iKM
+        bdnDs6NtMGswDgYDVR0PAQH/BAQDAgGmMB0GA1UdJQQWMBQGCCsGAQUFBwMCBggr
+        BgEFBQcDATAPBgNVHRMBAf8EBTADAQH/MCkGA1UdDgQiBCDtFRcpBYm0u/uwGAvU
+        XFlwGIArQ/CVBMqaXHqVoQh+JjAKBggqhkjOPQQDAgNHADBEAiA+TlsZvNELp8ab
+        tV7NjExXUnUDiAxgplDvbqsSWBP1BgIgINhqvcbBc5yQ2IvMvinAZEmfMhEvyZml
+        SxcyPWoMz+s=
+        -----END CERTIFICATE-----
+        
+certificateAuthorities:
+  
+  orderermsp-ca.kfs:
+
+    url: https://orderermsp-ca.kfs.localho.st:443
+
+
+    registrar:
+        enrollId: enrollid
+        enrollSecret: 678n9fhkf5
+
+    caName: ca
+    tlsCACerts:
+      pem: 
+       - |
+            -----BEGIN CERTIFICATE-----
+            MIIChjCCAi2gAwIBAgIQMOtQOb8Q1SvofCei2JLX3DAKBggqhkjOPQQDAjBSMRMw
+            EQYDVQQGEwpDYWxpZm9ybmlhMQkwBwYDVQQHEwAxCTAHBgNVBAkTADEUMBIGA1UE
+            ChMLSHlwZXJsZWRnZXIxDzANBgNVBAsTBkZhYnJpYzAeFw0yMzA1MDYxNjMyMTha
+            Fw0zMzA1MDcxNjMyMThaMFIxEzARBgNVBAYTCkNhbGlmb3JuaWExCTAHBgNVBAcT
+            ADEJMAcGA1UECRMAMRQwEgYDVQQKEwtIeXBlcmxlZGdlcjEPMA0GA1UECxMGRmFi
+            cmljMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEms/YmVI8DsCIJrCNSv2OyOv4
+            ryO9YSA5yL0aPAhtoar7kxMAzsCol6gmNCwy6fBQRdoemFf9eYIvXTTTF+KtDqOB
+            5DCB4TAOBgNVHQ8BAf8EBAMCAaYwHQYDVR0lBBYwFAYIKwYBBQUHAwIGCCsGAQUF
+            BwMBMA8GA1UdEwEB/wQFMAMBAf8wKQYDVR0OBCIEIHBqx0rHSIB1gE5xdX7hUZ6A
+            Nj/xDLsFyAoJnFMR/lj9MHQGA1UdEQRtMGuCHG9yZGVyZXJtc3AtY2Eua2ZzLmxv
+            Y2FsaG8uc3SCEW9yZGVyZXJtc3AtY2Eua2ZzgiNvcmRlcmVybXNwLWNhLmtmcy5z
+            dmMuY2x1c3Rlci5sb2NhbIINb3JkZXJlcm1zcC1jYYcEfwAAATAKBggqhkjOPQQD
+            AgNHADBEAiB9u79yjK8OgEHbqrgUz4uVjhdYME8W9/K/BsMmJFw1vwIgAupjti3l
+            MEvBFUKSf51IREDmHXHwe4//vShsvbF64Rg=
+            -----END CERTIFICATE-----
+            
+  
+  org1msp-ca.kfs:
+
+    url: https://org1msp-ca.kfs.localho.st:443
+
+
+    registrar:
+        enrollId: enrollid
+        enrollSecret: 25k2zk6kk9
+
+    caName: ca
+    tlsCACerts:
+      pem: 
+       - |
+            -----BEGIN CERTIFICATE-----
+            MIICfDCCAiGgAwIBAgIQSpEAde7lhHiHQ/BxseX5nTAKBggqhkjOPQQDAjBSMRMw
+            EQYDVQQGEwpDYWxpZm9ybmlhMQkwBwYDVQQHEwAxCTAHBgNVBAkTADEUMBIGA1UE
+            ChMLSHlwZXJsZWRnZXIxDzANBgNVBAsTBkZhYnJpYzAeFw0yMzA1MDYxNjM2NDRa
+            Fw0zMzA1MDcxNjM2NDRaMFIxEzARBgNVBAYTCkNhbGlmb3JuaWExCTAHBgNVBAcT
+            ADEJMAcGA1UECRMAMRQwEgYDVQQKEwtIeXBlcmxlZGdlcjEPMA0GA1UECxMGRmFi
+            cmljMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEAUdVr1r6xw0c9BDOO69TE3ku
+            T7r279KsFskHzRmRMbrGe+sGIFWmO70fWGyKinj8+gH8DwNf4rGPOLOeZcPdSaOB
+            2DCB1TAOBgNVHQ8BAf8EBAMCAaYwHQYDVR0lBBYwFAYIKwYBBQUHAwIGCCsGAQUF
+            BwMBMA8GA1UdEwEB/wQFMAMBAf8wKQYDVR0OBCIEIIBmL74NoRnHMcqar1uN+MqR
+            qLLEAyGynmlAhLZNKUH4MGgGA1UdEQRhMF+CGW9yZzFtc3AtY2Eua2ZzLmxvY2Fs
+            aG8uc3SCDm9yZzFtc3AtY2Eua2ZzgiBvcmcxbXNwLWNhLmtmcy5zdmMuY2x1c3Rl
+            ci5sb2NhbIIKb3JnMW1zcC1jYYcEfwAAATAKBggqhkjOPQQDAgNJADBGAiEA2XK8
+            ov7VBzNy+e4XMZxnjzZ22Ll9xQqINUV6Ec2paAECIQDvobxXcAXDOGET8NkFsVBE
+            z3/R3ZEQ6eil0FEi4nT/ew==
+            -----END CERTIFICATE-----
+            
+  
+  org2msp-ca.kfs:
+
+    url: https://org2msp-ca.kfs.localho.st:443
+
+
+    registrar:
+        enrollId: enrollid
+        enrollSecret: 9nu41y9hp9
+
+    caName: ca
+    tlsCACerts:
+      pem: 
+       - |
+            -----BEGIN CERTIFICATE-----
+            MIICfDCCAiKgAwIBAgIRALl8XoTPwZHfqfodZFzrjfowCgYIKoZIzj0EAwIwUjET
+            MBEGA1UEBhMKQ2FsaWZvcm5pYTEJMAcGA1UEBxMAMQkwBwYDVQQJEwAxFDASBgNV
+            BAoTC0h5cGVybGVkZ2VyMQ8wDQYDVQQLEwZGYWJyaWMwHhcNMjMwNTA2MTYzOTM5
+            WhcNMzMwNTA3MTYzOTM5WjBSMRMwEQYDVQQGEwpDYWxpZm9ybmlhMQkwBwYDVQQH
+            EwAxCTAHBgNVBAkTADEUMBIGA1UEChMLSHlwZXJsZWRnZXIxDzANBgNVBAsTBkZh
+            YnJpYzBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABBJZoj+Z9vgyaZDcXPG+1r4H
+            D9H6Y9D/JdrTcSbbfTFhq1W6HcYG7Ypuu4nmt9Y8QY2YLH5h+w13ACr3e2K2ca6j
+            gdgwgdUwDgYDVR0PAQH/BAQDAgGmMB0GA1UdJQQWMBQGCCsGAQUFBwMCBggrBgEF
+            BQcDATAPBgNVHRMBAf8EBTADAQH/MCkGA1UdDgQiBCDEh4EV1Deyylqn8fo/I6x6
+            9She+80tH2XiJVDKjL5KqjBoBgNVHREEYTBfghlvcmcybXNwLWNhLmtmcy5sb2Nh
+            bGhvLnN0gg5vcmcybXNwLWNhLmtmc4Igb3JnMm1zcC1jYS5rZnMuc3ZjLmNsdXN0
+            ZXIubG9jYWyCCm9yZzJtc3AtY2GHBH8AAAEwCgYIKoZIzj0EAwIDSAAwRQIgIEFv
+            JrRu/nYGn0s4cJmzd3IJ2yHXBFfEigtjcseQ1cICIQDd7cc4f3rVmcpj0v43MLCq
+            9QGcAolItb6z4StF04d1Ww==
+            -----END CERTIFICATE-----
+            
+
+
+channels:
+  development:
+    orderers:
+      - orderermsp-orderer0.kfs
+      - orderermsp-orderer1.kfs
+      - orderermsp-orderer2.kfs
+    peers:
+       org1msp-peer0.kfs:
+        discover: true
+        endorsingPeer: true
+        chaincodeQuery: true
+        ledgerQuery: true
+        eventSource: true
+       org1msp-peer1.kfs:
+        discover: true
+        endorsingPeer: true
+        chaincodeQuery: true
+        ledgerQuery: true
+        eventSource: true
+       org2msp-peer0.kfs:
+        discover: true
+        endorsingPeer: true
+        chaincodeQuery: true
+        ledgerQuery: true
+        eventSource: true
+       org2msp-peer1.kfs:
+        discover: true
+        endorsingPeer: true
+        chaincodeQuery: true
+        ledgerQuery: true
+        eventSource: true
+  extradev:
+    orderers:
+      - orderermsp-orderer0.kfs
+      - orderermsp-orderer1.kfs
+      - orderermsp-orderer2.kfs
+    peers:
+       org1msp-peer0.kfs:
+        discover: true
+        endorsingPeer: true
+        chaincodeQuery: true
+        ledgerQuery: true
+        eventSource: true
+       org1msp-peer1.kfs:
+        discover: true
+        endorsingPeer: true
+        chaincodeQuery: true
+        ledgerQuery: true
+        eventSource: true
+       org2msp-peer0.kfs:
+        discover: true
+        endorsingPeer: true
+        chaincodeQuery: true
+        ledgerQuery: true
+        eventSource: true
+       org2msp-peer1.kfs:
+        discover: true
+        endorsingPeer: true
+        chaincodeQuery: true
+        ledgerQuery: true
+        eventSource: true
+  staging:
+    orderers:
+      - orderermsp-orderer0.kfs
+      - orderermsp-orderer1.kfs
+      - orderermsp-orderer2.kfs
+    peers:
+       org1msp-peer0.kfs:
+        discover: true
+        endorsingPeer: true
+        chaincodeQuery: true
+        ledgerQuery: true
+        eventSource: true
+       org1msp-peer1.kfs:
+        discover: true
+        endorsingPeer: true
+        chaincodeQuery: true
+        ledgerQuery: true
+        eventSource: true
+       org2msp-peer0.kfs:
+        discover: true
+        endorsingPeer: true
+        chaincodeQuery: true
+        ledgerQuery: true
+        eventSource: true
+       org2msp-peer1.kfs:
+        discover: true
+        endorsingPeer: true
+        chaincodeQuery: true
+        ledgerQuery: true
+        eventSource: true
+  uat:
+    orderers:
+      - orderermsp-orderer0.kfs
+      - orderermsp-orderer1.kfs
+      - orderermsp-orderer2.kfs
+    peers:
+       org1msp-peer0.kfs:
+        discover: true
+        endorsingPeer: true
+        chaincodeQuery: true
+        ledgerQuery: true
+        eventSource: true
+       org1msp-peer1.kfs:
+        discover: true
+        endorsingPeer: true
+        chaincodeQuery: true
+        ledgerQuery: true
+        eventSource: true
+       org2msp-peer0.kfs:
+        discover: true
+        endorsingPeer: true
+        chaincodeQuery: true
+        ledgerQuery: true
+        eventSource: true
+       org2msp-peer1.kfs:
+        discover: true
+        endorsingPeer: true
+        chaincodeQuery: true
+        ledgerQuery: true
+        eventSource: true
+
