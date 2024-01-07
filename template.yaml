@@ -1,0 +1,22 @@
+apiVersion: hlf.kungfusoftware.es/v1alpha1
+kind: FabricChaincodeTemplate
+metadata:
+  name: test-template
+  namespace: default
+spec:
+  affinity: null
+  annotations: null
+  chaincodeServerPort: 7052
+  credentials: null
+  env:
+    - name: FOO
+      value: "BAR"
+  imagePullPolicy: Always
+  imagePullSecrets: []
+  labels: null
+  mspID: ''
+  podAnnotations: null
+  podLabels: null
+  replicas: 1
+  resources: null
+  tolerations: []

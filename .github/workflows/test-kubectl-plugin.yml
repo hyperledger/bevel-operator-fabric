@@ -143,9 +143,8 @@ jobs:
                   health {
                      lameduck 5s
                   }
-                  rewrite name regex (.*)\.localho\.st host.ingress.internal
+                  rewrite name regex (.*)\.localho\.st istio-ingressgateway.istio-system.svc.cluster.local
                   hosts {
-                    ${CLUSTER_IP} host.ingress.internal
                     fallthrough
                   }
                   ready
