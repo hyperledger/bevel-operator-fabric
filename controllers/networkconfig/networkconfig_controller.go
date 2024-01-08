@@ -316,7 +316,6 @@ func (r *FabricNetworkConfigReconciler) Reconcile(ctx context.Context, req ctrl.
 		var cas []*helpers.ClusterCA
 		for _, ca := range certAuths {
 			for _, fabricNetworkConfigCA := range fabricNetworkConfig.Spec.CertificateAuthorities {
-				log.Infof("NAME=%s NAMECA=%s  NS=%s NSCA=%s", ca.Item.Name, fabricNetworkConfigCA.Name, ca.Item.Namespace, fabricNetworkConfigCA.Namespace)
 				if ca.Item.Name == fabricNetworkConfigCA.Name && ca.Item.Namespace == fabricNetworkConfigCA.Namespace {
 					cas = append(cas, ca)
 				}
@@ -435,14 +434,13 @@ func (r *FabricNetworkConfigReconciler) Reconcile(ctx context.Context, req ctrl.
 					}
 				}
 			}
-			for _, peer := range org.Peers {
-				for idx, p := range peers {
-					if p.MSPID == mspID && (p.Object.Name != peer.Name || p.Object.Namespace != peer.Namespace) {
-						peers = append(peers[:idx], peers[idx+1:]...)
-						break
-					}
+			var restPeerOrgs []*helpers.ClusterPeer
+			for _, p := range peers {
+				if p.MSPID != mspID {
+					restPeerOrgs = append(restPeerOrgs, p)
 				}
 			}
+			peers = append(restPeerOrgs, orgPeers...)
 			orgMap[mspID].Peers = orgPeers
 		}
 	}

@@ -20,7 +20,7 @@ require (
 	github.com/gorilla/mux v1.8.0
 	github.com/grantae/certinfo v0.0.0-20170412194111-59d56a35515b
 	github.com/hyperledger/fabric v2.1.1+incompatible
-	github.com/hyperledger/fabric-config v0.1.0
+	github.com/hyperledger/fabric-config v0.2.1
 	github.com/hyperledger/fabric-lib-go v1.0.0
 	github.com/hyperledger/fabric-protos-go v0.3.0
 	github.com/hyperledger/fabric-sdk-go v1.0.1-0.20220124135247-4f34271d9b0f

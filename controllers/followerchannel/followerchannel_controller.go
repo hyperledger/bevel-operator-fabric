@@ -251,14 +251,18 @@ func (r *FabricFollowerChannelReconciler) Reconcile(ctx context.Context, req ctr
 	r.Log.Info(fmt.Sprintf("Old anchor peers %v", anchorPeers))
 
 	for _, anchorPeer := range anchorPeers {
+		reqLogger.Info(fmt.Sprintf("Removing anchor peer %v", anchorPeer))
 		err = app.RemoveAnchorPeer(configtx.Address{
 			Host: anchorPeer.Host,
 			Port: anchorPeer.Port,
 		})
 		if err != nil {
+			currentAnchorPeers, err := app.AnchorPeers()
+			reqLogger.Error(err, fmt.Sprintf("Failed to remove anchor peer %v, current anchor peers: %v", anchorPeer, currentAnchorPeers))
 			r.setConditionStatus(ctx, fabricFollowerChannel, hlfv1alpha1.FailedStatus, false, err, false)
 			return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricFollowerChannel)
 		}
+		reqLogger.Info(fmt.Sprintf("Removed anchor peer %v", anchorPeer))
 	}
 	r.Log.Info(fmt.Sprintf("New anchor peers %v", anchorPeers))
 
@@ -268,6 +272,7 @@ func (r *FabricFollowerChannelReconciler) Reconcile(ctx context.Context, req ctr
 			Port: anchorPeer.Port,
 		})
 		if err != nil {
+			reqLogger.Error(err, fmt.Sprintf("Failed to add anchor peer %v", anchorPeer))
 			r.setConditionStatus(ctx, fabricFollowerChannel, hlfv1alpha1.FailedStatus, false, err, false)
 			return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricFollowerChannel)
 		}
