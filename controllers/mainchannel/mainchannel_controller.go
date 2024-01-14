@@ -1252,12 +1252,9 @@ func updateApplicationChannelConfigTx(currentConfigTX configtx.ConfigTx, newConf
 	if err != nil {
 		return errors.Wrapf(err, "failed to set ACLs")
 	}
-	err = currentConfigTX.Orderer().SetBatchTimeout(newConfigTx.Orderer.BatchTimeout)
-	if err != nil {
-		return errors.Wrapf(err, "failed to set batch timeout")
-	}
 	return nil
 }
+
 func updateOrdererChannelConfigTx(currentConfigTX configtx.ConfigTx, newConfigTx configtx.Channel) error {
 	err := currentConfigTX.Orderer().SetPolicies(
 		newConfigTx.Orderer.Policies,
@@ -1402,7 +1399,10 @@ func updateOrdererChannelConfigTx(currentConfigTX configtx.ConfigTx, newConfigTx
 	if err != nil {
 		return errors.Wrap(err, "failed to set application policies")
 	}
-
+	err = currentConfigTX.Orderer().SetBatchTimeout(newConfigTx.Orderer.BatchTimeout)
+	if err != nil {
+		return errors.Wrapf(err, "failed to set batch timeout")
+	}
 	return nil
 }
 

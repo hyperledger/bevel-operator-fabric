@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"time"
 
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/channel"
 	"github.com/hyperledger/fabric-sdk-go/pkg/core/config"
@@ -21,26 +22,32 @@ type queryChaincodeCmd struct {
 	fcn        string
 	args       []string
 	transient  string
+	mspID      string
 }
 
 func (c *queryChaincodeCmd) validate() error {
 	return nil
 }
 func (c *queryChaincodeCmd) run(out io.Writer) error {
-	oclient, err := helpers.GetKubeOperatorClient()
-	if err != nil {
-		return err
+	var mspID string
+	if c.mspID != "" {
+		mspID = c.mspID
+	} else {
+		oclient, err := helpers.GetKubeOperatorClient()
+		if err != nil {
+			return err
+		}
+		clientSet, err := helpers.GetKubeClient()
+		if err != nil {
+			return err
+		}
+		peer, err := helpers.GetPeerByFullName(clientSet, oclient, c.peer)
+		if err != nil {
+			return err
+		}
+		mspID = peer.Spec.MspID
 	}
-	clientSet, err := helpers.GetKubeClient()
-	if err != nil {
-		return err
-	}
-	peer, err := helpers.GetPeerByFullName(clientSet, oclient, c.peer)
-	if err != nil {
-		return err
-	}
-	mspID := peer.Spec.MspID
-	peerName := peer.Name
+	peerName := c.peer
 	configBackend := config.FromFile(c.configPath)
 	sdk, err := fabsdk.New(configBackend)
 	if err != nil {
@@ -63,10 +70,10 @@ func (c *queryChaincodeCmd) run(out io.Writer) error {
 	if c.transient != "" {
 		err = json.Unmarshal([]byte(c.transient), &transientMap)
 		if err != nil {
-			return err 
+			return err
 		}
 	}
-
+	t := time.Now()
 	response, err := ch.Query(
 		channel.Request{
 			ChaincodeID:     c.chaincode,
@@ -81,6 +88,7 @@ func (c *queryChaincodeCmd) run(out io.Writer) error {
 	if err != nil {
 		return err
 	}
+	fmt.Printf("Query took %s\n", time.Since(t))
 	_, err = fmt.Fprint(out, string(response.Payload))
 	if err != nil {
 		return err
@@ -108,6 +116,7 @@ func newQueryChaincodeCMD(out io.Writer, errOut io.Writer) *cobra.Command {
 	persistentFlags.StringVarP(&c.fcn, "fcn", "", "", "Function name")
 	persistentFlags.StringArrayVarP(&c.args, "args", "a", []string{}, "Function arguments")
 	persistentFlags.StringVarP(&c.transient, "transient", "t", "", "Transient map")
+	persistentFlags.StringVarP(&c.mspID, "mspID", "", "", "MSP ID")
 	cmd.MarkPersistentFlagRequired("user")
 	cmd.MarkPersistentFlagRequired("peer")
 	cmd.MarkPersistentFlagRequired("config")

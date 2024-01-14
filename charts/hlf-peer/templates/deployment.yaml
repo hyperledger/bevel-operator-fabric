@@ -251,7 +251,7 @@ spec:
                 name: {{ include "hlf-peer.fullname" . }}--peer
           volumeMounts:
 # range volumeMounts
-  {{- if .Values.volumeMounts }}
+  {{- if .Values.peerVolumeMounts }}
 {{ toYaml .Values.peerVolumeMounts | nindent 12 }}
   {{- end }}
             - name: peerconfig

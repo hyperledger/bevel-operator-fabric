@@ -88,7 +88,7 @@ type ExternalBuilder struct {
 	PropagateEnvironment []string `json:"propagateEnvironment"`
 }
 
-const DefaultImagePullPolicy = corev1.PullAlways
+const DefaultImagePullPolicy = corev1.PullIfNotPresent
 
 type ServiceMonitor struct {
 	// +kubebuilder:default:=false
@@ -1799,14 +1799,25 @@ func (in *FabricChaincodeSpec) ApplyDefaultValuesFromTemplate(template *FabricCh
 	if in.Resources == nil {
 		in.Resources = template.Spec.Resources
 	}
-	if in.Credentials == nil {
-		in.Credentials = template.Spec.Credentials
-	}
 	if in.Replicas == 0 {
 		in.Replicas = template.Spec.Replicas
 	}
 	if in.Env == nil || len(in.Env) == 0 {
 		in.Env = template.Spec.Env
+	} else {
+		for _, env := range template.Spec.Env {
+			found := false
+			for _, e := range in.Env {
+				if e.Name == env.Name {
+					found = true
+					break
+				}
+			}
+			if !found {
+				in.Env = append(in.Env, env)
+			}
+
+		}
 	}
 	if in.ChaincodeServerPort == 0 {
 		in.ChaincodeServerPort = template.Spec.ChaincodeServerPort
@@ -2391,11 +2402,6 @@ type FabricChaincodeTemplateSpec struct {
 	// +kubebuilder:validation:Optional
 	// +optional
 	Resources *corev1.ResourceRequirements `json:"resources"`
-
-	// +nullable
-	// +kubebuilder:validation:Optional
-	// +optional
-	Credentials *TLS `json:"credentials"`
 
 	// +kubebuilder:validation:Default=1
 	Replicas int `json:"replicas"`

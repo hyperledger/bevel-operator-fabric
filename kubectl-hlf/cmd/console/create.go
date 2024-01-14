@@ -114,7 +114,7 @@ func (c *createCmd) run() error {
 			Image:            c.consoleOpts.Image,
 			ImagePullSecrets: imagePullSecrets,
 			Tag:              c.consoleOpts.Version,
-			ImagePullPolicy:  "Always",
+			ImagePullPolicy:  "IfNotPresent",
 			Tolerations:      []corev1.Toleration{},
 			Replicas:         1,
 			CouchDB: v1alpha1.FabricOperationsConsoleCouchDB{
@@ -134,7 +134,7 @@ func (c *createCmd) run() error {
 				ImagePullSecrets: []corev1.LocalObjectReference{},
 				Affinity:         &corev1.Affinity{},
 				Tolerations:      []corev1.Toleration{},
-				ImagePullPolicy:  "Always",
+				ImagePullPolicy:  "IfNotPresent",
 			},
 			Env:      []corev1.EnvVar{},
 			Affinity: &corev1.Affinity{},

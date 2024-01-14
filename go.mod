@@ -1,6 +1,6 @@
 module github.com/kfsoftware/hlf-operator
 
-go 1.18
+go 1.21
 
 require (
 	github.com/IBM/idemix v0.0.0-20220113150823-80dd4cb2d74e
@@ -242,4 +242,7 @@ replace (
 	k8s.io/legacy-cloud-providers => k8s.io/legacy-cloud-providers v0.24.0
 	k8s.io/metrics => k8s.io/metrics v0.24.0
 	k8s.io/sample-apiserver => k8s.io/sample-apiserver v0.24.0
+)
+replace (
+	github.com/hyperledger/fabric-sdk-go => github.com/kfsoftware/fabric-sdk-go v0.0.0-20240114221414-98466038585d
 )

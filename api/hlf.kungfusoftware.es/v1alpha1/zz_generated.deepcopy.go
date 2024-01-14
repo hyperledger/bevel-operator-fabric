@@ -1340,11 +1340,6 @@ func (in *FabricChaincodeTemplateSpec) DeepCopyInto(out *FabricChaincodeTemplate
 		*out = new(v1.ResourceRequirements)
 		(*in).DeepCopyInto(*out)
 	}
-	if in.Credentials != nil {
-		in, out := &in.Credentials, &out.Credentials
-		*out = new(TLS)
-		(*in).DeepCopyInto(*out)
-	}
 	if in.Env != nil {
 		in, out := &in.Env, &out.Env
 		*out = make([]v1.EnvVar, len(*in))
