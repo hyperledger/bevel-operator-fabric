@@ -94,6 +94,11 @@ orderers:
 {{ else }}
     url: grpcs://{{ $orderer.PublicURL }}
 {{ end }}
+{{if $orderer.AdminURL }}
+    adminUrl: {{ $orderer.AdminURL }}
+    adminTlsCert: |
+{{ $orderer.Status.TlsAdminCert | indent 8 }}
+{{ end }}
     grpcOptions:
       allow-insecure: false
     tlsCACerts:
