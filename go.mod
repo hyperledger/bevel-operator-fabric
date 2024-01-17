@@ -1,6 +1,6 @@
 module github.com/kfsoftware/hlf-operator
 
-go 1.18
+go 1.21
 
 require (
 	github.com/IBM/idemix v0.0.0-20220113150823-80dd4cb2d74e
@@ -20,7 +20,7 @@ require (
 	github.com/gorilla/mux v1.8.0
 	github.com/grantae/certinfo v0.0.0-20170412194111-59d56a35515b
 	github.com/hyperledger/fabric v2.1.1+incompatible
-	github.com/hyperledger/fabric-config v0.1.0
+	github.com/hyperledger/fabric-config v0.2.1
 	github.com/hyperledger/fabric-lib-go v1.0.0
 	github.com/hyperledger/fabric-protos-go v0.3.0
 	github.com/hyperledger/fabric-sdk-go v1.0.1-0.20220124135247-4f34271d9b0f
@@ -242,4 +242,7 @@ replace (
 	k8s.io/legacy-cloud-providers => k8s.io/legacy-cloud-providers v0.24.0
 	k8s.io/metrics => k8s.io/metrics v0.24.0
 	k8s.io/sample-apiserver => k8s.io/sample-apiserver v0.24.0
+)
+replace (
+	github.com/hyperledger/fabric-sdk-go => github.com/kfsoftware/fabric-sdk-go v0.0.0-20240114221414-98466038585d
 )

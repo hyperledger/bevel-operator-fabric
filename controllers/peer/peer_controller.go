@@ -1556,6 +1556,7 @@ func (r *FabricPeerReconciler) finalizePeer(reqLogger logr.Logger, peer *hlfv1al
 }
 
 const PeerPortName = "peer"
+const PeerPortName443 = "peer-443"
 const ChaincodePortName = "chaincode"
 const EventPortName = "event"
 const OperationsPortName = "operations"
@@ -1607,6 +1608,15 @@ func createPeerService(
 	serviceSpec := corev1.ServiceSpec{
 		Type: peer.Spec.Service.Type,
 		Ports: []corev1.ServicePort{
+			{
+				Name:     PeerPortName443,
+				Protocol: "TCP",
+				Port:     443,
+				TargetPort: intstr.IntOrString{
+					Type:   intstr.Int,
+					IntVal: 443,
+				},
+			},
 			{
 				Name:     PeerPortName,
 				Protocol: "TCP",

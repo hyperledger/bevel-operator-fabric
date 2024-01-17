@@ -65,6 +65,7 @@ type ClusterOrdererNode struct {
 	Name       string
 	PublicURL  string
 	PrivateURL string
+	AdminURL   string
 	Spec       hlfv1alpha1.FabricOrdererNodeSpec
 	Status     hlfv1alpha1.FabricOrdererNodeStatus
 	Item       hlfv1alpha1.FabricOrdererNode
@@ -143,9 +144,14 @@ func MapClusterOrdererNode(clientSet *kubernetes.Clientset, ordNode hlfv1alpha1.
 	if err != nil {
 		return nil, err
 	}
+	adminPublicURL, err := GetAdminOrdererPublicURL(clientSet, ordNode)
+	if err != nil {
+		return nil, err
+	}
 	privateURL := GetOrdererPrivateURL(ordNode)
 	return &ClusterOrdererNode{
 		Name:       ordNode.FullName(),
+		AdminURL:   adminPublicURL,
 		Namespace:  ordNode.Namespace,
 		ObjectMeta: ordNode.ObjectMeta,
 		Spec:       ordNode.Spec,
@@ -199,9 +205,14 @@ func GetClusterOrderers(
 				return nil, nil, err
 			}
 			privateURL := GetOrdererPrivateURL(ordNode)
+			adminPublicURL, err := GetAdminOrdererPublicURL(clientSet, ordNode)
+			if err != nil {
+				return nil, nil, err
+			}
 			orderingService.Orderers = append(
 				orderingService.Orderers,
 				&ClusterOrdererNode{
+					AdminURL:   adminPublicURL,
 					Name:       ordNode.FullName(),
 					ObjectMeta: ordNode.ObjectMeta,
 					Spec:       ordNode.Spec,
@@ -276,11 +287,15 @@ func GetClusterOrdererNodes(
 			return nil, err
 		}
 		privateURL := GetOrdererPrivateURL(ordNode)
-
+		adminPublicURL, err := GetAdminOrdererPublicURL(clientSet, ordNode)
+		if err != nil {
+			return nil, err
+		}
 		ordererNodes = append(
 			ordererNodes,
 			&ClusterOrdererNode{
 				Name:       ordNode.FullName(),
+				AdminURL:   adminPublicURL,
 				Namespace:  ordNode.Namespace,
 				PublicURL:  publicURL,
 				PrivateURL: privateURL,
@@ -390,6 +405,13 @@ func GetOrdererPublicURL(clientset *kubernetes.Clientset, node hlfv1alpha1.Fabri
 		return "", err
 	}
 	return fmt.Sprintf("%s:%d", hostPort.Host, hostPort.Port), nil
+}
+func GetAdminOrdererPublicURL(clientset *kubernetes.Clientset, node hlfv1alpha1.FabricOrdererNode) (string, error) {
+	host, port, err := GetOrdererAdminHostAndPort(clientset, node.Spec, node.Status)
+	if err != nil {
+		return "", err
+	}
+	return fmt.Sprintf("https://%s:%d", host, port), nil
 }
 func GetOrdererHostAndPort(clientset *kubernetes.Clientset, nodeSpec hlfv1alpha1.FabricOrdererNodeSpec, nodeStatus hlfv1alpha1.FabricOrdererNodeStatus) (string, int, error) {
 	var hostName string

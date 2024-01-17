@@ -88,7 +88,7 @@ type ExternalBuilder struct {
 	PropagateEnvironment []string `json:"propagateEnvironment"`
 }
 
-const DefaultImagePullPolicy = corev1.PullAlways
+const DefaultImagePullPolicy = corev1.PullIfNotPresent
 
 type ServiceMonitor struct {
 	// +kubebuilder:default:=false
@@ -1581,6 +1581,18 @@ type FabricOperatorAPISpec struct {
 	Resources *corev1.ResourceRequirements `json:"resources"`
 }
 
+type FabricNetworkConfigOrgPeer struct {
+	Name      string `json:"name"`
+	Namespace string `json:"namespace"`
+}
+type FabricNetworkConfigOrganization struct {
+	Peers []FabricNetworkConfigOrgPeer `json:"peers"`
+}
+type FabricNetworkConfigCA struct {
+	Name      string `json:"name"`
+	Namespace string `json:"namespace"`
+}
+
 // FabricNetworkConfigSpec defines the desired state of FabricNetworkConfig
 type FabricNetworkConfigSpec struct {
 	Organization string `json:"organization"`
@@ -1588,8 +1600,17 @@ type FabricNetworkConfigSpec struct {
 	Internal bool `json:"internal"`
 
 	Organizations []string `json:"organizations"`
-
-	Namespaces []string `json:"namespaces"`
+	// +kubebuilder:validation:Default={}
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +nullable
+	OrganizationConfig map[string]FabricNetworkConfigOrganization `json:"organizationConfig"`
+	Namespaces         []string                                   `json:"namespaces"`
+	// +nullable
+	// +kubebuilder:validation:Optional
+	// +optional
+	// +kubebuilder:validation:Default={}
+	CertificateAuthorities []FabricNetworkConfigCA `json:"certificateAuthorities"`
 
 	Channels []string `json:"channels"`
 	// HLF Identities to be included in the network config
@@ -1662,8 +1683,18 @@ type FabricNetworkConfigList struct {
 	Items           []FabricNetworkConfig `json:"items"`
 }
 
+type FabricChaincodeTemplateRef struct {
+	Name      string `json:"name"`
+	Namespace string `json:"namespace"`
+}
+
 // FabricChaincodeSpec defines the desired state of FabricChaincode
 type FabricChaincodeSpec struct {
+	// +nullable
+	// +optional
+	// +kubebuilder:validation:Optional
+	Template *FabricChaincodeTemplateRef `json:"template"`
+
 	// +nullable
 	// +optional
 	// +kubebuilder:validation:Optional
@@ -1744,6 +1775,56 @@ type FabricChaincodeSpec struct {
 	// +optional
 	// +kubebuilder:validation:Optional
 	MspID string `json:"mspID"`
+}
+
+func (in *FabricChaincodeSpec) ApplyDefaultValuesFromTemplate(template *FabricChaincodeTemplate) {
+	if in.ImagePullPolicy == "" {
+		in.ImagePullPolicy = template.Spec.ImagePullPolicy
+	}
+	if in.ImagePullSecrets == nil || len(in.ImagePullSecrets) == 0 {
+		in.ImagePullSecrets = template.Spec.ImagePullSecrets
+	}
+	if in.Command == nil || len(in.Command) == 0 {
+		in.Command = template.Spec.Command
+	}
+	if in.Args == nil || len(in.Args) == 0 {
+		in.Args = template.Spec.Args
+	}
+	if in.Affinity == nil {
+		in.Affinity = template.Spec.Affinity
+	}
+	if in.Tolerations == nil || len(in.Tolerations) == 0 {
+		in.Tolerations = template.Spec.Tolerations
+	}
+	if in.Resources == nil {
+		in.Resources = template.Spec.Resources
+	}
+	if in.Replicas == 0 {
+		in.Replicas = template.Spec.Replicas
+	}
+	if in.Env == nil || len(in.Env) == 0 {
+		in.Env = template.Spec.Env
+	} else {
+		for _, env := range template.Spec.Env {
+			found := false
+			for _, e := range in.Env {
+				if e.Name == env.Name {
+					found = true
+					break
+				}
+			}
+			if !found {
+				in.Env = append(in.Env, env)
+			}
+
+		}
+	}
+	if in.ChaincodeServerPort == 0 {
+		in.ChaincodeServerPort = template.Spec.ChaincodeServerPort
+	}
+	if in.MspID == "" {
+		in.MspID = template.Spec.MspID
+	}
 }
 
 // FabricChaincodeStatus defines the observed state of FabricChaincode
@@ -2229,8 +2310,119 @@ type FabricFollowerChannelOrderer struct {
 	Certificate string `json:"certificate"`
 }
 
+// FabricChaincodeTemplateStatus defines the observed state of FabricChaincodeTemplate
+type FabricChaincodeTemplateStatus struct {
+	Conditions status.Conditions `json:"conditions"`
+	Message    string            `json:"message"`
+	// Status of the FabricCA
+	Status DeploymentStatus `json:"status"`
+}
+
+// +genclient
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+// +k8s:defaulter-gen=true
+// +kubebuilder:subresource:status
+// +kubebuilder:resource:scope=Namespaced,shortName=fabricchaincodetemplate,singular=fabricchaincodetemplate
+// +kubebuilder:printcolumn:name="State",type="string",JSONPath=".status.status"
+// +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
+
+// FabricChaincodeTemplate is the Schema for the hlfs API
+type FabricChaincodeTemplate struct {
+	metav1.TypeMeta   `json:",inline"`
+	metav1.ObjectMeta `json:"metadata,omitempty"`
+	Spec              FabricChaincodeTemplateSpec   `json:"spec,omitempty"`
+	Status            FabricChaincodeTemplateStatus `json:"status,omitempty"`
+}
+
+// +kubebuilder:object:root=true
+
+// FabricChaincodeTemplateList contains a list of FabricChaincodeTemplate
+type FabricChaincodeTemplateList struct {
+	metav1.TypeMeta `json:",inline"`
+	metav1.ListMeta `json:"metadata,omitempty"`
+	Items           []FabricChaincodeTemplate `json:"items"`
+}
+
+// FabricChaincodeTemplateSpec defines the desired state of FabricChaincodeTemplate
+type FabricChaincodeTemplateSpec struct {
+	// +nullable
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default:={}
+	Annotations map[string]string `json:"annotations"`
+	// +nullable
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default:={}
+	Labels map[string]string `json:"labels"`
+
+	// +nullable
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default:={}
+	PodAnnotations map[string]string `json:"podAnnotations"`
+
+	// +nullable
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default:={}
+	PodLabels map[string]string `json:"podLabels"`
+
+	// +kubebuilder:default:="IfNotPresent"
+	ImagePullPolicy corev1.PullPolicy `json:"imagePullPolicy"`
+
+	// +kubebuilder:validation:Default={}
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +nullable
+	ImagePullSecrets []corev1.LocalObjectReference `json:"imagePullSecrets"`
+
+	// Entrypoint array. Not executed within a shell.
+	// The container image's ENTRYPOINT is used if this is not provided.
+	// +optional
+	Command []string `json:"command,omitempty" protobuf:"bytes,3,rep,name=command"`
+
+	// Arguments to the entrypoint.
+	// The container image's CMD is used if this is not provided.
+	// +optional
+	Args []string `json:"args,omitempty" protobuf:"bytes,4,rep,name=args"`
+
+	// +nullable
+	// +kubebuilder:validation:Optional
+	// +optional
+	Affinity *corev1.Affinity `json:"affinity"`
+
+	// +nullable
+	// +kubebuilder:validation:Optional
+	// +optional
+	// +kubebuilder:validation:Default={}
+	Tolerations []corev1.Toleration `json:"tolerations"`
+
+	// +nullable
+	// +kubebuilder:validation:Optional
+	// +optional
+	Resources *corev1.ResourceRequirements `json:"resources"`
+
+	// +kubebuilder:validation:Default=1
+	Replicas int `json:"replicas"`
+
+	// +nullable
+	// +kubebuilder:validation:Optional
+	// +optional
+	// +kubebuilder:validation:Default={}
+	Env []corev1.EnvVar `json:"env"`
+
+	// +kubebuilder:default=7052
+	ChaincodeServerPort int `json:"chaincodeServerPort"`
+
+	// +optional
+	// +kubebuilder:validation:Optional
+	MspID string `json:"mspID"`
+}
+
 func init() {
 	SchemeBuilder.Register(&FabricPeer{}, &FabricPeerList{})
+	SchemeBuilder.Register(&FabricChaincodeTemplate{}, &FabricChaincodeTemplateList{})
 	SchemeBuilder.Register(&FabricOrderingService{}, &FabricOrderingServiceList{})
 	SchemeBuilder.Register(&FabricCA{}, &FabricCAList{})
 	SchemeBuilder.Register(&FabricOrdererNode{}, &FabricOrdererNodeList{})

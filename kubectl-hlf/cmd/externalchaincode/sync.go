@@ -64,7 +64,7 @@ func (c *syncExternalChaincodeCmd) validate() error {
 func (c syncExternalChaincodeCmd) getFabricChaincodeSpec(ctx context.Context) (v1alpha1.FabricChaincodeSpec, error) {
 	fabricChaincodeSpec := v1alpha1.FabricChaincodeSpec{
 		Image:               c.image,
-		ImagePullPolicy:     corev1.PullAlways,
+		ImagePullPolicy:     corev1.PullIfNotPresent,
 		PackageID:           c.packageID,
 		ImagePullSecrets:    []corev1.LocalObjectReference{},
 		Affinity:            nil,
@@ -180,6 +180,7 @@ func (c *syncExternalChaincodeCmd) updateChaincode(ctx context.Context, fabricCh
 	}
 	fabricChaincode.Spec.Image = fabricChaincodeSpec.Image
 	fabricChaincode.Spec.ImagePullPolicy = fabricChaincodeSpec.ImagePullPolicy
+	fabricChaincode.Spec.Replicas = fabricChaincodeSpec.Replicas
 	fabricChaincode.Spec.PackageID = fabricChaincodeSpec.PackageID
 	fabricChaincode.Spec.ImagePullSecrets = fabricChaincodeSpec.ImagePullSecrets
 	if c.tlsRequired {

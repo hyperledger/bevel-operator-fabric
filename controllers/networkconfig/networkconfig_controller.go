@@ -94,6 +94,11 @@ orderers:
 {{ else }}
     url: grpcs://{{ $orderer.PublicURL }}
 {{ end }}
+{{if $orderer.AdminURL }}
+    adminUrl: {{ $orderer.AdminURL }}
+    adminTlsCert: |
+{{ $orderer.Status.TlsAdminCert | indent 8 }}
+{{ end }}
     grpcOptions:
       allow-insecure: false
     tlsCACerts:
@@ -311,6 +316,18 @@ func (r *FabricNetworkConfigReconciler) Reconcile(ctx context.Context, req ctrl.
 		}
 		certAuths = append(certAuths, ca)
 	}
+	// filter by cas included, if any
+	if len(fabricNetworkConfig.Spec.CertificateAuthorities) > 0 {
+		var cas []*helpers.ClusterCA
+		for _, ca := range certAuths {
+			for _, fabricNetworkConfigCA := range fabricNetworkConfig.Spec.CertificateAuthorities {
+				if ca.Item.Name == fabricNetworkConfigCA.Name && ca.Item.Namespace == fabricNetworkConfigCA.Namespace {
+					cas = append(cas, ca)
+				}
+			}
+		}
+		certAuths = cas
+	}
 	for _, v := range peerOrgs {
 		if (filterByOrgs && utils.Contains(fabricNetworkConfig.Spec.Organizations, v.MspID)) || !filterByOrgs {
 			var peers []*helpers.ClusterPeer
@@ -396,6 +413,7 @@ func (r *FabricNetworkConfigReconciler) Reconcile(ctx context.Context, req ctrl.
 			Key:  string(keyBytes),
 		})
 	}
+
 	var peers []*helpers.ClusterPeer
 	for _, peer := range clusterPeers {
 		if filterByNS && !utils.Contains(fabricNetworkConfig.Spec.Namespaces, peer.Namespace) {
@@ -406,6 +424,32 @@ func (r *FabricNetworkConfigReconciler) Reconcile(ctx context.Context, req ctrl.
 		}
 
 	}
+	for mspID, org := range fabricNetworkConfig.Spec.OrganizationConfig {
+		if len(org.Peers) > 0 {
+			// iterate through clusterpeers and remove the ones that are not in the list
+			// peers = peer0-org1 peer1-org1 peer1-ch-org1
+			// org peers
+			var orgPeers []*helpers.ClusterPeer
+			for _, peer := range org.Peers {
+				for _, p := range peers {
+					if p.Object.Name == peer.Name && p.Object.Namespace == peer.Namespace {
+						orgPeers = append(orgPeers, p)
+					} else {
+						// delete from peers
+					}
+				}
+			}
+			var restPeerOrgs []*helpers.ClusterPeer
+			for _, p := range peers {
+				if p.MSPID != mspID {
+					restPeerOrgs = append(restPeerOrgs, p)
+				}
+			}
+			peers = append(restPeerOrgs, orgPeers...)
+			orgMap[mspID].Peers = orgPeers
+		}
+	}
+
 	tmpl, err := template.New("networkConfig").Funcs(sprig.HermeticTxtFuncMap()).Parse(tmplGoConfig)
 	if err != nil {
 		r.setConditionStatus(ctx, fabricNetworkConfig, hlfv1alpha1.FailedStatus, false, err, false)

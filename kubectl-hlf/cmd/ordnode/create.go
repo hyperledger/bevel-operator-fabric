@@ -197,7 +197,7 @@ func (c *createCmd) run(args []string) error {
 			Image:                       c.ordererOpts.Image,
 			ImagePullSecrets:            imagePullSecrets,
 			Tag:                         c.ordererOpts.Version,
-			PullPolicy:                  corev1.PullAlways,
+			PullPolicy:                  corev1.PullIfNotPresent,
 			MspID:                       c.ordererOpts.MspID,
 			Genesis:                     "",
 			BootstrapMethod:             v1alpha1.BootstrapMethodNone,

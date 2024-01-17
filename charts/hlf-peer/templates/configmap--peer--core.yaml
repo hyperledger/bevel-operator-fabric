@@ -355,6 +355,8 @@ data:
         # It sets the delivery service maximal delay between consecutive retries
         reConnectBackoffThreshold: 3600s
 
+        blockGossipEnabled: false
+
         # A list of orderer endpoint addresses which should be overridden
         # when found in channel configurations.
         addressOverrides:
