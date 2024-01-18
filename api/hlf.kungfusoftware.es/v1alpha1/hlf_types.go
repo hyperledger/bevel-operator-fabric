@@ -2079,7 +2079,11 @@ type FabricMainChannelOrdererConfig struct {
 	// +nullable
 	// +kubebuilder:validation:Optional
 	// +optional
-	SmartBFT         *FabricMainChannelSmartBFT       `json:"smartBFT"`
+	SmartBFT *FabricMainChannelSmartBFT `json:"smartBFT"`
+	// +nullable
+	// +kubebuilder:validation:Optional
+	// +optional
+	// +kubebuilder:validation:Default={}
 	ConsenterMapping []FabricMainChannelConsenterItem `json:"consenterMapping"`
 }
 type FabricMainChannelConsenterItem struct {
