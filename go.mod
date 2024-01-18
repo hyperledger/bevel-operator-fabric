@@ -245,7 +245,7 @@ replace (
 )
 
 replace (
-	//github.com/hyperledger/fabric-config => github.com/kfsoftware/fabric-config v0.0.0-20231011154251-e61bb40ee086
-	github.com/hyperledger/fabric-config => /Users/davidviejo/projects/kfs/fabric-config
+	github.com/hyperledger/fabric-config => github.com/kfsoftware/fabric-config v0.0.0-20240118174340-d0ca879ab321
+
 	github.com/hyperledger/fabric-sdk-go => github.com/kfsoftware/fabric-sdk-go v0.0.0-20240114221414-98466038585d
 )
