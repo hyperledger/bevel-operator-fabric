@@ -1000,10 +1000,6 @@ func (r *FabricMainChannelReconciler) mapToConfigTX(channel *hlfv1alpha1.FabricM
 			DecisionsPerLeader:        channel.Spec.ChannelConfig.Orderer.SmartBFT.DecisionsPerLeader,
 		}
 	} else if channel.Spec.ChannelConfig.Orderer.OrdererType == hlfv1alpha1.OrdererConsensusEtcdraft {
-		etcdRaft = orderer.EtcdRaft{
-			Consenters: consenters,
-			Options:    etcdRaftOptions,
-		}
 		for _, consenter := range channel.Spec.Consenters {
 			tlsCert, err := utils.ParseX509Certificate([]byte(consenter.TLSCert))
 			if err != nil {
@@ -1018,6 +1014,10 @@ func (r *FabricMainChannelReconciler) mapToConfigTX(channel *hlfv1alpha1.FabricM
 				ServerTLSCert: tlsCert,
 			}
 			consenters = append(consenters, channelConsenter)
+		}
+		etcdRaft = orderer.EtcdRaft{
+			Consenters: consenters,
+			Options:    etcdRaftOptions,
 		}
 	} else {
 		return configtx.Channel{}, fmt.Errorf("orderer type %s not supported", ordererType)
