@@ -951,6 +951,9 @@ func (r *FabricMainChannelReconciler) mapToConfigTX(channel *hlfv1alpha1.FabricM
 	ordererType := string(channel.Spec.ChannelConfig.Orderer.OrdererType)
 	consenterMapping := []cb.Consenter{}
 	consenters := []orderer.Consenter{}
+	var etcdRaft orderer.EtcdRaft
+
+	var smartBFTOptions *sb.Options
 	if channel.Spec.ChannelConfig.Orderer.OrdererType == hlfv1alpha1.OrdererConsensusBFT {
 		ordererType = string(hlfv1alpha1.OrdererConsensusBFT)
 		for _, consenterItem := range channel.Spec.ChannelConfig.Orderer.ConsenterMapping {
@@ -976,28 +979,7 @@ func (r *FabricMainChannelReconciler) mapToConfigTX(channel *hlfv1alpha1.FabricM
 				ServerTlsCert: utils.EncodeX509Certificate(serverTLSCert),
 			})
 		}
-	} else if channel.Spec.ChannelConfig.Orderer.OrdererType == hlfv1alpha1.OrdererConsensusEtcdraft {
-		for _, consenter := range channel.Spec.Consenters {
-			tlsCert, err := utils.ParseX509Certificate([]byte(consenter.TLSCert))
-			if err != nil {
-				return configtx.Channel{}, err
-			}
-			channelConsenter := orderer.Consenter{
-				Address: orderer.EtcdAddress{
-					Host: consenter.Host,
-					Port: consenter.Port,
-				},
-				ClientTLSCert: tlsCert,
-				ServerTLSCert: tlsCert,
-			}
-			consenters = append(consenters, channelConsenter)
-		}
-	}
-	ordConfigtx := configtx.Orderer{
-		OrdererType:      ordererType,
-		Organizations:    ordererOrgs,
-		ConsenterMapping: consenterMapping, // TODO: map from channel.Spec.ConssenterMapping
-		SmartBFT: &sb.Options{
+		smartBFTOptions = &sb.Options{
 			RequestBatchMaxCount:      channel.Spec.ChannelConfig.Orderer.SmartBFT.RequestBatchMaxCount,
 			RequestBatchMaxBytes:      channel.Spec.ChannelConfig.Orderer.SmartBFT.RequestBatchMaxBytes,
 			RequestBatchMaxInterval:   channel.Spec.ChannelConfig.Orderer.SmartBFT.RequestBatchMaxInterval,
@@ -1016,13 +998,39 @@ func (r *FabricMainChannelReconciler) mapToConfigTX(channel *hlfv1alpha1.FabricM
 			SpeedUpViewChange:         channel.Spec.ChannelConfig.Orderer.SmartBFT.SpeedUpViewChange,
 			LeaderRotation:            sb.Options_ROTATION_ON,
 			DecisionsPerLeader:        channel.Spec.ChannelConfig.Orderer.SmartBFT.DecisionsPerLeader,
-		},
-		EtcdRaft: orderer.EtcdRaft{
+		}
+	} else if channel.Spec.ChannelConfig.Orderer.OrdererType == hlfv1alpha1.OrdererConsensusEtcdraft {
+		etcdRaft = orderer.EtcdRaft{
 			Consenters: consenters,
 			Options:    etcdRaftOptions,
-		},
-		Policies:     adminOrdererPolicies,
-		Capabilities: channel.Spec.ChannelConfig.Orderer.Capabilities,
+		}
+		for _, consenter := range channel.Spec.Consenters {
+			tlsCert, err := utils.ParseX509Certificate([]byte(consenter.TLSCert))
+			if err != nil {
+				return configtx.Channel{}, err
+			}
+			channelConsenter := orderer.Consenter{
+				Address: orderer.EtcdAddress{
+					Host: consenter.Host,
+					Port: consenter.Port,
+				},
+				ClientTLSCert: tlsCert,
+				ServerTLSCert: tlsCert,
+			}
+			consenters = append(consenters, channelConsenter)
+		}
+	} else {
+		return configtx.Channel{}, fmt.Errorf("orderer type %s not supported", ordererType)
+	}
+
+	ordConfigtx := configtx.Orderer{
+		OrdererType:      ordererType,
+		Organizations:    ordererOrgs,
+		ConsenterMapping: consenterMapping, // TODO: map from channel.Spec.ConssenterMapping
+		SmartBFT:         smartBFTOptions,
+		EtcdRaft:         etcdRaft,
+		Policies:         adminOrdererPolicies,
+		Capabilities:     channel.Spec.ChannelConfig.Orderer.Capabilities,
 		BatchSize: orderer.BatchSize{
 			MaxMessageCount:   100,
 			AbsoluteMaxBytes:  1024 * 1024,
