@@ -3,14 +3,12 @@ package chaincode
 import (
 	"encoding/json"
 	"fmt"
-	"io"
-	"time"
-
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/channel"
 	"github.com/hyperledger/fabric-sdk-go/pkg/core/config"
 	"github.com/hyperledger/fabric-sdk-go/pkg/fabsdk"
 	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/helpers"
 	"github.com/spf13/cobra"
+	"io"
 )
 
 type queryChaincodeCmd struct {
@@ -73,7 +71,6 @@ func (c *queryChaincodeCmd) run(out io.Writer) error {
 			return err
 		}
 	}
-	t := time.Now()
 	response, err := ch.Query(
 		channel.Request{
 			ChaincodeID:     c.chaincode,
@@ -88,7 +85,6 @@ func (c *queryChaincodeCmd) run(out io.Writer) error {
 	if err != nil {
 		return err
 	}
-	fmt.Printf("Query took %s\n", time.Since(t))
 	_, err = fmt.Fprint(out, string(response.Payload))
 	if err != nil {
 		return err
