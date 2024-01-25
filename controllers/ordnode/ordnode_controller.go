@@ -11,6 +11,7 @@ import (
 	"helm.sh/helm/v3/pkg/release"
 	"os"
 	"reflect"
+	"sort"
 	"strings"
 	"time"
 
@@ -162,6 +163,32 @@ func (r *FabricOrdererNodeReconciler) Reconcile(ctx context.Context, req ctrl.Re
 			// it doesn't exist
 			return ctrl.Result{}, err
 		}
+	} else if exists && helmStatus.Info.Status == release.StatusPendingRollback {
+		historyAction := action.NewHistory(cfg)
+		history, err := historyAction.Run(releaseName)
+		if err != nil {
+			return ctrl.Result{}, err
+		}
+		if len(history) > 0 {
+			// find the last deployed revision
+			// and rollback to it
+			// sort history by revision number descending using raw go
+			sort.Slice(history, func(i, j int) bool {
+				return history[i].Version > history[j].Version
+			})
+			for _, historyItem := range history {
+				if historyItem.Info.Status == release.StatusDeployed {
+					rollbackStatus := action.NewRollback(cfg)
+					rollbackStatus.Version = historyItem.Version
+					err = rollbackStatus.Run(releaseName)
+					if err != nil {
+						// it doesn't exist
+						return ctrl.Result{}, err
+					}
+					break
+				}
+			}
+		}
 	}
 	log.Printf("Release %s exists=%v", releaseName, exists)
 	clientSet, err := utils.GetClientKubeWithConf(r.Config)
@@ -216,7 +243,7 @@ func (r *FabricOrdererNodeReconciler) Reconcile(ctx context.Context, req ctrl.Re
 			lastTimeCertsRenewed = &newTime
 			log.Infof("Certs updated, last time updated: %v", lastTimeCertsRenewed)
 			requeueAfter = time.Minute * 1
-		} else {
+		} else if helmStatus.Info.Status != release.StatusPendingUpgrade {
 			c, err := getConfig(fabricOrdererNode, clientSet, releaseName, req.Namespace, false)
 			if err != nil {
 				return ctrl.Result{}, err
@@ -478,6 +505,7 @@ func (r *FabricOrdererNodeReconciler) upgradeChart(
 	cmd.Wait = r.Wait
 	cmd.Timeout = r.Timeout
 	cmd.MaxHistory = r.MaxHistory
+
 	release, err := cmd.Run(releaseName, ch, inInterface)
 	if err != nil {
 		return err

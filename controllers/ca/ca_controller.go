@@ -933,6 +933,32 @@ func Reconcile(
 			// it doesn't exist
 			return ctrl.Result{}, err
 		}
+	} else if exists && helmStatus.Info.Status == release.StatusPendingRollback {
+		historyAction := action.NewHistory(cfg)
+		history, err := historyAction.Run(releaseName)
+		if err != nil {
+			return ctrl.Result{}, err
+		}
+		if len(history) > 0 {
+			// find the last deployed revision
+			// and rollback to it
+			// sort history by revision number descending using raw go
+			sort.Slice(history, func(i, j int) bool {
+				return history[i].Version > history[j].Version
+			})
+			for _, historyItem := range history {
+				if historyItem.Info.Status == release.StatusDeployed {
+					rollbackStatus := action.NewRollback(cfg)
+					rollbackStatus.Version = historyItem.Version
+					err = rollbackStatus.Run(releaseName)
+					if err != nil {
+						// it doesn't exist
+						return ctrl.Result{}, err
+					}
+					break
+				}
+			}
+		}
 	}
 	log.Debugf("Release %s exists=%v", releaseName, exists)
 	clientSet, err := utils.GetClientKubeWithConf(r.Config)
@@ -969,35 +995,38 @@ func Reconcile(
 			Status:             "True",
 			LastTransitionTime: v1.Time{},
 		})
-		c, err := GetConfig(hlf, clientSet, releaseName, req.Namespace)
-		if err != nil {
-			return ctrl.Result{}, err
+		if helmStatus.Info.Status != release.StatusPendingUpgrade {
+			c, err := GetConfig(hlf, clientSet, releaseName, req.Namespace)
+			if err != nil {
+				return ctrl.Result{}, err
+			}
+			inrec, err := json.Marshal(c)
+			if err != nil {
+				return ctrl.Result{}, err
+			}
+			var inInterface map[string]interface{}
+			err = json.Unmarshal(inrec, &inInterface)
+			if err != nil {
+				return ctrl.Result{}, err
+			}
+			cmd := action.NewUpgrade(cfg)
+			cmd.Timeout = r.Timeout
+			cmd.Wait = r.Wait
+			cmd.MaxHistory = r.MaxHistory
+
+			settings := cli.New()
+			chartPath, err := cmd.LocateChart(r.ChartPath, settings)
+			ch, err := loader.Load(chartPath)
+			if err != nil {
+				return ctrl.Result{}, err
+			}
+			release, err := cmd.Run(releaseName, ch, inInterface)
+			if err != nil {
+				setConditionStatus(hlf, hlfv1alpha1.FailedStatus, false, err, false)
+				return r.updateCRStatusOrFailReconcile(ctx, r.Log, hlf)
+			}
+			log.Debugf("Chart upgraded %s", release.Name)
 		}
-		inrec, err := json.Marshal(c)
-		if err != nil {
-			return ctrl.Result{}, err
-		}
-		var inInterface map[string]interface{}
-		err = json.Unmarshal(inrec, &inInterface)
-		if err != nil {
-			return ctrl.Result{}, err
-		}
-		cmd := action.NewUpgrade(cfg)
-		cmd.Timeout = r.Timeout
-		cmd.Wait = r.Wait
-		cmd.MaxHistory = r.MaxHistory
-		settings := cli.New()
-		chartPath, err := cmd.LocateChart(r.ChartPath, settings)
-		ch, err := loader.Load(chartPath)
-		if err != nil {
-			return ctrl.Result{}, err
-		}
-		release, err := cmd.Run(releaseName, ch, inInterface)
-		if err != nil {
-			setConditionStatus(hlf, hlfv1alpha1.FailedStatus, false, err, false)
-			return r.updateCRStatusOrFailReconcile(ctx, r.Log, hlf)
-		}
-		log.Debugf("Chart upgraded %s", release.Name)
 		if !reflect.DeepEqual(fca.Status, hlf.Status) {
 			if err := r.Status().Update(ctx, fca); err != nil {
 				log.Debugf("Error updating the status: %v", err)
