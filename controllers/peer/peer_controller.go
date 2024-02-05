@@ -1642,7 +1642,7 @@ func createPeerService(
 				Port:     443,
 				TargetPort: intstr.IntOrString{
 					Type:   intstr.Int,
-					IntVal: 443,
+					IntVal: 7051,
 				},
 			},
 			{
