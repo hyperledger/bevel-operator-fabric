@@ -71,6 +71,7 @@ func (c *queryChaincodeCmd) run(out io.Writer) error {
 			return err
 		}
 	}
+
 	response, err := ch.Query(
 		channel.Request{
 			ChaincodeID:     c.chaincode,
