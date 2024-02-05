@@ -459,6 +459,9 @@ func (r *FabricChaincodeReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 			FailureThreshold:    3,
 		},
 	}
+	if fabricChaincode.Spec.Resources != nil {
+		container.Resources = *fabricChaincode.Spec.Resources
+	}
 	if fabricChaincode.Spec.Command != nil {
 		container.Command = fabricChaincode.Spec.Command
 	}

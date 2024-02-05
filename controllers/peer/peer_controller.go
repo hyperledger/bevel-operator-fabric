@@ -11,6 +11,7 @@ import (
 	"helm.sh/helm/v3/pkg/release"
 	"os"
 	"reflect"
+	"sort"
 	"strings"
 	"time"
 
@@ -378,6 +379,32 @@ func (r *FabricPeerReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 			// it doesn't exist
 			return ctrl.Result{}, err
 		}
+	} else if exists && helmStatus.Info.Status == release.StatusPendingRollback {
+		historyAction := action.NewHistory(cfg)
+		history, err := historyAction.Run(releaseName)
+		if err != nil {
+			return ctrl.Result{}, err
+		}
+		if len(history) > 0 {
+			// find the last deployed revision
+			// and rollback to it
+			// sort history by revision number descending using raw go
+			sort.Slice(history, func(i, j int) bool {
+				return history[i].Version > history[j].Version
+			})
+			for _, historyItem := range history {
+				if historyItem.Info.Status == release.StatusDeployed {
+					rollbackStatus := action.NewRollback(cfg)
+					rollbackStatus.Version = historyItem.Version
+					err = rollbackStatus.Run(releaseName)
+					if err != nil {
+						// it doesn't exist
+						return ctrl.Result{}, err
+					}
+					break
+				}
+			}
+		}
 	}
 	log.Debugf("Release %s exists=%v", releaseName, exists)
 	clientSet, err := utils.GetClientKubeWithConf(r.Config)
@@ -449,11 +476,12 @@ func (r *FabricPeerReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 				r.setConditionStatus(ctx, fabricPeer, hlfv1alpha1.FailedStatus, false, err, false)
 				return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricPeer)
 			}
-
-			err = r.upgradeChart(cfg, err, ns, releaseName, c)
-			if err != nil {
-				r.setConditionStatus(ctx, fabricPeer, hlfv1alpha1.FailedStatus, false, err, false)
-				return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricPeer)
+			if helmStatus.Info.Status != release.StatusPendingUpgrade {
+				err = r.upgradeChart(cfg, err, ns, releaseName, c)
+				if err != nil {
+					r.setConditionStatus(ctx, fabricPeer, hlfv1alpha1.FailedStatus, false, err, false)
+					return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricPeer)
+				}
 			}
 			requeueAfter = time.Minute * 10
 		}

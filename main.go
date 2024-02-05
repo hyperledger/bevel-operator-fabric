@@ -95,8 +95,10 @@ func main() {
 	flag.Parse()
 	log.Infof("Auto renew peer certificates enabled: %t", autoRenewCertificatesPeerEnabled)
 	log.Infof("Auto renew orderer certificates enabled: %t", autoRenewCertificatesOrdererEnabled)
+	log.Infof("Auto renew identity certificates enabled: %t", autoRenewCertificatesIdentityEnabled)
 	log.Infof("Auto renew peer certificates delta: %s", autoRenewPeerCertificatesDelta)
 	log.Infof("Auto renew orderer certificates delta: %s", autoRenewOrdererCertificatesDelta)
+	log.Infof("Auto renew identity certificates delta: %s", autoRenewIdentityCertificatesDelta)
 	// Pass a Config struct
 	// to initialize a Client struct
 	// which implements Client interface

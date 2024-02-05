@@ -37,6 +37,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"strings"
+	"time"
 )
 
 // FabricFollowerChannelReconciler reconciles a FabricFollowerChannel object
@@ -385,7 +386,9 @@ func (r *FabricFollowerChannelReconciler) updateCRStatusOrFailReconcile(ctx cont
 		log.Error(err, fmt.Sprintf("%v failed to update the application status", ErrClientK8s))
 		return reconcile.Result{}, err
 	}
-	return reconcile.Result{}, nil
+	return reconcile.Result{
+		RequeueAfter: 1 * time.Minute,
+	}, nil
 }
 
 func (r *FabricFollowerChannelReconciler) setConditionStatus(ctx context.Context, p *hlfv1alpha1.FabricFollowerChannel, conditionType hlfv1alpha1.DeploymentStatus, statusFlag bool, err error, statusUnknown bool) (update bool) {
