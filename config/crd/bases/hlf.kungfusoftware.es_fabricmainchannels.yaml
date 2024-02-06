@@ -179,6 +179,7 @@ spec:
                             server_tls_cert:
                               type: string
                           type: object
+                        nullable: true
                         type: array
                       etcdRaft:
                         nullable: true
@@ -299,7 +300,6 @@ spec:
                     required:
                     - batchTimeout
                     - capabilities
-                    - consenterMapping
                     - ordererType
                     - state
                     type: object
