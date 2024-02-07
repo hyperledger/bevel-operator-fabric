@@ -118,11 +118,9 @@ func main() {
 	// Register custom metrics with the global prometheus registry
 	metrics.Registry.MustRegister(hlfmetrics.CertificateExpiryTimeSeconds)
 	mgr, err := ctrl.NewManager(restConfig, ctrl.Options{
-		Scheme:             scheme,
-		MetricsBindAddress: metricsAddr,
-		Port:               9443,
-		LeaderElection:     enableLeaderElection,
-		LeaderElectionID:   "a1f969eb.kungfusoftware.es",
+		Scheme:           scheme,
+		LeaderElection:   enableLeaderElection,
+		LeaderElectionID: "a1f969eb.kungfusoftware.es",
 	})
 	if err != nil {
 		setupLog.Error(err, "unable to start manager")

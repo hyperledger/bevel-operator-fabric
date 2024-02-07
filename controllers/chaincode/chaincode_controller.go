@@ -27,7 +27,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-	"sigs.k8s.io/controller-runtime/pkg/source"
 	"time"
 )
 
@@ -663,7 +662,7 @@ func (r *FabricChaincodeReconciler) setConditionStatus(ctx context.Context, p *h
 // enqueueRequestForOwningResource returns an event handler for all Chaincodes objects having
 // owningGatewayLabel
 func (r *FabricChaincodeReconciler) enqueueRequestForOwningResource() handler.EventHandler {
-	return handler.EnqueueRequestsFromMapFunc(func(object client.Object) []reconcile.Request {
+	return handler.EnqueueRequestsFromMapFunc(func(ctx context.Context, object client.Object) []reconcile.Request {
 		scopedLog := log.WithFields(log.Fields{
 			"controller": "chaincode",
 			"name":       object.GetName(),
@@ -698,9 +697,7 @@ func (r *FabricChaincodeReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		For(&hlfv1alpha1.FabricChaincode{}).
 		Owns(&corev1.Secret{}).
 		Watches(
-			&source.Kind{
-				Type: &hlfv1alpha1.FabricChaincodeTemplate{},
-			},
+			&hlfv1alpha1.FabricChaincodeTemplate{},
 			r.enqueueRequestForOwningResource(),
 		).
 		Complete(r)
