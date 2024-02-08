@@ -19,7 +19,6 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"path/filepath"
-	"sigs.k8s.io/controller-runtime/pkg/envtest/printer"
 
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
@@ -31,10 +30,7 @@ import (
 
 func TestAPIs(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecsWithDefaultAndCustomReporters(t,
-		"Controller Suite",
-		[]Reporter{printer.NewlineReporter{}},
-	)
+	RunSpecs(t, "Controller Suite")
 }
 
 var cfg *rest.Config
@@ -68,8 +64,7 @@ var _ = BeforeSuite(func(done Done) {
 	k8sManager, err = ctrl.NewManager(
 		cfg,
 		ctrl.Options{
-			Scheme:             scheme.Scheme,
-			MetricsBindAddress: "0",
+			Scheme: scheme.Scheme,
 		},
 	)
 	Expect(err).ToNot(HaveOccurred())
