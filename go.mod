@@ -33,6 +33,7 @@ require (
 	github.com/mattn/go-sqlite3 v1.14.15
 	github.com/mitchellh/mapstructure v1.4.1
 	github.com/olekukonko/tablewriter v0.0.5
+	github.com/onsi/ginkgo v1.14.0
 	github.com/onsi/ginkgo/v2 v2.15.0
 	github.com/onsi/gomega v1.31.1
 	github.com/op/go-logging v0.0.0-20160315200505-970db520ece7
