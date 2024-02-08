@@ -56,6 +56,11 @@ peer:
     orgLeader: "false"
     useLeaderElection: "true"
 
+    reconnectInterval: "25s"
+    aliveExpirationTimeout: "25s"
+    aliveTimeInterval: "5s"
+    responseWaitTime: "2s"
+
   tls:
     server:
       enabled: "true"

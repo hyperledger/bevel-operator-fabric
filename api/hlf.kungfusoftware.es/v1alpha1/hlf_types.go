@@ -375,6 +375,18 @@ type FabricPeerSpecGossip struct {
 	Endpoint          string `json:"endpoint"`
 	UseLeaderElection bool   `json:"useLeaderElection"`
 	OrgLeader         bool   `json:"orgLeader"`
+	// +kubebuilder:validation:Default=25s
+	// +optional
+	ReconnectInterval string `json:"reconnectInterval"`
+	// +kubebuilder:validation:Default=25s
+	// +optional
+	AliveExpirationTimeout string `json:"aliveExpirationTimeout"`
+	// +kubebuilder:validation:Default=5s
+	// +optional
+	AliveTimeInterval string `json:"aliveTimeInterval"`
+	// +kubebuilder:validation:Default=2s
+	// +optional
+	ResponseWaitTime string `json:"responseWaitTime"`
 }
 type Catls struct {
 	Cacert string `json:"cacert"`

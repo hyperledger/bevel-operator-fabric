@@ -141,11 +141,15 @@ type Image struct {
 type Annotations struct {
 }
 type Gossip struct {
-	Bootstrap         string `json:"bootstrap"`
-	Endpoint          string `json:"endpoint"`
-	ExternalEndpoint  string `json:"externalEndpoint"`
-	OrgLeader         bool   `json:"orgLeader"`
-	UseLeaderElection bool   `json:"useLeaderElection"`
+	Bootstrap              string `json:"bootstrap"`
+	Endpoint               string `json:"endpoint"`
+	ExternalEndpoint       string `json:"externalEndpoint"`
+	OrgLeader              bool   `json:"orgLeader"`
+	UseLeaderElection      bool   `json:"useLeaderElection"`
+	ReconnectInterval      string `json:"reconnectInterval"`
+	AliveExpirationTimeout string `json:"aliveExpirationTimeout"`
+	AliveTimeInterval      string `json:"aliveTimeInterval"`
+	ResponseWaitTime       string `json:"responseWaitTime"`
 }
 type Server struct {
 	Enabled bool `json:"enabled"`
