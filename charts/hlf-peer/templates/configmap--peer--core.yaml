@@ -162,13 +162,13 @@ data:
         # Should be slightly bigger than digestWaitTime
         requestWaitTime: 1500ms
         # Time to wait before pull engine ends pull (unit: second)
-        responseWaitTime: 2s
+        responseWaitTime: {{.Values.peer.gossip.responseWaitTime | default "2s" }}
         # Alive check interval(unit: second)
-        aliveTimeInterval: 5s
+        aliveTimeInterval: {{.Values.peer.gossip.aliveTimeInterval | default "5s" }}
         # Alive expiration timeout(unit: second)
-        aliveExpirationTimeout: 25s
+        aliveExpirationTimeout: {{.Values.peer.gossip.aliveExpirationTimeout | default "25s"}}
         # Reconnect interval(unit: second)
-        reconnectInterval: 25s
+        reconnectInterval: {{.Values.peer.gossip.reconnectInterval | default "25s"}}
         # Max number of attempts to connect to a peer
         maxConnectionAttempts: 120
         # Message expiration factor for alive messages

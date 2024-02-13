@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"github.com/kfsoftware/hlf-operator/pkg/status"
 	"k8s.io/api/networking/v1beta1"
-	kubeclock "k8s.io/apimachinery/pkg/util/clock"
+	kubeclock "k8s.io/utils/clock"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -375,6 +375,18 @@ type FabricPeerSpecGossip struct {
 	Endpoint          string `json:"endpoint"`
 	UseLeaderElection bool   `json:"useLeaderElection"`
 	OrgLeader         bool   `json:"orgLeader"`
+	// +kubebuilder:validation:Default=25s
+	// +optional
+	ReconnectInterval string `json:"reconnectInterval"`
+	// +kubebuilder:validation:Default=25s
+	// +optional
+	AliveExpirationTimeout string `json:"aliveExpirationTimeout"`
+	// +kubebuilder:validation:Default=5s
+	// +optional
+	AliveTimeInterval string `json:"aliveTimeInterval"`
+	// +kubebuilder:validation:Default=2s
+	// +optional
+	ResponseWaitTime string `json:"responseWaitTime"`
 }
 type Catls struct {
 	Cacert string `json:"cacert"`
