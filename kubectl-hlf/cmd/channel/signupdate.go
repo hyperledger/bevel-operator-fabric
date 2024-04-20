@@ -3,6 +3,8 @@ package channel
 import (
 	"bytes"
 	"fmt"
+	mspclient "github.com/hyperledger/fabric-sdk-go/pkg/client/msp"
+	"os"
 
 	"github.com/golang/protobuf/proto"
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/resmgmt"
@@ -18,7 +20,6 @@ import (
 	"gopkg.in/yaml.v3"
 
 	"io"
-	"io/ioutil"
 )
 
 type signUpdateChannelCmd struct {
@@ -58,55 +59,71 @@ func (c *signUpdateChannelCmd) run(out io.Writer) error {
 	if err != nil {
 		return err
 	}
-	updateEnvelopeBytes, err := ioutil.ReadFile(c.file)
+	updateEnvelopeBytes, err := os.ReadFile(c.file)
 	if err != nil {
 		return err
 	}
 	configUpdateReader := bytes.NewReader(updateEnvelopeBytes)
-	sdkConfig, err := sdk.Config()
-	if err != nil {
-		return err
+
+	var signatureBytes []byte
+
+	// use identity file if provided
+	if c.identity != "" {
+		sdkConfig, err := sdk.Config()
+		if err != nil {
+			return err
+		}
+
+		cryptoConfig := cryptosuite.ConfigFromBackend(sdkConfig)
+		cryptoSuite, err := sw.GetSuiteByConfig(cryptoConfig)
+		if err != nil {
+			return err
+		}
+		userStore := mspimpl.NewMemoryUserStore()
+		endpointConfig, err := fab.ConfigFromBackend(sdkConfig)
+		if err != nil {
+			return err
+		}
+		identityManager, err := mspimpl.NewIdentityManager(c.mspID, userStore, cryptoSuite, endpointConfig)
+		if err != nil {
+			return err
+		}
+		identityBytes, err := os.ReadFile(c.identity)
+		if err != nil {
+			return err
+		}
+		id := &identity{}
+		err = yaml.Unmarshal(identityBytes, id)
+		if err != nil {
+			return err
+		}
+		signingIdentity, err := identityManager.CreateSigningIdentity(
+			msp.WithPrivateKey([]byte(id.Key.Pem)),
+			msp.WithCert([]byte(id.Cert.Pem)),
+		)
+		if err != nil {
+			return err
+		}
+		signature, err := resClient.CreateConfigSignatureFromReader(signingIdentity, configUpdateReader)
+		if err != nil {
+			return err
+		}
+		signatureBytes, err = proto.Marshal(signature)
+		if err != nil {
+			return err
+		}
+	} else {
+		mspClient, err := mspclient.New(org1AdminClientContext, mspclient.WithOrg(c.mspID))
+		if err != nil {
+			return err
+		}
+		usr, err := mspClient.GetSigningIdentity(c.userName)
+		signature, err := resClient.CreateConfigSignatureFromReader(usr, configUpdateReader)
+		signatureBytes, err = proto.Marshal(signature)
 	}
-	cryptoConfig := cryptosuite.ConfigFromBackend(sdkConfig)
-	cryptoSuite, err := sw.GetSuiteByConfig(cryptoConfig)
-	if err != nil {
-		return err
-	}
-	userStore := mspimpl.NewMemoryUserStore()
-	endpointConfig, err := fab.ConfigFromBackend(sdkConfig)
-	if err != nil {
-		return err
-	}
-	identityManager, err := mspimpl.NewIdentityManager(c.mspID, userStore, cryptoSuite, endpointConfig)
-	if err != nil {
-		return err
-	}
-	identityBytes, err := ioutil.ReadFile(c.identity)
-	if err != nil {
-		return err
-	}
-	id := &identity{}
-	err = yaml.Unmarshal(identityBytes, id)
-	if err != nil {
-		return err
-	}
-	signingIdentity, err := identityManager.CreateSigningIdentity(
-		msp.WithPrivateKey([]byte(id.Key.Pem)),
-		msp.WithCert([]byte(id.Cert.Pem)),
-	)
-	if err != nil {
-		return err
-	}
-	signature, err := resClient.CreateConfigSignatureFromReader(signingIdentity, configUpdateReader)
-	if err != nil {
-		return err
-	}
-	signatureBytes, err := proto.Marshal(signature)
-	if err != nil {
-		return err
-	}
+
 	if c.output != "" {
-		err = ioutil.WriteFile(c.output, signatureBytes, 0644)
+		err = os.WriteFile(c.output, signatureBytes, 0644)
 		if err != nil {
 			return err
 		}
