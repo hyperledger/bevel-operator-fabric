@@ -1770,6 +1770,29 @@ type FabricChaincodeSpec struct {
 	// +nullable
 	// +kubebuilder:validation:Optional
 	// +optional
+	PodSecurityContext *corev1.PodSecurityContext `json:"podSecurityContext"`
+	// +nullable
+	// +kubebuilder:validation:Optional
+	// +optional
+	SecurityContext *corev1.SecurityContext `json:"securityContext"`
+	// +nullable
+	// +kubebuilder:validation:Optional
+	// +optional
+	// +kubebuilder:validation:Default=""
+	ServiceAccountName string `json:"serviceAccountName"`
+	// +nullable
+	// +kubebuilder:validation:Optional
+	// +optional
+	// +kubebuilder:validation:Default=false
+	EnableServiceLinks bool `json:"enableServiceLinks"`
+	// +nullable
+	// +kubebuilder:validation:Optional
+	// +optional
+	// +kubebuilder:validation:Default={}
+	NodeSelector map[string]string `json:"nodeSelector"`
+	// +nullable
+	// +kubebuilder:validation:Optional
+	// +optional
 	Credentials *TLS `json:"credentials"`
 
 	// +kubebuilder:validation:Default=1

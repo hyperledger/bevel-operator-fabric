@@ -362,7 +362,7 @@ func (r *FabricOperatorAPIReconciler) Reconcile(ctx context.Context, req ctrl.Re
 		}
 		return ctrl.Result{
 			Requeue:      false,
-			RequeueAfter: 10 * time.Second,
+			RequeueAfter: 120 * time.Minute,
 		}, nil
 	}
 }

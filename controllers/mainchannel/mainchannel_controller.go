@@ -763,9 +763,7 @@ func (r *FabricMainChannelReconciler) updateCRStatusOrFailReconcile(ctx context.
 		log.Error(err, fmt.Sprintf("%v failed to update the application status", ErrClientK8s))
 		return reconcile.Result{}, err
 	}
-	return reconcile.Result{
-		RequeueAfter: 1 * time.Minute,
-	}, nil
+	return reconcile.Result{}, nil
 }
 
 func (r *FabricMainChannelReconciler) setConditionStatus(ctx context.Context, p *hlfv1alpha1.FabricMainChannel, conditionType hlfv1alpha1.DeploymentStatus, statusFlag bool, err error, statusUnknown bool) (update bool) {
@@ -931,6 +929,7 @@ func (r *FabricMainChannelReconciler) mapToConfigTX(channel *hlfv1alpha1.FabricM
 			Rule: "ANY Writers",
 		},
 	}
+
 	ordConfigtx := configtx.Orderer{
 		OrdererType:   "etcdraft",
 		Organizations: ordererOrgs,
@@ -961,6 +960,12 @@ func (r *FabricMainChannelReconciler) mapToConfigTX(channel *hlfv1alpha1.FabricM
 				ordConfigtx.BatchSize.MaxMessageCount = uint32(channel.Spec.ChannelConfig.Orderer.BatchSize.MaxMessageCount)
 				ordConfigtx.BatchSize.AbsoluteMaxBytes = uint32(channel.Spec.ChannelConfig.Orderer.BatchSize.AbsoluteMaxBytes)
 				ordConfigtx.BatchSize.PreferredMaxBytes = uint32(channel.Spec.ChannelConfig.Orderer.BatchSize.PreferredMaxBytes)
+			}
+			if channel.Spec.ChannelConfig.Orderer.Capabilities != nil {
+				ordConfigtx.Capabilities = channel.Spec.ChannelConfig.Orderer.Capabilities
+			}
+			if channel.Spec.ChannelConfig.Orderer.Policies != nil {
+				ordConfigtx.Policies = r.mapPolicy(*channel.Spec.ChannelConfig.Orderer.Policies)
 			}
 		}
 	}
@@ -1009,7 +1014,7 @@ func (r *FabricMainChannelReconciler) mapToConfigTX(channel *hlfv1alpha1.FabricM
 		}
 		adminAppPolicy += ")"
 	}
-	policies := map[string]configtx.Policy{
+	applicationPolicies := map[string]configtx.Policy{
 		"Readers": {
 			Type: "ImplicitMeta",
 			Rule: "ANY Readers",
@@ -1034,8 +1039,12 @@ func (r *FabricMainChannelReconciler) mapToConfigTX(channel *hlfv1alpha1.FabricM
 	application := configtx.Application{
 		Organizations: peerOrgs,
 		Capabilities:  []string{"V2_0"},
-		Policies:      policies,
+		Policies:      applicationPolicies,
 		ACLs:          defaultACLs(),
+	}
+
+	if channel.Spec.ChannelConfig.Application != nil && channel.Spec.ChannelConfig.Application.Policies != nil {
+		application.Policies = r.mapPolicy(*channel.Spec.ChannelConfig.Application.Policies)
 	}
 	channelConfig := configtx.Channel{
 		Orderer:      ordConfigtx,
@@ -1059,6 +1068,18 @@ func (r *FabricMainChannelReconciler) mapToConfigTX(channel *hlfv1alpha1.FabricM
 	return channelConfig, nil
 }
 
+func (r *FabricMainChannelReconciler) mapPolicy(
+	policies map[string]hlfv1alpha1.FabricMainChannelPoliciesConfig,
+) map[string]configtx.Policy {
+	policiesMap := map[string]configtx.Policy{}
+	for policyName, policyConfig := range policies {
+		policiesMap[policyName] = configtx.Policy{
+			Type: policyConfig.Type,
+			Rule: policyConfig.Rule,
+		}
+	}
+	return policiesMap
+}
 func (r *FabricMainChannelReconciler) mapOrdererOrg(mspID string, ordererEndpoints []string, caCert *x509.Certificate, tlsCACert *x509.Certificate) configtx.Organization {
 	return configtx.Organization{
 		Name: mspID,

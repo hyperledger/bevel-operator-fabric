@@ -483,7 +483,7 @@ func (r *FabricPeerReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 					return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricPeer)
 				}
 			}
-			requeueAfter = time.Minute * 10
+			requeueAfter = time.Minute * 60
 		}
 		s, err := GetPeerState(cfg, r.Config, releaseName, ns, svc)
 		if err != nil {
@@ -511,7 +511,7 @@ func (r *FabricPeerReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 				return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricPeer)
 			}
 		}
-		log.Infof("Peer %s in %s status", fPeer.Name, string(s.Status))
+		log.Infof("Peer %s in %s status requeueAfter %v", fPeer.Name, string(s.Status), requeueAfter)
 		switch s.Status {
 		case hlfv1alpha1.PendingStatus:
 			log.Infof("Peer %s in %s status", fPeer.Name, string(s.Status))

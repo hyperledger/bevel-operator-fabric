@@ -442,6 +442,7 @@ func (r *FabricChaincodeReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 			SuccessThreshold:    1,
 			FailureThreshold:    3,
 		},
+		SecurityContext: fabricChaincode.Spec.SecurityContext,
 		ReadinessProbe: &corev1.Probe{
 			ProbeHandler: corev1.ProbeHandler{
 				TCPSocket: &corev1.TCPSocketAction{
@@ -473,10 +474,16 @@ func (r *FabricChaincodeReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 		Containers: []corev1.Container{
 			container,
 		},
-		RestartPolicy:    corev1.RestartPolicyAlways,
-		ImagePullSecrets: fabricChaincode.Spec.ImagePullSecrets,
-		Affinity:         fabricChaincode.Spec.Affinity,
-		Tolerations:      fabricChaincode.Spec.Tolerations,
+		RestartPolicy:      corev1.RestartPolicyAlways,
+		ImagePullSecrets:   fabricChaincode.Spec.ImagePullSecrets,
+		Affinity:           fabricChaincode.Spec.Affinity,
+		Tolerations:        fabricChaincode.Spec.Tolerations,
+		NodeSelector:       fabricChaincode.Spec.NodeSelector,
+		SecurityContext:    fabricChaincode.Spec.PodSecurityContext,
+		EnableServiceLinks: &fabricChaincode.Spec.EnableServiceLinks,
+	}
+	if fabricChaincode.Spec.ServiceAccountName != "" {
+		podSpec.ServiceAccountName = fabricChaincode.Spec.ServiceAccountName
 	}
 	replicas := fabricChaincode.Spec.Replicas
 	podLabels := labels
