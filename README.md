@@ -223,7 +223,7 @@ export PEER_IMAGE=hyperledger/fabric-peer
 export PEER_VERSION=2.5.5
 
 export ORDERER_IMAGE=hyperledger/fabric-orderer
-export PEER_VERSION=2.5.5
+export ORDERER_VERSION=2.5.5
 
 export CA_IMAGE=hyperledger/fabric-ca             
 export CA_VERSION=1.5.7
