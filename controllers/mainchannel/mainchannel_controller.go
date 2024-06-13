@@ -763,6 +763,11 @@ func (r *FabricMainChannelReconciler) updateCRStatusOrFailReconcile(ctx context.
 		log.Error(err, fmt.Sprintf("%v failed to update the application status", ErrClientK8s))
 		return reconcile.Result{}, err
 	}
+	if p.Status.Status == hlfv1alpha1.FailedStatus {
+		return reconcile.Result{
+			RequeueAfter: 1 * time.Minute,
+		}, nil
+	}
 	return reconcile.Result{}, nil
 }
 

@@ -93,6 +93,8 @@ func main() {
 		"Enable leader election for controller manager. "+
 			"Enabling this will ensure there is only one active controller manager.")
 	flag.Parse()
+	log.SetFormatter(&log.JSONFormatter{})
+
 	log.Infof("Auto renew peer certificates enabled: %t", autoRenewCertificatesPeerEnabled)
 	log.Infof("Auto renew orderer certificates enabled: %t", autoRenewCertificatesOrdererEnabled)
 	log.Infof("Auto renew identity certificates enabled: %t", autoRenewCertificatesIdentityEnabled)
@@ -103,7 +105,10 @@ func main() {
 	// to initialize a Client struct
 	// which implements Client interface
 
-	ctrl.SetLogger(zap.New(zap.UseDevMode(true)))
+	ctrl.SetLogger(zap.New(
+		zap.UseDevMode(true),
+		zap.JSONEncoder(),
+	))
 	kubeContext, exists := os.LookupEnv("KUBECONTEXT")
 	var restConfig *rest.Config
 	var err error

@@ -4,6 +4,7 @@ import (
 	"crypto/ecdsa"
 	"crypto/x509"
 	"fmt"
+	"github.com/sirupsen/logrus"
 	"io/ioutil"
 	"path/filepath"
 
@@ -115,6 +116,39 @@ type GetCAInfoRequest struct {
 	URL     string
 	Name    string
 	MSPID   string
+}
+type RevokeUserRequest struct {
+	TLSCert           string
+	URL               string
+	Name              string
+	MSPID             string
+	EnrollID          string
+	EnrollSecret      string
+	RevocationRequest *api.RevocationRequest
+}
+
+func RevokeUser(params RevokeUserRequest) error {
+	caClient, err := GetClient(FabricCAParams{
+		TLSCert:      params.TLSCert,
+		URL:          params.URL,
+		Name:         params.Name,
+		MSPID:        params.MSPID,
+		EnrollID:     params.EnrollID,
+		EnrollSecret: params.EnrollSecret,
+	})
+	if err != nil {
+		return err
+	}
+	myIdentity, err := caClient.LoadMyIdentity()
+	if err != nil {
+		return err
+	}
+	result, err := myIdentity.Revoke(params.RevocationRequest)
+	if err != nil {
+		return err
+	}
+	logrus.Infof("Revoked user %v", result.RevokedCerts)
+	return nil
 }
 
 type RegisterUserRequest struct {
@@ -353,11 +387,22 @@ func GetClient(ca FabricCAParams) (*lib.Client, error) {
 	client := &lib.Client{
 		HomeDir: caHomeDir,
 		Config: &lib.ClientConfig{
+			URL: ca.URL,
 			TLS: tls.ClientTLSConfig{
 				Enabled:   true,
 				CertFiles: []string{caCertFile.Name()},
 			},
-			URL: ca.URL,
+			//MSPDir: "",
+			//Enrollment: api.EnrollmentRequest{},
+			//CSR:        api.CSRInfo{},
+			//ID:         api.RegistrationRequest{},
+			//Revoke:     api.RevocationRequest{},
+			//CAInfo:     api.GetCAInfoRequest{},
+			//CAName:     "",
+			//CSP:        nil,
+			//Debug:      false,
+			//LogLevel:   "",
+			//Idemix:     api.Idemix{},
 		},
 	}
 	err = client.Init()
