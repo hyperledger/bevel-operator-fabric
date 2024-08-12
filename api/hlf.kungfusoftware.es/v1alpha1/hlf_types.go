@@ -18,6 +18,7 @@ package v1alpha1
 
 import (
 	"fmt"
+
 	"github.com/kfsoftware/hlf-operator/pkg/status"
 	"k8s.io/api/networking/v1beta1"
 	kubeclock "k8s.io/utils/clock"
@@ -1896,6 +1897,126 @@ type FabricChaincodeList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
 	Items           []FabricChaincode `json:"items"`
+}
+
+// FabricChaincodeInstallSpec defines the desired state of FabricChaincodeInstall
+type FabricChaincodeInstallSpec struct {
+}
+
+// FabricChaincodeInstallStatus defines the observed state of FabricChaincodeInstall
+type FabricChaincodeInstallStatus struct {
+	Conditions status.Conditions `json:"conditions"`
+	Message    string            `json:"message"`
+	// Status of the FabricChaincodeInstall
+	Status DeploymentStatus `json:"status"`
+}
+
+// +genclient
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+// +k8s:defaulter-gen=true
+// +kubebuilder:subresource:status
+// +kubebuilder:resource:scope=Namespaced,shortName=fabricchaincodeinstall,singular=fabricchaincodeinstall
+// +kubebuilder:printcolumn:name="State",type="string",JSONPath=".status.status"
+// +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
+// +kubebuilder:object:root=true
+// +kubebuilder:subresource:status
+// +k8s:openapi-gen=true
+
+// FabricChaincodeInstall is the Schema for the hlfs API
+type FabricChaincodeInstall struct {
+	metav1.TypeMeta   `json:",inline"`
+	metav1.ObjectMeta `json:"metadata,omitempty"`
+	Spec              FabricChaincodeInstallSpec   `json:"spec,omitempty"`
+	Status            FabricChaincodeInstallStatus `json:"status,omitempty"`
+}
+
+// +kubebuilder:object:root=true
+
+// FabricChaincodeInstallList contains a list of FabricChaincodeInstall
+type FabricChaincodeInstallList struct {
+	metav1.TypeMeta `json:",inline"`
+	metav1.ListMeta `json:"metadata,omitempty"`
+	Items           []FabricChaincodeInstall `json:"items"`
+}
+
+// FabricChaincodeApproveSpec defines the desired state of FabricChaincodeApprove
+type FabricChaincodeApproveSpec struct {
+}
+
+// FabricChaincodeApproveStatus defines the observed state of FabricChaincodeApprove
+type FabricChaincodeApproveStatus struct {
+	Conditions status.Conditions `json:"conditions"`
+	Message    string            `json:"message"`
+	// Status of the FabricChaincodeApprove
+	Status DeploymentStatus `json:"status"`
+}
+
+// +genclient
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+// +k8s:defaulter-gen=true
+// +kubebuilder:subresource:status
+// +kubebuilder:resource:scope=Namespaced,shortName=fabricchaincodeapprove,singular=fabricchaincodeapprove
+// +kubebuilder:printcolumn:name="State",type="string",JSONPath=".status.status"
+// +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
+// +kubebuilder:object:root=true
+// +kubebuilder:subresource:status
+// +k8s:openapi-gen=true
+
+// FabricChaincodeApprove is the Schema for the hlfs API
+type FabricChaincodeApprove struct {
+	metav1.TypeMeta   `json:",inline"`
+	metav1.ObjectMeta `json:"metadata,omitempty"`
+	Spec              FabricChaincodeApproveSpec   `json:"spec,omitempty"`
+	Status            FabricChaincodeApproveStatus `json:"status,omitempty"`
+}
+
+// +kubebuilder:object:root=true
+
+// FabricChaincodeApproveList contains a list of FabricChaincodeApprove
+type FabricChaincodeApproveList struct {
+	metav1.TypeMeta `json:",inline"`
+	metav1.ListMeta `json:"metadata,omitempty"`
+	Items           []FabricChaincodeApprove `json:"items"`
+}
+
+// FabricChaincodeCommitSpec defines the desired state of FabricChaincodeCommit
+type FabricChaincodeCommitSpec struct {
+}
+
+// FabricChaincodeCommitStatus defines the observed state of FabricChaincodeCommit
+type FabricChaincodeCommitStatus struct {
+	Conditions status.Conditions `json:"conditions"`
+	Message    string            `json:"message"`
+	// Status of the FabricChaincodeCommit
+	Status DeploymentStatus `json:"status"`
+}
+
+// +genclient
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+// +k8s:defaulter-gen=true
+// +kubebuilder:subresource:status
+// +kubebuilder:resource:scope=Namespaced,shortName=fabricchaincodecommit,singular=fabricchaincodecommit
+// +kubebuilder:printcolumn:name="State",type="string",JSONPath=".status.status"
+// +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
+// +kubebuilder:object:root=true
+// +kubebuilder:subresource:status
+// +k8s:openapi-gen=true
+
+// FabricChaincodeCommit is the Schema for the hlfs API
+type FabricChaincodeCommit struct {
+	metav1.TypeMeta   `json:",inline"`
+	metav1.ObjectMeta `json:"metadata,omitempty"`
+	Spec              FabricChaincodeCommitSpec   `json:"spec,omitempty"`
+	Status            FabricChaincodeCommitStatus `json:"status,omitempty"`
+}
+
+// +kubebuilder:object:root=true
+
+// FabricChaincodeCommitList contains a list of FabricChaincodeCommit
+type FabricChaincodeCommitList struct {
+	metav1.TypeMeta `json:",inline"`
+	metav1.ListMeta `json:"metadata,omitempty"`
+	Items           []FabricChaincodeCommit `json:"items"`
 }
 
 // FabricMainChannelStatus defines the observed state of FabricMainChannel

@@ -18,11 +18,11 @@ package main
 
 import (
 	"flag"
+	"github.com/kfsoftware/hlf-operator/controllers/chaincode/deploy"
 	"os"
 	"path/filepath"
 	"time"
 
-	"github.com/kfsoftware/hlf-operator/controllers/chaincode"
 	"github.com/kfsoftware/hlf-operator/controllers/console"
 	"github.com/kfsoftware/hlf-operator/controllers/followerchannel"
 	"github.com/kfsoftware/hlf-operator/controllers/hlfmetrics"
@@ -302,7 +302,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err = (&chaincode.FabricChaincodeReconciler{
+	if err = (&deploy.FabricChaincodeReconciler{
 		Client: mgr.GetClient(),
 		Log:    ctrl.Log.WithName("controllers").WithName("FabricChaincode"),
 		Scheme: mgr.GetScheme(),
