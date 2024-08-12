@@ -32,6 +32,15 @@ For discussions and questions, please join the Hyperledger Foundation Discord:
 
 The channel is located under `BEVEL`, named [`bevel-operator-fabric`](https://discordapp.com/channels/905194001349627914/967823782712594442).
 
+## Hyperledger Meetups
+
+You can watch this video to see how to use it to deploy your own network:
+
+[![Deploying a Network Using SmartBFT in Hyperledger Fabric 3.0](http://img.youtube.com/vi/4taLwa_pl9U/0.jpg)](https://www.youtube.com/watch?v=4taLwa_pl9U "Deploying a Network Using SmartBFT in Hyperledger Fabric 3.0")
+[![Deploying a Network Using SmartBFT in Hyperledger Fabric 3.0](http://img.youtube.com/vi/vM_UzryCOqs/0.jpg)](https://www.youtube.com/watch?v=vM_UzryCOqs "Hyperledger Fabric on Kubernetes")
+[![Hyperledger Fabric on Kubernetes](http://img.youtube.com/vi/namKDeJf5QI/0.jpg)](http://www.youtube.com/watch?v=namKDeJf5QI "Hyperledger Fabric on Kubernetes")
+
+
 ## Tutorial Videos
 
 Step-by-step video tutorials to setup hlf-operator in Kubernetes
@@ -40,11 +49,6 @@ Step-by-step video tutorials to setup hlf-operator in Kubernetes
 
 This workshop provides an in-depth hands on discussion and demonstration of using Bevel and the new Bevel-Operator-Fabric to deploy Hyperledger Fabric on Kubernetes.
 
-## Hyperledger Meetup
-
-You can watch this video to see how to use it to deploy your own network:
-
-[![Hyperledger Fabric on Kubernetes](http://img.youtube.com/vi/namKDeJf5QI/0.jpg)](http://www.youtube.com/watch?v=namKDeJf5QI "Hyperledger Fabric on Kubernetes")
 
 ## Hyperledger Workshops
 
@@ -54,9 +58,10 @@ This workshop provides an in-depth, hands-on discussion and demonstration of usi
 
 ## Sponsor
 
-|                                                                         |                                                                                                                                                                                                                               |
-| ----------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| ![kfs logo](https://avatars.githubusercontent.com/u/74511895?s=200&v=4) | If you want to design and deploy a secure Blockchain network based on the latest version of Hyperledger Fabric, feel free to contact dviejo@kungfusoftware.es or visit [https://kfs.es/blockchain](https://kfs.es/blockchain) |
+|                                                                               |                                                                                                                                                                                                                                                                                                                     |
+|-------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| ![galagames logo](https://avatars.githubusercontent.com/u/135145372?s=200&v=4) | Gala Games is a blockchain gaming platform that empowers players to earn cryptocurrencies and NFTs through gameplay. Founded in 2018 by Eric Schiermeyer, co-founder of Zynga, it aims to create a new type of gaming experience. The platform offers limited edition NFTs and allows players to earn Gala tokens s |
+| ![kfs logo](https://avatars.githubusercontent.com/u/74511895?s=200&v=4)       | If you want to design and deploy a secure Blockchain network based on the latest version of Hyperledger Fabric, feel free to contact dviejo@kungfusoftware.es or visit [https://kfs.es/blockchain](https://kfs.es/blockchain)                                                                                       |
 
 ## Getting started
 
@@ -81,7 +86,7 @@ kind: Cluster
 apiVersion: kind.x-k8s.io/v1alpha4
 nodes:
 - role: control-plane
-  image: kindest/node:v1.25.8
+  image: kindest/node:v1.30.2
   extraPortMappings:
   - containerPort: 30949
     hostPort: 80
@@ -105,7 +110,7 @@ To install helm: [https://helm.sh/docs/intro/install/](https://helm.sh/docs/intr
 ```bash
 helm repo add kfs https://kfsoftware.github.io/hlf-helm-charts --force-update
 
-helm install hlf-operator --version=1.9.2 -- kfs/hlf-operator
+helm install hlf-operator --version=1.10.1 -- kfs/hlf-operator
 ```
 
 

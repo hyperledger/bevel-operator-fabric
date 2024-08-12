@@ -23,13 +23,7 @@ For this step you'll need to install the chaincode package on your peer. To do t
 
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
-function getCodeExampleText(language){
-  return `
-kubectl hlf chaincode install \
-    --path=./fixtures/chaincodes/fabcar/go --config=networkConfig.yaml \
-    --language=${language} --label=fabcar --user=admin --peer=org1-peer0.default
-`
-}
+
 
 <Tabs
   defaultValue="nodejs"
