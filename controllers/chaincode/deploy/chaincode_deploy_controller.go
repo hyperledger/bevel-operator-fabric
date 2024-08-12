@@ -1,4 +1,4 @@
-package chaincode
+package deploy
 
 import (
 	"context"

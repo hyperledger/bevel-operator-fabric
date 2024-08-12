@@ -80,6 +80,14 @@ Ensure you have these ports available before creating the cluster:
 
 If these ports are not available this tutorial will not work.
 
+### Using K3D
+
+```bash
+k3d cluster create  -p "80:30949@agent:0" -p "443:30950@agent:0" --agents 2 k8s-hlf
+```
+
+### Using KinD
+
 ```bash
 cat << EOF > kind-config.yaml
 kind: Cluster
@@ -211,13 +219,13 @@ EOF
 
 ```bash
 export PEER_IMAGE=hyperledger/fabric-peer
-export PEER_VERSION=2.5.5
+export PEER_VERSION=2.5.9
 
 export ORDERER_IMAGE=hyperledger/fabric-orderer
-export ORDERER_VERSION=2.5.5
+export ORDERER_VERSION=2.5.9
 
 export CA_IMAGE=hyperledger/fabric-ca
-export CA_VERSION=1.5.7
+export CA_VERSION=1.5.12
 ```
 
 
