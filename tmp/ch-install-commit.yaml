@@ -1,0 +1,23 @@
+apiVersion: hlf.kungfusoftware.es/v1alpha1
+kind: FabricChaincodeCommit
+metadata:
+    name: fabcar-commit-1
+    namespace: default
+spec:
+    chaincodeName: fabcar
+    channelName: channel_name
+    mspID: Org1MSP
+    version: '1.0'
+    sequence: 1
+    endorsementPolicy: OR('Org1MSP.member')
+    pdc: []
+    hlfIdentity:
+        secretKey: user.yaml
+        secretName: org1-admin
+        secretNamespace: default
+    peers:
+        - name: org1-peer0
+          namespace: default
+    orderers:
+        - name: orderer0
+          namespace: default

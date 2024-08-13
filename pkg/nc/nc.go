@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	log "github.com/sirupsen/logrus"
 	"text/template"
 
 	"github.com/Masterminds/sprig/v3"
@@ -314,6 +315,7 @@ func GenerateNetworkConfigForChaincodeInstall(chInstall *hlfv1alpha1.FabricChain
 	if err != nil {
 		return nil, err
 	}
+	log.Infof("Generated network config %s", buf.String())
 	return &NetworkConfigResponse{
 		NetworkConfig: buf.String(),
 	}, nil

@@ -1918,9 +1918,13 @@ type ChaincodePackage struct {
 	Address string `json:"address"`
 	Type    string `json:"type"`
 
+	// +optional
+	// +nullable
 	// +kubebuilder:validation:Default=10s
-	DialTimeout string              `json:"dialTimeout"`
-	TLS         ChaincodePackageTLS `json:"tls"`
+	DialTimeout string `json:"dialTimeout"`
+	// +optional
+	// +nullable
+	TLS *ChaincodePackageTLS `json:"tls"`
 }
 
 type FabricPeerInternalRef struct {
@@ -1934,13 +1938,26 @@ type FabricPeerExternalRef struct {
 
 // FabricChaincodeInstallStatus defines the observed state of FabricChaincodeInstall
 type FabricChaincodeInstallStatus struct {
-	Conditions     status.Conditions `json:"conditions"`
-	Message        string            `json:"message"`
-	PackageID      string            `json:"packageID"`
-	FailedPeers    []string          `json:"failedPeers"`
-	InstalledPeers []string          `json:"installedPeers"`
+	Conditions status.Conditions `json:"conditions"`
+	Message    string            `json:"message"`
+	// +optional
+	// +nullable
+	PackageID string `json:"packageID"`
+	// +optional
+	// +nullable
+	FailedPeers []FailedPeer `json:"failedPeers"`
+	// +optional
+	// +nullable
+	InstalledPeers []InstalledPeer `json:"installedPeers"`
 	// Status of the FabricChaincodeInstall
 	Status DeploymentStatus `json:"status"`
+}
+type FailedPeer struct {
+	Name   string `json:"name"`
+	Reason string `json:"reason"`
+}
+type InstalledPeer struct {
+	Name string `json:"name"`
 }
 
 // +genclient

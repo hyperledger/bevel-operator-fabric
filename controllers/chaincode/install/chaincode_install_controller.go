@@ -260,11 +260,12 @@ func (r *FabricChaincodeInstallReconciler) Reconcile(ctx context.Context, req ct
 		return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricChaincodeInstall)
 	}
 	networkConfig = ncResponse.NetworkConfig
-	resClient, err := getResmgmtBasedOnIdentity(ctx, fabricChaincodeInstall, networkConfig, clientSet, hlfClientSet, fabricChaincodeInstall.Spec.MSPID)
+	resClient, sdk, err := getResmgmtBasedOnIdentity(ctx, fabricChaincodeInstall, networkConfig, clientSet, hlfClientSet, fabricChaincodeInstall.Spec.MSPID)
 	if err != nil {
 		r.setConditionStatus(ctx, fabricChaincodeInstall, hlfv1alpha1.FailedStatus, false, errors.Wrapf(err, "failed to get resmgmt"), false)
 		return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricChaincodeInstall)
 	}
+	defer sdk.Close()
 	chaincodePackage, err := generateChaincodePackage(ChaincodePackageOptions{
 		ChaincodeName:  fabricChaincodeInstall.Spec.ChaincodePackage.Name,
 		ChaincodeLabel: fabricChaincodeInstall.Spec.ChaincodePackage.Name,
@@ -274,19 +275,22 @@ func (r *FabricChaincodeInstallReconciler) Reconcile(ctx context.Context, req ct
 		r.setConditionStatus(ctx, fabricChaincodeInstall, hlfv1alpha1.FailedStatus, false, errors.Wrapf(err, "failed to generate chaincode package"), false)
 		return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricChaincodeInstall)
 	}
+	log.Infof("Chaincode package %s", chaincodePackage)
 	pkg, err := os.ReadFile(chaincodePackage)
 	if err != nil {
 		r.setConditionStatus(ctx, fabricChaincodeInstall, hlfv1alpha1.FailedStatus, false, errors.Wrapf(err, "failed to read chaincode package"), false)
 		return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricChaincodeInstall)
 	}
 	packageID := lifecycle.ComputePackageID(fabricChaincodeInstall.Spec.ChaincodePackage.Name, pkg)
-	status := hlfv1alpha1.FabricChaincodeInstallStatus{
+	log.Infof("PackageID %s", packageID)
+	chaincodeStatus := &hlfv1alpha1.FabricChaincodeInstallStatus{
 		PackageID:      packageID,
-		FailedPeers:    []string{},
-		InstalledPeers: []string{},
+		FailedPeers:    []hlfv1alpha1.FailedPeer{},
+		InstalledPeers: []hlfv1alpha1.InstalledPeer{},
 	}
 	for _, peer := range fabricChaincodeInstall.Spec.Peers {
 		peerName := fmt.Sprintf("%s.%s", peer.Name, peer.Namespace)
+		log.Infof("Installing chaincode on peer %s", peerName)
 		_, err := resClient.LifecycleInstallCC(
 			resmgmt.LifecycleInstallCCRequest{
 				Label:   fabricChaincodeInstall.Spec.ChaincodePackage.Name,
@@ -297,9 +301,14 @@ func (r *FabricChaincodeInstallReconciler) Reconcile(ctx context.Context, req ct
 			resmgmt.WithTimeout(fab2.PeerResponse, 20*time.Minute),
 		)
 		if err != nil {
-			status.FailedPeers = append(status.FailedPeers, peerName)
+			chaincodeStatus.FailedPeers = append(chaincodeStatus.FailedPeers, hlfv1alpha1.FailedPeer{
+				Name:   peerName,
+				Reason: err.Error(),
+			})
 		} else {
-			status.InstalledPeers = append(status.InstalledPeers, peerName)
+			chaincodeStatus.InstalledPeers = append(chaincodeStatus.InstalledPeers, hlfv1alpha1.InstalledPeer{
+				Name: peerName,
+			})
 		}
 	}
 	for _, peer := range fabricChaincodeInstall.Spec.ExternalPeers {
@@ -314,18 +323,26 @@ func (r *FabricChaincodeInstallReconciler) Reconcile(ctx context.Context, req ct
 			resmgmt.WithTimeout(fab2.PeerResponse, 20*time.Minute),
 		)
 		if err != nil {
-			status.FailedPeers = append(status.FailedPeers, peerName)
+			chaincodeStatus.FailedPeers = append(chaincodeStatus.FailedPeers, hlfv1alpha1.FailedPeer{
+				Name:   peerName,
+				Reason: err.Error(),
+			})
 		} else {
-			status.InstalledPeers = append(status.InstalledPeers, peerName)
+			chaincodeStatus.InstalledPeers = append(chaincodeStatus.InstalledPeers, hlfv1alpha1.InstalledPeer{
+				Name: peerName,
+			})
 		}
 	}
-	fabricChaincodeInstall.Status = status
-	err = r.Status().Update(ctx, fabricChaincodeInstall)
-	if err != nil {
-		reqLogger.Error(err, "Failed to update ChaincodeInstall status")
-		return ctrl.Result{}, err
-	}
-	return ctrl.Result{}, nil
+	fabricChaincodeInstall.Status = *chaincodeStatus
+	fabricChaincodeInstall.Status.Status = hlfv1alpha1.RunningStatus
+	fabricChaincodeInstall.Status.InstalledPeers = chaincodeStatus.InstalledPeers
+	fabricChaincodeInstall.Status.FailedPeers = chaincodeStatus.FailedPeers
+	fabricChaincodeInstall.Status.Conditions.SetCondition(status.Condition{
+		Type:   status.ConditionType(hlfv1alpha1.RunningStatus),
+		Status: corev1.ConditionTrue,
+	})
+	log.Infof("Chaincode status: %v", chaincodeStatus)
+	return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricChaincodeInstall)
 }
 
 type identity struct {
@@ -337,52 +354,51 @@ type Pem struct {
 	Pem string
 }
 
-func getResmgmtBasedOnIdentity(ctx context.Context, chInstall *hlfv1alpha1.FabricChaincodeInstall, networkConfig string, clientSet *kubernetes.Clientset, hlfClientSet *operatorv1.Clientset, mspID string) (*resmgmt.Client, error) {
+func getResmgmtBasedOnIdentity(ctx context.Context, chInstall *hlfv1alpha1.FabricChaincodeInstall, networkConfig string, clientSet *kubernetes.Clientset, hlfClientSet *operatorv1.Clientset, mspID string) (*resmgmt.Client, *fabsdk.FabricSDK, error) {
 	configBackend := config.FromRaw([]byte(networkConfig), "yaml")
 	sdk, err := fabsdk.New(configBackend)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
-	defer sdk.Close()
 	idConfig := chInstall.Spec.HLFIdentity
 	secret, err := clientSet.CoreV1().Secrets(idConfig.SecretNamespace).Get(ctx, idConfig.SecretName, v1.GetOptions{})
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	secretData, ok := secret.Data[idConfig.SecretKey]
 	if !ok {
 
-		return nil, err
+		return nil, nil, err
 	}
 	id := &identity{}
 	err = yaml.Unmarshal(secretData, id)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	sdkConfig, err := sdk.Config()
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	cryptoConfig := cryptosuite.ConfigFromBackend(sdkConfig)
 	cryptoSuite, err := sw.GetSuiteByConfig(cryptoConfig)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	userStore := mspimpl.NewMemoryUserStore()
 	endpointConfig, err := fab.ConfigFromBackend(sdkConfig)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	identityManager, err := mspimpl.NewIdentityManager(mspID, userStore, cryptoSuite, endpointConfig)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	signingIdentity, err := identityManager.CreateSigningIdentity(
 		msp.WithPrivateKey([]byte(id.Key.Pem)),
 		msp.WithCert([]byte(id.Cert.Pem)),
 	)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	sdkContext := sdk.Context(
 		fabsdk.WithIdentity(signingIdentity),
@@ -390,9 +406,9 @@ func getResmgmtBasedOnIdentity(ctx context.Context, chInstall *hlfv1alpha1.Fabri
 	)
 	resClient, err := resmgmt.New(sdkContext)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
-	return resClient, nil
+	return resClient, sdk, nil
 }
 
 func (r *FabricChaincodeInstallReconciler) setConditionStatus(ctx context.Context, p *hlfv1alpha1.FabricChaincodeInstall, conditionType hlfv1alpha1.DeploymentStatus, statusFlag bool, err error, statusUnknown bool) (update bool) {

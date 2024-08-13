@@ -50,10 +50,12 @@ spec:
                   address:
                     type: string
                   dialTimeout:
+                    nullable: true
                     type: string
                   name:
                     type: string
                   tls:
+                    nullable: true
                     properties:
                       required:
                         type: boolean
@@ -64,9 +66,7 @@ spec:
                     type: string
                 required:
                 - address
-                - dialTimeout
                 - name
-                - tls
                 - type
                 type: object
               externalPeers:
@@ -166,25 +166,38 @@ spec:
                 type: array
               failedPeers:
                 items:
-                  type: string
+                  properties:
+                    name:
+                      type: string
+                    reason:
+                      type: string
+                  required:
+                  - name
+                  - reason
+                  type: object
+                nullable: true
                 type: array
               installedPeers:
                 items:
-                  type: string
+                  properties:
+                    name:
+                      type: string
+                  required:
+                  - name
+                  type: object
+                nullable: true
                 type: array
               message:
                 type: string
               packageID:
+                nullable: true
                 type: string
               status:
                 description: Status of the FabricChaincodeInstall
                 type: string
             required:
             - conditions
-            - failedPeers
-            - installedPeers
             - message
-            - packageID
             - status
             type: object
         type: object
