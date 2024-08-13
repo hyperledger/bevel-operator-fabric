@@ -18,10 +18,12 @@ package main
 
 import (
 	"flag"
-	"github.com/kfsoftware/hlf-operator/controllers/chaincode/deploy"
 	"os"
 	"path/filepath"
 	"time"
+
+	"github.com/kfsoftware/hlf-operator/controllers/chaincode/deploy"
+	"github.com/kfsoftware/hlf-operator/controllers/chaincode/install"
 
 	"github.com/kfsoftware/hlf-operator/controllers/console"
 	"github.com/kfsoftware/hlf-operator/controllers/followerchannel"
@@ -302,13 +304,23 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err = (&deploy.FabricChaincodeReconciler{
+	if err = (&deploy.FabricChaincodeDeployReconciler{
 		Client: mgr.GetClient(),
 		Log:    ctrl.Log.WithName("controllers").WithName("FabricChaincode"),
 		Scheme: mgr.GetScheme(),
 		Config: mgr.GetConfig(),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "FabricNetworkConfig")
+		os.Exit(1)
+	}
+
+	if err = (&install.FabricChaincodeInstallReconciler{
+		Client: mgr.GetClient(),
+		Log:    ctrl.Log.WithName("controllers").WithName("FabricChaincodeInstall"),
+		Scheme: mgr.GetScheme(),
+		Config: mgr.GetConfig(),
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "FabricChaincodeInstall")
 		os.Exit(1)
 	}
 

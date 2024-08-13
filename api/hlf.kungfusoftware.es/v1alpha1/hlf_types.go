@@ -1901,12 +1901,44 @@ type FabricChaincodeList struct {
 
 // FabricChaincodeInstallSpec defines the desired state of FabricChaincodeInstall
 type FabricChaincodeInstallSpec struct {
+	Peers            []FabricPeerInternalRef `json:"peers"`
+	ExternalPeers    []FabricPeerExternalRef `json:"externalPeers"`
+	MSPID            string                  `json:"mspID"`
+	HLFIdentity      HLFIdentity             `json:"hlfIdentity"`
+	ChaincodePackage ChaincodePackage        `json:"chaincodePackage"`
+}
+
+type ChaincodePackageTLS struct {
+	// +kubebuilder:validation:Default=false
+	Required bool `json:"required"`
+}
+
+type ChaincodePackage struct {
+	Name    string `json:"name"`
+	Address string `json:"address"`
+	Type    string `json:"type"`
+
+	// +kubebuilder:validation:Default=10s
+	DialTimeout string              `json:"dialTimeout"`
+	TLS         ChaincodePackageTLS `json:"tls"`
+}
+
+type FabricPeerInternalRef struct {
+	Name      string `json:"name"`
+	Namespace string `json:"namespace"`
+}
+type FabricPeerExternalRef struct {
+	URL       string `json:"url"`
+	TLSCACert string `json:"tlsCACert"`
 }
 
 // FabricChaincodeInstallStatus defines the observed state of FabricChaincodeInstall
 type FabricChaincodeInstallStatus struct {
-	Conditions status.Conditions `json:"conditions"`
-	Message    string            `json:"message"`
+	Conditions     status.Conditions `json:"conditions"`
+	Message        string            `json:"message"`
+	PackageID      string            `json:"packageID"`
+	FailedPeers    []string          `json:"failedPeers"`
+	InstalledPeers []string          `json:"installedPeers"`
 	// Status of the FabricChaincodeInstall
 	Status DeploymentStatus `json:"status"`
 }
@@ -2590,5 +2622,6 @@ func init() {
 	SchemeBuilder.Register(&FabricOperatorAPI{}, &FabricOperatorAPIList{})
 	SchemeBuilder.Register(&FabricMainChannel{}, &FabricMainChannelList{})
 	SchemeBuilder.Register(&FabricIdentity{}, &FabricIdentityList{})
+	SchemeBuilder.Register(&FabricChaincodeInstall{}, &FabricChaincodeInstallList{})
 	SchemeBuilder.Register(&FabricFollowerChannel{}, &FabricFollowerChannelList{})
 }

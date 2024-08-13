@@ -48,7 +48,7 @@ type FabricFollowerChannelReconciler struct {
 	Config *rest.Config
 }
 
-const mainChannelFinalizer = "finalizer.mainChannel.hlf.kungfusoftware.es"
+const followerChannelFinalizer = "finalizer.followerChannel.hlf.kungfusoftware.es"
 
 func (r *FabricFollowerChannelReconciler) finalizeFollowerChannel(reqLogger logr.Logger, m *hlfv1alpha1.FabricFollowerChannel) error {
 	ns := m.Namespace
@@ -62,7 +62,7 @@ func (r *FabricFollowerChannelReconciler) finalizeFollowerChannel(reqLogger logr
 
 func (r *FabricFollowerChannelReconciler) addFinalizer(reqLogger logr.Logger, m *hlfv1alpha1.FabricFollowerChannel) error {
 	reqLogger.Info("Adding Finalizer for the MainChannel")
-	controllerutil.AddFinalizer(m, mainChannelFinalizer)
+	controllerutil.AddFinalizer(m, followerChannelFinalizer)
 
 	// Update CR
 	err := r.Update(context.TODO(), m)
@@ -92,11 +92,11 @@ func (r *FabricFollowerChannelReconciler) Reconcile(ctx context.Context, req ctr
 	}
 	markedToBeDeleted := fabricFollowerChannel.GetDeletionTimestamp() != nil
 	if markedToBeDeleted {
-		if utils.Contains(fabricFollowerChannel.GetFinalizers(), mainChannelFinalizer) {
+		if utils.Contains(fabricFollowerChannel.GetFinalizers(), followerChannelFinalizer) {
 			if err := r.finalizeFollowerChannel(reqLogger, fabricFollowerChannel); err != nil {
 				return ctrl.Result{}, err
 			}
-			controllerutil.RemoveFinalizer(fabricFollowerChannel, mainChannelFinalizer)
+			controllerutil.RemoveFinalizer(fabricFollowerChannel, followerChannelFinalizer)
 			err := r.Update(ctx, fabricFollowerChannel)
 			if err != nil {
 				return ctrl.Result{}, err
@@ -104,7 +104,7 @@ func (r *FabricFollowerChannelReconciler) Reconcile(ctx context.Context, req ctr
 		}
 		return ctrl.Result{}, nil
 	}
-	if !utils.Contains(fabricFollowerChannel.GetFinalizers(), mainChannelFinalizer) {
+	if !utils.Contains(fabricFollowerChannel.GetFinalizers(), followerChannelFinalizer) {
 		if err := r.addFinalizer(reqLogger, fabricFollowerChannel); err != nil {
 			return ctrl.Result{}, err
 		}

@@ -5,4 +5,4 @@ kind: Kustomization
 images:
 - name: controller
   newName: kfsoftware/hlf-operator
-  newTag: 1.11.0-support-chaincodes
+  newTag: dev-1723537257
