@@ -4,8 +4,9 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	log "github.com/sirupsen/logrus"
 	"text/template"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/Masterminds/sprig/v3"
 	hlfv1alpha1 "github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
@@ -257,6 +258,100 @@ func GenerateNetworkConfig(channel *hlfv1alpha1.FabricMainChannel, kubeClientset
 	}, nil
 }
 
+func GenerateNetworkConfigForChaincodeCommit(chCommit *hlfv1alpha1.FabricChaincodeCommit, kubeClientset *kubernetes.Clientset, hlfClientSet *operatorv1.Clientset, mspID string) (*NetworkConfigResponse, error) {
+	tmpl, err := template.New("networkConfig").Funcs(sprig.HermeticTxtFuncMap()).Parse(tmplGoConfig)
+	if err != nil {
+		return nil, err
+	}
+	var buf bytes.Buffer
+	orgs := []*Org{}
+	var peers []*Peer
+	var ordererNodes []*Orderer
+	var certAuths []*CA
+
+	ctx := context.Background()
+
+	org := &Org{
+		MSPID:     chCommit.Spec.MSPID,
+		CertAuths: []string{},
+		Peers:     []string{},
+		Orderers:  []string{},
+	}
+
+	for _, peer := range chCommit.Spec.Peers {
+		fabricPeer, err := hlfClientSet.HlfV1alpha1().FabricPeers(peer.Namespace).Get(ctx, peer.Name, v1.GetOptions{})
+		if err != nil {
+			return nil, err
+		}
+		peerName := fmt.Sprintf("%s.%s", fabricPeer.Name, fabricPeer.Namespace)
+		org.Peers = append(org.Peers, peerName)
+		peerHost, err := helpers.GetPeerPublicURL(kubeClientset, *fabricPeer)
+		if err != nil {
+			return nil, err
+		}
+		peers = append(peers, &Peer{
+			Name:      peerName,
+			URL:       fmt.Sprintf("grpcs://%s", peerHost),
+			TLSCACert: fabricPeer.Status.TlsCACert,
+		})
+	}
+
+	for _, peer := range chCommit.Spec.ExternalPeers {
+		peerName := peer.URL
+		org.Peers = append(org.Peers, peerName)
+		peers = append(peers, &Peer{
+			Name:      peerName,
+			URL:       peer.URL,
+			TLSCACert: peer.TLSCACert,
+		})
+	}
+
+	for _, orderer := range chCommit.Spec.Orderers {
+		fabricOrderer, err := hlfClientSet.HlfV1alpha1().FabricOrdererNodes(orderer.Namespace).Get(ctx, orderer.Name, v1.GetOptions{})
+		if err != nil {
+			return nil, err
+		}
+		ordererName := fmt.Sprintf("%s.%s", fabricOrderer.Name, fabricOrderer.Namespace)
+		org.Orderers = append(org.Orderers, ordererName)
+		ordererHost, err := helpers.GetOrdererPublicURL(kubeClientset, *fabricOrderer)
+		if err != nil {
+			return nil, err
+		}
+		ordererNodes = append(ordererNodes, &Orderer{
+			URL:       fmt.Sprintf("grpcs://%s", ordererHost),
+			Name:      ordererName,
+			TLSCACert: fabricOrderer.Status.TlsCert,
+		})
+	}
+
+	for _, orderer := range chCommit.Spec.ExternalOrderers {
+		ordererName := orderer.URL
+		org.Orderers = append(org.Orderers, ordererName)
+		ordererNodes = append(ordererNodes, &Orderer{
+			URL:       orderer.URL,
+			Name:      ordererName,
+			TLSCACert: orderer.TLSCACert,
+		})
+	}
+
+	orgs = append(orgs, org)
+	err = tmpl.Execute(&buf, map[string]interface{}{
+		"Peers":         peers,
+		"Orderers":      ordererNodes,
+		"Organizations": orgs,
+		"CertAuths":     certAuths,
+		"Organization":  mspID,
+		"Internal":      false,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &NetworkConfigResponse{
+		NetworkConfig: buf.String(),
+	}, nil
+}
+
+
 func GenerateNetworkConfigForChaincodeInstall(chInstall *hlfv1alpha1.FabricChaincodeInstall, kubeClientset *kubernetes.Clientset, hlfClientSet *operatorv1.Clientset, mspID string) (*NetworkConfigResponse, error) {
 	tmpl, err := template.New("networkConfig").Funcs(sprig.HermeticTxtFuncMap()).Parse(tmplGoConfig)
 	if err != nil {
@@ -307,6 +402,98 @@ func GenerateNetworkConfigForChaincodeInstall(chInstall *hlfv1alpha1.FabricChain
 	err = tmpl.Execute(&buf, map[string]interface{}{
 		"Peers":         peers,
 		"Orderers":      []string{},
+		"Organizations": orgs,
+		"CertAuths":     certAuths,
+		"Organization":  mspID,
+		"Internal":      false,
+	})
+	if err != nil {
+		return nil, err
+	}
+	log.Infof("Generated network config %s", buf.String())
+	return &NetworkConfigResponse{
+		NetworkConfig: buf.String(),
+	}, nil
+}
+
+func GenerateNetworkConfigForChaincodeApprove(chInstall *hlfv1alpha1.FabricChaincodeApprove, kubeClientset *kubernetes.Clientset, hlfClientSet *operatorv1.Clientset, mspID string) (*NetworkConfigResponse, error) {
+	tmpl, err := template.New("networkConfig").Funcs(sprig.HermeticTxtFuncMap()).Parse(tmplGoConfig)
+	if err != nil {
+		return nil, err
+	}
+	var buf bytes.Buffer
+	orgs := []*Org{}
+	var peers []*Peer
+	var certAuths []*CA
+	var ordererNodes []*Orderer
+
+	ctx := context.Background()
+	org := &Org{
+		MSPID:     mspID,
+		CertAuths: []string{},
+		Peers:     []string{},
+		Orderers:  []string{},
+	}
+
+	for _, peer := range chInstall.Spec.Peers {
+		fabricPeer, err := hlfClientSet.HlfV1alpha1().FabricPeers(peer.Namespace).Get(ctx, peer.Name, v1.GetOptions{})
+		if err != nil {
+			return nil, err
+		}
+		peerName := fmt.Sprintf("%s.%s", fabricPeer.Name, fabricPeer.Namespace)
+		org.Peers = append(org.Peers, peerName)
+		peerHost, err := helpers.GetPeerPublicURL(kubeClientset, *fabricPeer)
+		if err != nil {
+			return nil, err
+		}
+		peers = append(peers, &Peer{
+			Name:      peerName,
+			URL:       fmt.Sprintf("grpcs://%s", peerHost),
+			TLSCACert: fabricPeer.Status.TlsCACert,
+		})
+	}
+
+	for _, peer := range chInstall.Spec.ExternalPeers {
+		peerName := peer.URL
+		org.Peers = append(org.Peers, peerName)
+		peers = append(peers, &Peer{
+			Name:      peerName,
+			URL:       peer.URL,
+			TLSCACert: peer.TLSCACert,
+		})
+	}
+
+	for _, orderer := range chInstall.Spec.Orderers {
+		fabricOrderer, err := hlfClientSet.HlfV1alpha1().FabricOrdererNodes(orderer.Namespace).Get(ctx, orderer.Name, v1.GetOptions{})
+		if err != nil {
+			return nil, err
+		}
+		ordererName := fmt.Sprintf("%s.%s", fabricOrderer.Name, fabricOrderer.Namespace)
+		ordererHost, err := helpers.GetOrdererPublicURL(kubeClientset, *fabricOrderer)
+		if err != nil {
+			return nil, err
+		}
+		ordererNodes = append(ordererNodes, &Orderer{
+			Name:      ordererName,
+			URL:       fmt.Sprintf("grpcs://%s", ordererHost),
+			TLSCACert: fabricOrderer.Status.TlsCert,
+		})
+	}
+
+	for _, orderer := range chInstall.Spec.ExternalOrderers {
+		ordererName := orderer.URL
+		ordererNodes = append(ordererNodes, &Orderer{
+			Name:      ordererName,
+			URL:       orderer.URL,
+			TLSCACert: orderer.TLSCACert,
+		})
+	}
+
+	orgs = append(orgs, org)
+
+	err = tmpl.Execute(&buf, map[string]interface{}{
+		"Peers":         peers,
+		"Orderers":      ordererNodes,
 		"Organizations": orgs,
 		"CertAuths":     certAuths,
 		"Organization":  mspID,

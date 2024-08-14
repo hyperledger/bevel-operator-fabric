@@ -283,6 +283,8 @@ data:
 EOF
 ```
 
+### Configure Storage Class
+Set storage class depending on the Kubernetes cluster you are using:
 ```bash
 # for Kind
 export SC_NAME=standard
@@ -293,7 +295,6 @@ export SC_NAME=local-path
 ### Deploy a certificate authority
 
 ```bash
-
 kubectl hlf ca create  --image=$CA_IMAGE --version=$CA_VERSION --storage-class=$SC_NAME --capacity=1Gi --name=org1-ca \
     --enroll-id=enroll --enroll-pw=enrollpw --hosts=org1-ca.localho.st --istio-port=443
 
@@ -464,6 +465,7 @@ kubectl hlf identity create --name org1-admin --namespace default \
 
 kubectl create secret generic wallet --namespace=default \
         --from-file=org1msp.yaml=$PWD/org1msp.yaml \
+        --from-file=org2msp.yaml=$PWD/org2msp.yaml \
         --from-file=orderermsp.yaml=$PWD/orderermsp.yaml
 ```
 
@@ -472,17 +474,23 @@ kubectl create secret generic wallet --namespace=default \
 ```bash
 export PEER_ORG_SIGN_CERT=$(kubectl get fabriccas org1-ca -o=jsonpath='{.status.ca_cert}')
 export PEER_ORG_TLS_CERT=$(kubectl get fabriccas org1-ca -o=jsonpath='{.status.tlsca_cert}')
+
+export PEER_ORG2_SIGN_CERT=$(kubectl get fabriccas org2-ca -o=jsonpath='{.status.ca_cert}')
+export PEER_ORG2_TLS_CERT=$(kubectl get fabriccas org2-ca -o=jsonpath='{.status.tlsca_cert}')
+
 export IDENT_8=$(printf "%8s" "")
 export ORDERER_TLS_CERT=$(kubectl get fabriccas ord-ca -o=jsonpath='{.status.tlsca_cert}' | sed -e "s/^/${IDENT_8}/" )
 export ORDERER0_TLS_CERT=$(kubectl get fabricorderernodes ord-node1 -o=jsonpath='{.status.tlsCert}' | sed -e "s/^/${IDENT_8}/" )
+export ORDERER1_TLS_CERT=$(kubectl get fabricorderernodes ord-node2 -o=jsonpath='{.status.tlsCert}' | sed -e "s/^/${IDENT_8}/" )
+export ORDERER2_TLS_CERT=$(kubectl get fabricorderernodes ord-node3 -o=jsonpath='{.status.tlsCert}' | sed -e "s/^/${IDENT_8}/" )
 
 kubectl apply -f - <<EOF
 apiVersion: hlf.kungfusoftware.es/v1alpha1
 kind: FabricMainChannel
 metadata:
-  name: demo2
+  name: demo
 spec:
-  name: demo2
+  name: demo
   adminOrdererOrganizations:
     - mspID: OrdererMSP
   adminPeerOrganizations:
@@ -515,9 +523,13 @@ spec:
       state: STATE_NORMAL
     policies: null
   externalOrdererOrganizations: []
+  externalPeerOrganizations: []
   peerOrganizations:
     - mspID: Org1MSP
       caName: "org1-ca"
+      caNamespace: "default"
+    - mspID: Org2MSP
+      caName: "org2-ca"
       caNamespace: "default"
   identities:
     OrdererMSP:
@@ -528,58 +540,43 @@ spec:
       secretKey: org1msp.yaml
       secretName: wallet
       secretNamespace: default
-  externalPeerOrganizations: 
-  - mspID: Org2MSP
-    tlsRootCert: |
-        -----BEGIN CERTIFICATE-----
-        MIICRjCCAeugAwIBAgIQHA5nWgCvnS9ECuauCtat6TAKBggqhkjOPQQDAjBtMQsw
-        CQYDVQQGEwJFUzERMA8GA1UEBxMIQWxpY2FudGUxETAPBgNVBAkTCEFsaWNhbnRl
-        MRkwFwYDVQQKExBLdW5nIEZ1IFNvZnR3YXJlMQ0wCwYDVQQLEwRUZWNoMQ4wDAYD
-        VQQDEwV0bHNjYTAeFw0yMzExMTIxNTA3MTlaFw0zMzExMTMxNTA3MTlaMG0xCzAJ
-        BgNVBAYTAkVTMREwDwYDVQQHEwhBbGljYW50ZTERMA8GA1UECRMIQWxpY2FudGUx
-        GTAXBgNVBAoTEEt1bmcgRnUgU29mdHdhcmUxDTALBgNVBAsTBFRlY2gxDjAMBgNV
-        BAMTBXRsc2NhMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEVB/ZqhVePy96JJH/
-        QhYCT6hRlH7xQVSrTwI1QjLG6GgENV2c10m2EkXH/BHpLJCjZ8ZkGiqVVx/XMxZd
-        E6p1B6NtMGswDgYDVR0PAQH/BAQDAgGmMB0GA1UdJQQWMBQGCCsGAQUFBwMCBggr
-        BgEFBQcDATAPBgNVHRMBAf8EBTADAQH/MCkGA1UdDgQiBCBcmb8svFB8Yn96e3d4
-        Ft+8wZTrAYLielLn6Je/zxbjODAKBggqhkjOPQQDAgNJADBGAiEA3ad5GVhA5RSr
-        mjhnKlazFh53einWYfWxcYNy42v+EbcCIQCt+Fc4nzlMg0ebG3HDlpa9wjJpX9MW
-        caEunJxSdY4vWg==
-        -----END CERTIFICATE-----
-    signRootCert: |
-        -----BEGIN CERTIFICATE-----
-        MIICQTCCAeagAwIBAgIRALIMDeWXSDaW2cYssTwLrTAwCgYIKoZIzj0EAwIwajEL
-        MAkGA1UEBhMCRVMxETAPBgNVBAcTCEFsaWNhbnRlMREwDwYDVQQJEwhBbGljYW50
-        ZTEZMBcGA1UEChMQS3VuZyBGdSBTb2Z0d2FyZTENMAsGA1UECxMEVGVjaDELMAkG
-        A1UEAxMCY2EwHhcNMjMxMTEyMTUwNzE5WhcNMzMxMTEzMTUwNzE5WjBqMQswCQYD
-        VQQGEwJFUzERMA8GA1UEBxMIQWxpY2FudGUxETAPBgNVBAkTCEFsaWNhbnRlMRkw
-        FwYDVQQKExBLdW5nIEZ1IFNvZnR3YXJlMQ0wCwYDVQQLEwRUZWNoMQswCQYDVQQD
-        EwJjYTBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABAomf+HmUFMdRS7D+IZRCEkQ
-        QEDyrakkXYEE/vwSlXhSW5PsVVXQdi/wmXj2YwoPqsDk2IrXc7KT2tni5wOxJ8mj
-        bTBrMA4GA1UdDwEB/wQEAwIBpjAdBgNVHSUEFjAUBggrBgEFBQcDAgYIKwYBBQUH
-        AwEwDwYDVR0TAQH/BAUwAwEB/zApBgNVHQ4EIgQgESLOdwga9AciHgTGFTR6Zxzh
-        Z/vpQ2gC3V0MbzFvfOYwCgYIKoZIzj0EAwIDSQAwRgIhAKLN7BlISJJzjjHOqJ25
-        EFfWSywv6MgddOsGgrQxsedCAiEAxhMj/EJcYvVu5rr+xiHo7TarixkdvmA5k/eW
-        kOWiji0=
-        -----END CERTIFICATE-----
+    Org2MSP:
+      secretKey: org2msp.yaml
+      secretName: wallet
+      secretNamespace: default
 
   ordererOrganizations:
     - caName: "ord-ca"
       caNamespace: "default"
       externalOrderersToJoin:
-        - host: ord-node1
+        - host: ord-node1.default
+          port: 7053
+        - host: ord-node2.default
+          port: 7053
+        - host: ord-node3.default
           port: 7053
       mspID: OrdererMSP
       ordererEndpoints:
         - orderer0-ord.localho.st:443
+        - orderer1-ord.localho.st:443
+        - orderer2-ord.localho.st:443
       orderersToJoin: []
   orderers:
     - host: orderer0-ord.localho.st
       port: 443
       tlsCert: |-
 ${ORDERER0_TLS_CERT}
+    - host: orderer1-ord.localho.st
+      port: 443
+      tlsCert: |-
+${ORDERER1_TLS_CERT}
+    - host: orderer2-ord.localho.st
+      port: 443
+      tlsCert: |-
+${ORDERER2_TLS_CERT}
 
 EOF
+
 ```
 
 ## Join peer to the channel
@@ -593,7 +590,7 @@ kubectl apply -f - <<EOF
 apiVersion: hlf.kungfusoftware.es/v1alpha1
 kind: FabricFollowerChannel
 metadata:
-  name: demo2-org1msp
+  name: demo-org1msp
 spec:
   anchorPeers:
     - host: peer0-org1.localho.st
@@ -603,7 +600,7 @@ spec:
     secretName: wallet
     secretNamespace: default
   mspId: Org1MSP
-  name: demo2
+  name: demo
   externalPeersToJoin: []
   orderers:
     - certificate: |
@@ -752,7 +749,7 @@ At this point, you should have:
 
 - Ordering service with 1 nodes and a CA
 - Peer organization with a peer and a CA
-- A channel **demo2**
+- A channel **demo**
 - A chaincode install in peer0
 - A chaincode approved and committed
 

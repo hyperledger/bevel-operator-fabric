@@ -260,7 +260,7 @@ func (r *FabricChaincodeInstallReconciler) Reconcile(ctx context.Context, req ct
 		return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricChaincodeInstall)
 	}
 	networkConfig = ncResponse.NetworkConfig
-	resClient, sdk, err := getResmgmtBasedOnIdentity(ctx, fabricChaincodeInstall, networkConfig, clientSet, hlfClientSet, fabricChaincodeInstall.Spec.MSPID)
+	resClient, sdk, err := getResmgmtBasedOnIdentity(ctx, fabricChaincodeInstall, networkConfig, clientSet, fabricChaincodeInstall.Spec.MSPID)
 	if err != nil {
 		r.setConditionStatus(ctx, fabricChaincodeInstall, hlfv1alpha1.FailedStatus, false, errors.Wrapf(err, "failed to get resmgmt"), false)
 		return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricChaincodeInstall)
@@ -354,7 +354,7 @@ type Pem struct {
 	Pem string
 }
 
-func getResmgmtBasedOnIdentity(ctx context.Context, chInstall *hlfv1alpha1.FabricChaincodeInstall, networkConfig string, clientSet *kubernetes.Clientset, hlfClientSet *operatorv1.Clientset, mspID string) (*resmgmt.Client, *fabsdk.FabricSDK, error) {
+func getResmgmtBasedOnIdentity(ctx context.Context, chInstall *hlfv1alpha1.FabricChaincodeInstall, networkConfig string, clientSet *kubernetes.Clientset, mspID string) (*resmgmt.Client, *fabsdk.FabricSDK, error) {
 	configBackend := config.FromRaw([]byte(networkConfig), "yaml")
 	sdk, err := fabsdk.New(configBackend)
 	if err != nil {

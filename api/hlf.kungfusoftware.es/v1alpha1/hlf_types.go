@@ -1990,6 +1990,93 @@ type FabricChaincodeInstallList struct {
 
 // FabricChaincodeApproveSpec defines the desired state of FabricChaincodeApprove
 type FabricChaincodeApproveSpec struct {
+	// ChaincodeName is the name of the chaincode
+	ChaincodeName string `json:"chaincodeName"`
+
+	// ChannelName is the name of the channel
+	ChannelName string `json:"channelName"`
+
+	// +kubebuilder:validation:Default=false
+	// +optional
+	// +nullable
+	InitRequired bool `json:"initRequired"`
+
+	// MSPID is the MSP ID of the organization approving the chaincode
+	MSPID string `json:"mspID"`
+
+	// PackageID is the ID of the chaincode package
+	PackageID string `json:"packageId"`
+
+	// Version is the version of the chaincode
+	Version string `json:"version"`
+
+	// Sequence is the sequence number of the chaincode definition
+	Sequence int64 `json:"sequence"`
+
+	// EndorsementPolicy specifies the endorsement policy
+	EndorsementPolicy string `json:"endorsementPolicy"`
+
+	// PrivateDataCollections is a list of private data collection configurations
+	// +optional
+	PrivateDataCollections []PrivateDataCollection `json:"pdc,omitempty"`
+
+	// HLFIdentity specifies the identity to use for the operation
+	HLFIdentity HLFIdentity `json:"hlfIdentity"`
+
+	// Peers is a list of peers to approve the chaincode
+	Peers         []FabricPeerInternalRef `json:"peers"`
+	ExternalPeers []FabricPeerExternalRef `json:"externalPeers"`
+
+	// Orderers is a list of orderers to use for the transaction
+	Orderers         []FabricOrdererInternalRef `json:"orderers"`
+	ExternalOrderers []FabricOrdererExternalRef `json:"externalOrderers"`
+}
+
+type FabricOrdererInternalRef struct {
+	Name      string `json:"name"`
+	Namespace string `json:"namespace"`
+}
+
+type FabricOrdererExternalRef struct {
+	URL       string `json:"url"`
+	TLSCACert string `json:"tlsCACert"`
+}
+
+type PrivateDataCollectionEndorsementPolicy struct {
+	// +optional
+	// +nullable
+	ChannelConfigPolicy string `json:"channelConfigPolicy,omitempty"`
+	SignaturePolicy     string `json:"signaturePolicy,omitempty"`
+}
+
+type PrivateDataCollection struct {
+	// Define the structure for private data collections here
+	// This is a placeholder and should be expanded based on your specific requirements
+	Name   string `json:"name"`
+	Policy string `json:"policy"`
+	// +optional
+	// +nullable
+	// add default
+	// +kubebuilder:validation:Default=1
+	RequiredPeerCount *int32 `json:"requiredPeerCount"`
+	// +kubebuilder:validation:Default=1
+	MaxPeerCount *int32 `json:"maxPeerCount"`
+	// +nullable
+	// +optional
+	BlockToLive       uint64                                  `json:"blockToLive"`
+	MemberOnlyRead    bool                                    `json:"memberOnlyRead"`
+	MemberOnlyWrite   bool                                    `json:"memberOnlyWrite"`
+	EndorsementPolicy *PrivateDataCollectionEndorsementPolicy `json:"endorsementPolicy,omitempty"`
+}
+
+type PeerReference struct {
+	Name      string `json:"name"`
+	Namespace string `json:"namespace"`
+}
+
+type OrdererReference struct {
+	Name      string `json:"name"`
+	Namespace string `json:"namespace"`
 }
 
 // FabricChaincodeApproveStatus defines the observed state of FabricChaincodeApprove
@@ -1998,6 +2085,10 @@ type FabricChaincodeApproveStatus struct {
 	Message    string            `json:"message"`
 	// Status of the FabricChaincodeApprove
 	Status DeploymentStatus `json:"status"`
+
+	// +optional
+	// +nullable
+	TransactionID string `json:"transactionID"`
 }
 
 // +genclient
@@ -2030,6 +2121,37 @@ type FabricChaincodeApproveList struct {
 
 // FabricChaincodeCommitSpec defines the desired state of FabricChaincodeCommit
 type FabricChaincodeCommitSpec struct {
+	// ChaincodeName is the name of the chaincode
+	ChaincodeName string `json:"chaincodeName"`
+	// Channel is the name of the channel
+	ChannelName string `json:"channelName"`
+	// Version is the version of the chaincode to approve
+	Version string `json:"version"`
+	// Sequence is the sequence number of the chaincode definition
+	Sequence int64 `json:"sequence"`
+	// EndorsementPolicy is the endorsement policy of the chaincode
+	// +optional
+	EndorsementPolicy string `json:"endorsementPolicy,omitempty"`
+	// CollectionConfig is the private data collection configuration of the chaincode
+	// +optional
+	PrivateDataCollections []PrivateDataCollection `json:"pdc,omitempty"`
+	// InitRequired is a flag to indicate if the chaincode requires initialization
+	// +optional
+	InitRequired bool `json:"initRequired,omitempty"`
+	// HLFIdentity is the identity to use for the approve transaction
+	HLFIdentity HLFIdentity `json:"hlfIdentity"`
+	// MSPID is the MSP ID of the organization approving the chaincode
+	MSPID string `json:"mspID"`
+	// Peers is the list of peers to approve the chaincode
+	Peers []FabricPeerInternalRef `json:"peers"`
+	// ExternalPeers is the list of external peers to approve the chaincode
+	// +optional
+	ExternalPeers []FabricPeerExternalRef `json:"externalPeers,omitempty"`
+	// Orderers is the list of orderers to use for the approve transaction
+	Orderers []FabricOrdererInternalRef `json:"orderers"`
+	// ExternalOrderers is the list of external orderers to use for the approve transaction
+	// +optional
+	ExternalOrderers []FabricOrdererExternalRef `json:"externalOrderers,omitempty"`
 }
 
 // FabricChaincodeCommitStatus defines the observed state of FabricChaincodeCommit
@@ -2038,6 +2160,9 @@ type FabricChaincodeCommitStatus struct {
 	Message    string            `json:"message"`
 	// Status of the FabricChaincodeCommit
 	Status DeploymentStatus `json:"status"`
+	// +optional
+	// +nullable
+	TransactionID string `json:"transactionID"`
 }
 
 // +genclient
@@ -2640,5 +2765,8 @@ func init() {
 	SchemeBuilder.Register(&FabricMainChannel{}, &FabricMainChannelList{})
 	SchemeBuilder.Register(&FabricIdentity{}, &FabricIdentityList{})
 	SchemeBuilder.Register(&FabricChaincodeInstall{}, &FabricChaincodeInstallList{})
+	SchemeBuilder.Register(&FabricChaincodeApprove{}, &FabricChaincodeApproveList{})
+	SchemeBuilder.Register(&FabricChaincodeCommit{}, &FabricChaincodeCommitList{})
+
 	SchemeBuilder.Register(&FabricFollowerChannel{}, &FabricFollowerChannelList{})
 }

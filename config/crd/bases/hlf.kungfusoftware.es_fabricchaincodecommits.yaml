@@ -44,6 +44,158 @@ spec:
             type: object
           spec:
             description: FabricChaincodeCommitSpec defines the desired state of FabricChaincodeCommit
+            properties:
+              chaincodeName:
+                description: ChaincodeName is the name of the chaincode
+                type: string
+              channelName:
+                description: Channel is the name of the channel
+                type: string
+              endorsementPolicy:
+                description: EndorsementPolicy is the endorsement policy of the chaincode
+                type: string
+              externalOrderers:
+                description: ExternalOrderers is the list of external orderers to
+                  use for the approve transaction
+                items:
+                  properties:
+                    tlsCACert:
+                      type: string
+                    url:
+                      type: string
+                  required:
+                  - tlsCACert
+                  - url
+                  type: object
+                type: array
+              externalPeers:
+                description: ExternalPeers is the list of external peers to approve
+                  the chaincode
+                items:
+                  properties:
+                    tlsCACert:
+                      type: string
+                    url:
+                      type: string
+                  required:
+                  - tlsCACert
+                  - url
+                  type: object
+                type: array
+              hlfIdentity:
+                description: HLFIdentity is the identity to use for the approve transaction
+                properties:
+                  secretKey:
+                    description: Key inside the secret that holds the private key
+                      and certificate to interact with the network
+                    type: string
+                  secretName:
+                    description: Secret name
+                    type: string
+                  secretNamespace:
+                    default: default
+                    description: Secret namespace
+                    type: string
+                required:
+                - secretKey
+                - secretName
+                - secretNamespace
+                type: object
+              initRequired:
+                description: InitRequired is a flag to indicate if the chaincode requires
+                  initialization
+                type: boolean
+              mspID:
+                description: MSPID is the MSP ID of the organization approving the
+                  chaincode
+                type: string
+              orderers:
+                description: Orderers is the list of orderers to use for the approve
+                  transaction
+                items:
+                  properties:
+                    name:
+                      type: string
+                    namespace:
+                      type: string
+                  required:
+                  - name
+                  - namespace
+                  type: object
+                type: array
+              pdc:
+                description: CollectionConfig is the private data collection configuration
+                  of the chaincode
+                items:
+                  properties:
+                    blockToLive:
+                      format: int64
+                      nullable: true
+                      type: integer
+                    endorsementPolicy:
+                      properties:
+                        channelConfigPolicy:
+                          nullable: true
+                          type: string
+                        signaturePolicy:
+                          type: string
+                      type: object
+                    maxPeerCount:
+                      format: int32
+                      type: integer
+                    memberOnlyRead:
+                      type: boolean
+                    memberOnlyWrite:
+                      type: boolean
+                    name:
+                      description: Define the structure for private data collections
+                        here This is a placeholder and should be expanded based on
+                        your specific requirements
+                      type: string
+                    policy:
+                      type: string
+                    requiredPeerCount:
+                      description: add default
+                      format: int32
+                      nullable: true
+                      type: integer
+                  required:
+                  - maxPeerCount
+                  - memberOnlyRead
+                  - memberOnlyWrite
+                  - name
+                  - policy
+                  type: object
+                type: array
+              peers:
+                description: Peers is the list of peers to approve the chaincode
+                items:
+                  properties:
+                    name:
+                      type: string
+                    namespace:
+                      type: string
+                  required:
+                  - name
+                  - namespace
+                  type: object
+                type: array
+              sequence:
+                description: Sequence is the sequence number of the chaincode definition
+                format: int64
+                type: integer
+              version:
+                description: Version is the version of the chaincode to approve
+                type: string
+            required:
+            - chaincodeName
+            - channelName
+            - hlfIdentity
+            - mspID
+            - orderers
+            - peers
+            - sequence
+            - version
             type: object
           status:
             description: FabricChaincodeCommitStatus defines the observed state of
@@ -93,6 +245,9 @@ spec:
                 type: string
               status:
                 description: Status of the FabricChaincodeCommit
+                type: string
+              transactionID:
+                nullable: true
                 type: string
             required:
             - conditions

@@ -22,6 +22,8 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/kfsoftware/hlf-operator/controllers/chaincode/approve"
+	"github.com/kfsoftware/hlf-operator/controllers/chaincode/commit"
 	"github.com/kfsoftware/hlf-operator/controllers/chaincode/deploy"
 	"github.com/kfsoftware/hlf-operator/controllers/chaincode/install"
 
@@ -321,6 +323,26 @@ func main() {
 		Config: mgr.GetConfig(),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "FabricChaincodeInstall")
+		os.Exit(1)
+	}
+
+	if err = (&approve.FabricChaincodeApproveReconciler{
+		Client: mgr.GetClient(),
+		Log:    ctrl.Log.WithName("controllers").WithName("FabricChaincodeApprove"),
+		Scheme: mgr.GetScheme(),
+		Config: mgr.GetConfig(),
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "FabricChaincodeApprove")
+		os.Exit(1)
+	}
+
+	if err = (&commit.FabricChaincodeCommitReconciler{
+		Client: mgr.GetClient(),
+		Log:    ctrl.Log.WithName("controllers").WithName("FabricChaincodeCommit"),
+		Scheme: mgr.GetScheme(),
+		Config: mgr.GetConfig(),
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "FabricChaincodeCommit")
 		os.Exit(1)
 	}
 
