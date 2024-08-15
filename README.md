@@ -422,6 +422,10 @@ kubectl hlf ca register --name=ord-ca --user=admin --secret=adminpw \
 kubectl hlf ca enroll --name=ord-ca --namespace=default \
     --user=admin --secret=adminpw --mspid OrdererMSP \
     --ca-name tlsca  --output orderermsp.yaml
+    
+kubectl hlf ca enroll --name=ord-ca --namespace=default \
+    --user=admin --secret=adminpw --mspid OrdererMSP \
+    --ca-name ca  --output orderermspsign.yaml
 ```
 
 ### Register and enrolling Org1MSP Orderer identity
@@ -466,7 +470,8 @@ kubectl hlf identity create --name org1-admin --namespace default \
 kubectl create secret generic wallet --namespace=default \
         --from-file=org1msp.yaml=$PWD/org1msp.yaml \
         --from-file=org2msp.yaml=$PWD/org2msp.yaml \
-        --from-file=orderermsp.yaml=$PWD/orderermsp.yaml
+        --from-file=orderermsp.yaml=$PWD/orderermsp.yaml \
+        --from-file=orderermspsign.yaml=$PWD/orderermspsign.yaml
 ```
 
 ### Create main channel
@@ -534,6 +539,14 @@ spec:
   identities:
     OrdererMSP:
       secretKey: orderermsp.yaml
+      secretName: wallet
+      secretNamespace: default
+    OrdererMSP-tls:
+      secretKey: orderermsp.yaml
+      secretName: wallet
+      secretNamespace: default
+    OrdererMSP-sign:
+      secretKey: orderermspsign.yaml
       secretName: wallet
       secretNamespace: default
     Org1MSP:

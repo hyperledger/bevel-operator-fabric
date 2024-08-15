@@ -8,6 +8,12 @@ import (
 	"crypto/x509/pkix"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"net"
+	"strconv"
+	"strings"
+	"time"
+
 	"github.com/go-logr/logr"
 	"github.com/golang/protobuf/proto"
 	"github.com/hyperledger/fabric-config/configtx"
@@ -37,20 +43,15 @@ import (
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v3"
-	"io/ioutil"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/rest"
-	"net"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-	"strconv"
-	"strings"
-	"time"
 )
 
 // FabricMainChannelReconciler reconciles a FabricMainChannel object
@@ -145,8 +146,8 @@ func (r *FabricMainChannelReconciler) Reconcile(ctx context.Context, req ctrl.Re
 		return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricMainChannel)
 	}
 	defer sdk.Close()
-	firstAdminOrgMSPID := fabricMainChannel.Spec.AdminPeerOrganizations[0].MSPID
-	idConfig, ok := fabricMainChannel.Spec.Identities[firstAdminOrgMSPID]
+	firstAdminOrgMSPID := fabricMainChannel.Spec.AdminOrdererOrganizations[0].MSPID
+	idConfig, ok := fabricMainChannel.Spec.Identities[fmt.Sprintf("%s-sign", firstAdminOrgMSPID)]
 	if !ok {
 		r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, fmt.Errorf("identity not found for MSPID %s", firstAdminOrgMSPID), false)
 		return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricMainChannel)
@@ -197,10 +198,12 @@ func (r *FabricMainChannelReconciler) Reconcile(ctx context.Context, req ctrl.Re
 		r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, err, false)
 		return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricMainChannel)
 	}
+	log.Infof("Signing identity: %s", firstAdminOrgMSPID)
 	sdkContext := sdk.Context(
 		fabsdk.WithIdentity(signingIdentity),
 		fabsdk.WithOrg(firstAdminOrgMSPID),
 	)
+
 	resClient, err := resmgmt.New(sdkContext)
 	if err != nil {
 		r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, err, false)
@@ -298,9 +301,25 @@ func (r *FabricMainChannelReconciler) Reconcile(ctx context.Context, req ctrl.Re
 			[]byte(id.Cert.Pem),
 			[]byte(id.Key.Pem),
 		)
+		if err != nil {
+			r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, err, false)
+			return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricMainChannel)
+		}
 		for _, cc := range ordererOrg.ExternalOrderersToJoin {
 			osnUrl := fmt.Sprintf("https://%s:%d", cc.Host, cc.AdminPort)
 			log.Infof("Trying to join orderer %s to channel %s", osnUrl, fabricMainChannel.Spec.Name)
+			// get if orderer is already joined
+			chInfoResponse, err := osnadmin.ListSingleChannel(osnUrl, fabricMainChannel.Spec.Name, certPool, tlsClientCert)
+			if err != nil {
+				r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, err, false)
+				return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricMainChannel)
+			}
+			defer chInfoResponse.Body.Close()
+			if chInfoResponse.StatusCode == 200 {
+				log.Infof("Orderer %s already joined to channel %s", osnUrl, fabricMainChannel.Spec.Name)
+				continue
+			}
+
 			chResponse, err := osnadmin.Join(osnUrl, blockBytes, certPool, tlsClientCert)
 			if err != nil {
 				r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, err, false)
@@ -667,6 +686,7 @@ func (r *FabricMainChannelReconciler) Reconcile(ctx context.Context, req ctrl.Re
 			log.Infof("Orderer configuration updated with transaction ID: %s", saveChannelResponse.TransactionID)
 		}
 	}
+	time.Sleep(2 * time.Second) // wait for orderers to get the new config
 	r.Log.Info(fmt.Sprintf("fetching block every 1 second waiting for orderers to reconcile %s", fabricMainChannel.Name))
 	ordererChannelCh := make(chan *common.Block, 1)
 	go func() {
@@ -935,6 +955,16 @@ func (r *FabricMainChannelReconciler) mapToConfigTX(channel *hlfv1alpha1.FabricM
 		},
 	}
 
+	state := orderer.ConsensusStateNormal
+	if channel.Spec.ChannelConfig != nil && channel.Spec.ChannelConfig.Orderer != nil && channel.Spec.ChannelConfig.Orderer.State != "" {
+		switch channel.Spec.ChannelConfig.Orderer.State {
+		case hlfv1alpha1.ConsensusStateNormal:
+			state = orderer.ConsensusStateNormal
+		case hlfv1alpha1.ConsensusStateMaintenance:
+			state = orderer.ConsensusStateMaintenance
+		}
+	}
+	log.Infof("Orderer state: %s", state)
 	ordConfigtx := configtx.Orderer{
 		OrdererType:   "etcdraft",
 		Organizations: ordererOrgs,
@@ -950,7 +980,7 @@ func (r *FabricMainChannelReconciler) mapToConfigTX(channel *hlfv1alpha1.FabricM
 			PreferredMaxBytes: 512 * 1024,
 		},
 		BatchTimeout: 2 * time.Second,
-		State:        "STATE_NORMAL",
+		State:        state,
 	}
 	if channel.Spec.ChannelConfig != nil {
 		if channel.Spec.ChannelConfig.Orderer != nil {
@@ -1293,6 +1323,21 @@ func updateOrdererChannelConfigTx(currentConfigTX configtx.ConfigTx, newConfigTx
 	ord, err := currentConfigTX.Orderer().Configuration()
 	if err != nil {
 		return errors.Wrapf(err, "failed to get application configuration")
+	}
+	// update state
+	if newConfigTx.Orderer.State != "" {
+		state := orderer.ConsensusStateNormal
+		switch newConfigTx.Orderer.State {
+		case orderer.ConsensusStateNormal:
+			state = orderer.ConsensusStateNormal
+		case orderer.ConsensusStateMaintenance:
+			state = orderer.ConsensusStateMaintenance
+		}
+		err := currentConfigTX.Orderer().SetConsensusState(state)
+		if err != nil {
+			return err
+		}
+
 	}
 	log.Infof("Current orderer organizations %v", ord.Organizations)
 	log.Infof("New orderer organizations %v", newConfigTx.Orderer.Organizations)
