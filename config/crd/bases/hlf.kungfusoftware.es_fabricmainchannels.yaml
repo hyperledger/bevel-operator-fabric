@@ -159,6 +159,28 @@ spec:
                         items:
                           type: string
                         type: array
+                      consenterMapping:
+                        items:
+                          properties:
+                            client_tls_cert:
+                              type: string
+                            host:
+                              type: string
+                            id:
+                              format: int32
+                              type: integer
+                            identity:
+                              type: string
+                            msp_id:
+                              type: string
+                            port:
+                              format: int32
+                              type: integer
+                            server_tls_cert:
+                              type: string
+                          type: object
+                        nullable: true
+                        type: array
                       etcdRaft:
                         nullable: true
                         properties:
@@ -221,6 +243,54 @@ spec:
                           type: object
                         description: Policies of the orderer section of the channel
                         nullable: true
+                        type: object
+                      smartBFT:
+                        nullable: true
+                        properties:
+                          collect_timeout:
+                            type: string
+                          decisions_per_leader:
+                            format: int64
+                            type: integer
+                          incoming_message_buffer_size:
+                            format: int64
+                            type: integer
+                          leader_heartbeat_count:
+                            format: int64
+                            type: integer
+                          leader_heartbeat_timeout:
+                            type: string
+                          leader_rotation:
+                            format: int32
+                            type: integer
+                          request_auto_remove_timeout:
+                            type: string
+                          request_batch_max_bytes:
+                            format: int64
+                            type: integer
+                          request_batch_max_count:
+                            format: int64
+                            type: integer
+                          request_batch_max_interval:
+                            type: string
+                          request_complain_timeout:
+                            type: string
+                          request_forward_timeout:
+                            type: string
+                          request_max_bytes:
+                            format: int64
+                            type: integer
+                          request_pool_size:
+                            format: int64
+                            type: integer
+                          speed_up_view_change:
+                            type: boolean
+                          sync_on_start:
+                            type: boolean
+                          view_change_resend_interval:
+                            type: string
+                          view_change_timeout:
+                            type: string
                         type: object
                       state:
                         default: STATE_NORMAL

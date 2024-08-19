@@ -257,9 +257,7 @@ func (r FabricChaincodeDeployReconciler) getCryptoMaterial(ctx context.Context, 
 	return secretChaincodeData, nil
 }
 
-// +kubebuilder:rbac:groups=hlf.kungfusoftware.es,resources=fabricchaincodes,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=hlf.kungfusoftware.es,resources=fabricchaincodes/status,verbs=get;update;patch
-// +kubebuilder:rbac:groups=hlf.kungfusoftware.es,resources=fabricchaincodes/finalizers,verbs=get;update;patch
+
 func (r *FabricChaincodeDeployReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	reqLogger := r.Log.WithValues("hlf", req.NamespacedName)
 	fabricChaincode := &hlfv1alpha1.FabricChaincode{}

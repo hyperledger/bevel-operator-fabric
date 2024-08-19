@@ -14,6 +14,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/SmartBFT-Go/consensus/pkg/types"
 	"github.com/go-logr/logr"
 	"github.com/golang/protobuf/proto"
 	"github.com/hyperledger/fabric-config/configtx"
@@ -22,6 +23,7 @@ import (
 	"github.com/hyperledger/fabric-config/protolator"
 	"github.com/hyperledger/fabric-protos-go/common"
 	cb "github.com/hyperledger/fabric-protos-go/common"
+	sb "github.com/hyperledger/fabric-protos-go/orderer/smartbft"
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/resmgmt"
 	fab2 "github.com/hyperledger/fabric-sdk-go/pkg/common/providers/fab"
 	"github.com/hyperledger/fabric-sdk-go/pkg/common/providers/msp"
@@ -839,22 +841,6 @@ func (r *FabricMainChannelReconciler) SetupWithManager(mgr ctrl.Manager) error {
 }
 
 func (r *FabricMainChannelReconciler) mapToConfigTX(channel *hlfv1alpha1.FabricMainChannel) (configtx.Channel, error) {
-	consenters := []orderer.Consenter{}
-	for _, consenter := range channel.Spec.Consenters {
-		tlsCert, err := utils.ParseX509Certificate([]byte(consenter.TLSCert))
-		if err != nil {
-			return configtx.Channel{}, err
-		}
-		channelConsenter := orderer.Consenter{
-			Address: orderer.EtcdAddress{
-				Host: consenter.Host,
-				Port: consenter.Port,
-			},
-			ClientTLSCert: tlsCert,
-			ServerTLSCert: tlsCert,
-		}
-		consenters = append(consenters, channelConsenter)
-	}
 	clientSet, err := utils.GetClientKubeWithConf(r.Config)
 	if err != nil {
 		return configtx.Channel{}, err
@@ -956,24 +942,88 @@ func (r *FabricMainChannelReconciler) mapToConfigTX(channel *hlfv1alpha1.FabricM
 	}
 
 	state := orderer.ConsensusStateNormal
-	if channel.Spec.ChannelConfig != nil && channel.Spec.ChannelConfig.Orderer != nil && channel.Spec.ChannelConfig.Orderer.State != "" {
-		switch channel.Spec.ChannelConfig.Orderer.State {
-		case hlfv1alpha1.ConsensusStateNormal:
-			state = orderer.ConsensusStateNormal
-		case hlfv1alpha1.ConsensusStateMaintenance:
-			state = orderer.ConsensusStateMaintenance
+	ordererType := string(channel.Spec.ChannelConfig.Orderer.OrdererType)
+	var etcdRaft orderer.EtcdRaft
+	consenterMapping := []cb.Consenter{}
+	consenters := []orderer.Consenter{}
+	var smartBFTOptions *sb.Options
+	if channel.Spec.ChannelConfig.Orderer.OrdererType == hlfv1alpha1.OrdererConsensusBFT {
+		ordererType = string(hlfv1alpha1.OrdererConsensusBFT)
+		for _, consenterItem := range channel.Spec.ChannelConfig.Orderer.ConsenterMapping {
+			identityCert, err := utils.ParseX509Certificate([]byte(consenterItem.Identity))
+			if err != nil {
+				return configtx.Channel{}, err
+			}
+			clientTLSCert, err := utils.ParseX509Certificate([]byte(consenterItem.ClientTlsCert))
+			if err != nil {
+				return configtx.Channel{}, err
+			}
+			serverTLSCert, err := utils.ParseX509Certificate([]byte(consenterItem.ServerTlsCert))
+			if err != nil {
+				return configtx.Channel{}, err
+			}
+			consenterMapping = append(consenterMapping, cb.Consenter{
+				Id:            consenterItem.Id,
+				Host:          consenterItem.Host,
+				Port:          consenterItem.Port,
+				MspId:         consenterItem.MspId,
+				Identity:      utils.EncodeX509Certificate(identityCert),
+				ClientTlsCert: utils.EncodeX509Certificate(clientTLSCert),
+				ServerTlsCert: utils.EncodeX509Certificate(serverTLSCert),
+			})
 		}
-	}
-	log.Infof("Orderer state: %s", state)
-	ordConfigtx := configtx.Orderer{
-		OrdererType:   "etcdraft",
-		Organizations: ordererOrgs,
-		EtcdRaft: orderer.EtcdRaft{
+		smartBFTOptions = &sb.Options{
+			RequestBatchMaxCount:      channel.Spec.ChannelConfig.Orderer.SmartBFT.RequestBatchMaxCount,
+			RequestBatchMaxBytes:      channel.Spec.ChannelConfig.Orderer.SmartBFT.RequestBatchMaxBytes,
+			RequestBatchMaxInterval:   channel.Spec.ChannelConfig.Orderer.SmartBFT.RequestBatchMaxInterval,
+			IncomingMessageBufferSize: channel.Spec.ChannelConfig.Orderer.SmartBFT.IncomingMessageBufferSize,
+			RequestPoolSize:           channel.Spec.ChannelConfig.Orderer.SmartBFT.RequestPoolSize,
+			RequestForwardTimeout:     channel.Spec.ChannelConfig.Orderer.SmartBFT.RequestForwardTimeout,
+			RequestComplainTimeout:    channel.Spec.ChannelConfig.Orderer.SmartBFT.RequestComplainTimeout,
+			RequestAutoRemoveTimeout:  channel.Spec.ChannelConfig.Orderer.SmartBFT.RequestAutoRemoveTimeout,
+			RequestMaxBytes:           channel.Spec.ChannelConfig.Orderer.SmartBFT.RequestMaxBytes,
+			ViewChangeResendInterval:  channel.Spec.ChannelConfig.Orderer.SmartBFT.ViewChangeResendInterval,
+			ViewChangeTimeout:         channel.Spec.ChannelConfig.Orderer.SmartBFT.ViewChangeTimeout,
+			LeaderHeartbeatTimeout:    channel.Spec.ChannelConfig.Orderer.SmartBFT.LeaderHeartbeatTimeout,
+			LeaderHeartbeatCount:      channel.Spec.ChannelConfig.Orderer.SmartBFT.LeaderHeartbeatCount,
+			CollectTimeout:            channel.Spec.ChannelConfig.Orderer.SmartBFT.CollectTimeout,
+			SyncOnStart:               channel.Spec.ChannelConfig.Orderer.SmartBFT.SyncOnStart,
+			SpeedUpViewChange:         channel.Spec.ChannelConfig.Orderer.SmartBFT.SpeedUpViewChange,
+			LeaderRotation:            sb.Options_ROTATION_ON,
+			DecisionsPerLeader:        channel.Spec.ChannelConfig.Orderer.SmartBFT.DecisionsPerLeader,
+		}
+	} else if channel.Spec.ChannelConfig.Orderer.OrdererType == hlfv1alpha1.OrdererConsensusEtcdraft {
+		for _, consenter := range channel.Spec.Consenters {
+			tlsCert, err := utils.ParseX509Certificate([]byte(consenter.TLSCert))
+			if err != nil {
+				return configtx.Channel{}, err
+			}
+			channelConsenter := orderer.Consenter{
+				Address: orderer.EtcdAddress{
+					Host: consenter.Host,
+					Port: consenter.Port,
+				},
+				ClientTLSCert: tlsCert,
+				ServerTLSCert: tlsCert,
+			}
+			consenters = append(consenters, channelConsenter)
+		}
+		etcdRaft = orderer.EtcdRaft{
 			Consenters: consenters,
 			Options:    etcdRaftOptions,
-		},
-		Policies:     adminOrdererPolicies,
-		Capabilities: []string{"V2_0"},
+		}
+	} else {
+		return configtx.Channel{}, fmt.Errorf("orderer type %s not supported", ordererType)
+	}
+
+	ordConfigtx := configtx.Orderer{
+		OrdererType:      ordererType,
+		Organizations:    ordererOrgs,
+		ConsenterMapping: consenterMapping, // TODO: map from channel.Spec.ConssenterMapping
+		SmartBFT:         smartBFTOptions,
+		EtcdRaft:         etcdRaft,
+		Policies:         adminOrdererPolicies,
+		Capabilities:     channel.Spec.ChannelConfig.Orderer.Capabilities,
 		BatchSize: orderer.BatchSize{
 			MaxMessageCount:   100,
 			AbsoluteMaxBytes:  1024 * 1024,
@@ -995,12 +1045,6 @@ func (r *FabricMainChannelReconciler) mapToConfigTX(channel *hlfv1alpha1.FabricM
 				ordConfigtx.BatchSize.MaxMessageCount = uint32(channel.Spec.ChannelConfig.Orderer.BatchSize.MaxMessageCount)
 				ordConfigtx.BatchSize.AbsoluteMaxBytes = uint32(channel.Spec.ChannelConfig.Orderer.BatchSize.AbsoluteMaxBytes)
 				ordConfigtx.BatchSize.PreferredMaxBytes = uint32(channel.Spec.ChannelConfig.Orderer.BatchSize.PreferredMaxBytes)
-			}
-			if channel.Spec.ChannelConfig.Orderer.Capabilities != nil {
-				ordConfigtx.Capabilities = channel.Spec.ChannelConfig.Orderer.Capabilities
-			}
-			if channel.Spec.ChannelConfig.Orderer.Policies != nil {
-				ordConfigtx.Policies = r.mapPolicy(*channel.Spec.ChannelConfig.Orderer.Policies)
 			}
 		}
 	}
@@ -1073,7 +1117,7 @@ func (r *FabricMainChannelReconciler) mapToConfigTX(channel *hlfv1alpha1.FabricM
 	}
 	application := configtx.Application{
 		Organizations: peerOrgs,
-		Capabilities:  []string{"V2_0"},
+		Capabilities:  channel.Spec.ChannelConfig.Application.Capabilities,
 		Policies:      applicationPolicies,
 		ACLs:          defaultACLs(),
 	}
@@ -1084,7 +1128,7 @@ func (r *FabricMainChannelReconciler) mapToConfigTX(channel *hlfv1alpha1.FabricM
 	channelConfig := configtx.Channel{
 		Orderer:      ordConfigtx,
 		Application:  application,
-		Capabilities: []string{"V2_0"},
+		Capabilities: channel.Spec.ChannelConfig.Capabilities,
 		Policies: map[string]configtx.Policy{
 			"Readers": {
 				Type: "ImplicitMeta",
@@ -1313,6 +1357,27 @@ func updateApplicationChannelConfigTx(currentConfigTX configtx.ConfigTx, newConf
 	return nil
 }
 
+var DefaultConfig = sb.Options{
+	RequestBatchMaxCount:      types.DefaultConfig.RequestBatchMaxCount,
+	RequestBatchMaxBytes:      types.DefaultConfig.RequestBatchMaxBytes,
+	RequestBatchMaxInterval:   types.DefaultConfig.RequestBatchMaxInterval.String(),
+	IncomingMessageBufferSize: types.DefaultConfig.IncomingMessageBufferSize,
+	RequestPoolSize:           types.DefaultConfig.RequestPoolSize,
+	RequestForwardTimeout:     types.DefaultConfig.RequestForwardTimeout.String(),
+	RequestComplainTimeout:    types.DefaultConfig.RequestComplainTimeout.String(),
+	RequestAutoRemoveTimeout:  types.DefaultConfig.RequestAutoRemoveTimeout.String(),
+	ViewChangeResendInterval:  types.DefaultConfig.ViewChangeResendInterval.String(),
+	ViewChangeTimeout:         types.DefaultConfig.ViewChangeTimeout.String(),
+	LeaderHeartbeatTimeout:    types.DefaultConfig.LeaderHeartbeatTimeout.String(),
+	LeaderHeartbeatCount:      types.DefaultConfig.LeaderHeartbeatCount,
+	CollectTimeout:            types.DefaultConfig.CollectTimeout.String(),
+	SyncOnStart:               types.DefaultConfig.SyncOnStart,
+	SpeedUpViewChange:         types.DefaultConfig.SpeedUpViewChange,
+	LeaderRotation:            sb.Options_ROTATION_ON,
+	DecisionsPerLeader:        3,
+	RequestMaxBytes:           10 * 1024,
+}
+
 func updateOrdererChannelConfigTx(currentConfigTX configtx.ConfigTx, newConfigTx configtx.Channel) error {
 	err := currentConfigTX.Orderer().SetPolicies(
 		newConfigTx.Orderer.Policies,
@@ -1323,6 +1388,30 @@ func updateOrdererChannelConfigTx(currentConfigTX configtx.ConfigTx, newConfigTx
 	ord, err := currentConfigTX.Orderer().Configuration()
 	if err != nil {
 		return errors.Wrapf(err, "failed to get application configuration")
+	}
+
+	// update
+	if ord.OrdererType == "BFT" {
+		// update policies but blockValidation
+		err = currentConfigTX.Orderer().SetPolicy("Admins", newConfigTx.Orderer.Policies["Admins"])
+		if err != nil {
+			return errors.Wrapf(err, "failed to set policy admin for orderer")
+		}
+		err = currentConfigTX.Orderer().SetPolicy("Writers", newConfigTx.Orderer.Policies["Writers"])
+		if err != nil {
+			return errors.Wrapf(err, "failed to set policy writers for orderer")
+		}
+		err = currentConfigTX.Orderer().SetPolicy("Readers", newConfigTx.Orderer.Policies["Readers"])
+		if err != nil {
+			return errors.Wrapf(err, "failed to set policy readers for orderer")
+		}
+	} else {
+		err = currentConfigTX.Orderer().SetPolicies(
+			newConfigTx.Orderer.Policies,
+		)
+		if err != nil {
+			return errors.Wrapf(err, "failed to set application")
+		}
 	}
 	// update state
 	if newConfigTx.Orderer.State != "" {
@@ -1465,12 +1554,6 @@ func updateOrdererChannelConfigTx(currentConfigTX configtx.ConfigTx, newConfigTx
 	)
 	if err != nil {
 		return errors.Wrapf(err, "failed to set preferred max bytes")
-	}
-	err = currentConfigTX.Orderer().SetPolicies(
-		newConfigTx.Orderer.Policies,
-	)
-	if err != nil {
-		return errors.Wrap(err, "failed to set application policies")
 	}
 	err = currentConfigTX.Orderer().SetBatchTimeout(newConfigTx.Orderer.BatchTimeout)
 	if err != nil {

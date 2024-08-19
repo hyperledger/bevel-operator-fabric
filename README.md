@@ -118,7 +118,7 @@ To install helm: [https://helm.sh/docs/intro/install/](https://helm.sh/docs/intr
 ```bash
 helm repo add kfs https://kfsoftware.github.io/hlf-helm-charts --force-update
 
-helm install hlf-operator --version=1.10.1 -- kfs/hlf-operator
+helm install hlf-operator --version=1.10.0 -- kfs/hlf-operator
 ```
 
 
@@ -145,6 +145,9 @@ Install Istio on the Kubernetes cluster:
 ```bash
 
 kubectl create namespace istio-system
+
+export ISTIO_PATH=$(echo $PWD/istio-*/bin)
+export PATH="$PATH:$ISTIO_PATH"
 
 istioctl operator init
 

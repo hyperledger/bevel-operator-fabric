@@ -23,7 +23,7 @@ require (
 	github.com/hyperledger/fabric v2.1.1+incompatible
 	github.com/hyperledger/fabric-config v0.2.1
 	github.com/hyperledger/fabric-lib-go v1.0.0
-	github.com/hyperledger/fabric-protos-go v0.3.0
+	github.com/hyperledger/fabric-protos-go v0.3.1-0.20230524072835-b03edb47a905
 	github.com/hyperledger/fabric-sdk-go v1.0.1-0.20220124135247-4f34271d9b0f
 	github.com/jinzhu/copier v0.3.5
 	github.com/jmoiron/sqlx v1.3.5
@@ -80,6 +80,7 @@ require (
 	github.com/Microsoft/go-winio v0.6.1 // indirect
 	github.com/Microsoft/hcsshim v0.11.4 // indirect
 	github.com/Shopify/sarama v1.29.1 // indirect
+	github.com/SmartBFT-Go/consensus v0.3.0
 	github.com/VividCortex/gohistogram v1.0.0 // indirect
 	github.com/asaskevich/govalidator v0.0.0-20200428143746-21a406dcc535 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
@@ -238,4 +239,7 @@ require (
 //	github.com/docker/docker => github.com/docker/docker v20.10.17+incompatible
 //replace github.com/go-kit/kit => github.com/go-kit/kit v0.8.0
 
-replace github.com/hyperledger/fabric-sdk-go => github.com/kfsoftware/fabric-sdk-go v0.0.0-20240114221414-98466038585d
+replace (
+	github.com/hyperledger/fabric-config => github.com/kfsoftware/fabric-config v0.0.0-20240118175815-ef1a1564900a
+	github.com/hyperledger/fabric-sdk-go => github.com/kfsoftware/fabric-sdk-go v0.0.0-20240114221414-98466038585d
+)

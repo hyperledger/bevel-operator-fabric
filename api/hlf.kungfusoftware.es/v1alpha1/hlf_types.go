@@ -19,6 +19,7 @@ package v1alpha1
 import (
 	"fmt"
 
+	sb "github.com/hyperledger/fabric-protos-go/orderer/smartbft"
 	"github.com/kfsoftware/hlf-operator/pkg/status"
 	"k8s.io/api/networking/v1beta1"
 	kubeclock "k8s.io/utils/clock"
@@ -2375,7 +2376,7 @@ type FabricMainChannelApplicationConfig struct {
 type FabricMainChannelOrdererConfig struct {
 	// OrdererType of the consensus, default "etcdraft"
 	// +kubebuilder:default:="etcdraft"
-	OrdererType string `json:"ordererType"`
+	OrdererType OrdererConsensusType `json:"ordererType"`
 	// Capabilities of the channel
 	// +kubebuilder:default:={"V2_0"}
 	Capabilities []string `json:"capabilities"`
@@ -2398,8 +2399,37 @@ type FabricMainChannelOrdererConfig struct {
 	// +kubebuilder:validation:Optional
 	// +optional
 	EtcdRaft *FabricMainChannelEtcdRaft `json:"etcdRaft"`
+	// +nullable
+	// +kubebuilder:validation:Optional
+	// +optional
+	SmartBFT *FabricMainChannelSmartBFT `json:"smartBFT"`
+	// +nullable
+	// +kubebuilder:validation:Optional
+	// +optional
+	// +kubebuilder:validation:Default={}
+	ConsenterMapping []FabricMainChannelConsenterItem `json:"consenterMapping"`
 }
 
+type FabricMainChannelSmartBFT struct {
+	RequestBatchMaxCount      uint64              `json:"request_batch_max_count,omitempty"`
+	RequestBatchMaxBytes      uint64              `json:"request_batch_max_bytes,omitempty"`
+	RequestBatchMaxInterval   string              `json:"request_batch_max_interval,omitempty"`
+	IncomingMessageBufferSize uint64              `json:"incoming_message_buffer_size,omitempty"`
+	RequestPoolSize           uint64              `json:"request_pool_size,omitempty"`
+	RequestForwardTimeout     string              `json:"request_forward_timeout,omitempty"`
+	RequestComplainTimeout    string              `json:"request_complain_timeout,omitempty"`
+	RequestAutoRemoveTimeout  string              `json:"request_auto_remove_timeout,omitempty"`
+	RequestMaxBytes           uint64              `json:"request_max_bytes,omitempty"`
+	ViewChangeResendInterval  string              `json:"view_change_resend_interval,omitempty"`
+	ViewChangeTimeout         string              `json:"view_change_timeout,omitempty"`
+	LeaderHeartbeatTimeout    string              `json:"leader_heartbeat_timeout,omitempty"`
+	LeaderHeartbeatCount      uint64              `json:"leader_heartbeat_count,omitempty"`
+	CollectTimeout            string              `json:"collect_timeout,omitempty"`
+	SyncOnStart               bool                `json:"sync_on_start,omitempty"`
+	SpeedUpViewChange         bool                `json:"speed_up_view_change,omitempty"`
+	LeaderRotation            sb.Options_Rotation `json:"leader_rotation,omitempty"`
+	DecisionsPerLeader        uint64              `json:"decisions_per_leader,omitempty"`
+}
 type FabricMainChannelEtcdRaft struct {
 	// +nullable
 	// +kubebuilder:validation:Optional
@@ -2422,6 +2452,14 @@ type FabricMainChannelEtcdRaftOptions struct {
 	// +kubebuilder:default:=16777216
 	SnapshotIntervalSize uint32 `json:"snapshotIntervalSize"`
 }
+
+type OrdererConsensusType string
+
+const (
+	OrdererConsensusEtcdraft OrdererConsensusType = "etcdraft"
+	OrdererConsensusBFT      OrdererConsensusType = "BFT"
+)
+
 type FabricMainChannelConsensusState string
 
 const (
@@ -2460,6 +2498,15 @@ type FabricMainChannelIdentity struct {
 	SecretKey string `json:"secretKey"`
 }
 
+type FabricMainChannelConsenterItem struct {
+	Id            uint32 `json:"id,omitempty"`
+	Host          string `json:"host,omitempty"`
+	Port          uint32 `json:"port,omitempty"`
+	MspId         string `json:"msp_id,omitempty"`
+	Identity      string `json:"identity,omitempty"`
+	ClientTlsCert string `json:"client_tls_cert,omitempty"`
+	ServerTlsCert string `json:"server_tls_cert,omitempty"`
+}
 type FabricMainChannelConsenter struct {
 	// Orderer host of the consenter
 	Host string `json:"host"`

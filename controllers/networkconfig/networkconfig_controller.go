@@ -5,6 +5,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"text/template"
+	"time"
+
 	"github.com/Masterminds/sprig/v3"
 	"github.com/go-logr/logr"
 	hlfv1alpha1 "github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
@@ -23,8 +26,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-	"text/template"
-	"time"
 )
 
 // FabricNetworkConfigReconciler reconciles a FabricNetworkConfig object
@@ -245,6 +246,7 @@ func (r *FabricNetworkConfigReconciler) addFinalizer(reqLogger logr.Logger, m *h
 // +kubebuilder:rbac:groups=hlf.kungfusoftware.es,resources=fabricnetworkconfigs,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=hlf.kungfusoftware.es,resources=fabricnetworkconfigs/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=hlf.kungfusoftware.es,resources=fabricnetworkconfigs/finalizers,verbs=get;update;patch
+
 func (r *FabricNetworkConfigReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	reqLogger := r.Log.WithValues("hlf", req.NamespacedName)
 	fabricNetworkConfig := &hlfv1alpha1.FabricNetworkConfig{}
