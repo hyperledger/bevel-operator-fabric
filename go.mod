@@ -240,6 +240,6 @@ require (
 //replace github.com/go-kit/kit => github.com/go-kit/kit v0.8.0
 
 replace (
-	github.com/hyperledger/fabric-config => github.com/kfsoftware/fabric-config v0.0.0-20240118175815-ef1a1564900a
+	github.com/hyperledger/fabric-config => github.com/kfsoftware/fabric-config v0.0.0-20240819184344-a0b16ca530c2
 	github.com/hyperledger/fabric-sdk-go => github.com/kfsoftware/fabric-sdk-go v0.0.0-20240114221414-98466038585d
 )

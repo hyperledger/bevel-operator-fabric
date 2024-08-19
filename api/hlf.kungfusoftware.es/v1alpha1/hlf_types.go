@@ -2411,24 +2411,96 @@ type FabricMainChannelOrdererConfig struct {
 }
 
 type FabricMainChannelSmartBFT struct {
-	RequestBatchMaxCount      uint64              `json:"request_batch_max_count,omitempty"`
-	RequestBatchMaxBytes      uint64              `json:"request_batch_max_bytes,omitempty"`
-	RequestBatchMaxInterval   string              `json:"request_batch_max_interval,omitempty"`
-	IncomingMessageBufferSize uint64              `json:"incoming_message_buffer_size,omitempty"`
-	RequestPoolSize           uint64              `json:"request_pool_size,omitempty"`
-	RequestForwardTimeout     string              `json:"request_forward_timeout,omitempty"`
-	RequestComplainTimeout    string              `json:"request_complain_timeout,omitempty"`
-	RequestAutoRemoveTimeout  string              `json:"request_auto_remove_timeout,omitempty"`
-	RequestMaxBytes           uint64              `json:"request_max_bytes,omitempty"`
-	ViewChangeResendInterval  string              `json:"view_change_resend_interval,omitempty"`
-	ViewChangeTimeout         string              `json:"view_change_timeout,omitempty"`
-	LeaderHeartbeatTimeout    string              `json:"leader_heartbeat_timeout,omitempty"`
-	LeaderHeartbeatCount      uint64              `json:"leader_heartbeat_count,omitempty"`
-	CollectTimeout            string              `json:"collect_timeout,omitempty"`
-	SyncOnStart               bool                `json:"sync_on_start,omitempty"`
-	SpeedUpViewChange         bool                `json:"speed_up_view_change,omitempty"`
-	LeaderRotation            sb.Options_Rotation `json:"leader_rotation,omitempty"`
-	DecisionsPerLeader        uint64              `json:"decisions_per_leader,omitempty"`
+	// +nullable
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default:=100
+	RequestBatchMaxCount uint64 `json:"request_batch_max_count,omitempty"`
+	// +nullable
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default:=10485760
+	RequestBatchMaxBytes uint64 `json:"request_batch_max_bytes,omitempty"`
+	// +nullable
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default:="50ms"
+	RequestBatchMaxInterval string `json:"request_batch_max_interval,omitempty"`
+	// +nullable
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default:=200
+	IncomingMessageBufferSize uint64 `json:"incoming_message_buffer_size,omitempty"`
+	// +nullable
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default:=400
+	RequestPoolSize uint64 `json:"request_pool_size,omitempty"`
+	// +nullable
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default:="2s"
+	RequestForwardTimeout string `json:"request_forward_timeout,omitempty"`
+	// +nullable
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default:="20s"
+	RequestComplainTimeout string `json:"request_complain_timeout,omitempty"`
+	// +nullable
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default:="3m"
+	RequestAutoRemoveTimeout string `json:"request_auto_remove_timeout,omitempty"`
+	// +nullable
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default:=10485760
+	RequestMaxBytes uint64 `json:"request_max_bytes,omitempty"`
+	// +nullable
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default:="5s"
+	ViewChangeResendInterval string `json:"view_change_resend_interval,omitempty"`
+	// +nullable
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default:="20s"
+	ViewChangeTimeout string `json:"view_change_timeout,omitempty"`
+	// +nullable
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default:="1m"
+	LeaderHeartbeatTimeout string `json:"leader_heartbeat_timeout,omitempty"`
+	// +nullable
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default:=10
+	LeaderHeartbeatCount uint64 `json:"leader_heartbeat_count,omitempty"`
+	// +nullable
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default:="1s"
+	CollectTimeout string `json:"collect_timeout,omitempty"`
+	// +nullable
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default:=false
+	SyncOnStart bool `json:"sync_on_start,omitempty"`
+	// +nullable
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default:=false
+	SpeedUpViewChange bool `json:"speed_up_view_change,omitempty"`
+	// +nullable
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default:=1
+	LeaderRotation sb.Options_Rotation `json:"leader_rotation,omitempty"`
+	// +nullable
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default:=3
+	DecisionsPerLeader uint64 `json:"decisions_per_leader,omitempty"`
 }
 type FabricMainChannelEtcdRaft struct {
 	// +nullable

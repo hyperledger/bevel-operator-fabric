@@ -911,6 +911,11 @@ func (r *FabricMainChannelReconciler) mapToConfigTX(channel *hlfv1alpha1.FabricM
 		etcdRaftOptions.MaxInflightBlocks = channel.Spec.ChannelConfig.Orderer.EtcdRaft.Options.MaxInflightBlocks
 		etcdRaftOptions.SnapshotIntervalSize = channel.Spec.ChannelConfig.Orderer.EtcdRaft.Options.SnapshotIntervalSize
 	}
+	if channel.Spec.ChannelConfig != nil &&
+		channel.Spec.ChannelConfig.Orderer != nil &&
+		channel.Spec.ChannelConfig.Orderer.OrdererType == orderer.ConsensusTypeBFT {
+
+	}
 	ordererAdminRule := "MAJORITY Admins"
 	if channel.Spec.AdminOrdererOrganizations != nil {
 		ordererAdminRule = "OR("
@@ -941,14 +946,19 @@ func (r *FabricMainChannelReconciler) mapToConfigTX(channel *hlfv1alpha1.FabricM
 		},
 	}
 
-	state := orderer.ConsensusStateNormal
+	var state orderer.ConsensusState
+	if channel.Spec.ChannelConfig.Orderer.State == hlfv1alpha1.ConsensusStateMaintenance {
+		state = orderer.ConsensusStateMaintenance
+	} else {
+		state = orderer.ConsensusStateNormal
+	}
 	ordererType := string(channel.Spec.ChannelConfig.Orderer.OrdererType)
 	var etcdRaft orderer.EtcdRaft
 	consenterMapping := []cb.Consenter{}
 	consenters := []orderer.Consenter{}
 	var smartBFTOptions *sb.Options
 	if channel.Spec.ChannelConfig.Orderer.OrdererType == hlfv1alpha1.OrdererConsensusBFT {
-		ordererType = string(hlfv1alpha1.OrdererConsensusBFT)
+		ordererType = string(orderer.ConsensusTypeBFT)
 		for _, consenterItem := range channel.Spec.ChannelConfig.Orderer.ConsenterMapping {
 			identityCert, err := utils.ParseX509Certificate([]byte(consenterItem.Identity))
 			if err != nil {
@@ -972,6 +982,8 @@ func (r *FabricMainChannelReconciler) mapToConfigTX(channel *hlfv1alpha1.FabricM
 				ServerTlsCert: utils.EncodeX509Certificate(serverTLSCert),
 			})
 		}
+		//
+
 		smartBFTOptions = &sb.Options{
 			RequestBatchMaxCount:      channel.Spec.ChannelConfig.Orderer.SmartBFT.RequestBatchMaxCount,
 			RequestBatchMaxBytes:      channel.Spec.ChannelConfig.Orderer.SmartBFT.RequestBatchMaxBytes,
@@ -993,6 +1005,7 @@ func (r *FabricMainChannelReconciler) mapToConfigTX(channel *hlfv1alpha1.FabricM
 			DecisionsPerLeader:        channel.Spec.ChannelConfig.Orderer.SmartBFT.DecisionsPerLeader,
 		}
 	} else if channel.Spec.ChannelConfig.Orderer.OrdererType == hlfv1alpha1.OrdererConsensusEtcdraft {
+		ordererType = string(orderer.ConsensusTypeEtcdRaft)
 		for _, consenter := range channel.Spec.Consenters {
 			tlsCert, err := utils.ParseX509Certificate([]byte(consenter.TLSCert))
 			if err != nil {
@@ -1015,7 +1028,8 @@ func (r *FabricMainChannelReconciler) mapToConfigTX(channel *hlfv1alpha1.FabricM
 	} else {
 		return configtx.Channel{}, fmt.Errorf("orderer type %s not supported", ordererType)
 	}
-
+	log.Infof("Orderer type: %s", ordererType)
+	log.Infof("Consenter mapping: %v", consenterMapping)
 	ordConfigtx := configtx.Orderer{
 		OrdererType:      ordererType,
 		Organizations:    ordererOrgs,
@@ -1389,7 +1403,11 @@ func updateOrdererChannelConfigTx(currentConfigTX configtx.ConfigTx, newConfigTx
 	if err != nil {
 		return errors.Wrapf(err, "failed to get application configuration")
 	}
-
+	err = currentConfigTX.Orderer().SetConfiguration(newConfigTx.Orderer)
+	if err != nil {
+		return errors.Wrapf(err, "failed to set orderer configuration")
+	}
+	log.Infof("updateOrdererChannelConfigTx: Orderer type: %s", ord.OrdererType)
 	// update
 	if ord.OrdererType == "BFT" {
 		// update policies but blockValidation
@@ -1504,37 +1522,54 @@ func updateOrdererChannelConfigTx(currentConfigTX configtx.ConfigTx, newConfigTx
 
 		}
 	}
-	for _, consenter := range ord.EtcdRaft.Consenters {
-		deleted := true
-		for _, newConsenter := range newConfigTx.Orderer.EtcdRaft.Consenters {
-			if newConsenter.Address.Host == consenter.Address.Host && newConsenter.Address.Port == consenter.Address.Port {
-				deleted = false
-				break
-			}
-		}
-		if deleted {
-			log.Infof("Removing consenter %s:%d", consenter.Address.Host, consenter.Address.Port)
-			err = currentConfigTX.Orderer().RemoveConsenter(consenter)
-			if err != nil {
-				return errors.Wrapf(err, "failed to remove consenter %s:%d", consenter.Address.Host, consenter.Address.Port)
-			}
-		}
-	}
-	for _, newConsenter := range newConfigTx.Orderer.EtcdRaft.Consenters {
-		found := false
+
+	if newConfigTx.Orderer.OrdererType == orderer.ConsensusTypeEtcdRaft {
 		for _, consenter := range ord.EtcdRaft.Consenters {
-			if newConsenter.Address.Host == consenter.Address.Host && newConsenter.Address.Port == consenter.Address.Port {
-				found = true
-				break
+			deleted := true
+			for _, newConsenter := range newConfigTx.Orderer.EtcdRaft.Consenters {
+				if newConsenter.Address.Host == consenter.Address.Host && newConsenter.Address.Port == consenter.Address.Port {
+					deleted = false
+					break
+				}
+			}
+			if deleted {
+				log.Infof("Removing consenter %s:%d", consenter.Address.Host, consenter.Address.Port)
+				err = currentConfigTX.Orderer().RemoveConsenter(consenter)
+				if err != nil {
+					return errors.Wrapf(err, "failed to remove consenter %s:%d", consenter.Address.Host, consenter.Address.Port)
+				}
 			}
 		}
-		if !found {
-			log.Infof("Adding consenter %s:%d", newConsenter.Address.Host, newConsenter.Address.Port)
-			err = currentConfigTX.Orderer().AddConsenter(newConsenter)
-			if err != nil {
-				return errors.Wrapf(err, "failed to add consenter %s:%d", newConsenter.Address.Host, newConsenter.Address.Port)
+		for _, newConsenter := range newConfigTx.Orderer.EtcdRaft.Consenters {
+			found := false
+			for _, consenter := range ord.EtcdRaft.Consenters {
+				if newConsenter.Address.Host == consenter.Address.Host && newConsenter.Address.Port == consenter.Address.Port {
+					found = true
+					break
+				}
+			}
+			if !found {
+				log.Infof("Adding consenter %s:%d", newConsenter.Address.Host, newConsenter.Address.Port)
+				err = currentConfigTX.Orderer().AddConsenter(newConsenter)
+				if err != nil {
+					return errors.Wrapf(err, "failed to add consenter %s:%d", newConsenter.Address.Host, newConsenter.Address.Port)
+				}
 			}
 		}
+	} else if newConfigTx.Orderer.OrdererType == orderer.ConsensusTypeBFT {
+		var consenterMapping []*cb.Consenter
+		for _, consenter := range newConfigTx.Orderer.ConsenterMapping {
+			consenterMapping = append(consenterMapping, &cb.Consenter{
+				Host:          consenter.Host,
+				Port:          consenter.Port,
+				Id:            consenter.Id,
+				MspId:         consenter.MspId,
+				Identity:      consenter.Identity,
+				ClientTlsCert: consenter.ClientTlsCert,
+				ServerTlsCert: consenter.ServerTlsCert,
+			})
+		}
+		currentConfigTX.Orderer().SetConsenterMapping(consenterMapping)
 	}
 
 	err = currentConfigTX.Orderer().BatchSize().SetMaxMessageCount(

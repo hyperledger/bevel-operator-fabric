@@ -42,6 +42,7 @@ const sidebars: SidebarsConfig = {
 			"chaincode-deployment/getting-started",
 			"chaincode-deployment/external-chaincode-as-a-service",
 			"chaincode-deployment/k8s-builder",
+			"chaincode-deployment/install-crd",
 		],
 		"Channel management": [
 			"channel-management/getting-started",

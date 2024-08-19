@@ -60,7 +60,7 @@ This workshop provides an in-depth, hands-on discussion and demonstration of usi
 
 |                                                                               |                                                                                                                                                                                                                                                                                                                     |
 |-------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| ![galagames logo](https://avatars.githubusercontent.com/u/135145372?s=200&v=4) | Gala Games is a blockchain gaming platform that empowers players to earn cryptocurrencies and NFTs through gameplay. Founded in 2018 by Eric Schiermeyer, co-founder of Zynga, it aims to create a new type of gaming experience. The platform offers limited edition NFTs and allows players to earn Gala tokens s |
+| ![galagames logo](https://avatars.githubusercontent.com/u/135145372?s=200&v=4) | Gala Games is a blockchain gaming platform that empowers players to earn cryptocurrencies and NFTs through gameplay. Founded in 2018 by Eric Schiermeyer, co-founder of Zynga, it aims to create a new type of gaming experience. The platform offers limited edition NFTs and allows players to earn Gala tokens |
 | ![kfs logo](https://avatars.githubusercontent.com/u/74511895?s=200&v=4)       | If you want to design and deploy a secure Blockchain network based on the latest version of Hyperledger Fabric, feel free to contact dviejo@kungfusoftware.es or visit [https://kfs.es/blockchain](https://kfs.es/blockchain)                                                                                       |
 
 ## Getting started
@@ -327,10 +327,6 @@ kubectl hlf peer create --statedb=leveldb --image=$PEER_IMAGE --version=$PEER_VE
         --hosts=peer0-org1.localho.st --istio-port=443
 
 
-kubectl hlf peer create --statedb=leveldb --image=$PEER_IMAGE --version=$PEER_VERSION --storage-class=$SC_NAME --enroll-id=peer --mspid=Org1MSP \
-        --enroll-pw=peerpw --capacity=5Gi --name=org1-peer1 --ca-name=org1-ca.default \
-        --hosts=peer1-org1.localho.st --istio-port=443
-
 kubectl wait --timeout=180s --for=condition=Running fabricpeers.hlf.kungfusoftware.es --all
 ```
 
@@ -338,7 +334,50 @@ Check that the peer is deployed and works:
 
 ```bash
 openssl s_client -connect peer0-org1.localho.st:443
-openssl s_client -connect peer1-org1.localho.st:443
+```
+
+
+## Deploy Org2
+
+### Deploy a certificate authority
+
+```bash
+kubectl hlf ca create  --image=$CA_IMAGE --version=$CA_VERSION --storage-class=$SC_NAME --capacity=1Gi --name=org2-ca \
+    --enroll-id=enroll --enroll-pw=enrollpw --hosts=org2-ca.localho.st --istio-port=443
+
+kubectl wait --timeout=180s --for=condition=Running fabriccas.hlf.kungfusoftware.es --all
+```
+
+Check that the certification authority is deployed and works:
+
+```bash
+curl -k https://org2-ca.localho.st:443/cainfo
+```
+
+Register a user in the certification authority of the peer organization (Org2MSP)
+
+```bash
+# register user in CA for peers
+kubectl hlf ca register --name=org2-ca --user=peer --secret=peerpw --type=peer \
+ --enroll-id enroll --enroll-secret=enrollpw --mspid Org2MSP
+
+```
+
+### Deploy a peer
+
+```bash
+kubectl hlf peer create --statedb=leveldb --image=$PEER_IMAGE --version=$PEER_VERSION --storage-class=$SC_NAME --enroll-id=peer --mspid=Org2MSP \
+        --enroll-pw=peerpw --capacity=5Gi --name=org2-peer0 --ca-name=org2-ca.default \
+        --hosts=peer0-org2.localho.st --istio-port=443
+
+
+kubectl wait --timeout=180s --for=condition=Running fabricpeers.hlf.kungfusoftware.es --all
+```
+
+Check that the peer is deployed and works:
+
+```bash
+openssl s_client -connect peer0-org2.localho.st:443
 ```
 
 ## Deploy an `Orderer` organization
@@ -376,6 +415,7 @@ kubectl hlf ca register --name=ord-ca --user=orderer --secret=ordererpw \
 ### Deploy orderer
 
 ```bash
+
 kubectl hlf ordnode create --image=$ORDERER_IMAGE --version=$ORDERER_VERSION \
     --storage-class=$SC_NAME --enroll-id=orderer --mspid=OrdererMSP \
     --enroll-pw=ordererpw --capacity=2Gi --name=ord-node1 --ca-name=ord-ca.default \
@@ -394,6 +434,12 @@ kubectl hlf ordnode create --image=$ORDERER_IMAGE --version=$ORDERER_VERSION \
     --hosts=orderer2-ord.localho.st --admin-hosts=admin-orderer2-ord.localho.st --istio-port=443
 
 
+kubectl hlf ordnode create --image=$ORDERER_IMAGE --version=$ORDERER_VERSION \
+    --storage-class=$SC_NAME --enroll-id=orderer --mspid=OrdererMSP \
+    --enroll-pw=ordererpw --capacity=2Gi --name=ord-node4 --ca-name=ord-ca.default \
+    --hosts=orderer3-ord.localho.st --admin-hosts=admin-orderer3-ord.localho.st --istio-port=443
+
+
 
 kubectl wait --timeout=180s --for=condition=Running fabricorderernodes.hlf.kungfusoftware.es --all
 ```
@@ -406,6 +452,9 @@ kubectl get pods
 
 ```bash
 openssl s_client -connect orderer0-ord.localho.st:443
+openssl s_client -connect orderer1-ord.localho.st:443
+openssl s_client -connect orderer2-ord.localho.st:443
+openssl s_client -connect orderer3-ord.localho.st:443
 ```
 
 
@@ -466,15 +515,36 @@ kubectl hlf identity create --name org1-admin --namespace default \
 
 ```
 
+
+### Register and enrolling Org2MSP identity
+
+```bash
+# register
+kubectl hlf ca register --name=org2-ca --namespace=default --user=admin --secret=adminpw \
+    --type=admin --enroll-id enroll --enroll-secret=enrollpw --mspid=Org2MSP
+
+# enroll
+kubectl hlf ca enroll --name=org2-ca --namespace=default \
+    --user=admin --secret=adminpw --mspid Org2MSP \
+    --ca-name ca  --output org2msp.yaml
+
+# enroll
+kubectl hlf identity create --name org2-admin --namespace default \
+    --ca-name org2-ca --ca-namespace default \
+    --ca ca --mspid Org2MSP --enroll-id admin --enroll-secret adminpw
+
+
+```
+
 ### Create the secret
 
 ```bash
-
 kubectl create secret generic wallet --namespace=default \
         --from-file=org1msp.yaml=$PWD/org1msp.yaml \
         --from-file=org2msp.yaml=$PWD/org2msp.yaml \
         --from-file=orderermsp.yaml=$PWD/orderermsp.yaml \
         --from-file=orderermspsign.yaml=$PWD/orderermspsign.yaml
+
 ```
 
 ### Create main channel
@@ -491,6 +561,7 @@ export ORDERER_TLS_CERT=$(kubectl get fabriccas ord-ca -o=jsonpath='{.status.tls
 export ORDERER0_TLS_CERT=$(kubectl get fabricorderernodes ord-node1 -o=jsonpath='{.status.tlsCert}' | sed -e "s/^/${IDENT_8}/" )
 export ORDERER1_TLS_CERT=$(kubectl get fabricorderernodes ord-node2 -o=jsonpath='{.status.tlsCert}' | sed -e "s/^/${IDENT_8}/" )
 export ORDERER2_TLS_CERT=$(kubectl get fabricorderernodes ord-node3 -o=jsonpath='{.status.tlsCert}' | sed -e "s/^/${IDENT_8}/" )
+export ORDERER3_TLS_CERT=$(kubectl get fabricorderernodes ord-node4 -o=jsonpath='{.status.tlsCert}' | sed -e "s/^/${IDENT_8}/" )
 
 kubectl apply -f - <<EOF
 apiVersion: hlf.kungfusoftware.es/v1alpha1
@@ -508,6 +579,7 @@ spec:
       acls: null
       capabilities:
         - V2_0
+        - V2_5
       policies: null
     capabilities:
       - V2_0
@@ -571,11 +643,14 @@ spec:
           port: 7053
         - host: ord-node3.default
           port: 7053
+        - host: ord-node4.default
+          port: 7053
       mspID: OrdererMSP
       ordererEndpoints:
         - orderer0-ord.localho.st:443
         - orderer1-ord.localho.st:443
         - orderer2-ord.localho.st:443
+        - orderer3-ord.localho.st:443
       orderersToJoin: []
   orderers:
     - host: orderer0-ord.localho.st
@@ -590,6 +665,10 @@ ${ORDERER1_TLS_CERT}
       port: 443
       tlsCert: |-
 ${ORDERER2_TLS_CERT}
+    - host: orderer3-ord.localho.st
+      port: 443
+      tlsCert: |-
+${ORDERER3_TLS_CERT}
 
 EOF
 
@@ -624,6 +703,42 @@ ${ORDERER0_TLS_CERT}
       url: grpcs://ord-node1.default:7050
   peersToJoin:
     - name: org1-peer0
+      namespace: default
+EOF
+
+
+```
+
+
+## Join peer to the channel
+
+```bash
+
+export IDENT_8=$(printf "%8s" "")
+export ORDERER0_TLS_CERT=$(kubectl get fabricorderernodes ord-node1 -o=jsonpath='{.status.tlsCert}' | sed -e "s/^/${IDENT_8}/" )
+
+kubectl apply -f - <<EOF
+apiVersion: hlf.kungfusoftware.es/v1alpha1
+kind: FabricFollowerChannel
+metadata:
+  name: demo-org2msp
+spec:
+  anchorPeers:
+    - host: peer0-org2.localho.st
+      port: 443
+  hlfIdentity:
+    secretKey: org2msp.yaml
+    secretName: wallet
+    secretNamespace: default
+  mspId: Org2MSP
+  name: demo
+  externalPeersToJoin: []
+  orderers:
+    - certificate: |
+${ORDERER0_TLS_CERT}
+      url: grpcs://ord-node1.default:7050
+  peersToJoin:
+    - name: org2-peer0
       namespace: default
 EOF
 

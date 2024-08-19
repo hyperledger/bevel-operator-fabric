@@ -248,48 +248,84 @@ spec:
                         nullable: true
                         properties:
                           collect_timeout:
+                            default: 1s
+                            nullable: true
                             type: string
                           decisions_per_leader:
+                            default: 3
                             format: int64
+                            nullable: true
                             type: integer
                           incoming_message_buffer_size:
+                            default: 200
                             format: int64
+                            nullable: true
                             type: integer
                           leader_heartbeat_count:
+                            default: 10
                             format: int64
+                            nullable: true
                             type: integer
                           leader_heartbeat_timeout:
+                            default: 1m
+                            nullable: true
                             type: string
                           leader_rotation:
+                            default: 1
                             format: int32
+                            nullable: true
                             type: integer
                           request_auto_remove_timeout:
+                            default: 3m
+                            nullable: true
                             type: string
                           request_batch_max_bytes:
+                            default: 10485760
                             format: int64
+                            nullable: true
                             type: integer
                           request_batch_max_count:
+                            default: 100
                             format: int64
+                            nullable: true
                             type: integer
                           request_batch_max_interval:
+                            default: 50ms
+                            nullable: true
                             type: string
                           request_complain_timeout:
+                            default: 20s
+                            nullable: true
                             type: string
                           request_forward_timeout:
+                            default: 2s
+                            nullable: true
                             type: string
                           request_max_bytes:
+                            default: 10485760
                             format: int64
+                            nullable: true
                             type: integer
                           request_pool_size:
+                            default: 400
                             format: int64
+                            nullable: true
                             type: integer
                           speed_up_view_change:
+                            default: false
+                            nullable: true
                             type: boolean
                           sync_on_start:
+                            default: false
+                            nullable: true
                             type: boolean
                           view_change_resend_interval:
+                            default: 5s
+                            nullable: true
                             type: string
                           view_change_timeout:
+                            default: 20s
+                            nullable: true
                             type: string
                         type: object
                       state:

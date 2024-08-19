@@ -675,6 +675,8 @@ github.com/karrick/godirwalk v1.16.1 h1:DynhcF+bztK8gooS0+NDJFrdNZjJ3gzVzC545UNA
 github.com/karrick/godirwalk v1.16.1/go.mod h1:j4mkqPuvaLI8mp1DroR3P6ad7cyYd4c1qeJ3RV7ULlk=
 github.com/kfsoftware/fabric-config v0.0.0-20240118175815-ef1a1564900a h1:4o9kHzPdSU4Jzj8GpDYxmy3xZ45GEM0DKLtP862gf2c=
 github.com/kfsoftware/fabric-config v0.0.0-20240118175815-ef1a1564900a/go.mod h1:1ZfjDrsuMoM4IPKezQgTByy2vXUj8bgTXaOXaGXK5O4=
+github.com/kfsoftware/fabric-config v0.0.0-20240819184344-a0b16ca530c2 h1:6wb4m/bz/rjQwAwpsOlRtWxwrPwmODVQFh7W9HJiXhc=
+github.com/kfsoftware/fabric-config v0.0.0-20240819184344-a0b16ca530c2/go.mod h1:1ZfjDrsuMoM4IPKezQgTByy2vXUj8bgTXaOXaGXK5O4=
 github.com/kfsoftware/fabric-sdk-go v0.0.0-20240114221414-98466038585d h1:HcMV8Lve3QkZUIWYHP+rVIR4xtTdDPooj7Id0IdBj0o=
 github.com/kfsoftware/fabric-sdk-go v0.0.0-20240114221414-98466038585d/go.mod h1:JRplpKBeAvXjsBhOCCM/KvMRUbdDyhsAh80qbXzKc10=
 github.com/kisielk/errcheck v1.1.0/go.mod h1:EZBBE59ingxPouuu3KfxchcWSUPOHkagtvWXihfKN4Q=
