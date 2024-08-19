@@ -1,0 +1,22 @@
+kind: FabricChaincodeInstall
+apiVersion: hlf.kungfusoftware.es/v1alpha1
+metadata:
+    name: example-chaincode
+    namespace: default
+spec:
+    peers:
+        - name: org1-peer0
+          namespace: default
+    externalPeers: []
+    mspID: Org1MSP
+    hlfIdentity:
+        secretName: org1-admin
+        secretNamespace: default
+        secretKey: user.yaml
+    chaincodePackage:
+        name: test
+        address: 'example-chaincode.default:9999'
+        type: 'ccaas'
+        dialTimeout: "10s"
+        tls:
+            required: false

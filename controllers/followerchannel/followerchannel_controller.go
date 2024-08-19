@@ -48,21 +48,21 @@ type FabricFollowerChannelReconciler struct {
 	Config *rest.Config
 }
 
-const mainChannelFinalizer = "finalizer.mainChannel.hlf.kungfusoftware.es"
+const followerChannelFinalizer = "finalizer.followerChannel.hlf.kungfusoftware.es"
 
-func (r *FabricFollowerChannelReconciler) finalizeMainChannel(reqLogger logr.Logger, m *hlfv1alpha1.FabricFollowerChannel) error {
+func (r *FabricFollowerChannelReconciler) finalizeFollowerChannel(reqLogger logr.Logger, m *hlfv1alpha1.FabricFollowerChannel) error {
 	ns := m.Namespace
 	if ns == "" {
 		ns = "default"
 	}
-	reqLogger.Info("Successfully finalized mainChannel")
+	reqLogger.Info("Successfully finalized followerChannel")
 
 	return nil
 }
 
 func (r *FabricFollowerChannelReconciler) addFinalizer(reqLogger logr.Logger, m *hlfv1alpha1.FabricFollowerChannel) error {
 	reqLogger.Info("Adding Finalizer for the MainChannel")
-	controllerutil.AddFinalizer(m, mainChannelFinalizer)
+	controllerutil.AddFinalizer(m, followerChannelFinalizer)
 
 	// Update CR
 	err := r.Update(context.TODO(), m)
@@ -92,11 +92,11 @@ func (r *FabricFollowerChannelReconciler) Reconcile(ctx context.Context, req ctr
 	}
 	markedToBeDeleted := fabricFollowerChannel.GetDeletionTimestamp() != nil
 	if markedToBeDeleted {
-		if utils.Contains(fabricFollowerChannel.GetFinalizers(), mainChannelFinalizer) {
-			if err := r.finalizeMainChannel(reqLogger, fabricFollowerChannel); err != nil {
+		if utils.Contains(fabricFollowerChannel.GetFinalizers(), followerChannelFinalizer) {
+			if err := r.finalizeFollowerChannel(reqLogger, fabricFollowerChannel); err != nil {
 				return ctrl.Result{}, err
 			}
-			controllerutil.RemoveFinalizer(fabricFollowerChannel, mainChannelFinalizer)
+			controllerutil.RemoveFinalizer(fabricFollowerChannel, followerChannelFinalizer)
 			err := r.Update(ctx, fabricFollowerChannel)
 			if err != nil {
 				return ctrl.Result{}, err
@@ -104,7 +104,7 @@ func (r *FabricFollowerChannelReconciler) Reconcile(ctx context.Context, req ctr
 		}
 		return ctrl.Result{}, nil
 	}
-	if !utils.Contains(fabricFollowerChannel.GetFinalizers(), mainChannelFinalizer) {
+	if !utils.Contains(fabricFollowerChannel.GetFinalizers(), followerChannelFinalizer) {
 		if err := r.addFinalizer(reqLogger, fabricFollowerChannel); err != nil {
 			return ctrl.Result{}, err
 		}
@@ -122,14 +122,15 @@ func (r *FabricFollowerChannelReconciler) Reconcile(ctx context.Context, req ctr
 
 	// join peers
 	mspID := fabricFollowerChannel.Spec.MSPID
-
+	var networkConfig string
 	ncResponse, err := nc.GenerateNetworkConfigForFollower(fabricFollowerChannel, clientSet, hlfClientSet, mspID)
 	if err != nil {
 		r.setConditionStatus(ctx, fabricFollowerChannel, hlfv1alpha1.FailedStatus, false, errors.Wrapf(err, "failed to generate network config"), false)
 		return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricFollowerChannel)
 	}
-	log.Infof("Generated network config: %s", ncResponse.NetworkConfig)
-	configBackend := config.FromRaw([]byte(ncResponse.NetworkConfig), "yaml")
+	networkConfig = ncResponse.NetworkConfig
+	log.Infof("Generated network config: %s", networkConfig)
+	configBackend := config.FromRaw([]byte(networkConfig), "yaml")
 	sdk, err := fabsdk.New(configBackend)
 	if err != nil {
 		r.setConditionStatus(ctx, fabricFollowerChannel, hlfv1alpha1.FailedStatus, false, err, false)
@@ -386,9 +387,12 @@ func (r *FabricFollowerChannelReconciler) updateCRStatusOrFailReconcile(ctx cont
 		log.Error(err, fmt.Sprintf("%v failed to update the application status", ErrClientK8s))
 		return reconcile.Result{}, err
 	}
-	return reconcile.Result{
-		RequeueAfter: 1 * time.Minute,
-	}, nil
+	if p.Status.Status == hlfv1alpha1.FailedStatus {
+		return reconcile.Result{
+			RequeueAfter: 1 * time.Minute,
+		}, nil
+	}
+	return reconcile.Result{}, nil
 }
 
 func (r *FabricFollowerChannelReconciler) setConditionStatus(ctx context.Context, p *hlfv1alpha1.FabricFollowerChannel, conditionType hlfv1alpha1.DeploymentStatus, statusFlag bool, err error, statusUnknown bool) (update bool) {

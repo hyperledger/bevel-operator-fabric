@@ -81,6 +81,7 @@ func (c *removeChannelCmd) run() error {
 		return err
 	}
 	osnUrl := fmt.Sprintf("https://%s:%d", ordererHostName, adminPort)
+	log.Infof("Removing channel %s from %s", c.channel, osnUrl)
 	chResponse, err := osnadmin.Remove(osnUrl, c.channel, certPool, tlsClientCert)
 	if err != nil {
 		return err

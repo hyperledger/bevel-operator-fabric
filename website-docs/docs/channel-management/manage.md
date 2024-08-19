@@ -6,7 +6,7 @@ title: Manage the channel
 ## Add peer organization to the channel
 
 
-You can add more organizations by updating the `peerOrganizations` or `externalPeerOrganizations` property in the [`FabricMainChannel`](../reference/reference.md#hlf.kungfusoftware.es/v1alpha1.FabricMainChannel) CRD.
+You can add more organizations by updating the `peerOrganizations` or `externalPeerOrganizations` property in the `FabricMainChannel` CRD.
 
 If the organization is not in the cluster, you need to add the organization to the `externalPeerOrganizations` property, with the `mspID`, `signRootCert` and `tlsRootCert`.
 
@@ -33,7 +33,7 @@ If the organization is in the cluster, you need to add the organization to the `
 ## Add orderer organization to the channel
 
 
-You can add more organizations by updating the `peerOrganizations` or `externalPeerOrganizations` property in the [`FabricMainChannel`](../reference/reference.md#hlf.kungfusoftware.es/v1alpha1.FabricMainChannel) CRD.
+You can add more organizations by updating the `peerOrganizations` or `externalPeerOrganizations` property in the `FabricMainChannel` CRD.
 
 If the organization is not in the cluster, you need to add the organization to the `externalPeerOrganizations` property, with the `mspID`, `signRootCert` and `tlsRootCert`.
 

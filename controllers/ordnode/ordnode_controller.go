@@ -253,7 +253,7 @@ func (r *FabricOrdererNodeReconciler) Reconcile(ctx context.Context, req ctrl.Re
 				r.setConditionStatus(ctx, fabricOrdererNode, hlfv1alpha1.FailedStatus, false, err, false)
 				return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricOrdererNode)
 			}
-			requeueAfter = time.Minute * 10
+			requeueAfter = time.Minute * 60
 		}
 		s, err := GetOrdererState(cfg, r.Config, releaseName, ns, fabricOrdererNode)
 		if err != nil {
@@ -283,6 +283,7 @@ func (r *FabricOrdererNodeReconciler) Reconcile(ctx context.Context, req ctrl.Re
 				return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricOrdererNode)
 			}
 		}
+		reqLogger.Info(fmt.Sprintf("Peer status %s  requeueAfter %v", string(s.Status), requeueAfter))
 		switch s.Status {
 		case hlfv1alpha1.PendingStatus:
 			log.Infof("Orderer %s in pending status", fabricOrdererNode.Name)

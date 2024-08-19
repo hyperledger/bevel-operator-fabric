@@ -22,7 +22,11 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/kfsoftware/hlf-operator/controllers/chaincode"
+	"github.com/kfsoftware/hlf-operator/controllers/chaincode/approve"
+	"github.com/kfsoftware/hlf-operator/controllers/chaincode/commit"
+	"github.com/kfsoftware/hlf-operator/controllers/chaincode/deploy"
+	"github.com/kfsoftware/hlf-operator/controllers/chaincode/install"
+
 	"github.com/kfsoftware/hlf-operator/controllers/console"
 	"github.com/kfsoftware/hlf-operator/controllers/followerchannel"
 	"github.com/kfsoftware/hlf-operator/controllers/hlfmetrics"
@@ -93,6 +97,8 @@ func main() {
 		"Enable leader election for controller manager. "+
 			"Enabling this will ensure there is only one active controller manager.")
 	flag.Parse()
+	log.SetFormatter(&log.JSONFormatter{})
+
 	log.Infof("Auto renew peer certificates enabled: %t", autoRenewCertificatesPeerEnabled)
 	log.Infof("Auto renew orderer certificates enabled: %t", autoRenewCertificatesOrdererEnabled)
 	log.Infof("Auto renew identity certificates enabled: %t", autoRenewCertificatesIdentityEnabled)
@@ -103,7 +109,10 @@ func main() {
 	// to initialize a Client struct
 	// which implements Client interface
 
-	ctrl.SetLogger(zap.New(zap.UseDevMode(true)))
+	ctrl.SetLogger(zap.New(
+		zap.UseDevMode(true),
+		zap.JSONEncoder(),
+	))
 	kubeContext, exists := os.LookupEnv("KUBECONTEXT")
 	var restConfig *rest.Config
 	var err error
@@ -297,13 +306,43 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err = (&chaincode.FabricChaincodeReconciler{
+	if err = (&deploy.FabricChaincodeDeployReconciler{
 		Client: mgr.GetClient(),
 		Log:    ctrl.Log.WithName("controllers").WithName("FabricChaincode"),
 		Scheme: mgr.GetScheme(),
 		Config: mgr.GetConfig(),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "FabricNetworkConfig")
+		os.Exit(1)
+	}
+
+	if err = (&install.FabricChaincodeInstallReconciler{
+		Client: mgr.GetClient(),
+		Log:    ctrl.Log.WithName("controllers").WithName("FabricChaincodeInstall"),
+		Scheme: mgr.GetScheme(),
+		Config: mgr.GetConfig(),
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "FabricChaincodeInstall")
+		os.Exit(1)
+	}
+
+	if err = (&approve.FabricChaincodeApproveReconciler{
+		Client: mgr.GetClient(),
+		Log:    ctrl.Log.WithName("controllers").WithName("FabricChaincodeApprove"),
+		Scheme: mgr.GetScheme(),
+		Config: mgr.GetConfig(),
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "FabricChaincodeApprove")
+		os.Exit(1)
+	}
+
+	if err = (&commit.FabricChaincodeCommitReconciler{
+		Client: mgr.GetClient(),
+		Log:    ctrl.Log.WithName("controllers").WithName("FabricChaincodeCommit"),
+		Scheme: mgr.GetScheme(),
+		Config: mgr.GetConfig(),
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "FabricChaincodeCommit")
 		os.Exit(1)
 	}
 

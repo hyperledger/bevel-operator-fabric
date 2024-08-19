@@ -1,4 +1,9 @@
-module.exports = {
+import { themes as prismThemes } from 'prism-react-renderer';
+import type { Config } from '@docusaurus/types';
+import type * as Preset from '@docusaurus/preset-classic';
+
+
+const config: Config = {
   title: "Hyperledger Fabric Operator",
   tagline:
     "Make easier and more secure deployments of Hyperledger Fabric on Kubernetes",
@@ -9,7 +14,9 @@ module.exports = {
   favicon: "img/favicon.png",
   organizationName: "hyperledger", // Usually your GitHub org/user name.
   projectName: "bevel-operator-fabric", // Usually your repo name.
+
   themeConfig: {
+
     colorMode: {
       // "light" | "dark"
       defaultMode: "light",
@@ -23,25 +30,25 @@ module.exports = {
       respectPrefersColorScheme: false,
 
       // Dark/light switch icon options
-      switchConfig: {
-        // Icon for the switch while in dark mode
-        darkIcon: "🌙",
+      // switchConfig: {
+      //   // Icon for the switch while in dark mode
+      //   darkIcon: "🌙",
 
-        // CSS to apply to dark icon,
-        // React inline style object
-        // see https://reactjs.org/docs/dom-elements.html#style
-        darkIconStyle: {
-          marginLeft: "2px",
-        },
+      //   // CSS to apply to dark icon,
+      //   // React inline style object
+      //   // see https://reactjs.org/docs/dom-elements.html#style
+      //   darkIconStyle: {
+      //     marginLeft: "2px",
+      //   },
 
-        // Unicode icons such as '\u2600' will work
-        // Unicode with 5 chars require brackets: '\u{1F602}'
-        lightIcon: "🌞",
+      //   // Unicode icons such as '\u2600' will work
+      //   // Unicode with 5 chars require brackets: '\u{1F602}'
+      //   lightIcon: "🌞",
 
-        lightIconStyle: {
-          marginLeft: "1px",
-        },
-      },
+      //   lightIconStyle: {
+      //     marginLeft: "1px",
+      //   },
+      // },
     },
     navbar: {
       title: "HLF Operator",
@@ -72,18 +79,6 @@ module.exports = {
             {
               label: "Introduction",
               to: "docs/",
-            },
-            {
-              label: "Certificate Authority",
-              to: "docs/ca/",
-            },
-            {
-              label: "Peer",
-              to: "docs/peer/",
-            },
-            {
-              label: "Ordering Service",
-              to: "docs/orderer/",
             },
             {
               label: "Kubectl Plugin",
@@ -117,6 +112,8 @@ module.exports = {
       copyright: `Copyright © ${new Date().getFullYear()} HLF Operator, Inc. Built with Docusaurus.`,
     },
   },
+  plugins: ["@orama/plugin-docusaurus-v3"],
+
   presets: [
     [
       "@docusaurus/preset-classic",
@@ -141,3 +138,5 @@ module.exports = {
     ],
   ],
 };
+
+export default config;

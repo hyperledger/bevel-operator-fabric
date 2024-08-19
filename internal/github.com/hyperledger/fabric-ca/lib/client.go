@@ -295,6 +295,22 @@ func (c *Client) Enroll(req *api.EnrollmentRequest) (*EnrollmentResponse, error)
 	return c.handleX509Enroll(req)
 }
 
+// Enroll enrolls a new identity
+// @param req The enrollment request
+func (c *Client) Revoke(req *api.EnrollmentRequest) (*EnrollmentResponse, error) {
+	log.Debugf("Enrolling %+v", req)
+
+	err := c.Init()
+	if err != nil {
+		return nil, err
+	}
+
+	if strings.ToLower(req.Type) == "idemix" {
+		return c.handleIdemixEnroll(req)
+	}
+	return c.handleX509Enroll(req)
+}
+
 // Convert from network to local CA information
 func (c *Client) net2LocalCAInfo(net *api.CAInfoResponseNet, local *GetCAInfoResponse) error {
 	caChain, err := util.B64Decode(net.CAChain)

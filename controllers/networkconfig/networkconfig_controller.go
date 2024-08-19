@@ -5,6 +5,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"text/template"
+	"time"
+
 	"github.com/Masterminds/sprig/v3"
 	"github.com/go-logr/logr"
 	hlfv1alpha1 "github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
@@ -23,8 +26,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-	"text/template"
-	"time"
 )
 
 // FabricNetworkConfigReconciler reconciles a FabricNetworkConfig object
@@ -245,6 +246,7 @@ func (r *FabricNetworkConfigReconciler) addFinalizer(reqLogger logr.Logger, m *h
 // +kubebuilder:rbac:groups=hlf.kungfusoftware.es,resources=fabricnetworkconfigs,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=hlf.kungfusoftware.es,resources=fabricnetworkconfigs/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=hlf.kungfusoftware.es,resources=fabricnetworkconfigs/finalizers,verbs=get;update;patch
+
 func (r *FabricNetworkConfigReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	reqLogger := r.Log.WithValues("hlf", req.NamespacedName)
 	fabricNetworkConfig := &hlfv1alpha1.FabricNetworkConfig{}
@@ -419,7 +421,7 @@ func (r *FabricNetworkConfigReconciler) Reconcile(ctx context.Context, req ctrl.
 		if filterByNS && !utils.Contains(fabricNetworkConfig.Spec.Namespaces, peer.Namespace) {
 			continue
 		}
-		if (filterByOrgs && utils.Contains(fabricNetworkConfig.Spec.Organizations, peer.MSPID)) || !filterByOrgs {
+		if (peer.Spec.Replicas > 0 && filterByOrgs && utils.Contains(fabricNetworkConfig.Spec.Organizations, peer.MSPID)) || !filterByOrgs {
 			peers = append(peers, peer)
 		}
 
@@ -432,7 +434,7 @@ func (r *FabricNetworkConfigReconciler) Reconcile(ctx context.Context, req ctrl.
 			var orgPeers []*helpers.ClusterPeer
 			for _, peer := range org.Peers {
 				for _, p := range peers {
-					if p.Object.Name == peer.Name && p.Object.Namespace == peer.Namespace {
+					if p.Object.Name == peer.Name && p.Object.Namespace == peer.Namespace && p.Spec.Replicas > 0 {
 						orgPeers = append(orgPeers, p)
 					} else {
 						// delete from peers
@@ -441,7 +443,7 @@ func (r *FabricNetworkConfigReconciler) Reconcile(ctx context.Context, req ctrl.
 			}
 			var restPeerOrgs []*helpers.ClusterPeer
 			for _, p := range peers {
-				if p.MSPID != mspID {
+				if p.MSPID != mspID && p.Spec.Replicas > 0 {
 					restPeerOrgs = append(restPeerOrgs, p)
 				}
 			}
@@ -524,7 +526,7 @@ func (r *FabricNetworkConfigReconciler) Reconcile(ctx context.Context, req ctrl.
 		return reconcile.Result{}, err
 	}
 	r.setConditionStatus(ctx, fabricNetworkConfig, hlfv1alpha1.RunningStatus, true, nil, false)
-	return r.updateCRStatusOrFailReconcileWithRequeue(ctx, r.Log, fabricNetworkConfig, 1*time.Minute)
+	return r.updateCRStatusOrFailReconcileWithRequeue(ctx, r.Log, fabricNetworkConfig, 120*time.Minute)
 }
 
 var (

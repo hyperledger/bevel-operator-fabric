@@ -303,7 +303,7 @@ func (r *FabricIdentityReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 		return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricIdentity)
 	}
 	return ctrl.Result{
-		RequeueAfter: 10 * 60 * time.Second,
+		RequeueAfter: 120 * time.Minute,
 	}, nil
 }
 

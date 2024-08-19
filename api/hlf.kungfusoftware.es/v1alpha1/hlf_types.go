@@ -18,6 +18,8 @@ package v1alpha1
 
 import (
 	"fmt"
+
+	sb "github.com/hyperledger/fabric-protos-go/orderer/smartbft"
 	"github.com/kfsoftware/hlf-operator/pkg/status"
 	"k8s.io/api/networking/v1beta1"
 	kubeclock "k8s.io/utils/clock"
@@ -1770,6 +1772,29 @@ type FabricChaincodeSpec struct {
 	// +nullable
 	// +kubebuilder:validation:Optional
 	// +optional
+	PodSecurityContext *corev1.PodSecurityContext `json:"podSecurityContext"`
+	// +nullable
+	// +kubebuilder:validation:Optional
+	// +optional
+	SecurityContext *corev1.SecurityContext `json:"securityContext"`
+	// +nullable
+	// +kubebuilder:validation:Optional
+	// +optional
+	// +kubebuilder:validation:Default=""
+	ServiceAccountName string `json:"serviceAccountName"`
+	// +nullable
+	// +kubebuilder:validation:Optional
+	// +optional
+	// +kubebuilder:validation:Default=false
+	EnableServiceLinks bool `json:"enableServiceLinks"`
+	// +nullable
+	// +kubebuilder:validation:Optional
+	// +optional
+	// +kubebuilder:validation:Default={}
+	NodeSelector map[string]string `json:"nodeSelector"`
+	// +nullable
+	// +kubebuilder:validation:Optional
+	// +optional
 	Credentials *TLS `json:"credentials"`
 
 	// +kubebuilder:validation:Default=1
@@ -1873,6 +1898,300 @@ type FabricChaincodeList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
 	Items           []FabricChaincode `json:"items"`
+}
+
+// FabricChaincodeInstallSpec defines the desired state of FabricChaincodeInstall
+type FabricChaincodeInstallSpec struct {
+	Peers            []FabricPeerInternalRef `json:"peers"`
+	ExternalPeers    []FabricPeerExternalRef `json:"externalPeers"`
+	MSPID            string                  `json:"mspID"`
+	HLFIdentity      HLFIdentity             `json:"hlfIdentity"`
+	ChaincodePackage ChaincodePackage        `json:"chaincodePackage"`
+}
+
+type ChaincodePackageTLS struct {
+	// +kubebuilder:validation:Default=false
+	Required bool `json:"required"`
+}
+
+type ChaincodePackage struct {
+	Name    string `json:"name"`
+	Address string `json:"address"`
+	Type    string `json:"type"`
+
+	// +optional
+	// +nullable
+	// +kubebuilder:validation:Default=10s
+	DialTimeout string `json:"dialTimeout"`
+	// +optional
+	// +nullable
+	TLS *ChaincodePackageTLS `json:"tls"`
+}
+
+type FabricPeerInternalRef struct {
+	Name      string `json:"name"`
+	Namespace string `json:"namespace"`
+}
+type FabricPeerExternalRef struct {
+	URL       string `json:"url"`
+	TLSCACert string `json:"tlsCACert"`
+}
+
+// FabricChaincodeInstallStatus defines the observed state of FabricChaincodeInstall
+type FabricChaincodeInstallStatus struct {
+	Conditions status.Conditions `json:"conditions"`
+	Message    string            `json:"message"`
+	// +optional
+	// +nullable
+	PackageID string `json:"packageID"`
+	// +optional
+	// +nullable
+	FailedPeers []FailedPeer `json:"failedPeers"`
+	// +optional
+	// +nullable
+	InstalledPeers []InstalledPeer `json:"installedPeers"`
+	// Status of the FabricChaincodeInstall
+	Status DeploymentStatus `json:"status"`
+}
+type FailedPeer struct {
+	Name   string `json:"name"`
+	Reason string `json:"reason"`
+}
+type InstalledPeer struct {
+	Name string `json:"name"`
+}
+
+// +genclient
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+// +k8s:defaulter-gen=true
+// +kubebuilder:subresource:status
+// +kubebuilder:resource:scope=Namespaced,shortName=fabricchaincodeinstall,singular=fabricchaincodeinstall
+// +kubebuilder:printcolumn:name="State",type="string",JSONPath=".status.status"
+// +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
+// +kubebuilder:object:root=true
+// +kubebuilder:subresource:status
+// +k8s:openapi-gen=true
+
+// FabricChaincodeInstall is the Schema for the hlfs API
+type FabricChaincodeInstall struct {
+	metav1.TypeMeta   `json:",inline"`
+	metav1.ObjectMeta `json:"metadata,omitempty"`
+	Spec              FabricChaincodeInstallSpec   `json:"spec,omitempty"`
+	Status            FabricChaincodeInstallStatus `json:"status,omitempty"`
+}
+
+// +kubebuilder:object:root=true
+
+// FabricChaincodeInstallList contains a list of FabricChaincodeInstall
+type FabricChaincodeInstallList struct {
+	metav1.TypeMeta `json:",inline"`
+	metav1.ListMeta `json:"metadata,omitempty"`
+	Items           []FabricChaincodeInstall `json:"items"`
+}
+
+// FabricChaincodeApproveSpec defines the desired state of FabricChaincodeApprove
+type FabricChaincodeApproveSpec struct {
+	// ChaincodeName is the name of the chaincode
+	ChaincodeName string `json:"chaincodeName"`
+
+	// ChannelName is the name of the channel
+	ChannelName string `json:"channelName"`
+
+	// +kubebuilder:validation:Default=false
+	// +optional
+	// +nullable
+	InitRequired bool `json:"initRequired"`
+
+	// MSPID is the MSP ID of the organization approving the chaincode
+	MSPID string `json:"mspID"`
+
+	// PackageID is the ID of the chaincode package
+	PackageID string `json:"packageId"`
+
+	// Version is the version of the chaincode
+	Version string `json:"version"`
+
+	// Sequence is the sequence number of the chaincode definition
+	Sequence int64 `json:"sequence"`
+
+	// EndorsementPolicy specifies the endorsement policy
+	EndorsementPolicy string `json:"endorsementPolicy"`
+
+	// PrivateDataCollections is a list of private data collection configurations
+	// +optional
+	PrivateDataCollections []PrivateDataCollection `json:"pdc,omitempty"`
+
+	// HLFIdentity specifies the identity to use for the operation
+	HLFIdentity HLFIdentity `json:"hlfIdentity"`
+
+	// Peers is a list of peers to approve the chaincode
+	Peers         []FabricPeerInternalRef `json:"peers"`
+	ExternalPeers []FabricPeerExternalRef `json:"externalPeers"`
+
+	// Orderers is a list of orderers to use for the transaction
+	Orderers         []FabricOrdererInternalRef `json:"orderers"`
+	ExternalOrderers []FabricOrdererExternalRef `json:"externalOrderers"`
+}
+
+type FabricOrdererInternalRef struct {
+	Name      string `json:"name"`
+	Namespace string `json:"namespace"`
+}
+
+type FabricOrdererExternalRef struct {
+	URL       string `json:"url"`
+	TLSCACert string `json:"tlsCACert"`
+}
+
+type PrivateDataCollectionEndorsementPolicy struct {
+	// +optional
+	// +nullable
+	ChannelConfigPolicy string `json:"channelConfigPolicy,omitempty"`
+	SignaturePolicy     string `json:"signaturePolicy,omitempty"`
+}
+
+type PrivateDataCollection struct {
+	// Define the structure for private data collections here
+	// This is a placeholder and should be expanded based on your specific requirements
+	Name   string `json:"name"`
+	Policy string `json:"policy"`
+	// +optional
+	// +nullable
+	// add default
+	// +kubebuilder:validation:Default=1
+	RequiredPeerCount *int32 `json:"requiredPeerCount"`
+	// +kubebuilder:validation:Default=1
+	MaxPeerCount *int32 `json:"maxPeerCount"`
+	// +nullable
+	// +optional
+	BlockToLive       uint64                                  `json:"blockToLive"`
+	MemberOnlyRead    bool                                    `json:"memberOnlyRead"`
+	MemberOnlyWrite   bool                                    `json:"memberOnlyWrite"`
+	EndorsementPolicy *PrivateDataCollectionEndorsementPolicy `json:"endorsementPolicy,omitempty"`
+}
+
+type PeerReference struct {
+	Name      string `json:"name"`
+	Namespace string `json:"namespace"`
+}
+
+type OrdererReference struct {
+	Name      string `json:"name"`
+	Namespace string `json:"namespace"`
+}
+
+// FabricChaincodeApproveStatus defines the observed state of FabricChaincodeApprove
+type FabricChaincodeApproveStatus struct {
+	Conditions status.Conditions `json:"conditions"`
+	Message    string            `json:"message"`
+	// Status of the FabricChaincodeApprove
+	Status DeploymentStatus `json:"status"`
+
+	// +optional
+	// +nullable
+	TransactionID string `json:"transactionID"`
+}
+
+// +genclient
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+// +k8s:defaulter-gen=true
+// +kubebuilder:subresource:status
+// +kubebuilder:resource:scope=Namespaced,shortName=fabricchaincodeapprove,singular=fabricchaincodeapprove
+// +kubebuilder:printcolumn:name="State",type="string",JSONPath=".status.status"
+// +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
+// +kubebuilder:object:root=true
+// +kubebuilder:subresource:status
+// +k8s:openapi-gen=true
+
+// FabricChaincodeApprove is the Schema for the hlfs API
+type FabricChaincodeApprove struct {
+	metav1.TypeMeta   `json:",inline"`
+	metav1.ObjectMeta `json:"metadata,omitempty"`
+	Spec              FabricChaincodeApproveSpec   `json:"spec,omitempty"`
+	Status            FabricChaincodeApproveStatus `json:"status,omitempty"`
+}
+
+// +kubebuilder:object:root=true
+
+// FabricChaincodeApproveList contains a list of FabricChaincodeApprove
+type FabricChaincodeApproveList struct {
+	metav1.TypeMeta `json:",inline"`
+	metav1.ListMeta `json:"metadata,omitempty"`
+	Items           []FabricChaincodeApprove `json:"items"`
+}
+
+// FabricChaincodeCommitSpec defines the desired state of FabricChaincodeCommit
+type FabricChaincodeCommitSpec struct {
+	// ChaincodeName is the name of the chaincode
+	ChaincodeName string `json:"chaincodeName"`
+	// Channel is the name of the channel
+	ChannelName string `json:"channelName"`
+	// Version is the version of the chaincode to approve
+	Version string `json:"version"`
+	// Sequence is the sequence number of the chaincode definition
+	Sequence int64 `json:"sequence"`
+	// EndorsementPolicy is the endorsement policy of the chaincode
+	// +optional
+	EndorsementPolicy string `json:"endorsementPolicy,omitempty"`
+	// CollectionConfig is the private data collection configuration of the chaincode
+	// +optional
+	PrivateDataCollections []PrivateDataCollection `json:"pdc,omitempty"`
+	// InitRequired is a flag to indicate if the chaincode requires initialization
+	// +optional
+	InitRequired bool `json:"initRequired,omitempty"`
+	// HLFIdentity is the identity to use for the approve transaction
+	HLFIdentity HLFIdentity `json:"hlfIdentity"`
+	// MSPID is the MSP ID of the organization approving the chaincode
+	MSPID string `json:"mspID"`
+	// Peers is the list of peers to approve the chaincode
+	Peers []FabricPeerInternalRef `json:"peers"`
+	// ExternalPeers is the list of external peers to approve the chaincode
+	// +optional
+	ExternalPeers []FabricPeerExternalRef `json:"externalPeers,omitempty"`
+	// Orderers is the list of orderers to use for the approve transaction
+	Orderers []FabricOrdererInternalRef `json:"orderers"`
+	// ExternalOrderers is the list of external orderers to use for the approve transaction
+	// +optional
+	ExternalOrderers []FabricOrdererExternalRef `json:"externalOrderers,omitempty"`
+}
+
+// FabricChaincodeCommitStatus defines the observed state of FabricChaincodeCommit
+type FabricChaincodeCommitStatus struct {
+	Conditions status.Conditions `json:"conditions"`
+	Message    string            `json:"message"`
+	// Status of the FabricChaincodeCommit
+	Status DeploymentStatus `json:"status"`
+	// +optional
+	// +nullable
+	TransactionID string `json:"transactionID"`
+}
+
+// +genclient
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+// +k8s:defaulter-gen=true
+// +kubebuilder:subresource:status
+// +kubebuilder:resource:scope=Namespaced,shortName=fabricchaincodecommit,singular=fabricchaincodecommit
+// +kubebuilder:printcolumn:name="State",type="string",JSONPath=".status.status"
+// +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
+// +kubebuilder:object:root=true
+// +kubebuilder:subresource:status
+// +k8s:openapi-gen=true
+
+// FabricChaincodeCommit is the Schema for the hlfs API
+type FabricChaincodeCommit struct {
+	metav1.TypeMeta   `json:",inline"`
+	metav1.ObjectMeta `json:"metadata,omitempty"`
+	Spec              FabricChaincodeCommitSpec   `json:"spec,omitempty"`
+	Status            FabricChaincodeCommitStatus `json:"status,omitempty"`
+}
+
+// +kubebuilder:object:root=true
+
+// FabricChaincodeCommitList contains a list of FabricChaincodeCommit
+type FabricChaincodeCommitList struct {
+	metav1.TypeMeta `json:",inline"`
+	metav1.ListMeta `json:"metadata,omitempty"`
+	Items           []FabricChaincodeCommit `json:"items"`
 }
 
 // FabricMainChannelStatus defines the observed state of FabricMainChannel
@@ -2057,7 +2376,7 @@ type FabricMainChannelApplicationConfig struct {
 type FabricMainChannelOrdererConfig struct {
 	// OrdererType of the consensus, default "etcdraft"
 	// +kubebuilder:default:="etcdraft"
-	OrdererType string `json:"ordererType"`
+	OrdererType OrdererConsensusType `json:"ordererType"`
 	// Capabilities of the channel
 	// +kubebuilder:default:={"V2_0"}
 	Capabilities []string `json:"capabilities"`
@@ -2080,8 +2399,37 @@ type FabricMainChannelOrdererConfig struct {
 	// +kubebuilder:validation:Optional
 	// +optional
 	EtcdRaft *FabricMainChannelEtcdRaft `json:"etcdRaft"`
+	// +nullable
+	// +kubebuilder:validation:Optional
+	// +optional
+	SmartBFT *FabricMainChannelSmartBFT `json:"smartBFT"`
+	// +nullable
+	// +kubebuilder:validation:Optional
+	// +optional
+	// +kubebuilder:validation:Default={}
+	ConsenterMapping []FabricMainChannelConsenterItem `json:"consenterMapping"`
 }
 
+type FabricMainChannelSmartBFT struct {
+	RequestBatchMaxCount      uint64              `json:"request_batch_max_count,omitempty"`
+	RequestBatchMaxBytes      uint64              `json:"request_batch_max_bytes,omitempty"`
+	RequestBatchMaxInterval   string              `json:"request_batch_max_interval,omitempty"`
+	IncomingMessageBufferSize uint64              `json:"incoming_message_buffer_size,omitempty"`
+	RequestPoolSize           uint64              `json:"request_pool_size,omitempty"`
+	RequestForwardTimeout     string              `json:"request_forward_timeout,omitempty"`
+	RequestComplainTimeout    string              `json:"request_complain_timeout,omitempty"`
+	RequestAutoRemoveTimeout  string              `json:"request_auto_remove_timeout,omitempty"`
+	RequestMaxBytes           uint64              `json:"request_max_bytes,omitempty"`
+	ViewChangeResendInterval  string              `json:"view_change_resend_interval,omitempty"`
+	ViewChangeTimeout         string              `json:"view_change_timeout,omitempty"`
+	LeaderHeartbeatTimeout    string              `json:"leader_heartbeat_timeout,omitempty"`
+	LeaderHeartbeatCount      uint64              `json:"leader_heartbeat_count,omitempty"`
+	CollectTimeout            string              `json:"collect_timeout,omitempty"`
+	SyncOnStart               bool                `json:"sync_on_start,omitempty"`
+	SpeedUpViewChange         bool                `json:"speed_up_view_change,omitempty"`
+	LeaderRotation            sb.Options_Rotation `json:"leader_rotation,omitempty"`
+	DecisionsPerLeader        uint64              `json:"decisions_per_leader,omitempty"`
+}
 type FabricMainChannelEtcdRaft struct {
 	// +nullable
 	// +kubebuilder:validation:Optional
@@ -2104,6 +2452,14 @@ type FabricMainChannelEtcdRaftOptions struct {
 	// +kubebuilder:default:=16777216
 	SnapshotIntervalSize uint32 `json:"snapshotIntervalSize"`
 }
+
+type OrdererConsensusType string
+
+const (
+	OrdererConsensusEtcdraft OrdererConsensusType = "etcdraft"
+	OrdererConsensusBFT      OrdererConsensusType = "BFT"
+)
+
 type FabricMainChannelConsensusState string
 
 const (
@@ -2142,6 +2498,15 @@ type FabricMainChannelIdentity struct {
 	SecretKey string `json:"secretKey"`
 }
 
+type FabricMainChannelConsenterItem struct {
+	Id            uint32 `json:"id,omitempty"`
+	Host          string `json:"host,omitempty"`
+	Port          uint32 `json:"port,omitempty"`
+	MspId         string `json:"msp_id,omitempty"`
+	Identity      string `json:"identity,omitempty"`
+	ClientTlsCert string `json:"client_tls_cert,omitempty"`
+	ServerTlsCert string `json:"server_tls_cert,omitempty"`
+}
 type FabricMainChannelConsenter struct {
 	// Orderer host of the consenter
 	Host string `json:"host"`
@@ -2446,5 +2811,9 @@ func init() {
 	SchemeBuilder.Register(&FabricOperatorAPI{}, &FabricOperatorAPIList{})
 	SchemeBuilder.Register(&FabricMainChannel{}, &FabricMainChannelList{})
 	SchemeBuilder.Register(&FabricIdentity{}, &FabricIdentityList{})
+	SchemeBuilder.Register(&FabricChaincodeInstall{}, &FabricChaincodeInstallList{})
+	SchemeBuilder.Register(&FabricChaincodeApprove{}, &FabricChaincodeApproveList{})
+	SchemeBuilder.Register(&FabricChaincodeCommit{}, &FabricChaincodeCommitList{})
+
 	SchemeBuilder.Register(&FabricFollowerChannel{}, &FabricFollowerChannelList{})
 }

@@ -1,4 +1,4 @@
-package chaincode
+package deploy
 
 import (
 	"context"
@@ -6,6 +6,8 @@ import (
 	"crypto/x509"
 	"encoding/base64"
 	"fmt"
+	"time"
+
 	"github.com/go-logr/logr"
 	hlfv1alpha1 "github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
 	"github.com/kfsoftware/hlf-operator/controllers/certs"
@@ -27,11 +29,10 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-	"time"
 )
 
-// FabricChaincodeReconciler reconciles a FabricChaincode object
-type FabricChaincodeReconciler struct {
+// FabricChaincodeDeployReconciler reconciles a FabricChaincode object
+type FabricChaincodeDeployReconciler struct {
 	client.Client
 	Log    logr.Logger
 	Scheme *runtime.Scheme
@@ -66,17 +67,17 @@ func CreateChaincodeCryptoMaterial(conf *hlfv1alpha1.FabricChaincode, caName str
 	}
 	return tlsCert, tlsKey, tlsRootCert, nil
 }
-func (r *FabricChaincodeReconciler) getDeploymentName(fabricChaincode *hlfv1alpha1.FabricChaincode) string {
+func (r *FabricChaincodeDeployReconciler) getDeploymentName(fabricChaincode *hlfv1alpha1.FabricChaincode) string {
 	return fmt.Sprintf("%s", fabricChaincode.Name)
 }
-func (r *FabricChaincodeReconciler) getServiceName(fabricChaincode *hlfv1alpha1.FabricChaincode) string {
+func (r *FabricChaincodeDeployReconciler) getServiceName(fabricChaincode *hlfv1alpha1.FabricChaincode) string {
 	return fmt.Sprintf("%s", fabricChaincode.Name)
 }
-func (r *FabricChaincodeReconciler) getSecretName(fabricChaincode *hlfv1alpha1.FabricChaincode) string {
+func (r *FabricChaincodeDeployReconciler) getSecretName(fabricChaincode *hlfv1alpha1.FabricChaincode) string {
 	return fmt.Sprintf("%s-certs", fabricChaincode.Name)
 }
 
-func (r *FabricChaincodeReconciler) finalizeChaincode(reqLogger logr.Logger, m *hlfv1alpha1.FabricChaincode) error {
+func (r *FabricChaincodeDeployReconciler) finalizeChaincode(reqLogger logr.Logger, m *hlfv1alpha1.FabricChaincode) error {
 	ns := m.Namespace
 	if ns == "" {
 		ns = "default"
@@ -121,7 +122,7 @@ func (r *FabricChaincodeReconciler) finalizeChaincode(reqLogger logr.Logger, m *
 	return nil
 }
 
-func (r *FabricChaincodeReconciler) addFinalizer(reqLogger logr.Logger, m *hlfv1alpha1.FabricChaincode) error {
+func (r *FabricChaincodeDeployReconciler) addFinalizer(reqLogger logr.Logger, m *hlfv1alpha1.FabricChaincode) error {
 	reqLogger.Info("Adding Finalizer for the Chaincode")
 	controllerutil.AddFinalizer(m, chaincodeFinalizer)
 
@@ -140,7 +141,7 @@ const (
 	RootCertSecretKey    = "tlsroot.crt"
 )
 
-func (r FabricChaincodeReconciler) getCryptoMaterial(ctx context.Context, labels map[string]string, ns string, fabricChaincode *hlfv1alpha1.FabricChaincode) (*SecretChaincodeData, error) {
+func (r FabricChaincodeDeployReconciler) getCryptoMaterial(ctx context.Context, labels map[string]string, ns string, fabricChaincode *hlfv1alpha1.FabricChaincode) (*SecretChaincodeData, error) {
 	secretChaincodeData := &SecretChaincodeData{
 		Enabled: true,
 		Updated: false,
@@ -256,10 +257,8 @@ func (r FabricChaincodeReconciler) getCryptoMaterial(ctx context.Context, labels
 	return secretChaincodeData, nil
 }
 
-// +kubebuilder:rbac:groups=hlf.kungfusoftware.es,resources=fabricchaincodes,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=hlf.kungfusoftware.es,resources=fabricchaincodes/status,verbs=get;update;patch
-// +kubebuilder:rbac:groups=hlf.kungfusoftware.es,resources=fabricchaincodes/finalizers,verbs=get;update;patch
-func (r *FabricChaincodeReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+
+func (r *FabricChaincodeDeployReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	reqLogger := r.Log.WithValues("hlf", req.NamespacedName)
 	fabricChaincode := &hlfv1alpha1.FabricChaincode{}
 	//releaseName := req.Name
@@ -442,6 +441,7 @@ func (r *FabricChaincodeReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 			SuccessThreshold:    1,
 			FailureThreshold:    3,
 		},
+		SecurityContext: fabricChaincode.Spec.SecurityContext,
 		ReadinessProbe: &corev1.Probe{
 			ProbeHandler: corev1.ProbeHandler{
 				TCPSocket: &corev1.TCPSocketAction{
@@ -473,10 +473,16 @@ func (r *FabricChaincodeReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 		Containers: []corev1.Container{
 			container,
 		},
-		RestartPolicy:    corev1.RestartPolicyAlways,
-		ImagePullSecrets: fabricChaincode.Spec.ImagePullSecrets,
-		Affinity:         fabricChaincode.Spec.Affinity,
-		Tolerations:      fabricChaincode.Spec.Tolerations,
+		RestartPolicy:      corev1.RestartPolicyAlways,
+		ImagePullSecrets:   fabricChaincode.Spec.ImagePullSecrets,
+		Affinity:           fabricChaincode.Spec.Affinity,
+		Tolerations:        fabricChaincode.Spec.Tolerations,
+		NodeSelector:       fabricChaincode.Spec.NodeSelector,
+		SecurityContext:    fabricChaincode.Spec.PodSecurityContext,
+		EnableServiceLinks: &fabricChaincode.Spec.EnableServiceLinks,
+	}
+	if fabricChaincode.Spec.ServiceAccountName != "" {
+		podSpec.ServiceAccountName = fabricChaincode.Spec.ServiceAccountName
 	}
 	replicas := fabricChaincode.Spec.Replicas
 	podLabels := labels
@@ -608,7 +614,7 @@ var (
 	ErrClientK8s = errors.New("k8sAPIClientError")
 )
 
-func (r *FabricChaincodeReconciler) updateCRStatusOrFailReconcile(ctx context.Context, log logr.Logger, p *hlfv1alpha1.FabricChaincode) (
+func (r *FabricChaincodeDeployReconciler) updateCRStatusOrFailReconcile(ctx context.Context, log logr.Logger, p *hlfv1alpha1.FabricChaincode) (
 	ctrl.Result, error) {
 	if err := r.Status().Update(ctx, p); err != nil {
 		log.Error(err, fmt.Sprintf("%v failed to update the application status", ErrClientK8s))
@@ -617,7 +623,7 @@ func (r *FabricChaincodeReconciler) updateCRStatusOrFailReconcile(ctx context.Co
 	return ctrl.Result{Requeue: false, RequeueAfter: 0}, nil
 }
 
-func (r *FabricChaincodeReconciler) setConditionStatus(ctx context.Context, p *hlfv1alpha1.FabricChaincode, conditionType hlfv1alpha1.DeploymentStatus, statusFlag bool, err error, statusUnknown bool) (update bool) {
+func (r *FabricChaincodeDeployReconciler) setConditionStatus(ctx context.Context, p *hlfv1alpha1.FabricChaincode, conditionType hlfv1alpha1.DeploymentStatus, statusFlag bool, err error, statusUnknown bool) (update bool) {
 	statusStr := func() corev1.ConditionStatus {
 		if statusUnknown {
 			return corev1.ConditionUnknown
@@ -661,7 +667,7 @@ func (r *FabricChaincodeReconciler) setConditionStatus(ctx context.Context, p *h
 
 // enqueueRequestForOwningResource returns an event handler for all Chaincodes objects having
 // owningGatewayLabel
-func (r *FabricChaincodeReconciler) enqueueRequestForOwningResource() handler.EventHandler {
+func (r *FabricChaincodeDeployReconciler) enqueueRequestForOwningResource() handler.EventHandler {
 	return handler.EnqueueRequestsFromMapFunc(func(ctx context.Context, object client.Object) []reconcile.Request {
 		scopedLog := log.WithFields(log.Fields{
 			"controller": "chaincode",
@@ -691,7 +697,7 @@ func (r *FabricChaincodeReconciler) enqueueRequestForOwningResource() handler.Ev
 	})
 }
 
-func (r *FabricChaincodeReconciler) SetupWithManager(mgr ctrl.Manager) error {
+func (r *FabricChaincodeDeployReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	managedBy := ctrl.NewControllerManagedBy(mgr)
 	return managedBy.
 		For(&hlfv1alpha1.FabricChaincode{}).

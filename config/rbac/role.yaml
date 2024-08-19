@@ -1,7 +1,9 @@
+
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
+  creationTimestamp: null
   name: manager-role
 rules:
 - apiGroups:
@@ -241,6 +243,18 @@ rules:
   - update
   - watch
 - apiGroups:
+  - coordination.k8s.io
+  resources:
+  - leases
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
   - extensions
   resources:
   - configmaps
@@ -400,6 +414,342 @@ rules:
   - hlf.kungfusoftware.es
   resources:
   - fabriccas/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - hlf.kungfusoftware.es
+  resources:
+  - fabricchaincodeapproves
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - hlf.kungfusoftware.es
+  resources:
+  - fabricchaincodeapproves/finalizers
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - hlf.kungfusoftware.es
+  resources:
+  - fabricchaincodeapproves/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - hlf.kungfusoftware.es
+  resources:
+  - fabricchaincodecommits
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - hlf.kungfusoftware.es
+  resources:
+  - fabricchaincodecommits/finalizers
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - hlf.kungfusoftware.es
+  resources:
+  - fabricchaincodecommits/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - hlf.kungfusoftware.es
+  resources:
+  - fabricchaincodeinstalls
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - hlf.kungfusoftware.es
+  resources:
+  - fabricchaincodeinstalls/finalizers
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - hlf.kungfusoftware.es
+  resources:
+  - fabricchaincodeinstalls/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - hlf.kungfusoftware.es
+  resources:
+  - fabricchaincodes
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - hlf.kungfusoftware.es
+  resources:
+  - fabricchaincodes/finalizers
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - hlf.kungfusoftware.es
+  resources:
+  - fabricchaincodes/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - hlf.kungfusoftware.es
+  resources:
+  - fabricchaincodetemplates
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - hlf.kungfusoftware.es
+  resources:
+  - fabricchaincodetemplates/finalizers
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - hlf.kungfusoftware.es
+  resources:
+  - fabricchaincodetemplates/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - hlf.kungfusoftware.es
+  resources:
+  - fabricfollowerchannels
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - hlf.kungfusoftware.es
+  resources:
+  - fabricfollowerchannels/finalizers
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - hlf.kungfusoftware.es
+  resources:
+  - fabricfollowerchannels/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - hlf.kungfusoftware.es
+  resources:
+  - fabricidentities
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - hlf.kungfusoftware.es
+  resources:
+  - fabricidentities/finalizers
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - hlf.kungfusoftware.es
+  resources:
+  - fabricidentities/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - hlf.kungfusoftware.es
+  resources:
+  - fabricmainchannels
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - hlf.kungfusoftware.es
+  resources:
+  - fabricmainchannels/finalizers
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - hlf.kungfusoftware.es
+  resources:
+  - fabricmainchannels/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - hlf.kungfusoftware.es
+  resources:
+  - fabricnetworkconfigs
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - hlf.kungfusoftware.es
+  resources:
+  - fabricnetworkconfigs/finalizers
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - hlf.kungfusoftware.es
+  resources:
+  - fabricnetworkconfigs/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - hlf.kungfusoftware.es
+  resources:
+  - fabricoperationsconsoles
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - hlf.kungfusoftware.es
+  resources:
+  - fabricoperationsconsoles/finalizers
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - hlf.kungfusoftware.es
+  resources:
+  - fabricoperationsconsoles/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - hlf.kungfusoftware.es
+  resources:
+  - fabricoperatorapis
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - hlf.kungfusoftware.es
+  resources:
+  - fabricoperatorapis/finalizers
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - hlf.kungfusoftware.es
+  resources:
+  - fabricoperatorapis/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - hlf.kungfusoftware.es
+  resources:
+  - fabricoperatoruis
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - hlf.kungfusoftware.es
+  resources:
+  - fabricoperatoruis/finalizers
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - hlf.kungfusoftware.es
+  resources:
+  - fabricoperatoruis/status
   verbs:
   - get
   - patch

@@ -46,7 +46,10 @@ func (c *getLatestInfoCmd) run(out io.Writer, stdErr io.Writer) error {
 	if err != nil {
 		return err
 	}
-	committedCCs, err := resClient.LifecycleQueryCommittedCC(c.channelName, resmgmt.LifecycleQueryCommittedCCRequest{Name: c.name})
+	committedCCs, err := resClient.LifecycleQueryCommittedCC(
+		c.channelName,
+		resmgmt.LifecycleQueryCommittedCCRequest{Name: c.name},
+	)
 	if err != nil {
 		return err
 	}

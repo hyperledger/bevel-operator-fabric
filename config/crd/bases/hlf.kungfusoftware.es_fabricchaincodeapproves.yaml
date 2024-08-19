@@ -1,0 +1,268 @@
+
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.3.0
+  creationTimestamp: null
+  name: fabricchaincodeapproves.hlf.kungfusoftware.es
+spec:
+  group: hlf.kungfusoftware.es
+  names:
+    kind: FabricChaincodeApprove
+    listKind: FabricChaincodeApproveList
+    plural: fabricchaincodeapproves
+    shortNames:
+    - fabricchaincodeapprove
+    singular: fabricchaincodeapprove
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .status.status
+      name: State
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: FabricChaincodeApprove is the Schema for the hlfs API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: FabricChaincodeApproveSpec defines the desired state of FabricChaincodeApprove
+            properties:
+              chaincodeName:
+                description: ChaincodeName is the name of the chaincode
+                type: string
+              channelName:
+                description: ChannelName is the name of the channel
+                type: string
+              endorsementPolicy:
+                description: EndorsementPolicy specifies the endorsement policy
+                type: string
+              externalOrderers:
+                items:
+                  properties:
+                    tlsCACert:
+                      type: string
+                    url:
+                      type: string
+                  required:
+                  - tlsCACert
+                  - url
+                  type: object
+                type: array
+              externalPeers:
+                items:
+                  properties:
+                    tlsCACert:
+                      type: string
+                    url:
+                      type: string
+                  required:
+                  - tlsCACert
+                  - url
+                  type: object
+                type: array
+              hlfIdentity:
+                description: HLFIdentity specifies the identity to use for the operation
+                properties:
+                  secretKey:
+                    description: Key inside the secret that holds the private key
+                      and certificate to interact with the network
+                    type: string
+                  secretName:
+                    description: Secret name
+                    type: string
+                  secretNamespace:
+                    default: default
+                    description: Secret namespace
+                    type: string
+                required:
+                - secretKey
+                - secretName
+                - secretNamespace
+                type: object
+              initRequired:
+                nullable: true
+                type: boolean
+              mspID:
+                description: MSPID is the MSP ID of the organization approving the
+                  chaincode
+                type: string
+              orderers:
+                description: Orderers is a list of orderers to use for the transaction
+                items:
+                  properties:
+                    name:
+                      type: string
+                    namespace:
+                      type: string
+                  required:
+                  - name
+                  - namespace
+                  type: object
+                type: array
+              packageId:
+                description: PackageID is the ID of the chaincode package
+                type: string
+              pdc:
+                description: PrivateDataCollections is a list of private data collection
+                  configurations
+                items:
+                  properties:
+                    blockToLive:
+                      format: int64
+                      nullable: true
+                      type: integer
+                    endorsementPolicy:
+                      properties:
+                        channelConfigPolicy:
+                          nullable: true
+                          type: string
+                        signaturePolicy:
+                          type: string
+                      type: object
+                    maxPeerCount:
+                      format: int32
+                      type: integer
+                    memberOnlyRead:
+                      type: boolean
+                    memberOnlyWrite:
+                      type: boolean
+                    name:
+                      description: Define the structure for private data collections
+                        here This is a placeholder and should be expanded based on
+                        your specific requirements
+                      type: string
+                    policy:
+                      type: string
+                    requiredPeerCount:
+                      description: add default
+                      format: int32
+                      nullable: true
+                      type: integer
+                  required:
+                  - maxPeerCount
+                  - memberOnlyRead
+                  - memberOnlyWrite
+                  - name
+                  - policy
+                  type: object
+                type: array
+              peers:
+                description: Peers is a list of peers to approve the chaincode
+                items:
+                  properties:
+                    name:
+                      type: string
+                    namespace:
+                      type: string
+                  required:
+                  - name
+                  - namespace
+                  type: object
+                type: array
+              sequence:
+                description: Sequence is the sequence number of the chaincode definition
+                format: int64
+                type: integer
+              version:
+                description: Version is the version of the chaincode
+                type: string
+            required:
+            - chaincodeName
+            - channelName
+            - endorsementPolicy
+            - externalOrderers
+            - externalPeers
+            - hlfIdentity
+            - mspID
+            - orderers
+            - packageId
+            - peers
+            - sequence
+            - version
+            type: object
+          status:
+            description: FabricChaincodeApproveStatus defines the observed state of
+              FabricChaincodeApprove
+            properties:
+              conditions:
+                description: Conditions is a set of Condition instances.
+                items:
+                  description: "Condition represents an observation of an object's
+                    state. Conditions are an extension mechanism intended to be used
+                    when the details of an observation are not a priori known or would
+                    not apply to all instances of a given Kind. \n Conditions should
+                    be added to explicitly convey properties that users and components
+                    care about rather than requiring those properties to be inferred
+                    from other observations. Once defined, the meaning of a Condition
+                    can not be changed arbitrarily - it becomes part of the API, and
+                    has the same backwards- and forwards-compatibility concerns of
+                    any other part of the API."
+                  properties:
+                    lastTransitionTime:
+                      format: date-time
+                      type: string
+                    message:
+                      type: string
+                    reason:
+                      description: ConditionReason is intended to be a one-word, CamelCase
+                        representation of the category of cause of the current status.
+                        It is intended to be used in concise output, such as one-line
+                        kubectl get output, and in summarizing occurrences of causes.
+                      type: string
+                    status:
+                      type: string
+                    type:
+                      description: "ConditionType is the type of the condition and
+                        is typically a CamelCased word or short phrase. \n Condition
+                        types should indicate state in the \"abnormal-true\" polarity.
+                        For example, if the condition indicates when a policy is invalid,
+                        the \"is valid\" case is probably the norm, so the condition
+                        should be called \"Invalid\"."
+                      type: string
+                  required:
+                  - status
+                  - type
+                  type: object
+                type: array
+              message:
+                type: string
+              status:
+                description: Status of the FabricChaincodeApprove
+                type: string
+              transactionID:
+                nullable: true
+                type: string
+            required:
+            - conditions
+            - message
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []

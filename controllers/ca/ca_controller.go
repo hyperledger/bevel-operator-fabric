@@ -1033,6 +1033,7 @@ func Reconcile(
 				return ctrl.Result{}, err
 			}
 		}
+		reqLogger.Info(fmt.Sprintf("CA Status %s", s.Status))
 		switch s.Status {
 		case hlfv1alpha1.PendingStatus:
 			log.Infof("CA %s in pending status, refreshing state in 10 seconds", fca.Name)
@@ -1040,11 +1041,16 @@ func Reconcile(
 				RequeueAfter: 10 * time.Second,
 			}, nil
 		case hlfv1alpha1.RunningStatus:
-			return ctrl.Result{}, nil
-		default:
 			return ctrl.Result{
-				RequeueAfter: 2 * time.Second,
+				RequeueAfter: 60 * time.Minute,
 			}, nil
+		case hlfv1alpha1.FailedStatus:
+			log.Infof("CA %s in failed status, refreshing state in 10 seconds", fca.Name)
+			return ctrl.Result{
+				RequeueAfter: 10 * time.Second,
+			}, nil
+		default:
+			return ctrl.Result{}, nil
 		}
 	} else {
 		cmd := action.NewInstall(cfg)
