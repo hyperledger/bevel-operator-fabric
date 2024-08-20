@@ -1407,9 +1407,10 @@ func updateOrdererChannelConfigTx(currentConfigTX configtx.ConfigTx, newConfigTx
 	if err != nil {
 		return errors.Wrapf(err, "failed to set orderer configuration")
 	}
-	log.Infof("updateOrdererChannelConfigTx: Orderer type: %s", ord.OrdererType)
 	// update
 	if ord.OrdererType == "BFT" {
+
+		log.Infof("updateOrdererChannelConfigTx: Orderer type: %s", ord.OrdererType)
 		// update policies but blockValidation
 		err = currentConfigTX.Orderer().SetPolicy("Admins", newConfigTx.Orderer.Policies["Admins"])
 		if err != nil {

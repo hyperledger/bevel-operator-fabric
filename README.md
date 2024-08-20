@@ -567,9 +567,9 @@ kubectl apply -f - <<EOF
 apiVersion: hlf.kungfusoftware.es/v1alpha1
 kind: FabricMainChannel
 metadata:
-  name: demo
+  name: demo5
 spec:
-  name: demo
+  name: demo5
   adminOrdererOrganizations:
     - mspID: OrdererMSP
   adminPeerOrganizations:
