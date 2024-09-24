@@ -16,7 +16,7 @@ spec:
     shortNames:
     - fabricchaincodeinstall
     singular: fabricchaincodeinstall
-  scope: Namespaced
+  scope: Cluster
   versions:
   - additionalPrinterColumns:
     - jsonPath: .status.status

@@ -238,12 +238,23 @@ const consoleFinalizer = "finalizer.console.hlf.kungfusoftware.es"
 // +kubebuilder:rbac:groups=hlf.kungfusoftware.es,resources=fabricfollowerchannels/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=hlf.kungfusoftware.es,resources=fabricfollowerchannels/finalizers,verbs=get;update;patch
 
-
 // +kubebuilder:rbac:groups=hlf.kungfusoftware.es,resources=fabricmainchannels,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=hlf.kungfusoftware.es,resources=fabricmainchannels/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=hlf.kungfusoftware.es,resources=fabricmainchannels/finalizers,verbs=get;update;patch
 
-// 
+// +kubebuilder:rbac:groups=hlf.kungfusoftware.es,resources=fabricchaincodeinstalls,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=hlf.kungfusoftware.es,resources=fabricchaincodeinstalls/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=hlf.kungfusoftware.es,resources=fabricchaincodeinstalls/finalizers,verbs=get;update;patch
+
+// +kubebuilder:rbac:groups=hlf.kungfusoftware.es,resources=fabricchaincodeapproves,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=hlf.kungfusoftware.es,resources=fabricchaincodeapproves/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=hlf.kungfusoftware.es,resources=fabricchaincodeapproves/finalizers,verbs=get;update;patch
+
+// +kubebuilder:rbac:groups=hlf.kungfusoftware.es,resources=fabricchaincodecommits,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=hlf.kungfusoftware.es,resources=fabricchaincodecommits/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=hlf.kungfusoftware.es,resources=fabricchaincodecommits/finalizers,verbs=get;update;patch
+
+//
 
 func (r *FabricOperationsConsoleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	reqLogger := r.Log.WithValues("hlf", req.NamespacedName)

@@ -4,9 +4,13 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"strings"
+	"time"
+
 	"github.com/go-logr/logr"
 	"github.com/golang/protobuf/proto"
 	"github.com/hyperledger/fabric-config/configtx"
+	"github.com/hyperledger/fabric-config/configtx/orderer"
 	"github.com/hyperledger/fabric-config/protolator"
 	"github.com/hyperledger/fabric-protos-go/common"
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/resmgmt"
@@ -36,8 +40,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-	"strings"
-	"time"
 )
 
 // FabricFollowerChannelReconciler reconciles a FabricFollowerChannel object
@@ -236,6 +238,7 @@ func (r *FabricFollowerChannelReconciler) Reconcile(ctx context.Context, req ctr
 		r.setConditionStatus(ctx, fabricFollowerChannel, hlfv1alpha1.FailedStatus, false, err, false)
 		return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricFollowerChannel)
 	}
+
 	var buf2 bytes.Buffer
 	err = protolator.DeepMarshalJSON(&buf2, cfgBlock)
 	if err != nil {
@@ -244,6 +247,15 @@ func (r *FabricFollowerChannelReconciler) Reconcile(ctx context.Context, req ctr
 	}
 	log.Infof("Config block: %s", buf2.Bytes())
 	cftxGen := configtx.New(cfgBlock)
+	ordererConfig, err := cftxGen.Orderer().Configuration()
+	if err != nil {
+		r.setConditionStatus(ctx, fabricFollowerChannel, hlfv1alpha1.FailedStatus, false, err, false)
+		return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricFollowerChannel)
+	}
+	if ordererConfig.State == orderer.ConsensusStateMaintenance {
+		r.setConditionStatus(ctx, fabricFollowerChannel, hlfv1alpha1.FailedStatus, false, errors.New("the orderer is in maintenance mode"), false)
+		return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricFollowerChannel)
+	}
 	app := cftxGen.Application().Organization(mspID)
 	anchorPeers, err := app.AnchorPeers()
 	if err != nil {
@@ -392,7 +404,9 @@ func (r *FabricFollowerChannelReconciler) updateCRStatusOrFailReconcile(ctx cont
 			RequeueAfter: 1 * time.Minute,
 		}, nil
 	}
-	return reconcile.Result{}, nil
+	return reconcile.Result{
+		Requeue: false,
+	}, nil
 }
 
 func (r *FabricFollowerChannelReconciler) setConditionStatus(ctx context.Context, p *hlfv1alpha1.FabricFollowerChannel, conditionType hlfv1alpha1.DeploymentStatus, statusFlag bool, err error, statusUnknown bool) (update bool) {

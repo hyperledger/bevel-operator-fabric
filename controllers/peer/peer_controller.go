@@ -8,12 +8,13 @@ import (
 	"encoding/json"
 	"encoding/pem"
 	"fmt"
-	"helm.sh/helm/v3/pkg/release"
 	"os"
 	"reflect"
 	"sort"
 	"strings"
 	"time"
+
+	"helm.sh/helm/v3/pkg/release"
 
 	"github.com/kfsoftware/hlf-operator/controllers/hlfmetrics"
 	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/helpers"
@@ -1026,8 +1027,29 @@ func GetConfig(
 				string(utils.EncodeX509Certificate(tlsCert)),
 				tlsKey,
 			)
+			authenticationFailure := false
 			if err != nil {
-				return nil, errors.Wrapf(err, "failed to reenroll tls crypto material")
+				if strings.Contains(err.Error(), "Authentication failure") {
+					authenticationFailure = true
+				} else {
+					return nil, errors.Wrapf(err, "failed to reenroll tls crypto material")
+				}
+			}
+			if authenticationFailure {
+				log.Infof("Re enroll failed because of credentials, falling back to enroll")
+				// just enroll the user
+				tlsCert, tlsKey, tlsRootCert, err = CreateTLSCryptoMaterial(
+					conf,
+					tlsParams.Caname,
+					tlsCAUrl,
+					tlsParams.Enrollid,
+					tlsParams.Enrollsecret,
+					string(cacert),
+					hosts,
+				)
+				if err != nil {
+					return nil, err
+				}
 			}
 			log.Infof("Successfully reenrolled tls crypto material for %s", chartName)
 		}
@@ -1145,8 +1167,28 @@ func GetConfig(
 				string(signCertPem),
 				signKey,
 			)
+			authenticationFailure := false
 			if err != nil {
-				return nil, errors.Wrapf(err, "failed to reenroll sign crypto material")
+				if strings.Contains(err.Error(), "Authentication failure") {
+					authenticationFailure = true
+				} else {
+					return nil, errors.Wrapf(err, "failed to reenroll sign crypto material")
+				}
+			}
+			if authenticationFailure {
+				log.Infof("Re enroll failed because of credentials, falling back to enroll")
+				// just enroll the user
+				signCert, signKey, signRootCert, err = CreateSignCryptoMaterial(
+					conf,
+					signParams.Caname,
+					caUrl,
+					signParams.Enrollid,
+					signParams.Enrollsecret,
+					string(cacert),
+				)
+				if err != nil {
+					return nil, err
+				}
 			}
 			log.Infof("Reenrolled sign crypto material")
 		}

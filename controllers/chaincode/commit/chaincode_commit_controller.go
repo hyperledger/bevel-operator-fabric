@@ -44,7 +44,7 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-const chaincodeCommitFinalizer = "finalizer.chaincodeCommit.hlf.kungfusoftware.es"
+const chaincodeCommitFinalizer = "finalizer.chaincodecommit.hlf.kungfusoftware.es"
 
 type FabricChaincodeCommitReconciler struct {
 	client.Client
@@ -54,6 +54,7 @@ type FabricChaincodeCommitReconciler struct {
 }
 
 func (r *FabricChaincodeCommitReconciler) finalizeChaincodeCommit(reqLogger logr.Logger, m *hlfv1alpha1.FabricChaincodeCommit) error {
+	// no need to do anything when finalizing
 	reqLogger.Info("Successfully finalized ChaincodeCommit")
 	return nil
 }
@@ -179,12 +180,12 @@ func (r *FabricChaincodeCommitReconciler) Reconcile(ctx context.Context, req ctr
 		r.setConditionStatus(ctx, fabricChaincodeCommit, hlfv1alpha1.FailedStatus, false, err, false)
 		return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricChaincodeCommit)
 	}
-
+	r.Log.Info(fmt.Sprintf("ChaincodeCommit %s committed: %s", fabricChaincodeCommit.Name, txID))
 	fabricChaincodeCommit.Status.Status = hlfv1alpha1.RunningStatus
 	fabricChaincodeCommit.Status.Message = "Chaincode committed"
-	if txID != "" {
-		fabricChaincodeCommit.Status.TransactionID = string(txID)
-	}
+	// if txID != "" {
+	// 	fabricChaincodeCommit.Status.TransactionID = string(txID)
+	// }
 	fabricChaincodeCommit.Status.Conditions.SetCondition(status.Condition{
 		Type:   status.ConditionType(hlfv1alpha1.RunningStatus),
 		Status: corev1.ConditionTrue,
@@ -239,7 +240,10 @@ func (r *FabricChaincodeCommitReconciler) updateCRStatusOrFailReconcile(ctx cont
 	reconcile.Result, error) {
 	if err := r.Status().Update(ctx, p); err != nil {
 		log.Error(err, fmt.Sprintf("%v failed to update the application status", ErrClientK8s))
-		return reconcile.Result{}, err
+		return reconcile.Result{
+			Requeue:      false,
+			RequeueAfter: 0,
+		}, err
 	}
 	if p.Status.Status == hlfv1alpha1.FailedStatus {
 		return reconcile.Result{

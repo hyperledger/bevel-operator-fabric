@@ -148,6 +148,14 @@ func (r *FabricIdentityReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 	var rootCert *x509.Certificate
 	if fabricIdentity.Spec.Register != nil {
 		log.Infof("Registering user %s", fabricIdentity.Spec.Enrollid)
+		attributes := []api.Attribute{}
+		for _, attr := range fabricIdentity.Spec.Register.Attributes {
+			attributes = append(attributes, api.Attribute{
+				Name:  attr.Name,
+				Value: attr.Value,
+				ECert: attr.ECert,
+			})
+		}
 		_, err = certs.RegisterUser(certs.RegisterUserRequest{
 			TLSCert:      string(tlsCert),
 			URL:          fmt.Sprintf("https://%s:%d", fabricIdentity.Spec.Cahost, fabricIdentity.Spec.Caport),
@@ -158,7 +166,7 @@ func (r *FabricIdentityReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 			User:         fabricIdentity.Spec.Enrollid,
 			Secret:       fabricIdentity.Spec.Enrollsecret,
 			Type:         fabricIdentity.Spec.Register.Type,
-			Attributes:   []api.Attribute{},
+			Attributes:   attributes,
 		})
 		if err != nil {
 			if !strings.Contains(err.Error(), "already registered") {
@@ -169,6 +177,13 @@ func (r *FabricIdentityReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 		}
 	}
 
+	requests := []*api.AttributeRequest{}
+	for _, attr := range fabricIdentity.Spec.AttributeRequest {
+		requests = append(requests, &api.AttributeRequest{
+			Name:     attr.Name,
+			Optional: attr.Optional,
+		})
+	}
 	if secretExists {
 		// get crypto material from secret
 		certPemBytes := secret.Data["cert.pem"]
@@ -206,14 +221,41 @@ func (r *FabricIdentityReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 					Name:       fabricIdentity.Spec.Caname,
 					MSPID:      fabricIdentity.Spec.MSPID,
 					Hosts:      []string{},
-					Attributes: []*api.AttributeRequest{},
+					Attributes: requests,
 				},
 				string(utils.EncodeX509Certificate(x509Cert)),
 				pk,
 			)
+			authenticationFailure := false
 			if err != nil {
-				r.setConditionStatus(ctx, fabricIdentity, hlfv1alpha1.FailedStatus, false, err, false)
-				return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricIdentity)
+				if strings.Contains(err.Error(), "Authentication failure") {
+					authenticationFailure = true
+				} else {
+					r.setConditionStatus(ctx, fabricIdentity, hlfv1alpha1.FailedStatus, false, err, false)
+					return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricIdentity)
+				}
+			}
+			if authenticationFailure {
+				r.Log.Info(fmt.Sprintf("Re enroll failed because of credentials, falling back to enroll"))
+				// just enroll the user
+				x509Cert, pk, rootCert, err = certs.EnrollUser(certs.EnrollUserRequest{
+					TLSCert:    string(tlsCert),
+					URL:        fmt.Sprintf("https://%s:%d", fabricIdentity.Spec.Cahost, fabricIdentity.Spec.Caport),
+					Name:       fabricIdentity.Spec.Caname,
+					MSPID:      fabricIdentity.Spec.MSPID,
+					User:       fabricIdentity.Spec.Enrollid,
+					Secret:     fabricIdentity.Spec.Enrollsecret,
+					Hosts:      []string{},
+					Attributes: requests,
+				})
+				if err != nil {
+					if strings.Contains(err.Error(), "Authentication failure") {
+						r.setConditionStatus(ctx, fabricIdentity, hlfv1alpha1.FailedStatus, false, errors.New("enroll secret is not correct"), false)
+						return r.updateCRStatusOrFailReconcileWithRequeue(ctx, r.Log, fabricIdentity, false, 0*time.Second)
+					}
+					r.setConditionStatus(ctx, fabricIdentity, hlfv1alpha1.FailedStatus, false, err, false)
+					return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricIdentity)
+				}
 			}
 
 		}
@@ -226,7 +268,7 @@ func (r *FabricIdentityReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 			User:       fabricIdentity.Spec.Enrollid,
 			Secret:     fabricIdentity.Spec.Enrollsecret,
 			Hosts:      []string{},
-			Attributes: []*api.AttributeRequest{},
+			Attributes: requests,
 		})
 		if err != nil {
 			if strings.Contains(err.Error(), "Authentication failure") {

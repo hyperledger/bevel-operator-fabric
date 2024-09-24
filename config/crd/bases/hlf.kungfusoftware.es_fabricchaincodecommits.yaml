@@ -16,7 +16,7 @@ spec:
     shortNames:
     - fabricchaincodecommit
     singular: fabricchaincodecommit
-  scope: Namespaced
+  scope: Cluster
   versions:
   - additionalPrinterColumns:
     - jsonPath: .status.status

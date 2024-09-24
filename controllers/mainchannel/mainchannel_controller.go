@@ -14,7 +14,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/SmartBFT-Go/consensus/pkg/types"
 	"github.com/go-logr/logr"
 	"github.com/golang/protobuf/proto"
 	"github.com/hyperledger/fabric-config/configtx"
@@ -221,7 +220,15 @@ func (r *FabricMainChannelReconciler) Reconcile(ctx context.Context, req ctrl.Re
 	}
 	var blockBytes []byte
 
-	channelBlock, err := resClient.QueryConfigBlockFromOrderer(fabricMainChannel.Spec.Name, resmgmtOptions...)
+	var channelBlock *cb.Block
+	for i := 0; i < 5; i++ {
+		channelBlock, err = resClient.QueryConfigBlockFromOrderer(fabricMainChannel.Spec.Name, resmgmtOptions...)
+		if err == nil {
+			break
+		}
+		log.Warnf("Attempt %d failed to query config block from orderer: %v retrying in 1 second", i+1, err)
+		time.Sleep(1 * time.Second) // Sleep for a bit before retrying
+	}
 	if err == nil {
 		log.Infof("Channel %s already exists", fabricMainChannel.Spec.Name)
 		blockBytes, err = proto.Marshal(channelBlock)
@@ -448,6 +455,7 @@ func (r *FabricMainChannelReconciler) Reconcile(ctx context.Context, req ctrl.Re
 	currentConfigTx := configtx.New(cfgBlock)
 	newConfigTx, err := r.mapToConfigTX(fabricMainChannel)
 	if err != nil {
+		log.Errorf("Error mapping channel to configtx channel: %v", err)
 		r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, errors.Wrapf(err, "error mapping channel to configtx channel"), false)
 		return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricMainChannel)
 	}
@@ -457,8 +465,11 @@ func (r *FabricMainChannelReconciler) Reconcile(ctx context.Context, req ctrl.Re
 		r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, errors.Wrapf(err, "error converting block to JSON"), false)
 		return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricMainChannel)
 	}
-	log.Debug(fmt.Sprintf("Config block main channel: %s", buf2.String()))
-	log.Debug(fmt.Sprintf("ConfigTX: %v", newConfigTx))
+	// ordererConfig, err := currentConfigTx.Orderer().Configuration()
+	// if err != nil {
+	// 	r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, errors.Wrapf(err, "failed to get orderer configuration"), false)
+	// 	return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricMainChannel)
+	// }
 	err = updateApplicationChannelConfigTx(currentConfigTx, newConfigTx)
 	if err != nil {
 		r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, errors.Wrapf(err, "failed to update application channel config"), false)
@@ -553,6 +564,129 @@ func (r *FabricMainChannelReconciler) Reconcile(ctx context.Context, req ctrl.Re
 			resmgmt.WithConfigSignatures(configSignatures...),
 		}
 		saveChannelOpts = append(saveChannelOpts, resmgmtOptions...)
+		_ = saveChannelOpts
+		_ = configUpdateReader
+		// saveChannelResponse, err := resClient.SaveChannel(
+		// 	resmgmt.SaveChannelRequest{
+		// 		ChannelID:         fabricMainChannel.Spec.Name,
+		// 		ChannelConfig:     configUpdateReader,
+		// 		SigningIdentities: []msp.SigningIdentity{},
+		// 	},
+		// 	saveChannelOpts...,
+		// )
+		// if err != nil {
+		// 	r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, errors.Wrapf(err, "error saving application configuration"), false)
+		// 	return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricMainChannel)
+		// }
+		// log.Infof("Application configuration updated with transaction ID: %s", saveChannelResponse.TransactionID)
+	}
+	currentConfigTx = configtx.New(cfgBlock)
+	newConfigTx, err = r.mapToConfigTX(fabricMainChannel)
+	if err != nil {
+		r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, errors.Wrapf(err, "error mapping channel to configtx channel"), false)
+		return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricMainChannel)
+	}
+	err = updateOrdererChannelConfigTx(currentConfigTx, newConfigTx)
+	if err != nil {
+		r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, errors.Wrapf(err, "failed to update application channel config"), false)
+		return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricMainChannel)
+	}
+	configUpdate, err = resmgmt.CalculateConfigUpdate(fabricMainChannel.Spec.Name, cfgBlock, currentConfigTx.UpdatedConfig())
+	if err != nil {
+		if !strings.Contains(err.Error(), "no differences detected between original and updated config") {
+			r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, errors.Wrapf(err, "error calculating config update"), false)
+			return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricMainChannel)
+		}
+		log.Infof("No differences detected between original and updated config")
+	} else {
+		channelConfigBytes, err := CreateConfigUpdateEnvelope(fabricMainChannel.Spec.Name, configUpdate)
+		if err != nil {
+			r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, errors.Wrapf(err, "error creating config update envelope"), false)
+			return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricMainChannel)
+		}
+		var buf2 bytes.Buffer
+		err = protolator.DeepMarshalJSON(&buf2, cfgBlock)
+		if err != nil {
+			r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, errors.Wrapf(err, "error converting block to JSON"), false)
+			return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricMainChannel)
+		}
+		configSignatures := []*cb.ConfigSignature{}
+		for _, adminOrderer := range fabricMainChannel.Spec.AdminOrdererOrganizations {
+			configUpdateReader := bytes.NewReader(channelConfigBytes)
+			identityName := fmt.Sprintf("%s-sign", adminOrderer.MSPID)
+			idConfig, ok := fabricMainChannel.Spec.Identities[identityName]
+			if !ok {
+				r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, fmt.Errorf("identity not found for MSPID %s", identityName), false)
+				return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricMainChannel)
+			}
+			secret, err := clientSet.CoreV1().Secrets(idConfig.SecretNamespace).Get(ctx, idConfig.SecretName, v1.GetOptions{})
+			if err != nil {
+				r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, err, false)
+				return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricMainChannel)
+			}
+			secretData, ok := secret.Data[idConfig.SecretKey]
+			if !ok {
+				r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, fmt.Errorf("secret key %s not found", idConfig.SecretKey), false)
+				return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricMainChannel)
+			}
+			id := &identity{}
+			err = yaml.Unmarshal(secretData, id)
+			if err != nil {
+				r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, err, false)
+				return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricMainChannel)
+			}
+			sdkConfig, err := sdk.Config()
+			if err != nil {
+				r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, err, false)
+				return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricMainChannel)
+			}
+			cryptoConfig := cryptosuite.ConfigFromBackend(sdkConfig)
+			cryptoSuite, err := sw.GetSuiteByConfig(cryptoConfig)
+			if err != nil {
+				r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, err, false)
+				return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricMainChannel)
+			}
+			userStore := mspimpl.NewMemoryUserStore()
+			endpointConfig, err := fab.ConfigFromBackend(sdkConfig)
+			if err != nil {
+				r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, err, false)
+				return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricMainChannel)
+			}
+			identityManager, err := mspimpl.NewIdentityManager(adminOrderer.MSPID, userStore, cryptoSuite, endpointConfig)
+			if err != nil {
+				r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, err, false)
+				return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricMainChannel)
+			}
+			signingIdentity, err := identityManager.CreateSigningIdentity(
+				msp.WithPrivateKey([]byte(id.Key.Pem)),
+				msp.WithCert([]byte(id.Cert.Pem)),
+			)
+			if err != nil {
+				r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, err, false)
+				return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricMainChannel)
+			}
+
+			sdkContext := sdk.Context(
+				fabsdk.WithIdentity(signingIdentity),
+				fabsdk.WithOrg(adminOrderer.MSPID),
+			)
+			resClient, err := resmgmt.New(sdkContext)
+			if err != nil {
+				r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, err, false)
+				return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricMainChannel)
+			}
+			signature, err := resClient.CreateConfigSignatureFromReader(signingIdentity, configUpdateReader)
+			if err != nil {
+				r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, err, false)
+				return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricMainChannel)
+			}
+			configSignatures = append(configSignatures, signature)
+		}
+		configUpdateReader := bytes.NewReader(channelConfigBytes)
+		saveChannelOpts := []resmgmt.RequestOption{
+			resmgmt.WithConfigSignatures(configSignatures...),
+		}
+		saveChannelOpts = append(saveChannelOpts, resmgmtOptions...)
 		saveChannelResponse, err := resClient.SaveChannel(
 			resmgmt.SaveChannelRequest{
 				ChannelID:         fabricMainChannel.Spec.Name,
@@ -562,131 +696,10 @@ func (r *FabricMainChannelReconciler) Reconcile(ctx context.Context, req ctrl.Re
 			saveChannelOpts...,
 		)
 		if err != nil {
-			r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, errors.Wrapf(err, "error saving application configuration"), false)
+			r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, errors.Wrapf(err, "error saving orderer configuration"), false)
 			return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricMainChannel)
 		}
-		log.Infof("Application configuration updated with transaction ID: %s", saveChannelResponse.TransactionID)
-		currentConfigTx := configtx.New(cfgBlock)
-		newConfigTx, err := r.mapToConfigTX(fabricMainChannel)
-		if err != nil {
-			r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, errors.Wrapf(err, "error mapping channel to configtx channel"), false)
-			return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricMainChannel)
-		}
-		err = updateOrdererChannelConfigTx(currentConfigTx, newConfigTx)
-		if err != nil {
-			r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, errors.Wrapf(err, "failed to update application channel config"), false)
-			return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricMainChannel)
-		}
-		configUpdate, err := resmgmt.CalculateConfigUpdate(fabricMainChannel.Spec.Name, cfgBlock, currentConfigTx.UpdatedConfig())
-		if err != nil {
-			if !strings.Contains(err.Error(), "no differences detected between original and updated config") {
-				r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, errors.Wrapf(err, "error calculating config update"), false)
-				return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricMainChannel)
-			}
-			log.Infof("No differences detected between original and updated config")
-		} else {
-			channelConfigBytes, err := CreateConfigUpdateEnvelope(fabricMainChannel.Spec.Name, configUpdate)
-			if err != nil {
-				r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, errors.Wrapf(err, "error creating config update envelope"), false)
-				return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricMainChannel)
-			}
-			var buf2 bytes.Buffer
-			err = protolator.DeepMarshalJSON(&buf2, cfgBlock)
-			if err != nil {
-				r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, errors.Wrapf(err, "error converting block to JSON"), false)
-				return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricMainChannel)
-			}
-			configSignatures = []*cb.ConfigSignature{}
-			for _, adminOrderer := range fabricMainChannel.Spec.AdminOrdererOrganizations {
-				configUpdateReader := bytes.NewReader(channelConfigBytes)
-				identityName := fmt.Sprintf("%s-sign", adminOrderer.MSPID)
-				idConfig, ok := fabricMainChannel.Spec.Identities[identityName]
-				if !ok {
-					r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, fmt.Errorf("identity not found for MSPID %s", identityName), false)
-					return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricMainChannel)
-				}
-				secret, err := clientSet.CoreV1().Secrets(idConfig.SecretNamespace).Get(ctx, idConfig.SecretName, v1.GetOptions{})
-				if err != nil {
-					r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, err, false)
-					return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricMainChannel)
-				}
-				secretData, ok := secret.Data[idConfig.SecretKey]
-				if !ok {
-					r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, fmt.Errorf("secret key %s not found", idConfig.SecretKey), false)
-					return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricMainChannel)
-				}
-				id := &identity{}
-				err = yaml.Unmarshal(secretData, id)
-				if err != nil {
-					r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, err, false)
-					return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricMainChannel)
-				}
-				sdkConfig, err := sdk.Config()
-				if err != nil {
-					r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, err, false)
-					return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricMainChannel)
-				}
-				cryptoConfig := cryptosuite.ConfigFromBackend(sdkConfig)
-				cryptoSuite, err := sw.GetSuiteByConfig(cryptoConfig)
-				if err != nil {
-					r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, err, false)
-					return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricMainChannel)
-				}
-				userStore := mspimpl.NewMemoryUserStore()
-				endpointConfig, err := fab.ConfigFromBackend(sdkConfig)
-				if err != nil {
-					r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, err, false)
-					return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricMainChannel)
-				}
-				identityManager, err := mspimpl.NewIdentityManager(adminOrderer.MSPID, userStore, cryptoSuite, endpointConfig)
-				if err != nil {
-					r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, err, false)
-					return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricMainChannel)
-				}
-				signingIdentity, err := identityManager.CreateSigningIdentity(
-					msp.WithPrivateKey([]byte(id.Key.Pem)),
-					msp.WithCert([]byte(id.Cert.Pem)),
-				)
-				if err != nil {
-					r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, err, false)
-					return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricMainChannel)
-				}
-
-				sdkContext := sdk.Context(
-					fabsdk.WithIdentity(signingIdentity),
-					fabsdk.WithOrg(adminOrderer.MSPID),
-				)
-				resClient, err := resmgmt.New(sdkContext)
-				if err != nil {
-					r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, err, false)
-					return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricMainChannel)
-				}
-				signature, err := resClient.CreateConfigSignatureFromReader(signingIdentity, configUpdateReader)
-				if err != nil {
-					r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, err, false)
-					return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricMainChannel)
-				}
-				configSignatures = append(configSignatures, signature)
-			}
-			configUpdateReader = bytes.NewReader(channelConfigBytes)
-			saveChannelOpts = []resmgmt.RequestOption{
-				resmgmt.WithConfigSignatures(configSignatures...),
-			}
-			saveChannelOpts = append(saveChannelOpts, resmgmtOptions...)
-			saveChannelResponse, err = resClient.SaveChannel(
-				resmgmt.SaveChannelRequest{
-					ChannelID:         fabricMainChannel.Spec.Name,
-					ChannelConfig:     configUpdateReader,
-					SigningIdentities: []msp.SigningIdentity{},
-				},
-				saveChannelOpts...,
-			)
-			if err != nil {
-				r.setConditionStatus(ctx, fabricMainChannel, hlfv1alpha1.FailedStatus, false, errors.Wrapf(err, "error saving orderer configuration"), false)
-				return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricMainChannel)
-			}
-			log.Infof("Orderer configuration updated with transaction ID: %s", saveChannelResponse.TransactionID)
-		}
+		log.Infof("Orderer configuration updated with transaction ID: %s", saveChannelResponse.TransactionID)
 	}
 	time.Sleep(2 * time.Second) // wait for orderers to get the new config
 	r.Log.Info(fmt.Sprintf("fetching block every 1 second waiting for orderers to reconcile %s", fabricMainChannel.Name))
@@ -984,6 +997,14 @@ func (r *FabricMainChannelReconciler) mapToConfigTX(channel *hlfv1alpha1.FabricM
 		}
 		//
 
+		leader_rotation := sb.Options_ROTATION_ON
+		if channel.Spec.ChannelConfig.Orderer.SmartBFT.LeaderRotation == sb.Options_ROTATION_ON {
+			leader_rotation = sb.Options_ROTATION_ON
+		} else if channel.Spec.ChannelConfig.Orderer.SmartBFT.LeaderRotation == sb.Options_ROTATION_OFF {
+			leader_rotation = sb.Options_ROTATION_OFF
+		} else {
+			leader_rotation = sb.Options_ROTATION_UNSPECIFIED
+		}
 		smartBFTOptions = &sb.Options{
 			RequestBatchMaxCount:      channel.Spec.ChannelConfig.Orderer.SmartBFT.RequestBatchMaxCount,
 			RequestBatchMaxBytes:      channel.Spec.ChannelConfig.Orderer.SmartBFT.RequestBatchMaxBytes,
@@ -1001,7 +1022,7 @@ func (r *FabricMainChannelReconciler) mapToConfigTX(channel *hlfv1alpha1.FabricM
 			CollectTimeout:            channel.Spec.ChannelConfig.Orderer.SmartBFT.CollectTimeout,
 			SyncOnStart:               channel.Spec.ChannelConfig.Orderer.SmartBFT.SyncOnStart,
 			SpeedUpViewChange:         channel.Spec.ChannelConfig.Orderer.SmartBFT.SpeedUpViewChange,
-			LeaderRotation:            sb.Options_ROTATION_ON,
+			LeaderRotation:            leader_rotation,
 			DecisionsPerLeader:        channel.Spec.ChannelConfig.Orderer.SmartBFT.DecisionsPerLeader,
 		}
 	} else if channel.Spec.ChannelConfig.Orderer.OrdererType == hlfv1alpha1.OrdererConsensusEtcdraft {
@@ -1029,7 +1050,6 @@ func (r *FabricMainChannelReconciler) mapToConfigTX(channel *hlfv1alpha1.FabricM
 		return configtx.Channel{}, fmt.Errorf("orderer type %s not supported", ordererType)
 	}
 	log.Infof("Orderer type: %s", ordererType)
-	log.Infof("Consenter mapping: %v", consenterMapping)
 	ordConfigtx := configtx.Orderer{
 		OrdererType:      ordererType,
 		Organizations:    ordererOrgs,
@@ -1133,11 +1153,14 @@ func (r *FabricMainChannelReconciler) mapToConfigTX(channel *hlfv1alpha1.FabricM
 		Organizations: peerOrgs,
 		Capabilities:  channel.Spec.ChannelConfig.Application.Capabilities,
 		Policies:      applicationPolicies,
-		ACLs:          defaultACLs(),
+		ACLs:          defaultApplicationACLs(),
 	}
 
 	if channel.Spec.ChannelConfig.Application != nil && channel.Spec.ChannelConfig.Application.Policies != nil {
 		application.Policies = r.mapPolicy(*channel.Spec.ChannelConfig.Application.Policies)
+	}
+	if channel.Spec.ChannelConfig.Application != nil && channel.Spec.ChannelConfig.Application.ACLs != nil {
+		application.ACLs = *channel.Spec.ChannelConfig.Application.ACLs
 	}
 	channelConfig := configtx.Channel{
 		Orderer:      ordConfigtx,
@@ -1362,34 +1385,44 @@ func updateApplicationChannelConfigTx(currentConfigTX configtx.ConfigTx, newConf
 	if err != nil {
 		return errors.Wrap(err, "failed to set application policies")
 	}
-	err = currentConfigTX.Application().SetACLs(
-		newConfigTx.Application.ACLs,
-	)
-	if err != nil {
-		return errors.Wrapf(err, "failed to set ACLs")
+	if newConfigTx.Application.ACLs != nil {
+		var acls []string
+		for key := range newConfigTx.Application.ACLs {
+			acls = append(acls, key)
+		}
+		err = currentConfigTX.Application().RemoveACLs(acls)
+		if err != nil {
+			return errors.Wrapf(err, "failed to remove ACLs")
+		}
+		err = currentConfigTX.Application().SetACLs(
+			newConfigTx.Application.ACLs,
+		)
+		if err != nil {
+			return errors.Wrapf(err, "failed to set ACLs")
+		}
+	} else {
+		err = currentConfigTX.Application().SetACLs(
+			defaultApplicationACLs(),
+		)
+		if err != nil {
+			return errors.Wrapf(err, "failed to set ACLs")
+		}
+	}
+
+	for _, capability := range app.Capabilities {
+		err = currentConfigTX.Application().RemoveCapability(capability)
+		if err != nil {
+			return errors.Wrapf(err, "failed to remove capability %s", capability)
+		}
+	}
+
+	for _, capability := range newConfigTx.Application.Capabilities {
+		err = currentConfigTX.Application().AddCapability(capability)
+		if err != nil {
+			return errors.Wrapf(err, "failed to add capability %s", capability)
+		}
 	}
 	return nil
-}
-
-var DefaultConfig = sb.Options{
-	RequestBatchMaxCount:      types.DefaultConfig.RequestBatchMaxCount,
-	RequestBatchMaxBytes:      types.DefaultConfig.RequestBatchMaxBytes,
-	RequestBatchMaxInterval:   types.DefaultConfig.RequestBatchMaxInterval.String(),
-	IncomingMessageBufferSize: types.DefaultConfig.IncomingMessageBufferSize,
-	RequestPoolSize:           types.DefaultConfig.RequestPoolSize,
-	RequestForwardTimeout:     types.DefaultConfig.RequestForwardTimeout.String(),
-	RequestComplainTimeout:    types.DefaultConfig.RequestComplainTimeout.String(),
-	RequestAutoRemoveTimeout:  types.DefaultConfig.RequestAutoRemoveTimeout.String(),
-	ViewChangeResendInterval:  types.DefaultConfig.ViewChangeResendInterval.String(),
-	ViewChangeTimeout:         types.DefaultConfig.ViewChangeTimeout.String(),
-	LeaderHeartbeatTimeout:    types.DefaultConfig.LeaderHeartbeatTimeout.String(),
-	LeaderHeartbeatCount:      types.DefaultConfig.LeaderHeartbeatCount,
-	CollectTimeout:            types.DefaultConfig.CollectTimeout.String(),
-	SyncOnStart:               types.DefaultConfig.SyncOnStart,
-	SpeedUpViewChange:         types.DefaultConfig.SpeedUpViewChange,
-	LeaderRotation:            sb.Options_ROTATION_ON,
-	DecisionsPerLeader:        3,
-	RequestMaxBytes:           10 * 1024,
 }
 
 func updateOrdererChannelConfigTx(currentConfigTX configtx.ConfigTx, newConfigTx configtx.Channel) error {
@@ -1403,13 +1436,13 @@ func updateOrdererChannelConfigTx(currentConfigTX configtx.ConfigTx, newConfigTx
 	if err != nil {
 		return errors.Wrapf(err, "failed to get application configuration")
 	}
+	log.Infof("New config tx: %v", newConfigTx.Orderer)
 	err = currentConfigTX.Orderer().SetConfiguration(newConfigTx.Orderer)
 	if err != nil {
 		return errors.Wrapf(err, "failed to set orderer configuration")
 	}
 	// update
 	if ord.OrdererType == "BFT" {
-
 		log.Infof("updateOrdererChannelConfigTx: Orderer type: %s", ord.OrdererType)
 		// update policies but blockValidation
 		err = currentConfigTX.Orderer().SetPolicy("Admins", newConfigTx.Orderer.Policies["Admins"])
@@ -1441,14 +1474,15 @@ func updateOrdererChannelConfigTx(currentConfigTX configtx.ConfigTx, newConfigTx
 		case orderer.ConsensusStateMaintenance:
 			state = orderer.ConsensusStateMaintenance
 		}
+		log.Infof("updateOrdererChannelConfigTx: Setting consensus state to %s", state)
 		err := currentConfigTX.Orderer().SetConsensusState(state)
 		if err != nil {
 			return err
 		}
-
+		log.Infof("updateOrdererChannelConfigTx: Consensus state set to %s", state)
+	} else {
+		log.Infof("updateOrdererChannelConfigTx: Consensus state is not set")
 	}
-	log.Infof("Current orderer organizations %v", ord.Organizations)
-	log.Infof("New orderer organizations %v", newConfigTx.Orderer.Organizations)
 	for _, channelOrdOrg := range ord.Organizations {
 		deleted := true
 		for _, organization := range newConfigTx.Orderer.Organizations {
@@ -1570,7 +1604,10 @@ func updateOrdererChannelConfigTx(currentConfigTX configtx.ConfigTx, newConfigTx
 				ServerTlsCert: consenter.ServerTlsCert,
 			})
 		}
-		currentConfigTX.Orderer().SetConsenterMapping(consenterMapping)
+		err = currentConfigTX.Orderer().SetConsenterMapping(consenterMapping)
+		if err != nil {
+			return errors.Wrapf(err, "failed to set consenter mapping")
+		}
 	}
 
 	err = currentConfigTX.Orderer().BatchSize().SetMaxMessageCount(
@@ -1595,10 +1632,23 @@ func updateOrdererChannelConfigTx(currentConfigTX configtx.ConfigTx, newConfigTx
 	if err != nil {
 		return errors.Wrapf(err, "failed to set batch timeout")
 	}
+
+	for _, capability := range newConfigTx.Orderer.Capabilities {
+		err = currentConfigTX.Orderer().RemoveCapability(capability)
+		if err != nil {
+			return errors.Wrapf(err, "failed to remove capability %s", capability)
+		}
+	}
+	for _, capability := range newConfigTx.Orderer.Capabilities {
+		err = currentConfigTX.Orderer().AddCapability(capability)
+		if err != nil {
+			return errors.Wrapf(err, "failed to add capability %s", capability)
+		}
+	}
 	return nil
 }
 
-func defaultACLs() map[string]string {
+func defaultApplicationACLs() map[string]string {
 	return map[string]string{
 		"_lifecycle/CheckCommitReadiness": "/Channel/Application/Writers",
 

@@ -1962,10 +1962,11 @@ type InstalledPeer struct {
 }
 
 // +genclient
+// +genclient:nonNamespaced
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 // +k8s:defaulter-gen=true
 // +kubebuilder:subresource:status
-// +kubebuilder:resource:scope=Namespaced,shortName=fabricchaincodeinstall,singular=fabricchaincodeinstall
+// +kubebuilder:resource:scope=Cluster,shortName=fabricchaincodeinstall,singular=fabricchaincodeinstall
 // +kubebuilder:printcolumn:name="State",type="string",JSONPath=".status.status"
 // +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
 // +kubebuilder:object:root=true
@@ -2093,10 +2094,11 @@ type FabricChaincodeApproveStatus struct {
 }
 
 // +genclient
+// +genclient:nonNamespaced
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 // +k8s:defaulter-gen=true
 // +kubebuilder:subresource:status
-// +kubebuilder:resource:scope=Namespaced,shortName=fabricchaincodeapprove,singular=fabricchaincodeapprove
+// +kubebuilder:resource:scope=Cluster,shortName=fabricchaincodeapprove,singular=fabricchaincodeapprove
 // +kubebuilder:printcolumn:name="State",type="string",JSONPath=".status.status"
 // +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
 // +kubebuilder:object:root=true
@@ -2167,10 +2169,11 @@ type FabricChaincodeCommitStatus struct {
 }
 
 // +genclient
+// +genclient:nonNamespaced
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 // +k8s:defaulter-gen=true
 // +kubebuilder:subresource:status
-// +kubebuilder:resource:scope=Namespaced,shortName=fabricchaincodecommit,singular=fabricchaincodecommit
+// +kubebuilder:resource:scope=Cluster,shortName=fabricchaincodecommit,singular=fabricchaincodecommit
 // +kubebuilder:printcolumn:name="State",type="string",JSONPath=".status.status"
 // +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
 // +kubebuilder:object:root=true
@@ -2242,10 +2245,28 @@ type FabricIdentitySpec struct {
 	Enrollsecret string `json:"enrollsecret"`
 	// +kubebuilder:validation:MinLength=1
 	MSPID string `json:"mspid"`
-
+	// +nullable
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default:={}
+	AttributeRequest []FabricIdentityAttributeRequest `json:"attributeRequest"`
 	// +optional
 	// +nullable
 	Register *FabricIdentityRegister `json:"register"`
+	// +optional
+	// +nullable
+	UpdateCertificateTime *metav1.Time `json:"updateCertificateTime"`
+}
+
+type FabricIdentityAttributeRequest struct {
+	// +kubebuilder:validation:MinLength=1
+	Name string `json:"name"`
+
+	// +nullable
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default:=false
+	Optional bool `json:"optional"`
 }
 
 type FabricIdentityRegister struct {
@@ -2259,8 +2280,25 @@ type FabricIdentityRegister struct {
 	Affiliation string `json:"affiliation"`
 
 	MaxEnrollments int `json:"maxenrollments"`
+	// +nullable
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default:={}
+	Attributes []FabricIdentityAttributes `json:"attributes"`
+	Attrs      []string                   `json:"attrs"`
+}
+type FabricIdentityAttributes struct {
+	// +kubebuilder:validation:MinLength=1
+	Name string `json:"name"`
 
-	Attrs []string `json:"attrs"`
+	// +kubebuilder:validation:MinLength=1
+	Value string `json:"value"`
+
+	// +nullable
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default:=false
+	ECert bool `json:"ecert"`
 }
 
 // FabricMainChannelStatus defines the observed state of FabricMainChannel

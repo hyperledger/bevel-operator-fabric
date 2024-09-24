@@ -43,7 +43,7 @@ import (
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-const chaincodeApproveFinalizer = "finalizer.chaincodeApprove.hlf.kungfusoftware.es"
+const chaincodeApproveFinalizer = "finalizer.chaincodeapprove.hlf.kungfusoftware.es"
 
 type FabricChaincodeApproveReconciler struct {
 	client.Client
@@ -53,7 +53,7 @@ type FabricChaincodeApproveReconciler struct {
 }
 
 func (r *FabricChaincodeApproveReconciler) finalizeChaincodeApprove(reqLogger logr.Logger, m *hlfv1alpha1.FabricChaincodeApprove) error {
-	// TODO: Add any cleanup steps if needed
+	// TODO: no need to do anything when finalizing
 	reqLogger.Info("Successfully finalized ChaincodeApprove")
 	return nil
 }
@@ -77,6 +77,7 @@ func (r *FabricChaincodeApproveReconciler) addFinalizer(reqLogger logr.Logger, m
 
 func (r *FabricChaincodeApproveReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	reqLogger := r.Log.WithValues("hlf", req.NamespacedName)
+	reqLogger.Info("Reconciling ChaincodeApprove")
 	fabricChaincodeApprove := &hlfv1alpha1.FabricChaincodeApprove{}
 
 	err := r.Get(ctx, req.NamespacedName, fabricChaincodeApprove)
@@ -171,40 +172,89 @@ func (r *FabricChaincodeApproveReconciler) Reconcile(ctx context.Context, req ct
 		collectionConfigs = nil
 	}
 	// get peerName of the first peer, either from peers or externalPeers
-	peerTarget := fabricChaincodeApprove.Spec.Peers[0].Name
-	if len(fabricChaincodeApprove.Spec.ExternalPeers) > 0 {
-		peerTarget = fabricChaincodeApprove.Spec.ExternalPeers[0].URL
-	}
+	var peerTarget string
 	if len(fabricChaincodeApprove.Spec.Peers) > 0 {
 		peerTarget = fmt.Sprintf("%s.%s", fabricChaincodeApprove.Spec.Peers[0].Name, fabricChaincodeApprove.Spec.Peers[0].Namespace)
+	} else if len(fabricChaincodeApprove.Spec.ExternalPeers) > 0 {
+		peerTarget = fabricChaincodeApprove.Spec.ExternalPeers[0].URL
 	}
 	if peerTarget == "" {
 		r.setConditionStatus(ctx, fabricChaincodeApprove, hlfv1alpha1.FailedStatus, false, errors.New("peerTarget is empty"), false)
 		return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricChaincodeApprove)
 	}
+	if fabricChaincodeApprove.Spec.Sequence > 1 {
+		info, err := resClient.LifecycleQueryCommittedCC(
+			fabricChaincodeApprove.Spec.ChannelName,
+			resmgmt.LifecycleQueryCommittedCCRequest{
+				Name: fabricChaincodeApprove.Spec.ChaincodeName,
+			},
+			resmgmt.WithTargetEndpoints(peerTarget),
+		)
+
+		if err != nil {
+			r.setConditionStatus(ctx, fabricChaincodeApprove, hlfv1alpha1.FailedStatus, false, errors.Wrapf(err, "failed to query committed chaincode"), false)
+			return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricChaincodeApprove)
+		}
+		log.Infof("info: %+v", info)
+		lastSequence := info[0].Sequence
+		if fabricChaincodeApprove.Spec.Sequence <= lastSequence {
+			log.Infof("Sequence %d already committed", fabricChaincodeApprove.Spec.Sequence)
+			fabricChaincodeApprove.Status.Status = hlfv1alpha1.RunningStatus
+			fabricChaincodeApprove.Status.Message = "Chaincode already committed"
+			fabricChaincodeApprove.Status.Conditions.SetCondition(status.Condition{
+				Type:   status.ConditionType(hlfv1alpha1.RunningStatus),
+				Status: corev1.ConditionTrue,
+			})
+			return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricChaincodeApprove)
+		}
+	}
+	approveCCRequest := resmgmt.LifecycleApproveCCRequest{
+		Name:              fabricChaincodeApprove.Spec.ChaincodeName,
+		Version:           fabricChaincodeApprove.Spec.Version,
+		PackageID:         fabricChaincodeApprove.Spec.PackageID,
+		Sequence:          fabricChaincodeApprove.Spec.Sequence,
+		EndorsementPlugin: "escc",
+		ValidationPlugin:  "vscc",
+		SignaturePolicy:   sp,
+		CollectionConfig:  collectionConfigs,
+		InitRequired:      fabricChaincodeApprove.Spec.InitRequired,
+	}
+	mustApprove := true
+	// get current approved chaincode
+	currentApprovedCC, err := resClient.LifecycleQueryApprovedCC(
+		fabricChaincodeApprove.Spec.ChannelName,
+		resmgmt.LifecycleQueryApprovedCCRequest{
+			Name:     fabricChaincodeApprove.Spec.ChaincodeName,
+			Sequence: fabricChaincodeApprove.Spec.Sequence,
+		},
+		resmgmt.WithTargetEndpoints(peerTarget),
+	)
+	if err == nil {
+		mustApprove = currentApprovedCC.PackageID != fabricChaincodeApprove.Spec.PackageID || currentApprovedCC.Sequence != fabricChaincodeApprove.Spec.Sequence
+	}
+
+	log.Infof("currentApprovedCC: %+v", currentApprovedCC)
+	log.Infof("approveCCRequest: %+v", approveCCRequest)
+
+	log.Infof("mustApprove: %t", mustApprove)
+	// compare currentApprovedCC with approveCCRequest and decide if we need to approve again
+	if !mustApprove {
+		r.setConditionStatus(ctx, fabricChaincodeApprove, hlfv1alpha1.RunningStatus, false, errors.New("chaincode already approved"), false)
+		return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricChaincodeApprove)
+	}
 
 	txID, err := resClient.LifecycleApproveCC(
 		fabricChaincodeApprove.Spec.ChannelName,
-		resmgmt.LifecycleApproveCCRequest{
-			Name:              fabricChaincodeApprove.Spec.ChaincodeName,
-			Version:           fabricChaincodeApprove.Spec.Version,
-			PackageID:         fabricChaincodeApprove.Spec.PackageID,
-			Sequence:          fabricChaincodeApprove.Spec.Sequence,
-			EndorsementPlugin: "escc",
-			ValidationPlugin:  "vscc",
-			SignaturePolicy:   sp,
-			CollectionConfig:  collectionConfigs,
-			InitRequired:      fabricChaincodeApprove.Spec.InitRequired,
-		},
+		approveCCRequest,
 		resmgmt.WithTargetEndpoints(peerTarget),
 		resmgmt.WithTimeout(fab2.ResMgmt, 20*time.Minute),
 		resmgmt.WithTimeout(fab2.PeerResponse, 20*time.Minute),
 	)
-	if err != nil && !strings.Contains(err.Error(), "attempted to redefine uncommitted") {
-		r.setConditionStatus(ctx, fabricChaincodeApprove, hlfv1alpha1.FailedStatus, false, err, false)
+	if err != nil && (!strings.Contains(err.Error(), "attempted to redefine uncommitted") && !strings.Contains(err.Error(), "attempted to redefine the current committed")) {
+		r.setConditionStatus(ctx, fabricChaincodeApprove, hlfv1alpha1.FailedStatus, false, errors.Wrapf(err, "failed to approve chaincode"), false)
 		return r.updateCRStatusOrFailReconcile(ctx, r.Log, fabricChaincodeApprove)
 	}
-
+	r.Log.Info(fmt.Sprintf("ChaincodeApprove %s approved: %s", fabricChaincodeApprove.Name, txID))
 	fabricChaincodeApprove.Status.Status = hlfv1alpha1.RunningStatus
 	fabricChaincodeApprove.Status.Message = "Chaincode approved"
 	if txID != "" {
@@ -264,14 +314,21 @@ func (r *FabricChaincodeApproveReconciler) updateCRStatusOrFailReconcile(ctx con
 	reconcile.Result, error) {
 	if err := r.Status().Update(ctx, p); err != nil {
 		log.Error(err, fmt.Sprintf("%v failed to update the application status", ErrClientK8s))
-		return reconcile.Result{}, err
+		return reconcile.Result{
+			Requeue:      false,
+			RequeueAfter: 0,
+		}, nil
 	}
 	if p.Status.Status == hlfv1alpha1.FailedStatus {
 		return reconcile.Result{
 			RequeueAfter: 1 * time.Minute,
 		}, nil
 	}
-	return reconcile.Result{}, nil
+	r.Log.Info(fmt.Sprintf("Requeueing after 1 minute for %s", p.Name))
+	return reconcile.Result{
+		Requeue:      false,
+		RequeueAfter: 0,
+	}, nil
 }
 
 func (r *FabricChaincodeApproveReconciler) SetupWithManager(mgr ctrl.Manager) error {

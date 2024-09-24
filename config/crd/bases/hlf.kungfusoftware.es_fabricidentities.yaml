@@ -45,6 +45,21 @@ spec:
           spec:
             description: FabricIdentitySpec defines the desired state of FabricIdentity
             properties:
+              attributeRequest:
+                items:
+                  properties:
+                    name:
+                      minLength: 1
+                      type: string
+                    optional:
+                      default: false
+                      nullable: true
+                      type: boolean
+                  required:
+                  - name
+                  type: object
+                nullable: true
+                type: array
               cahost:
                 minLength: 1
                 type: string
@@ -88,6 +103,25 @@ spec:
                 properties:
                   affiliation:
                     type: string
+                  attributes:
+                    items:
+                      properties:
+                        ecert:
+                          default: false
+                          nullable: true
+                          type: boolean
+                        name:
+                          minLength: 1
+                          type: string
+                        value:
+                          minLength: 1
+                          type: string
+                      required:
+                      - name
+                      - value
+                      type: object
+                    nullable: true
+                    type: array
                   attrs:
                     items:
                       type: string
@@ -111,6 +145,10 @@ spec:
                 - maxenrollments
                 - type
                 type: object
+              updateCertificateTime:
+                format: date-time
+                nullable: true
+                type: string
             required:
             - cahost
             - caname
