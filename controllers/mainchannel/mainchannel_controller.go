@@ -580,7 +580,6 @@ func (r *FabricMainChannelReconciler) updateChannelConfig(ctx context.Context, f
 	}
 	isMaintenanceMode := ordererConfig.State == orderer.ConsensusStateMaintenance
 	switchingToMaintenanceMode := !isMaintenanceMode && newConfigTx.Orderer.State == orderer.ConsensusStateMaintenance
-	r.Log.Info("Is maintenance mode", "isMaintenanceMode", isMaintenanceMode, "switchingToMaintenanceMode", switchingToMaintenanceMode)
 
 	if !isMaintenanceMode && !switchingToMaintenanceMode {
 		if err := updateApplicationChannelConfigTx(currentConfigTx, newConfigTx); err != nil {
