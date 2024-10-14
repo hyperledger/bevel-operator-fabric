@@ -362,7 +362,8 @@ jobs:
           kubectl get fabricmainchannels.hlf.kungfusoftware.es -A -o=custom-columns='NAME:metadata.name,NAMESPACE:metadata.namespace,STATE:status.status,MESSAGE:status.message'
           kubectl get fabricfollowerchannels.hlf.kungfusoftware.es -A -o=custom-columns='NAME:metadata.name,NAMESPACE:metadata.namespace,STATE:status.status,MESSAGE:status.message'
           kubectl get configmap coredns -n kube-system -o yaml
-
+          echo "Logs for hlf-operator deployment:"
+          kubectl logs -l app.kubernetes.io/name=hlf-operator -c manager --tail 2500 
           kubectl get fabricmainchannels  -o yaml
           kubectl get fabricfollowerchannels  -o yaml
 
