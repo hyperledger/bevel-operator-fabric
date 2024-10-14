@@ -8,7 +8,7 @@
 package fake
 
 import (
-	v1alpha1 "github.com/minio/operator/pkg/client/clientset/versioned/typed/hlf.kungfusoftware.es/v1alpha1"
+	v1alpha1 "github.com/kfsoftware/hlf-operator/pkg/client/clientset/versioned/typed/hlf.kungfusoftware.es/v1alpha1"
 	rest "k8s.io/client-go/rest"
 	testing "k8s.io/client-go/testing"
 )

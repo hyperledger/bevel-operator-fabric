@@ -1,11 +1,11 @@
 package tests
 
 import (
-	hlfv1alpha1 "github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
 	"github.com/kfsoftware/hlf-operator/controllers/ca"
 	"github.com/kfsoftware/hlf-operator/controllers/ordnode"
 	"github.com/kfsoftware/hlf-operator/controllers/ordservice"
 	"github.com/kfsoftware/hlf-operator/controllers/peer"
+	hlfv1alpha1 "github.com/kfsoftware/hlf-operator/pkg/apis/hlf.kungfusoftware.es/v1alpha1"
 	ctrl "sigs.k8s.io/controller-runtime"
 	k8sconfig "sigs.k8s.io/controller-runtime/pkg/client/config"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"

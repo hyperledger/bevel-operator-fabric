@@ -12,9 +12,9 @@ import (
 	sync "sync"
 	time "time"
 
-	versioned "github.com/minio/operator/pkg/client/clientset/versioned"
-	hlfkungfusoftwarees "github.com/minio/operator/pkg/client/informers/externalversions/hlf.kungfusoftware.es"
-	internalinterfaces "github.com/minio/operator/pkg/client/informers/externalversions/internalinterfaces"
+	versioned "github.com/kfsoftware/hlf-operator/pkg/client/clientset/versioned"
+	hlfkungfusoftwarees "github.com/kfsoftware/hlf-operator/pkg/client/informers/externalversions/hlf.kungfusoftware.es"
+	internalinterfaces "github.com/kfsoftware/hlf-operator/pkg/client/informers/externalversions/internalinterfaces"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"

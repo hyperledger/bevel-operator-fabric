@@ -5,7 +5,7 @@ set -o nounset
 set -o pipefail
 
 SCRIPT_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
-ROOT_PKG=github.com/minio/operator
+ROOT_PKG=github.com/kfsoftware/hlf-operator
 
 # Grab code-generator version from go.sum
 CODEGEN_VERSION=$(grep 'k8s.io/code-generator' go.mod | awk '{print $2}' | sed 's/\/go.mod//g' | head -1)

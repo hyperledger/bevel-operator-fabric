@@ -11,7 +11,7 @@ import (
 	"net/http"
 
 	v1alpha1 "github.com/kfsoftware/hlf-operator/pkg/apis/hlf.kungfusoftware.es/v1alpha1"
-	"github.com/minio/operator/pkg/client/clientset/versioned/scheme"
+	"github.com/kfsoftware/hlf-operator/pkg/client/clientset/versioned/scheme"
 	rest "k8s.io/client-go/rest"
 )
 

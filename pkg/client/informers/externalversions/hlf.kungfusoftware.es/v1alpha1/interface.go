@@ -8,7 +8,7 @@
 package v1alpha1
 
 import (
-	internalinterfaces "github.com/minio/operator/pkg/client/informers/externalversions/internalinterfaces"
+	internalinterfaces "github.com/kfsoftware/hlf-operator/pkg/client/informers/externalversions/internalinterfaces"
 )
 
 // Interface provides access to all the informers in this group version.

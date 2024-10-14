@@ -48,7 +48,7 @@ jobs:
 
       - name: Install operator CRDs
         run: |
-          go install sigs.k8s.io/controller-tools/cmd/controller-gen@v0.14.0
+          go install sigs.k8s.io/controller-tools/cmd/controller-gen@v0.16.4
           make generate manifests install
       - name: Install Istio
         run: |

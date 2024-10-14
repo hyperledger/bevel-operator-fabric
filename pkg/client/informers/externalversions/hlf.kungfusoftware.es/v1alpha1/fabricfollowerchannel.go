@@ -12,9 +12,9 @@ import (
 	time "time"
 
 	hlfkungfusoftwareesv1alpha1 "github.com/kfsoftware/hlf-operator/pkg/apis/hlf.kungfusoftware.es/v1alpha1"
-	versioned "github.com/minio/operator/pkg/client/clientset/versioned"
-	internalinterfaces "github.com/minio/operator/pkg/client/informers/externalversions/internalinterfaces"
-	v1alpha1 "github.com/minio/operator/pkg/client/listers/hlf.kungfusoftware.es/v1alpha1"
+	versioned "github.com/kfsoftware/hlf-operator/pkg/client/clientset/versioned"
+	internalinterfaces "github.com/kfsoftware/hlf-operator/pkg/client/informers/externalversions/internalinterfaces"
+	v1alpha1 "github.com/kfsoftware/hlf-operator/pkg/client/listers/hlf.kungfusoftware.es/v1alpha1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	watch "k8s.io/apimachinery/pkg/watch"

@@ -3,7 +3,7 @@ package ordservice
 import (
 	"context"
 	"github.com/go-logr/logr"
-	hlfv1alpha1 "github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
+	hlfv1alpha1 "github.com/kfsoftware/hlf-operator/pkg/apis/hlf.kungfusoftware.es/v1alpha1"
 	"github.com/kfsoftware/hlf-operator/pkg/status"
 	log "github.com/sirupsen/logrus"
 	appsv1 "k8s.io/api/apps/v1"

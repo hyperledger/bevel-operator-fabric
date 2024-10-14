@@ -1,11 +1,9 @@
-
 ---
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.3.0
-  creationTimestamp: null
+    controller-gen.kubebuilder.io/version: v0.16.4
   name: fabricchaincodecommits.hlf.kungfusoftware.es
 spec:
   group: hlf.kungfusoftware.es
@@ -28,35 +26,22 @@ spec:
     name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: FabricChaincodeCommit is the Schema for the hlfs API
         properties:
           apiVersion:
-            description: 'APIVersion defines the versioned schema of this representation
-              of an object. Servers should convert recognized schemas to the latest
-              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
             type: string
           kind:
-            description: 'Kind is a string value representing the REST resource this
-              object represents. Servers may infer this from the endpoint the client
-              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
             type: string
           metadata:
             type: object
           spec:
-            description: FabricChaincodeCommitSpec defines the desired state of FabricChaincodeCommit
             properties:
               chaincodeName:
-                description: ChaincodeName is the name of the chaincode
                 type: string
               channelName:
-                description: Channel is the name of the channel
                 type: string
               endorsementPolicy:
-                description: EndorsementPolicy is the endorsement policy of the chaincode
                 type: string
               externalOrderers:
-                description: ExternalOrderers is the list of external orderers to
-                  use for the approve transaction
                 items:
                   properties:
                     tlsCACert:
@@ -69,8 +54,6 @@ spec:
                   type: object
                 type: array
               externalPeers:
-                description: ExternalPeers is the list of external peers to approve
-                  the chaincode
                 items:
                   properties:
                     tlsCACert:
@@ -83,18 +66,13 @@ spec:
                   type: object
                 type: array
               hlfIdentity:
-                description: HLFIdentity is the identity to use for the approve transaction
                 properties:
                   secretKey:
-                    description: Key inside the secret that holds the private key
-                      and certificate to interact with the network
                     type: string
                   secretName:
-                    description: Secret name
                     type: string
                   secretNamespace:
                     default: default
-                    description: Secret namespace
                     type: string
                 required:
                 - secretKey
@@ -102,16 +80,10 @@ spec:
                 - secretNamespace
                 type: object
               initRequired:
-                description: InitRequired is a flag to indicate if the chaincode requires
-                  initialization
                 type: boolean
               mspID:
-                description: MSPID is the MSP ID of the organization approving the
-                  chaincode
                 type: string
               orderers:
-                description: Orderers is the list of orderers to use for the approve
-                  transaction
                 items:
                   properties:
                     name:
@@ -124,8 +96,6 @@ spec:
                   type: object
                 type: array
               pdc:
-                description: CollectionConfig is the private data collection configuration
-                  of the chaincode
                 items:
                   properties:
                     blockToLive:
@@ -148,14 +118,10 @@ spec:
                     memberOnlyWrite:
                       type: boolean
                     name:
-                      description: Define the structure for private data collections
-                        here This is a placeholder and should be expanded based on
-                        your specific requirements
                       type: string
                     policy:
                       type: string
                     requiredPeerCount:
-                      description: add default
                       format: int32
                       nullable: true
                       type: integer
@@ -168,7 +134,6 @@ spec:
                   type: object
                 type: array
               peers:
-                description: Peers is the list of peers to approve the chaincode
                 items:
                   properties:
                     name:
@@ -181,11 +146,9 @@ spec:
                   type: object
                 type: array
               sequence:
-                description: Sequence is the sequence number of the chaincode definition
                 format: int64
                 type: integer
               version:
-                description: Version is the version of the chaincode to approve
                 type: string
             required:
             - chaincodeName
@@ -198,22 +161,9 @@ spec:
             - version
             type: object
           status:
-            description: FabricChaincodeCommitStatus defines the observed state of
-              FabricChaincodeCommit
             properties:
               conditions:
-                description: Conditions is a set of Condition instances.
                 items:
-                  description: "Condition represents an observation of an object's
-                    state. Conditions are an extension mechanism intended to be used
-                    when the details of an observation are not a priori known or would
-                    not apply to all instances of a given Kind. \n Conditions should
-                    be added to explicitly convey properties that users and components
-                    care about rather than requiring those properties to be inferred
-                    from other observations. Once defined, the meaning of a Condition
-                    can not be changed arbitrarily - it becomes part of the API, and
-                    has the same backwards- and forwards-compatibility concerns of
-                    any other part of the API."
                   properties:
                     lastTransitionTime:
                       format: date-time
@@ -221,20 +171,10 @@ spec:
                     message:
                       type: string
                     reason:
-                      description: ConditionReason is intended to be a one-word, CamelCase
-                        representation of the category of cause of the current status.
-                        It is intended to be used in concise output, such as one-line
-                        kubectl get output, and in summarizing occurrences of causes.
                       type: string
                     status:
                       type: string
                     type:
-                      description: "ConditionType is the type of the condition and
-                        is typically a CamelCased word or short phrase. \n Condition
-                        types should indicate state in the \"abnormal-true\" polarity.
-                        For example, if the condition indicates when a policy is invalid,
-                        the \"is valid\" case is probably the norm, so the condition
-                        should be called \"Invalid\"."
                       type: string
                   required:
                   - status
@@ -244,7 +184,6 @@ spec:
               message:
                 type: string
               status:
-                description: Status of the FabricChaincodeCommit
                 type: string
               transactionID:
                 nullable: true
@@ -259,9 +198,3 @@ spec:
     storage: true
     subresources:
       status: {}
-status:
-  acceptedNames:
-    kind: ""
-    plural: ""
-  conditions: []
-  storedVersions: []

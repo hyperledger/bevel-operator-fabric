@@ -8,10 +8,10 @@
 package fake
 
 import (
-	applyconfiguration "github.com/minio/operator/pkg/client/applyconfiguration"
-	clientset "github.com/minio/operator/pkg/client/clientset/versioned"
-	hlfv1alpha1 "github.com/minio/operator/pkg/client/clientset/versioned/typed/hlf.kungfusoftware.es/v1alpha1"
-	fakehlfv1alpha1 "github.com/minio/operator/pkg/client/clientset/versioned/typed/hlf.kungfusoftware.es/v1alpha1/fake"
+	applyconfiguration "github.com/kfsoftware/hlf-operator/pkg/client/applyconfiguration"
+	clientset "github.com/kfsoftware/hlf-operator/pkg/client/clientset/versioned"
+	hlfv1alpha1 "github.com/kfsoftware/hlf-operator/pkg/client/clientset/versioned/typed/hlf.kungfusoftware.es/v1alpha1"
+	fakehlfv1alpha1 "github.com/kfsoftware/hlf-operator/pkg/client/clientset/versioned/typed/hlf.kungfusoftware.es/v1alpha1/fake"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/discovery"

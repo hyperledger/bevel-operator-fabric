@@ -9,8 +9,8 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/Masterminds/sprig/v3"
-	hlfv1alpha1 "github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
 	"github.com/kfsoftware/hlf-operator/kubectl-hlf/cmd/helpers"
+	hlfv1alpha1 "github.com/kfsoftware/hlf-operator/pkg/apis/hlf.kungfusoftware.es/v1alpha1"
 	operatorv1 "github.com/kfsoftware/hlf-operator/pkg/client/clientset/versioned"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -350,7 +350,6 @@ func GenerateNetworkConfigForChaincodeCommit(chCommit *hlfv1alpha1.FabricChainco
 		NetworkConfig: buf.String(),
 	}, nil
 }
-
 
 func GenerateNetworkConfigForChaincodeInstall(chInstall *hlfv1alpha1.FabricChaincodeInstall, kubeClientset *kubernetes.Clientset, hlfClientSet *operatorv1.Clientset, mspID string) (*NetworkConfigResponse, error) {
 	tmpl, err := template.New("networkConfig").Funcs(sprig.HermeticTxtFuncMap()).Parse(tmplGoConfig)

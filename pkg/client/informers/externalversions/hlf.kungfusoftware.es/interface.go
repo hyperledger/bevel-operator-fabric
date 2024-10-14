@@ -8,8 +8,8 @@
 package hlf
 
 import (
-	v1alpha1 "github.com/minio/operator/pkg/client/informers/externalversions/hlf.kungfusoftware.es/v1alpha1"
-	internalinterfaces "github.com/minio/operator/pkg/client/informers/externalversions/internalinterfaces"
+	v1alpha1 "github.com/kfsoftware/hlf-operator/pkg/client/informers/externalversions/hlf.kungfusoftware.es/v1alpha1"
+	internalinterfaces "github.com/kfsoftware/hlf-operator/pkg/client/informers/externalversions/internalinterfaces"
 )
 
 // Interface provides access to each of this group's versions.
