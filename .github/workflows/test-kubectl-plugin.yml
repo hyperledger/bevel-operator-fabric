@@ -46,7 +46,8 @@ jobs:
           go build -o hlf-operator ./main.go
           docker build -t "${IMAGE}:${TAG}" .
           kind load docker-image "${IMAGE}:${TAG}"
-          make deploy IMG=$IMAGE
+          make deploy IMG="${IMAGE}:${TAG}"
+
 
       - name: Install Istio
         run: |
