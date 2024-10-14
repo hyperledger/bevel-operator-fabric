@@ -7,7 +7,7 @@
 
 package v1alpha1
 
-// FabricMainChannelSpecApplyConfiguration represents an declarative configuration of the FabricMainChannelSpec type for use
+// FabricMainChannelSpecApplyConfiguration represents a declarative configuration of the FabricMainChannelSpec type for use
 // with apply.
 type FabricMainChannelSpecApplyConfiguration struct {
 	Name                         *string                                                           `json:"name,omitempty"`
@@ -22,7 +22,7 @@ type FabricMainChannelSpecApplyConfiguration struct {
 	Consenters                   []FabricMainChannelConsenterApplyConfiguration                    `json:"orderers,omitempty"`
 }
 
-// FabricMainChannelSpecApplyConfiguration constructs an declarative configuration of the FabricMainChannelSpec type for use with
+// FabricMainChannelSpecApplyConfiguration constructs a declarative configuration of the FabricMainChannelSpec type for use with
 // apply.
 func FabricMainChannelSpec() *FabricMainChannelSpecApplyConfiguration {
 	return &FabricMainChannelSpecApplyConfiguration{}

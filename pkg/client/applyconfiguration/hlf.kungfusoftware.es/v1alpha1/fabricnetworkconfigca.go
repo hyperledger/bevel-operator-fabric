@@ -7,14 +7,14 @@
 
 package v1alpha1
 
-// FabricNetworkConfigCAApplyConfiguration represents an declarative configuration of the FabricNetworkConfigCA type for use
+// FabricNetworkConfigCAApplyConfiguration represents a declarative configuration of the FabricNetworkConfigCA type for use
 // with apply.
 type FabricNetworkConfigCAApplyConfiguration struct {
 	Name      *string `json:"name,omitempty"`
 	Namespace *string `json:"namespace,omitempty"`
 }
 
-// FabricNetworkConfigCAApplyConfiguration constructs an declarative configuration of the FabricNetworkConfigCA type for use with
+// FabricNetworkConfigCAApplyConfiguration constructs a declarative configuration of the FabricNetworkConfigCA type for use with
 // apply.
 func FabricNetworkConfigCA() *FabricNetworkConfigCAApplyConfiguration {
 	return &FabricNetworkConfigCAApplyConfiguration{}

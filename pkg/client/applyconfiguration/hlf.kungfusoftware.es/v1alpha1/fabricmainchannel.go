@@ -13,7 +13,7 @@ import (
 	v1 "k8s.io/client-go/applyconfigurations/meta/v1"
 )
 
-// FabricMainChannelApplyConfiguration represents an declarative configuration of the FabricMainChannel type for use
+// FabricMainChannelApplyConfiguration represents a declarative configuration of the FabricMainChannel type for use
 // with apply.
 type FabricMainChannelApplyConfiguration struct {
 	v1.TypeMetaApplyConfiguration    `json:",inline"`
@@ -22,7 +22,7 @@ type FabricMainChannelApplyConfiguration struct {
 	Status                           *FabricMainChannelStatusApplyConfiguration `json:"status,omitempty"`
 }
 
-// FabricMainChannel constructs an declarative configuration of the FabricMainChannel type for use with
+// FabricMainChannel constructs a declarative configuration of the FabricMainChannel type for use with
 // apply.
 func FabricMainChannel(name string) *FabricMainChannelApplyConfiguration {
 	b := &FabricMainChannelApplyConfiguration{}
@@ -204,4 +204,10 @@ func (b *FabricMainChannelApplyConfiguration) WithSpec(value *FabricMainChannelS
 func (b *FabricMainChannelApplyConfiguration) WithStatus(value *FabricMainChannelStatusApplyConfiguration) *FabricMainChannelApplyConfiguration {
 	b.Status = value
 	return b
+}
+
+// GetName retrieves the value of the Name field in the declarative configuration.
+func (b *FabricMainChannelApplyConfiguration) GetName() *string {
+	b.ensureObjectMetaApplyConfigurationExists()
+	return b.Name
 }

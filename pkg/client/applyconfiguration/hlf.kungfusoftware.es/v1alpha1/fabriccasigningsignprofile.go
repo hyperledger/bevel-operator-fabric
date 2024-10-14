@@ -7,7 +7,7 @@
 
 package v1alpha1
 
-// FabricCASigningSignProfileApplyConfiguration represents an declarative configuration of the FabricCASigningSignProfile type for use
+// FabricCASigningSignProfileApplyConfiguration represents a declarative configuration of the FabricCASigningSignProfile type for use
 // with apply.
 type FabricCASigningSignProfileApplyConfiguration struct {
 	Usage        []string                                                `json:"usage,omitempty"`
@@ -15,7 +15,7 @@ type FabricCASigningSignProfileApplyConfiguration struct {
 	CAConstraint *FabricCASigningSignProfileConstraintApplyConfiguration `json:"caconstraint,omitempty"`
 }
 
-// FabricCASigningSignProfileApplyConfiguration constructs an declarative configuration of the FabricCASigningSignProfile type for use with
+// FabricCASigningSignProfileApplyConfiguration constructs a declarative configuration of the FabricCASigningSignProfile type for use with
 // apply.
 func FabricCASigningSignProfile() *FabricCASigningSignProfileApplyConfiguration {
 	return &FabricCASigningSignProfileApplyConfiguration{}

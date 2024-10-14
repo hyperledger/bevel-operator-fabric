@@ -7,14 +7,14 @@
 
 package v1alpha1
 
-// OrdererSystemChannelApplyConfiguration represents an declarative configuration of the OrdererSystemChannel type for use
+// OrdererSystemChannelApplyConfiguration represents a declarative configuration of the OrdererSystemChannel type for use
 // with apply.
 type OrdererSystemChannelApplyConfiguration struct {
 	Name   *string                          `json:"name,omitempty"`
 	Config *ChannelConfigApplyConfiguration `json:"config,omitempty"`
 }
 
-// OrdererSystemChannelApplyConfiguration constructs an declarative configuration of the OrdererSystemChannel type for use with
+// OrdererSystemChannelApplyConfiguration constructs a declarative configuration of the OrdererSystemChannel type for use with
 // apply.
 func OrdererSystemChannel() *OrdererSystemChannelApplyConfiguration {
 	return &OrdererSystemChannelApplyConfiguration{}

@@ -7,14 +7,14 @@
 
 package v1alpha1
 
-// FabricNetworkConfigOrgPeerApplyConfiguration represents an declarative configuration of the FabricNetworkConfigOrgPeer type for use
+// FabricNetworkConfigOrgPeerApplyConfiguration represents a declarative configuration of the FabricNetworkConfigOrgPeer type for use
 // with apply.
 type FabricNetworkConfigOrgPeerApplyConfiguration struct {
 	Name      *string `json:"name,omitempty"`
 	Namespace *string `json:"namespace,omitempty"`
 }
 
-// FabricNetworkConfigOrgPeerApplyConfiguration constructs an declarative configuration of the FabricNetworkConfigOrgPeer type for use with
+// FabricNetworkConfigOrgPeerApplyConfiguration constructs a declarative configuration of the FabricNetworkConfigOrgPeer type for use with
 // apply.
 func FabricNetworkConfigOrgPeer() *FabricNetworkConfigOrgPeerApplyConfiguration {
 	return &FabricNetworkConfigOrgPeerApplyConfiguration{}

@@ -12,8 +12,8 @@ import (
 	json "encoding/json"
 	"fmt"
 
-	v1alpha1 "github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
-	hlfkungfusoftwareesv1alpha1 "github.com/kfsoftware/hlf-operator/pkg/client/applyconfiguration/hlf.kungfusoftware.es/v1alpha1"
+	v1alpha1 "github.com/kfsoftware/hlf-operator/pkg/apis/hlf.kungfusoftware.es/v1alpha1"
+	hlfkungfusoftwareesv1alpha1 "github.com/minio/operator/pkg/client/applyconfiguration/hlf.kungfusoftware.es/v1alpha1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	labels "k8s.io/apimachinery/pkg/labels"
 	types "k8s.io/apimachinery/pkg/types"
@@ -32,20 +32,22 @@ var fabricfollowerchannelsKind = v1alpha1.SchemeGroupVersion.WithKind("FabricFol
 
 // Get takes name of the fabricFollowerChannel, and returns the corresponding fabricFollowerChannel object, and an error if there is any.
 func (c *FakeFabricFollowerChannels) Get(ctx context.Context, name string, options v1.GetOptions) (result *v1alpha1.FabricFollowerChannel, err error) {
+	emptyResult := &v1alpha1.FabricFollowerChannel{}
 	obj, err := c.Fake.
-		Invokes(testing.NewRootGetAction(fabricfollowerchannelsResource, name), &v1alpha1.FabricFollowerChannel{})
+		Invokes(testing.NewRootGetActionWithOptions(fabricfollowerchannelsResource, name, options), emptyResult)
 	if obj == nil {
-		return nil, err
+		return emptyResult, err
 	}
 	return obj.(*v1alpha1.FabricFollowerChannel), err
 }
 
 // List takes label and field selectors, and returns the list of FabricFollowerChannels that match those selectors.
 func (c *FakeFabricFollowerChannels) List(ctx context.Context, opts v1.ListOptions) (result *v1alpha1.FabricFollowerChannelList, err error) {
+	emptyResult := &v1alpha1.FabricFollowerChannelList{}
 	obj, err := c.Fake.
-		Invokes(testing.NewRootListAction(fabricfollowerchannelsResource, fabricfollowerchannelsKind, opts), &v1alpha1.FabricFollowerChannelList{})
+		Invokes(testing.NewRootListActionWithOptions(fabricfollowerchannelsResource, fabricfollowerchannelsKind, opts), emptyResult)
 	if obj == nil {
-		return nil, err
+		return emptyResult, err
 	}
 
 	label, _, _ := testing.ExtractFromListOptions(opts)
@@ -64,36 +66,39 @@ func (c *FakeFabricFollowerChannels) List(ctx context.Context, opts v1.ListOptio
 // Watch returns a watch.Interface that watches the requested fabricFollowerChannels.
 func (c *FakeFabricFollowerChannels) Watch(ctx context.Context, opts v1.ListOptions) (watch.Interface, error) {
 	return c.Fake.
-		InvokesWatch(testing.NewRootWatchAction(fabricfollowerchannelsResource, opts))
+		InvokesWatch(testing.NewRootWatchActionWithOptions(fabricfollowerchannelsResource, opts))
 }
 
 // Create takes the representation of a fabricFollowerChannel and creates it.  Returns the server's representation of the fabricFollowerChannel, and an error, if there is any.
 func (c *FakeFabricFollowerChannels) Create(ctx context.Context, fabricFollowerChannel *v1alpha1.FabricFollowerChannel, opts v1.CreateOptions) (result *v1alpha1.FabricFollowerChannel, err error) {
+	emptyResult := &v1alpha1.FabricFollowerChannel{}
 	obj, err := c.Fake.
-		Invokes(testing.NewRootCreateAction(fabricfollowerchannelsResource, fabricFollowerChannel), &v1alpha1.FabricFollowerChannel{})
+		Invokes(testing.NewRootCreateActionWithOptions(fabricfollowerchannelsResource, fabricFollowerChannel, opts), emptyResult)
 	if obj == nil {
-		return nil, err
+		return emptyResult, err
 	}
 	return obj.(*v1alpha1.FabricFollowerChannel), err
 }
 
 // Update takes the representation of a fabricFollowerChannel and updates it. Returns the server's representation of the fabricFollowerChannel, and an error, if there is any.
 func (c *FakeFabricFollowerChannels) Update(ctx context.Context, fabricFollowerChannel *v1alpha1.FabricFollowerChannel, opts v1.UpdateOptions) (result *v1alpha1.FabricFollowerChannel, err error) {
+	emptyResult := &v1alpha1.FabricFollowerChannel{}
 	obj, err := c.Fake.
-		Invokes(testing.NewRootUpdateAction(fabricfollowerchannelsResource, fabricFollowerChannel), &v1alpha1.FabricFollowerChannel{})
+		Invokes(testing.NewRootUpdateActionWithOptions(fabricfollowerchannelsResource, fabricFollowerChannel, opts), emptyResult)
 	if obj == nil {
-		return nil, err
+		return emptyResult, err
 	}
 	return obj.(*v1alpha1.FabricFollowerChannel), err
 }
 
 // UpdateStatus was generated because the type contains a Status member.
 // Add a +genclient:noStatus comment above the type to avoid generating UpdateStatus().
-func (c *FakeFabricFollowerChannels) UpdateStatus(ctx context.Context, fabricFollowerChannel *v1alpha1.FabricFollowerChannel, opts v1.UpdateOptions) (*v1alpha1.FabricFollowerChannel, error) {
+func (c *FakeFabricFollowerChannels) UpdateStatus(ctx context.Context, fabricFollowerChannel *v1alpha1.FabricFollowerChannel, opts v1.UpdateOptions) (result *v1alpha1.FabricFollowerChannel, err error) {
+	emptyResult := &v1alpha1.FabricFollowerChannel{}
 	obj, err := c.Fake.
-		Invokes(testing.NewRootUpdateSubresourceAction(fabricfollowerchannelsResource, "status", fabricFollowerChannel), &v1alpha1.FabricFollowerChannel{})
+		Invokes(testing.NewRootUpdateSubresourceActionWithOptions(fabricfollowerchannelsResource, "status", fabricFollowerChannel, opts), emptyResult)
 	if obj == nil {
-		return nil, err
+		return emptyResult, err
 	}
 	return obj.(*v1alpha1.FabricFollowerChannel), err
 }
@@ -107,7 +112,7 @@ func (c *FakeFabricFollowerChannels) Delete(ctx context.Context, name string, op
 
 // DeleteCollection deletes a collection of objects.
 func (c *FakeFabricFollowerChannels) DeleteCollection(ctx context.Context, opts v1.DeleteOptions, listOpts v1.ListOptions) error {
-	action := testing.NewRootDeleteCollectionAction(fabricfollowerchannelsResource, listOpts)
+	action := testing.NewRootDeleteCollectionActionWithOptions(fabricfollowerchannelsResource, opts, listOpts)
 
 	_, err := c.Fake.Invokes(action, &v1alpha1.FabricFollowerChannelList{})
 	return err
@@ -115,10 +120,11 @@ func (c *FakeFabricFollowerChannels) DeleteCollection(ctx context.Context, opts 
 
 // Patch applies the patch and returns the patched fabricFollowerChannel.
 func (c *FakeFabricFollowerChannels) Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *v1alpha1.FabricFollowerChannel, err error) {
+	emptyResult := &v1alpha1.FabricFollowerChannel{}
 	obj, err := c.Fake.
-		Invokes(testing.NewRootPatchSubresourceAction(fabricfollowerchannelsResource, name, pt, data, subresources...), &v1alpha1.FabricFollowerChannel{})
+		Invokes(testing.NewRootPatchSubresourceActionWithOptions(fabricfollowerchannelsResource, name, pt, data, opts, subresources...), emptyResult)
 	if obj == nil {
-		return nil, err
+		return emptyResult, err
 	}
 	return obj.(*v1alpha1.FabricFollowerChannel), err
 }
@@ -136,10 +142,11 @@ func (c *FakeFabricFollowerChannels) Apply(ctx context.Context, fabricFollowerCh
 	if name == nil {
 		return nil, fmt.Errorf("fabricFollowerChannel.Name must be provided to Apply")
 	}
+	emptyResult := &v1alpha1.FabricFollowerChannel{}
 	obj, err := c.Fake.
-		Invokes(testing.NewRootPatchSubresourceAction(fabricfollowerchannelsResource, *name, types.ApplyPatchType, data), &v1alpha1.FabricFollowerChannel{})
+		Invokes(testing.NewRootPatchSubresourceActionWithOptions(fabricfollowerchannelsResource, *name, types.ApplyPatchType, data, opts.ToPatchOptions()), emptyResult)
 	if obj == nil {
-		return nil, err
+		return emptyResult, err
 	}
 	return obj.(*v1alpha1.FabricFollowerChannel), err
 }
@@ -158,10 +165,11 @@ func (c *FakeFabricFollowerChannels) ApplyStatus(ctx context.Context, fabricFoll
 	if name == nil {
 		return nil, fmt.Errorf("fabricFollowerChannel.Name must be provided to Apply")
 	}
+	emptyResult := &v1alpha1.FabricFollowerChannel{}
 	obj, err := c.Fake.
-		Invokes(testing.NewRootPatchSubresourceAction(fabricfollowerchannelsResource, *name, types.ApplyPatchType, data, "status"), &v1alpha1.FabricFollowerChannel{})
+		Invokes(testing.NewRootPatchSubresourceActionWithOptions(fabricfollowerchannelsResource, *name, types.ApplyPatchType, data, opts.ToPatchOptions(), "status"), emptyResult)
 	if obj == nil {
-		return nil, err
+		return emptyResult, err
 	}
 	return obj.(*v1alpha1.FabricFollowerChannel), err
 }

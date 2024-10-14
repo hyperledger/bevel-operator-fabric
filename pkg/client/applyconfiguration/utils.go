@@ -8,9 +8,12 @@
 package applyconfiguration
 
 import (
-	v1alpha1 "github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
-	hlfkungfusoftwareesv1alpha1 "github.com/kfsoftware/hlf-operator/pkg/client/applyconfiguration/hlf.kungfusoftware.es/v1alpha1"
+	v1alpha1 "github.com/kfsoftware/hlf-operator/pkg/apis/hlf.kungfusoftware.es/v1alpha1"
+	hlfkungfusoftwareesv1alpha1 "github.com/minio/operator/pkg/client/applyconfiguration/hlf.kungfusoftware.es/v1alpha1"
+	internal "github.com/minio/operator/pkg/client/applyconfiguration/internal"
+	runtime "k8s.io/apimachinery/pkg/runtime"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"
+	testing "k8s.io/client-go/testing"
 )
 
 // ForKind returns an apply configuration type for the given GroupVersionKind, or nil if no
@@ -24,6 +27,10 @@ func ForKind(kind schema.GroupVersionKind) interface{} {
 		return &hlfkungfusoftwareesv1alpha1.ApplicationCapabilitiesApplyConfiguration{}
 	case v1alpha1.SchemeGroupVersion.WithKind("Catls"):
 		return &hlfkungfusoftwareesv1alpha1.CatlsApplyConfiguration{}
+	case v1alpha1.SchemeGroupVersion.WithKind("ChaincodePackage"):
+		return &hlfkungfusoftwareesv1alpha1.ChaincodePackageApplyConfiguration{}
+	case v1alpha1.SchemeGroupVersion.WithKind("ChaincodePackageTLS"):
+		return &hlfkungfusoftwareesv1alpha1.ChaincodePackageTLSApplyConfiguration{}
 	case v1alpha1.SchemeGroupVersion.WithKind("ChannelCapabilities"):
 		return &hlfkungfusoftwareesv1alpha1.ChannelCapabilitiesApplyConfiguration{}
 	case v1alpha1.SchemeGroupVersion.WithKind("ChannelConfig"):
@@ -106,12 +113,32 @@ func ForKind(kind schema.GroupVersionKind) interface{} {
 		return &hlfkungfusoftwareesv1alpha1.FabricCATLSConfApplyConfiguration{}
 	case v1alpha1.SchemeGroupVersion.WithKind("FabricChaincode"):
 		return &hlfkungfusoftwareesv1alpha1.FabricChaincodeApplyConfiguration{}
+	case v1alpha1.SchemeGroupVersion.WithKind("FabricChaincodeApprove"):
+		return &hlfkungfusoftwareesv1alpha1.FabricChaincodeApproveApplyConfiguration{}
+	case v1alpha1.SchemeGroupVersion.WithKind("FabricChaincodeApproveSpec"):
+		return &hlfkungfusoftwareesv1alpha1.FabricChaincodeApproveSpecApplyConfiguration{}
+	case v1alpha1.SchemeGroupVersion.WithKind("FabricChaincodeApproveStatus"):
+		return &hlfkungfusoftwareesv1alpha1.FabricChaincodeApproveStatusApplyConfiguration{}
+	case v1alpha1.SchemeGroupVersion.WithKind("FabricChaincodeCommit"):
+		return &hlfkungfusoftwareesv1alpha1.FabricChaincodeCommitApplyConfiguration{}
+	case v1alpha1.SchemeGroupVersion.WithKind("FabricChaincodeCommitSpec"):
+		return &hlfkungfusoftwareesv1alpha1.FabricChaincodeCommitSpecApplyConfiguration{}
+	case v1alpha1.SchemeGroupVersion.WithKind("FabricChaincodeCommitStatus"):
+		return &hlfkungfusoftwareesv1alpha1.FabricChaincodeCommitStatusApplyConfiguration{}
+	case v1alpha1.SchemeGroupVersion.WithKind("FabricChaincodeInstall"):
+		return &hlfkungfusoftwareesv1alpha1.FabricChaincodeInstallApplyConfiguration{}
+	case v1alpha1.SchemeGroupVersion.WithKind("FabricChaincodeInstallSpec"):
+		return &hlfkungfusoftwareesv1alpha1.FabricChaincodeInstallSpecApplyConfiguration{}
+	case v1alpha1.SchemeGroupVersion.WithKind("FabricChaincodeInstallStatus"):
+		return &hlfkungfusoftwareesv1alpha1.FabricChaincodeInstallStatusApplyConfiguration{}
 	case v1alpha1.SchemeGroupVersion.WithKind("FabricChaincodeSpec"):
 		return &hlfkungfusoftwareesv1alpha1.FabricChaincodeSpecApplyConfiguration{}
 	case v1alpha1.SchemeGroupVersion.WithKind("FabricChaincodeStatus"):
 		return &hlfkungfusoftwareesv1alpha1.FabricChaincodeStatusApplyConfiguration{}
 	case v1alpha1.SchemeGroupVersion.WithKind("FabricChaincodeTemplate"):
 		return &hlfkungfusoftwareesv1alpha1.FabricChaincodeTemplateApplyConfiguration{}
+	case v1alpha1.SchemeGroupVersion.WithKind("FabricChaincodeTemplateRef"):
+		return &hlfkungfusoftwareesv1alpha1.FabricChaincodeTemplateRefApplyConfiguration{}
 	case v1alpha1.SchemeGroupVersion.WithKind("FabricChaincodeTemplateSpec"):
 		return &hlfkungfusoftwareesv1alpha1.FabricChaincodeTemplateSpecApplyConfiguration{}
 	case v1alpha1.SchemeGroupVersion.WithKind("FabricChaincodeTemplateStatus"):
@@ -142,6 +169,10 @@ func ForKind(kind schema.GroupVersionKind) interface{} {
 		return &hlfkungfusoftwareesv1alpha1.FabricGatewayApiApplyConfiguration{}
 	case v1alpha1.SchemeGroupVersion.WithKind("FabricIdentity"):
 		return &hlfkungfusoftwareesv1alpha1.FabricIdentityApplyConfiguration{}
+	case v1alpha1.SchemeGroupVersion.WithKind("FabricIdentityAttributeRequest"):
+		return &hlfkungfusoftwareesv1alpha1.FabricIdentityAttributeRequestApplyConfiguration{}
+	case v1alpha1.SchemeGroupVersion.WithKind("FabricIdentityAttributes"):
+		return &hlfkungfusoftwareesv1alpha1.FabricIdentityAttributesApplyConfiguration{}
 	case v1alpha1.SchemeGroupVersion.WithKind("FabricIdentityRegister"):
 		return &hlfkungfusoftwareesv1alpha1.FabricIdentityRegisterApplyConfiguration{}
 	case v1alpha1.SchemeGroupVersion.WithKind("FabricIdentitySpec"):
@@ -162,6 +193,8 @@ func ForKind(kind schema.GroupVersionKind) interface{} {
 		return &hlfkungfusoftwareesv1alpha1.FabricMainChannelConfigApplyConfiguration{}
 	case v1alpha1.SchemeGroupVersion.WithKind("FabricMainChannelConsenter"):
 		return &hlfkungfusoftwareesv1alpha1.FabricMainChannelConsenterApplyConfiguration{}
+	case v1alpha1.SchemeGroupVersion.WithKind("FabricMainChannelConsenterItem"):
+		return &hlfkungfusoftwareesv1alpha1.FabricMainChannelConsenterItemApplyConfiguration{}
 	case v1alpha1.SchemeGroupVersion.WithKind("FabricMainChannelEtcdRaft"):
 		return &hlfkungfusoftwareesv1alpha1.FabricMainChannelEtcdRaftApplyConfiguration{}
 	case v1alpha1.SchemeGroupVersion.WithKind("FabricMainChannelEtcdRaftOptions"):
@@ -186,6 +219,8 @@ func ForKind(kind schema.GroupVersionKind) interface{} {
 		return &hlfkungfusoftwareesv1alpha1.FabricMainChannelPeerOrganizationApplyConfiguration{}
 	case v1alpha1.SchemeGroupVersion.WithKind("FabricMainChannelPoliciesConfig"):
 		return &hlfkungfusoftwareesv1alpha1.FabricMainChannelPoliciesConfigApplyConfiguration{}
+	case v1alpha1.SchemeGroupVersion.WithKind("FabricMainChannelSmartBFT"):
+		return &hlfkungfusoftwareesv1alpha1.FabricMainChannelSmartBFTApplyConfiguration{}
 	case v1alpha1.SchemeGroupVersion.WithKind("FabricMainChannelSpec"):
 		return &hlfkungfusoftwareesv1alpha1.FabricMainChannelSpecApplyConfiguration{}
 	case v1alpha1.SchemeGroupVersion.WithKind("FabricMainChannelStatus"):
@@ -238,6 +273,10 @@ func ForKind(kind schema.GroupVersionKind) interface{} {
 		return &hlfkungfusoftwareesv1alpha1.FabricOperatorUISpecApplyConfiguration{}
 	case v1alpha1.SchemeGroupVersion.WithKind("FabricOperatorUIStatus"):
 		return &hlfkungfusoftwareesv1alpha1.FabricOperatorUIStatusApplyConfiguration{}
+	case v1alpha1.SchemeGroupVersion.WithKind("FabricOrdererExternalRef"):
+		return &hlfkungfusoftwareesv1alpha1.FabricOrdererExternalRefApplyConfiguration{}
+	case v1alpha1.SchemeGroupVersion.WithKind("FabricOrdererInternalRef"):
+		return &hlfkungfusoftwareesv1alpha1.FabricOrdererInternalRefApplyConfiguration{}
 	case v1alpha1.SchemeGroupVersion.WithKind("FabricOrdererNode"):
 		return &hlfkungfusoftwareesv1alpha1.FabricOrdererNodeApplyConfiguration{}
 	case v1alpha1.SchemeGroupVersion.WithKind("FabricOrdererNodeSpec"):
@@ -260,6 +299,10 @@ func ForKind(kind schema.GroupVersionKind) interface{} {
 		return &hlfkungfusoftwareesv1alpha1.FabricPeerDiscoveryApplyConfiguration{}
 	case v1alpha1.SchemeGroupVersion.WithKind("FabricPeerExternalCouchDB"):
 		return &hlfkungfusoftwareesv1alpha1.FabricPeerExternalCouchDBApplyConfiguration{}
+	case v1alpha1.SchemeGroupVersion.WithKind("FabricPeerExternalRef"):
+		return &hlfkungfusoftwareesv1alpha1.FabricPeerExternalRefApplyConfiguration{}
+	case v1alpha1.SchemeGroupVersion.WithKind("FabricPeerInternalRef"):
+		return &hlfkungfusoftwareesv1alpha1.FabricPeerInternalRefApplyConfiguration{}
 	case v1alpha1.SchemeGroupVersion.WithKind("FabricPeerLogging"):
 		return &hlfkungfusoftwareesv1alpha1.FabricPeerLoggingApplyConfiguration{}
 	case v1alpha1.SchemeGroupVersion.WithKind("FabricPeerResources"):
@@ -276,6 +319,8 @@ func ForKind(kind schema.GroupVersionKind) interface{} {
 		return &hlfkungfusoftwareesv1alpha1.FabricTraefikApplyConfiguration{}
 	case v1alpha1.SchemeGroupVersion.WithKind("FabricTraefikMiddleware"):
 		return &hlfkungfusoftwareesv1alpha1.FabricTraefikMiddlewareApplyConfiguration{}
+	case v1alpha1.SchemeGroupVersion.WithKind("FailedPeer"):
+		return &hlfkungfusoftwareesv1alpha1.FailedPeerApplyConfiguration{}
 	case v1alpha1.SchemeGroupVersion.WithKind("GRPCProxy"):
 		return &hlfkungfusoftwareesv1alpha1.GRPCProxyApplyConfiguration{}
 	case v1alpha1.SchemeGroupVersion.WithKind("HLFIdentity"):
@@ -286,6 +331,8 @@ func ForKind(kind schema.GroupVersionKind) interface{} {
 		return &hlfkungfusoftwareesv1alpha1.IngressHostApplyConfiguration{}
 	case v1alpha1.SchemeGroupVersion.WithKind("IngressPath"):
 		return &hlfkungfusoftwareesv1alpha1.IngressPathApplyConfiguration{}
+	case v1alpha1.SchemeGroupVersion.WithKind("InstalledPeer"):
+		return &hlfkungfusoftwareesv1alpha1.InstalledPeerApplyConfiguration{}
 	case v1alpha1.SchemeGroupVersion.WithKind("OrdererCapabilities"):
 		return &hlfkungfusoftwareesv1alpha1.OrdererCapabilitiesApplyConfiguration{}
 	case v1alpha1.SchemeGroupVersion.WithKind("OrdererEnrollment"):
@@ -304,6 +351,10 @@ func ForKind(kind schema.GroupVersionKind) interface{} {
 		return &hlfkungfusoftwareesv1alpha1.OrdererSystemChannelApplyConfiguration{}
 	case v1alpha1.SchemeGroupVersion.WithKind("PeerService"):
 		return &hlfkungfusoftwareesv1alpha1.PeerServiceApplyConfiguration{}
+	case v1alpha1.SchemeGroupVersion.WithKind("PrivateDataCollection"):
+		return &hlfkungfusoftwareesv1alpha1.PrivateDataCollectionApplyConfiguration{}
+	case v1alpha1.SchemeGroupVersion.WithKind("PrivateDataCollectionEndorsementPolicy"):
+		return &hlfkungfusoftwareesv1alpha1.PrivateDataCollectionEndorsementPolicyApplyConfiguration{}
 	case v1alpha1.SchemeGroupVersion.WithKind("Secret"):
 		return &hlfkungfusoftwareesv1alpha1.SecretApplyConfiguration{}
 	case v1alpha1.SchemeGroupVersion.WithKind("SecretRef"):
@@ -319,4 +370,8 @@ func ForKind(kind schema.GroupVersionKind) interface{} {
 
 	}
 	return nil
+}
+
+func NewTypeConverter(scheme *runtime.Scheme) *testing.TypeConverter {
+	return &testing.TypeConverter{Scheme: scheme, TypeResolver: internal.Parser()}
 }

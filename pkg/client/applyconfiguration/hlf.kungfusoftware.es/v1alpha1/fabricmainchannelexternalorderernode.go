@@ -7,14 +7,14 @@
 
 package v1alpha1
 
-// FabricMainChannelExternalOrdererNodeApplyConfiguration represents an declarative configuration of the FabricMainChannelExternalOrdererNode type for use
+// FabricMainChannelExternalOrdererNodeApplyConfiguration represents a declarative configuration of the FabricMainChannelExternalOrdererNode type for use
 // with apply.
 type FabricMainChannelExternalOrdererNodeApplyConfiguration struct {
 	Host      *string `json:"host,omitempty"`
 	AdminPort *int    `json:"port,omitempty"`
 }
 
-// FabricMainChannelExternalOrdererNodeApplyConfiguration constructs an declarative configuration of the FabricMainChannelExternalOrdererNode type for use with
+// FabricMainChannelExternalOrdererNodeApplyConfiguration constructs a declarative configuration of the FabricMainChannelExternalOrdererNode type for use with
 // apply.
 func FabricMainChannelExternalOrdererNode() *FabricMainChannelExternalOrdererNodeApplyConfiguration {
 	return &FabricMainChannelExternalOrdererNodeApplyConfiguration{}

@@ -8,9 +8,9 @@
 package v1alpha1
 
 import (
-	v1alpha1 "github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
-	"k8s.io/apimachinery/pkg/api/errors"
+	v1alpha1 "github.com/kfsoftware/hlf-operator/pkg/apis/hlf.kungfusoftware.es/v1alpha1"
 	"k8s.io/apimachinery/pkg/labels"
+	"k8s.io/client-go/listers"
 	"k8s.io/client-go/tools/cache"
 )
 
@@ -27,25 +27,17 @@ type FabricOperatorUILister interface {
 
 // fabricOperatorUILister implements the FabricOperatorUILister interface.
 type fabricOperatorUILister struct {
-	indexer cache.Indexer
+	listers.ResourceIndexer[*v1alpha1.FabricOperatorUI]
 }
 
 // NewFabricOperatorUILister returns a new FabricOperatorUILister.
 func NewFabricOperatorUILister(indexer cache.Indexer) FabricOperatorUILister {
-	return &fabricOperatorUILister{indexer: indexer}
-}
-
-// List lists all FabricOperatorUIs in the indexer.
-func (s *fabricOperatorUILister) List(selector labels.Selector) (ret []*v1alpha1.FabricOperatorUI, err error) {
-	err = cache.ListAll(s.indexer, selector, func(m interface{}) {
-		ret = append(ret, m.(*v1alpha1.FabricOperatorUI))
-	})
-	return ret, err
+	return &fabricOperatorUILister{listers.New[*v1alpha1.FabricOperatorUI](indexer, v1alpha1.Resource("fabricoperatorui"))}
 }
 
 // FabricOperatorUIs returns an object that can list and get FabricOperatorUIs.
 func (s *fabricOperatorUILister) FabricOperatorUIs(namespace string) FabricOperatorUINamespaceLister {
-	return fabricOperatorUINamespaceLister{indexer: s.indexer, namespace: namespace}
+	return fabricOperatorUINamespaceLister{listers.NewNamespaced[*v1alpha1.FabricOperatorUI](s.ResourceIndexer, namespace)}
 }
 
 // FabricOperatorUINamespaceLister helps list and get FabricOperatorUIs.
@@ -63,26 +55,5 @@ type FabricOperatorUINamespaceLister interface {
 // fabricOperatorUINamespaceLister implements the FabricOperatorUINamespaceLister
 // interface.
 type fabricOperatorUINamespaceLister struct {
-	indexer   cache.Indexer
-	namespace string
-}
-
-// List lists all FabricOperatorUIs in the indexer for a given namespace.
-func (s fabricOperatorUINamespaceLister) List(selector labels.Selector) (ret []*v1alpha1.FabricOperatorUI, err error) {
-	err = cache.ListAllByNamespace(s.indexer, s.namespace, selector, func(m interface{}) {
-		ret = append(ret, m.(*v1alpha1.FabricOperatorUI))
-	})
-	return ret, err
-}
-
-// Get retrieves the FabricOperatorUI from the indexer for a given namespace and name.
-func (s fabricOperatorUINamespaceLister) Get(name string) (*v1alpha1.FabricOperatorUI, error) {
-	obj, exists, err := s.indexer.GetByKey(s.namespace + "/" + name)
-	if err != nil {
-		return nil, err
-	}
-	if !exists {
-		return nil, errors.NewNotFound(v1alpha1.Resource("fabricoperatorui"), name)
-	}
-	return obj.(*v1alpha1.FabricOperatorUI), nil
+	listers.ResourceIndexer[*v1alpha1.FabricOperatorUI]
 }

@@ -7,7 +7,7 @@
 
 package v1alpha1
 
-// FabricMainChannelOrdererBatchSizeApplyConfiguration represents an declarative configuration of the FabricMainChannelOrdererBatchSize type for use
+// FabricMainChannelOrdererBatchSizeApplyConfiguration represents a declarative configuration of the FabricMainChannelOrdererBatchSize type for use
 // with apply.
 type FabricMainChannelOrdererBatchSizeApplyConfiguration struct {
 	MaxMessageCount   *int `json:"maxMessageCount,omitempty"`
@@ -15,7 +15,7 @@ type FabricMainChannelOrdererBatchSizeApplyConfiguration struct {
 	PreferredMaxBytes *int `json:"preferredMaxBytes,omitempty"`
 }
 
-// FabricMainChannelOrdererBatchSizeApplyConfiguration constructs an declarative configuration of the FabricMainChannelOrdererBatchSize type for use with
+// FabricMainChannelOrdererBatchSizeApplyConfiguration constructs a declarative configuration of the FabricMainChannelOrdererBatchSize type for use with
 // apply.
 func FabricMainChannelOrdererBatchSize() *FabricMainChannelOrdererBatchSizeApplyConfiguration {
 	return &FabricMainChannelOrdererBatchSizeApplyConfiguration{}

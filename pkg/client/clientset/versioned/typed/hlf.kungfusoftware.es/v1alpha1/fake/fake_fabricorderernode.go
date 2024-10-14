@@ -12,8 +12,8 @@ import (
 	json "encoding/json"
 	"fmt"
 
-	v1alpha1 "github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
-	hlfkungfusoftwareesv1alpha1 "github.com/kfsoftware/hlf-operator/pkg/client/applyconfiguration/hlf.kungfusoftware.es/v1alpha1"
+	v1alpha1 "github.com/kfsoftware/hlf-operator/pkg/apis/hlf.kungfusoftware.es/v1alpha1"
+	hlfkungfusoftwareesv1alpha1 "github.com/minio/operator/pkg/client/applyconfiguration/hlf.kungfusoftware.es/v1alpha1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	labels "k8s.io/apimachinery/pkg/labels"
 	types "k8s.io/apimachinery/pkg/types"
@@ -33,22 +33,24 @@ var fabricorderernodesKind = v1alpha1.SchemeGroupVersion.WithKind("FabricOrderer
 
 // Get takes name of the fabricOrdererNode, and returns the corresponding fabricOrdererNode object, and an error if there is any.
 func (c *FakeFabricOrdererNodes) Get(ctx context.Context, name string, options v1.GetOptions) (result *v1alpha1.FabricOrdererNode, err error) {
+	emptyResult := &v1alpha1.FabricOrdererNode{}
 	obj, err := c.Fake.
-		Invokes(testing.NewGetAction(fabricorderernodesResource, c.ns, name), &v1alpha1.FabricOrdererNode{})
+		Invokes(testing.NewGetActionWithOptions(fabricorderernodesResource, c.ns, name, options), emptyResult)
 
 	if obj == nil {
-		return nil, err
+		return emptyResult, err
 	}
 	return obj.(*v1alpha1.FabricOrdererNode), err
 }
 
 // List takes label and field selectors, and returns the list of FabricOrdererNodes that match those selectors.
 func (c *FakeFabricOrdererNodes) List(ctx context.Context, opts v1.ListOptions) (result *v1alpha1.FabricOrdererNodeList, err error) {
+	emptyResult := &v1alpha1.FabricOrdererNodeList{}
 	obj, err := c.Fake.
-		Invokes(testing.NewListAction(fabricorderernodesResource, fabricorderernodesKind, c.ns, opts), &v1alpha1.FabricOrdererNodeList{})
+		Invokes(testing.NewListActionWithOptions(fabricorderernodesResource, fabricorderernodesKind, c.ns, opts), emptyResult)
 
 	if obj == nil {
-		return nil, err
+		return emptyResult, err
 	}
 
 	label, _, _ := testing.ExtractFromListOptions(opts)
@@ -67,40 +69,43 @@ func (c *FakeFabricOrdererNodes) List(ctx context.Context, opts v1.ListOptions) 
 // Watch returns a watch.Interface that watches the requested fabricOrdererNodes.
 func (c *FakeFabricOrdererNodes) Watch(ctx context.Context, opts v1.ListOptions) (watch.Interface, error) {
 	return c.Fake.
-		InvokesWatch(testing.NewWatchAction(fabricorderernodesResource, c.ns, opts))
+		InvokesWatch(testing.NewWatchActionWithOptions(fabricorderernodesResource, c.ns, opts))
 
 }
 
 // Create takes the representation of a fabricOrdererNode and creates it.  Returns the server's representation of the fabricOrdererNode, and an error, if there is any.
 func (c *FakeFabricOrdererNodes) Create(ctx context.Context, fabricOrdererNode *v1alpha1.FabricOrdererNode, opts v1.CreateOptions) (result *v1alpha1.FabricOrdererNode, err error) {
+	emptyResult := &v1alpha1.FabricOrdererNode{}
 	obj, err := c.Fake.
-		Invokes(testing.NewCreateAction(fabricorderernodesResource, c.ns, fabricOrdererNode), &v1alpha1.FabricOrdererNode{})
+		Invokes(testing.NewCreateActionWithOptions(fabricorderernodesResource, c.ns, fabricOrdererNode, opts), emptyResult)
 
 	if obj == nil {
-		return nil, err
+		return emptyResult, err
 	}
 	return obj.(*v1alpha1.FabricOrdererNode), err
 }
 
 // Update takes the representation of a fabricOrdererNode and updates it. Returns the server's representation of the fabricOrdererNode, and an error, if there is any.
 func (c *FakeFabricOrdererNodes) Update(ctx context.Context, fabricOrdererNode *v1alpha1.FabricOrdererNode, opts v1.UpdateOptions) (result *v1alpha1.FabricOrdererNode, err error) {
+	emptyResult := &v1alpha1.FabricOrdererNode{}
 	obj, err := c.Fake.
-		Invokes(testing.NewUpdateAction(fabricorderernodesResource, c.ns, fabricOrdererNode), &v1alpha1.FabricOrdererNode{})
+		Invokes(testing.NewUpdateActionWithOptions(fabricorderernodesResource, c.ns, fabricOrdererNode, opts), emptyResult)
 
 	if obj == nil {
-		return nil, err
+		return emptyResult, err
 	}
 	return obj.(*v1alpha1.FabricOrdererNode), err
 }
 
 // UpdateStatus was generated because the type contains a Status member.
 // Add a +genclient:noStatus comment above the type to avoid generating UpdateStatus().
-func (c *FakeFabricOrdererNodes) UpdateStatus(ctx context.Context, fabricOrdererNode *v1alpha1.FabricOrdererNode, opts v1.UpdateOptions) (*v1alpha1.FabricOrdererNode, error) {
+func (c *FakeFabricOrdererNodes) UpdateStatus(ctx context.Context, fabricOrdererNode *v1alpha1.FabricOrdererNode, opts v1.UpdateOptions) (result *v1alpha1.FabricOrdererNode, err error) {
+	emptyResult := &v1alpha1.FabricOrdererNode{}
 	obj, err := c.Fake.
-		Invokes(testing.NewUpdateSubresourceAction(fabricorderernodesResource, "status", c.ns, fabricOrdererNode), &v1alpha1.FabricOrdererNode{})
+		Invokes(testing.NewUpdateSubresourceActionWithOptions(fabricorderernodesResource, "status", c.ns, fabricOrdererNode, opts), emptyResult)
 
 	if obj == nil {
-		return nil, err
+		return emptyResult, err
 	}
 	return obj.(*v1alpha1.FabricOrdererNode), err
 }
@@ -115,7 +120,7 @@ func (c *FakeFabricOrdererNodes) Delete(ctx context.Context, name string, opts v
 
 // DeleteCollection deletes a collection of objects.
 func (c *FakeFabricOrdererNodes) DeleteCollection(ctx context.Context, opts v1.DeleteOptions, listOpts v1.ListOptions) error {
-	action := testing.NewDeleteCollectionAction(fabricorderernodesResource, c.ns, listOpts)
+	action := testing.NewDeleteCollectionActionWithOptions(fabricorderernodesResource, c.ns, opts, listOpts)
 
 	_, err := c.Fake.Invokes(action, &v1alpha1.FabricOrdererNodeList{})
 	return err
@@ -123,11 +128,12 @@ func (c *FakeFabricOrdererNodes) DeleteCollection(ctx context.Context, opts v1.D
 
 // Patch applies the patch and returns the patched fabricOrdererNode.
 func (c *FakeFabricOrdererNodes) Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *v1alpha1.FabricOrdererNode, err error) {
+	emptyResult := &v1alpha1.FabricOrdererNode{}
 	obj, err := c.Fake.
-		Invokes(testing.NewPatchSubresourceAction(fabricorderernodesResource, c.ns, name, pt, data, subresources...), &v1alpha1.FabricOrdererNode{})
+		Invokes(testing.NewPatchSubresourceActionWithOptions(fabricorderernodesResource, c.ns, name, pt, data, opts, subresources...), emptyResult)
 
 	if obj == nil {
-		return nil, err
+		return emptyResult, err
 	}
 	return obj.(*v1alpha1.FabricOrdererNode), err
 }
@@ -145,11 +151,12 @@ func (c *FakeFabricOrdererNodes) Apply(ctx context.Context, fabricOrdererNode *h
 	if name == nil {
 		return nil, fmt.Errorf("fabricOrdererNode.Name must be provided to Apply")
 	}
+	emptyResult := &v1alpha1.FabricOrdererNode{}
 	obj, err := c.Fake.
-		Invokes(testing.NewPatchSubresourceAction(fabricorderernodesResource, c.ns, *name, types.ApplyPatchType, data), &v1alpha1.FabricOrdererNode{})
+		Invokes(testing.NewPatchSubresourceActionWithOptions(fabricorderernodesResource, c.ns, *name, types.ApplyPatchType, data, opts.ToPatchOptions()), emptyResult)
 
 	if obj == nil {
-		return nil, err
+		return emptyResult, err
 	}
 	return obj.(*v1alpha1.FabricOrdererNode), err
 }
@@ -168,11 +175,12 @@ func (c *FakeFabricOrdererNodes) ApplyStatus(ctx context.Context, fabricOrdererN
 	if name == nil {
 		return nil, fmt.Errorf("fabricOrdererNode.Name must be provided to Apply")
 	}
+	emptyResult := &v1alpha1.FabricOrdererNode{}
 	obj, err := c.Fake.
-		Invokes(testing.NewPatchSubresourceAction(fabricorderernodesResource, c.ns, *name, types.ApplyPatchType, data, "status"), &v1alpha1.FabricOrdererNode{})
+		Invokes(testing.NewPatchSubresourceActionWithOptions(fabricorderernodesResource, c.ns, *name, types.ApplyPatchType, data, opts.ToPatchOptions(), "status"), emptyResult)
 
 	if obj == nil {
-		return nil, err
+		return emptyResult, err
 	}
 	return obj.(*v1alpha1.FabricOrdererNode), err
 }

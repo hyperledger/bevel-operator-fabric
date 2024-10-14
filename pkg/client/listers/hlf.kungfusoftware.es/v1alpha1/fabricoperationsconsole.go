@@ -8,9 +8,9 @@
 package v1alpha1
 
 import (
-	v1alpha1 "github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
-	"k8s.io/apimachinery/pkg/api/errors"
+	v1alpha1 "github.com/kfsoftware/hlf-operator/pkg/apis/hlf.kungfusoftware.es/v1alpha1"
 	"k8s.io/apimachinery/pkg/labels"
+	"k8s.io/client-go/listers"
 	"k8s.io/client-go/tools/cache"
 )
 
@@ -27,25 +27,17 @@ type FabricOperationsConsoleLister interface {
 
 // fabricOperationsConsoleLister implements the FabricOperationsConsoleLister interface.
 type fabricOperationsConsoleLister struct {
-	indexer cache.Indexer
+	listers.ResourceIndexer[*v1alpha1.FabricOperationsConsole]
 }
 
 // NewFabricOperationsConsoleLister returns a new FabricOperationsConsoleLister.
 func NewFabricOperationsConsoleLister(indexer cache.Indexer) FabricOperationsConsoleLister {
-	return &fabricOperationsConsoleLister{indexer: indexer}
-}
-
-// List lists all FabricOperationsConsoles in the indexer.
-func (s *fabricOperationsConsoleLister) List(selector labels.Selector) (ret []*v1alpha1.FabricOperationsConsole, err error) {
-	err = cache.ListAll(s.indexer, selector, func(m interface{}) {
-		ret = append(ret, m.(*v1alpha1.FabricOperationsConsole))
-	})
-	return ret, err
+	return &fabricOperationsConsoleLister{listers.New[*v1alpha1.FabricOperationsConsole](indexer, v1alpha1.Resource("fabricoperationsconsole"))}
 }
 
 // FabricOperationsConsoles returns an object that can list and get FabricOperationsConsoles.
 func (s *fabricOperationsConsoleLister) FabricOperationsConsoles(namespace string) FabricOperationsConsoleNamespaceLister {
-	return fabricOperationsConsoleNamespaceLister{indexer: s.indexer, namespace: namespace}
+	return fabricOperationsConsoleNamespaceLister{listers.NewNamespaced[*v1alpha1.FabricOperationsConsole](s.ResourceIndexer, namespace)}
 }
 
 // FabricOperationsConsoleNamespaceLister helps list and get FabricOperationsConsoles.
@@ -63,26 +55,5 @@ type FabricOperationsConsoleNamespaceLister interface {
 // fabricOperationsConsoleNamespaceLister implements the FabricOperationsConsoleNamespaceLister
 // interface.
 type fabricOperationsConsoleNamespaceLister struct {
-	indexer   cache.Indexer
-	namespace string
-}
-
-// List lists all FabricOperationsConsoles in the indexer for a given namespace.
-func (s fabricOperationsConsoleNamespaceLister) List(selector labels.Selector) (ret []*v1alpha1.FabricOperationsConsole, err error) {
-	err = cache.ListAllByNamespace(s.indexer, s.namespace, selector, func(m interface{}) {
-		ret = append(ret, m.(*v1alpha1.FabricOperationsConsole))
-	})
-	return ret, err
-}
-
-// Get retrieves the FabricOperationsConsole from the indexer for a given namespace and name.
-func (s fabricOperationsConsoleNamespaceLister) Get(name string) (*v1alpha1.FabricOperationsConsole, error) {
-	obj, exists, err := s.indexer.GetByKey(s.namespace + "/" + name)
-	if err != nil {
-		return nil, err
-	}
-	if !exists {
-		return nil, errors.NewNotFound(v1alpha1.Resource("fabricoperationsconsole"), name)
-	}
-	return obj.(*v1alpha1.FabricOperationsConsole), nil
+	listers.ResourceIndexer[*v1alpha1.FabricOperationsConsole]
 }

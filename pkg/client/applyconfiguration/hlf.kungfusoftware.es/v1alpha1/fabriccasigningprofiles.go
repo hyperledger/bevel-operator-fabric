@@ -7,14 +7,14 @@
 
 package v1alpha1
 
-// FabricCASigningProfilesApplyConfiguration represents an declarative configuration of the FabricCASigningProfiles type for use
+// FabricCASigningProfilesApplyConfiguration represents a declarative configuration of the FabricCASigningProfiles type for use
 // with apply.
 type FabricCASigningProfilesApplyConfiguration struct {
 	CA  *FabricCASigningSignProfileApplyConfiguration `json:"ca,omitempty"`
 	TLS *FabricCASigningTLSProfileApplyConfiguration  `json:"tls,omitempty"`
 }
 
-// FabricCASigningProfilesApplyConfiguration constructs an declarative configuration of the FabricCASigningProfiles type for use with
+// FabricCASigningProfilesApplyConfiguration constructs a declarative configuration of the FabricCASigningProfiles type for use with
 // apply.
 func FabricCASigningProfiles() *FabricCASigningProfilesApplyConfiguration {
 	return &FabricCASigningProfilesApplyConfiguration{}

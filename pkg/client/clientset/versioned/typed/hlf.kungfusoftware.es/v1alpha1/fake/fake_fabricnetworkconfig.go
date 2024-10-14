@@ -12,8 +12,8 @@ import (
 	json "encoding/json"
 	"fmt"
 
-	v1alpha1 "github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
-	hlfkungfusoftwareesv1alpha1 "github.com/kfsoftware/hlf-operator/pkg/client/applyconfiguration/hlf.kungfusoftware.es/v1alpha1"
+	v1alpha1 "github.com/kfsoftware/hlf-operator/pkg/apis/hlf.kungfusoftware.es/v1alpha1"
+	hlfkungfusoftwareesv1alpha1 "github.com/minio/operator/pkg/client/applyconfiguration/hlf.kungfusoftware.es/v1alpha1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	labels "k8s.io/apimachinery/pkg/labels"
 	types "k8s.io/apimachinery/pkg/types"
@@ -33,22 +33,24 @@ var fabricnetworkconfigsKind = v1alpha1.SchemeGroupVersion.WithKind("FabricNetwo
 
 // Get takes name of the fabricNetworkConfig, and returns the corresponding fabricNetworkConfig object, and an error if there is any.
 func (c *FakeFabricNetworkConfigs) Get(ctx context.Context, name string, options v1.GetOptions) (result *v1alpha1.FabricNetworkConfig, err error) {
+	emptyResult := &v1alpha1.FabricNetworkConfig{}
 	obj, err := c.Fake.
-		Invokes(testing.NewGetAction(fabricnetworkconfigsResource, c.ns, name), &v1alpha1.FabricNetworkConfig{})
+		Invokes(testing.NewGetActionWithOptions(fabricnetworkconfigsResource, c.ns, name, options), emptyResult)
 
 	if obj == nil {
-		return nil, err
+		return emptyResult, err
 	}
 	return obj.(*v1alpha1.FabricNetworkConfig), err
 }
 
 // List takes label and field selectors, and returns the list of FabricNetworkConfigs that match those selectors.
 func (c *FakeFabricNetworkConfigs) List(ctx context.Context, opts v1.ListOptions) (result *v1alpha1.FabricNetworkConfigList, err error) {
+	emptyResult := &v1alpha1.FabricNetworkConfigList{}
 	obj, err := c.Fake.
-		Invokes(testing.NewListAction(fabricnetworkconfigsResource, fabricnetworkconfigsKind, c.ns, opts), &v1alpha1.FabricNetworkConfigList{})
+		Invokes(testing.NewListActionWithOptions(fabricnetworkconfigsResource, fabricnetworkconfigsKind, c.ns, opts), emptyResult)
 
 	if obj == nil {
-		return nil, err
+		return emptyResult, err
 	}
 
 	label, _, _ := testing.ExtractFromListOptions(opts)
@@ -67,40 +69,43 @@ func (c *FakeFabricNetworkConfigs) List(ctx context.Context, opts v1.ListOptions
 // Watch returns a watch.Interface that watches the requested fabricNetworkConfigs.
 func (c *FakeFabricNetworkConfigs) Watch(ctx context.Context, opts v1.ListOptions) (watch.Interface, error) {
 	return c.Fake.
-		InvokesWatch(testing.NewWatchAction(fabricnetworkconfigsResource, c.ns, opts))
+		InvokesWatch(testing.NewWatchActionWithOptions(fabricnetworkconfigsResource, c.ns, opts))
 
 }
 
 // Create takes the representation of a fabricNetworkConfig and creates it.  Returns the server's representation of the fabricNetworkConfig, and an error, if there is any.
 func (c *FakeFabricNetworkConfigs) Create(ctx context.Context, fabricNetworkConfig *v1alpha1.FabricNetworkConfig, opts v1.CreateOptions) (result *v1alpha1.FabricNetworkConfig, err error) {
+	emptyResult := &v1alpha1.FabricNetworkConfig{}
 	obj, err := c.Fake.
-		Invokes(testing.NewCreateAction(fabricnetworkconfigsResource, c.ns, fabricNetworkConfig), &v1alpha1.FabricNetworkConfig{})
+		Invokes(testing.NewCreateActionWithOptions(fabricnetworkconfigsResource, c.ns, fabricNetworkConfig, opts), emptyResult)
 
 	if obj == nil {
-		return nil, err
+		return emptyResult, err
 	}
 	return obj.(*v1alpha1.FabricNetworkConfig), err
 }
 
 // Update takes the representation of a fabricNetworkConfig and updates it. Returns the server's representation of the fabricNetworkConfig, and an error, if there is any.
 func (c *FakeFabricNetworkConfigs) Update(ctx context.Context, fabricNetworkConfig *v1alpha1.FabricNetworkConfig, opts v1.UpdateOptions) (result *v1alpha1.FabricNetworkConfig, err error) {
+	emptyResult := &v1alpha1.FabricNetworkConfig{}
 	obj, err := c.Fake.
-		Invokes(testing.NewUpdateAction(fabricnetworkconfigsResource, c.ns, fabricNetworkConfig), &v1alpha1.FabricNetworkConfig{})
+		Invokes(testing.NewUpdateActionWithOptions(fabricnetworkconfigsResource, c.ns, fabricNetworkConfig, opts), emptyResult)
 
 	if obj == nil {
-		return nil, err
+		return emptyResult, err
 	}
 	return obj.(*v1alpha1.FabricNetworkConfig), err
 }
 
 // UpdateStatus was generated because the type contains a Status member.
 // Add a +genclient:noStatus comment above the type to avoid generating UpdateStatus().
-func (c *FakeFabricNetworkConfigs) UpdateStatus(ctx context.Context, fabricNetworkConfig *v1alpha1.FabricNetworkConfig, opts v1.UpdateOptions) (*v1alpha1.FabricNetworkConfig, error) {
+func (c *FakeFabricNetworkConfigs) UpdateStatus(ctx context.Context, fabricNetworkConfig *v1alpha1.FabricNetworkConfig, opts v1.UpdateOptions) (result *v1alpha1.FabricNetworkConfig, err error) {
+	emptyResult := &v1alpha1.FabricNetworkConfig{}
 	obj, err := c.Fake.
-		Invokes(testing.NewUpdateSubresourceAction(fabricnetworkconfigsResource, "status", c.ns, fabricNetworkConfig), &v1alpha1.FabricNetworkConfig{})
+		Invokes(testing.NewUpdateSubresourceActionWithOptions(fabricnetworkconfigsResource, "status", c.ns, fabricNetworkConfig, opts), emptyResult)
 
 	if obj == nil {
-		return nil, err
+		return emptyResult, err
 	}
 	return obj.(*v1alpha1.FabricNetworkConfig), err
 }
@@ -115,7 +120,7 @@ func (c *FakeFabricNetworkConfigs) Delete(ctx context.Context, name string, opts
 
 // DeleteCollection deletes a collection of objects.
 func (c *FakeFabricNetworkConfigs) DeleteCollection(ctx context.Context, opts v1.DeleteOptions, listOpts v1.ListOptions) error {
-	action := testing.NewDeleteCollectionAction(fabricnetworkconfigsResource, c.ns, listOpts)
+	action := testing.NewDeleteCollectionActionWithOptions(fabricnetworkconfigsResource, c.ns, opts, listOpts)
 
 	_, err := c.Fake.Invokes(action, &v1alpha1.FabricNetworkConfigList{})
 	return err
@@ -123,11 +128,12 @@ func (c *FakeFabricNetworkConfigs) DeleteCollection(ctx context.Context, opts v1
 
 // Patch applies the patch and returns the patched fabricNetworkConfig.
 func (c *FakeFabricNetworkConfigs) Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *v1alpha1.FabricNetworkConfig, err error) {
+	emptyResult := &v1alpha1.FabricNetworkConfig{}
 	obj, err := c.Fake.
-		Invokes(testing.NewPatchSubresourceAction(fabricnetworkconfigsResource, c.ns, name, pt, data, subresources...), &v1alpha1.FabricNetworkConfig{})
+		Invokes(testing.NewPatchSubresourceActionWithOptions(fabricnetworkconfigsResource, c.ns, name, pt, data, opts, subresources...), emptyResult)
 
 	if obj == nil {
-		return nil, err
+		return emptyResult, err
 	}
 	return obj.(*v1alpha1.FabricNetworkConfig), err
 }
@@ -145,11 +151,12 @@ func (c *FakeFabricNetworkConfigs) Apply(ctx context.Context, fabricNetworkConfi
 	if name == nil {
 		return nil, fmt.Errorf("fabricNetworkConfig.Name must be provided to Apply")
 	}
+	emptyResult := &v1alpha1.FabricNetworkConfig{}
 	obj, err := c.Fake.
-		Invokes(testing.NewPatchSubresourceAction(fabricnetworkconfigsResource, c.ns, *name, types.ApplyPatchType, data), &v1alpha1.FabricNetworkConfig{})
+		Invokes(testing.NewPatchSubresourceActionWithOptions(fabricnetworkconfigsResource, c.ns, *name, types.ApplyPatchType, data, opts.ToPatchOptions()), emptyResult)
 
 	if obj == nil {
-		return nil, err
+		return emptyResult, err
 	}
 	return obj.(*v1alpha1.FabricNetworkConfig), err
 }
@@ -168,11 +175,12 @@ func (c *FakeFabricNetworkConfigs) ApplyStatus(ctx context.Context, fabricNetwor
 	if name == nil {
 		return nil, fmt.Errorf("fabricNetworkConfig.Name must be provided to Apply")
 	}
+	emptyResult := &v1alpha1.FabricNetworkConfig{}
 	obj, err := c.Fake.
-		Invokes(testing.NewPatchSubresourceAction(fabricnetworkconfigsResource, c.ns, *name, types.ApplyPatchType, data, "status"), &v1alpha1.FabricNetworkConfig{})
+		Invokes(testing.NewPatchSubresourceActionWithOptions(fabricnetworkconfigsResource, c.ns, *name, types.ApplyPatchType, data, opts.ToPatchOptions(), "status"), emptyResult)
 
 	if obj == nil {
-		return nil, err
+		return emptyResult, err
 	}
 	return obj.(*v1alpha1.FabricNetworkConfig), err
 }

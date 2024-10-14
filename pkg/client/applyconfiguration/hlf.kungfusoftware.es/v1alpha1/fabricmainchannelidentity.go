@@ -7,7 +7,7 @@
 
 package v1alpha1
 
-// FabricMainChannelIdentityApplyConfiguration represents an declarative configuration of the FabricMainChannelIdentity type for use
+// FabricMainChannelIdentityApplyConfiguration represents a declarative configuration of the FabricMainChannelIdentity type for use
 // with apply.
 type FabricMainChannelIdentityApplyConfiguration struct {
 	SecretNamespace *string `json:"secretNamespace,omitempty"`
@@ -15,7 +15,7 @@ type FabricMainChannelIdentityApplyConfiguration struct {
 	SecretKey       *string `json:"secretKey,omitempty"`
 }
 
-// FabricMainChannelIdentityApplyConfiguration constructs an declarative configuration of the FabricMainChannelIdentity type for use with
+// FabricMainChannelIdentityApplyConfiguration constructs a declarative configuration of the FabricMainChannelIdentity type for use with
 // apply.
 func FabricMainChannelIdentity() *FabricMainChannelIdentityApplyConfiguration {
 	return &FabricMainChannelIdentityApplyConfiguration{}

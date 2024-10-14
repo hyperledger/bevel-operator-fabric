@@ -7,7 +7,7 @@
 
 package v1alpha1
 
-// OrdererNodeApplyConfiguration represents an declarative configuration of the OrdererNode type for use
+// OrdererNodeApplyConfiguration represents a declarative configuration of the OrdererNode type for use
 // with apply.
 type OrdererNodeApplyConfiguration struct {
 	ID         *string                                  `json:"id,omitempty"`
@@ -16,7 +16,7 @@ type OrdererNodeApplyConfiguration struct {
 	Enrollment *OrdererNodeEnrollmentApplyConfiguration `json:"enrollment,omitempty"`
 }
 
-// OrdererNodeApplyConfiguration constructs an declarative configuration of the OrdererNode type for use with
+// OrdererNodeApplyConfiguration constructs a declarative configuration of the OrdererNode type for use with
 // apply.
 func OrdererNode() *OrdererNodeApplyConfiguration {
 	return &OrdererNodeApplyConfiguration{}

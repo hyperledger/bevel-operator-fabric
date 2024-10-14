@@ -7,7 +7,7 @@
 
 package v1alpha1
 
-// FabricOperatorUIAuthApplyConfiguration represents an declarative configuration of the FabricOperatorUIAuth type for use
+// FabricOperatorUIAuthApplyConfiguration represents a declarative configuration of the FabricOperatorUIAuth type for use
 // with apply.
 type FabricOperatorUIAuthApplyConfiguration struct {
 	OIDCAuthority *string `json:"oidcAuthority,omitempty"`
@@ -15,7 +15,7 @@ type FabricOperatorUIAuthApplyConfiguration struct {
 	OIDCScope     *string `json:"oidcScope,omitempty"`
 }
 
-// FabricOperatorUIAuthApplyConfiguration constructs an declarative configuration of the FabricOperatorUIAuth type for use with
+// FabricOperatorUIAuthApplyConfiguration constructs a declarative configuration of the FabricOperatorUIAuth type for use with
 // apply.
 func FabricOperatorUIAuth() *FabricOperatorUIAuthApplyConfiguration {
 	return &FabricOperatorUIAuthApplyConfiguration{}

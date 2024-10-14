@@ -8,9 +8,9 @@
 package v1alpha1
 
 import (
-	v1alpha1 "github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
-	"k8s.io/apimachinery/pkg/api/errors"
+	v1alpha1 "github.com/kfsoftware/hlf-operator/pkg/apis/hlf.kungfusoftware.es/v1alpha1"
 	"k8s.io/apimachinery/pkg/labels"
+	"k8s.io/client-go/listers"
 	"k8s.io/client-go/tools/cache"
 )
 
@@ -27,25 +27,17 @@ type FabricCALister interface {
 
 // fabricCALister implements the FabricCALister interface.
 type fabricCALister struct {
-	indexer cache.Indexer
+	listers.ResourceIndexer[*v1alpha1.FabricCA]
 }
 
 // NewFabricCALister returns a new FabricCALister.
 func NewFabricCALister(indexer cache.Indexer) FabricCALister {
-	return &fabricCALister{indexer: indexer}
-}
-
-// List lists all FabricCAs in the indexer.
-func (s *fabricCALister) List(selector labels.Selector) (ret []*v1alpha1.FabricCA, err error) {
-	err = cache.ListAll(s.indexer, selector, func(m interface{}) {
-		ret = append(ret, m.(*v1alpha1.FabricCA))
-	})
-	return ret, err
+	return &fabricCALister{listers.New[*v1alpha1.FabricCA](indexer, v1alpha1.Resource("fabricca"))}
 }
 
 // FabricCAs returns an object that can list and get FabricCAs.
 func (s *fabricCALister) FabricCAs(namespace string) FabricCANamespaceLister {
-	return fabricCANamespaceLister{indexer: s.indexer, namespace: namespace}
+	return fabricCANamespaceLister{listers.NewNamespaced[*v1alpha1.FabricCA](s.ResourceIndexer, namespace)}
 }
 
 // FabricCANamespaceLister helps list and get FabricCAs.
@@ -63,26 +55,5 @@ type FabricCANamespaceLister interface {
 // fabricCANamespaceLister implements the FabricCANamespaceLister
 // interface.
 type fabricCANamespaceLister struct {
-	indexer   cache.Indexer
-	namespace string
-}
-
-// List lists all FabricCAs in the indexer for a given namespace.
-func (s fabricCANamespaceLister) List(selector labels.Selector) (ret []*v1alpha1.FabricCA, err error) {
-	err = cache.ListAllByNamespace(s.indexer, s.namespace, selector, func(m interface{}) {
-		ret = append(ret, m.(*v1alpha1.FabricCA))
-	})
-	return ret, err
-}
-
-// Get retrieves the FabricCA from the indexer for a given namespace and name.
-func (s fabricCANamespaceLister) Get(name string) (*v1alpha1.FabricCA, error) {
-	obj, exists, err := s.indexer.GetByKey(s.namespace + "/" + name)
-	if err != nil {
-		return nil, err
-	}
-	if !exists {
-		return nil, errors.NewNotFound(v1alpha1.Resource("fabricca"), name)
-	}
-	return obj.(*v1alpha1.FabricCA), nil
+	listers.ResourceIndexer[*v1alpha1.FabricCA]
 }

@@ -11,7 +11,7 @@ import (
 	v1 "k8s.io/api/core/v1"
 )
 
-// GRPCProxyApplyConfiguration represents an declarative configuration of the GRPCProxy type for use
+// GRPCProxyApplyConfiguration represents a declarative configuration of the GRPCProxy type for use
 // with apply.
 type GRPCProxyApplyConfiguration struct {
 	Enabled          *bool                          `json:"enabled,omitempty"`
@@ -23,7 +23,7 @@ type GRPCProxyApplyConfiguration struct {
 	ImagePullSecrets []v1.LocalObjectReference      `json:"imagePullSecrets,omitempty"`
 }
 
-// GRPCProxyApplyConfiguration constructs an declarative configuration of the GRPCProxy type for use with
+// GRPCProxyApplyConfiguration constructs a declarative configuration of the GRPCProxy type for use with
 // apply.
 func GRPCProxy() *GRPCProxyApplyConfiguration {
 	return &GRPCProxyApplyConfiguration{}

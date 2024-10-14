@@ -7,13 +7,13 @@
 
 package v1alpha1
 
-// ChannelCapabilitiesApplyConfiguration represents an declarative configuration of the ChannelCapabilities type for use
+// ChannelCapabilitiesApplyConfiguration represents a declarative configuration of the ChannelCapabilities type for use
 // with apply.
 type ChannelCapabilitiesApplyConfiguration struct {
 	V2_0 *bool `json:"V2_0,omitempty"`
 }
 
-// ChannelCapabilitiesApplyConfiguration constructs an declarative configuration of the ChannelCapabilities type for use with
+// ChannelCapabilitiesApplyConfiguration constructs a declarative configuration of the ChannelCapabilities type for use with
 // apply.
 func ChannelCapabilities() *ChannelCapabilitiesApplyConfiguration {
 	return &ChannelCapabilitiesApplyConfiguration{}

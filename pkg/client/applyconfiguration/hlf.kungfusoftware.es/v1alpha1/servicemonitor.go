@@ -7,7 +7,7 @@
 
 package v1alpha1
 
-// ServiceMonitorApplyConfiguration represents an declarative configuration of the ServiceMonitor type for use
+// ServiceMonitorApplyConfiguration represents a declarative configuration of the ServiceMonitor type for use
 // with apply.
 type ServiceMonitorApplyConfiguration struct {
 	Enabled       *bool             `json:"enabled,omitempty"`
@@ -17,7 +17,7 @@ type ServiceMonitorApplyConfiguration struct {
 	ScrapeTimeout *string           `json:"scrapeTimeout,omitempty"`
 }
 
-// ServiceMonitorApplyConfiguration constructs an declarative configuration of the ServiceMonitor type for use with
+// ServiceMonitorApplyConfiguration constructs a declarative configuration of the ServiceMonitor type for use with
 // apply.
 func ServiceMonitor() *ServiceMonitorApplyConfiguration {
 	return &ServiceMonitorApplyConfiguration{}

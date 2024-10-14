@@ -11,7 +11,7 @@ import (
 	v1 "k8s.io/api/core/v1"
 )
 
-// FabricCASpecApplyConfiguration represents an declarative configuration of the FabricCASpec type for use
+// FabricCASpecApplyConfiguration represents a declarative configuration of the FabricCASpec type for use
 // with apply.
 type FabricCASpecApplyConfiguration struct {
 	PodAnnotations   map[string]string                      `json:"podAnnotations,omitempty"`
@@ -41,7 +41,7 @@ type FabricCASpecApplyConfiguration struct {
 	Env              []v1.EnvVar                            `json:"env,omitempty"`
 }
 
-// FabricCASpecApplyConfiguration constructs an declarative configuration of the FabricCASpec type for use with
+// FabricCASpecApplyConfiguration constructs a declarative configuration of the FabricCASpec type for use with
 // apply.
 func FabricCASpec() *FabricCASpecApplyConfiguration {
 	return &FabricCASpecApplyConfiguration{}

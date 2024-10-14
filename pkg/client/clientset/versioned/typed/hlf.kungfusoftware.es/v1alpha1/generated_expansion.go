@@ -11,6 +11,12 @@ type FabricCAExpansion interface{}
 
 type FabricChaincodeExpansion interface{}
 
+type FabricChaincodeApproveExpansion interface{}
+
+type FabricChaincodeCommitExpansion interface{}
+
+type FabricChaincodeInstallExpansion interface{}
+
 type FabricChaincodeTemplateExpansion interface{}
 
 type FabricExplorerExpansion interface{}

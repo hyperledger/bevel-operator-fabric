@@ -7,14 +7,14 @@
 
 package v1alpha1
 
-// CsrApplyConfiguration represents an declarative configuration of the Csr type for use
+// CsrApplyConfiguration represents a declarative configuration of the Csr type for use
 // with apply.
 type CsrApplyConfiguration struct {
 	Hosts []string `json:"hosts,omitempty"`
 	CN    *string  `json:"cn,omitempty"`
 }
 
-// CsrApplyConfiguration constructs an declarative configuration of the Csr type for use with
+// CsrApplyConfiguration constructs a declarative configuration of the Csr type for use with
 // apply.
 func Csr() *CsrApplyConfiguration {
 	return &CsrApplyConfiguration{}

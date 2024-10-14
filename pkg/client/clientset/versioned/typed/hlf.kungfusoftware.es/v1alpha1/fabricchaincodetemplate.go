@@ -9,17 +9,14 @@ package v1alpha1
 
 import (
 	"context"
-	json "encoding/json"
-	"fmt"
-	"time"
 
-	v1alpha1 "github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
-	hlfkungfusoftwareesv1alpha1 "github.com/kfsoftware/hlf-operator/pkg/client/applyconfiguration/hlf.kungfusoftware.es/v1alpha1"
-	scheme "github.com/kfsoftware/hlf-operator/pkg/client/clientset/versioned/scheme"
+	v1alpha1 "github.com/kfsoftware/hlf-operator/pkg/apis/hlf.kungfusoftware.es/v1alpha1"
+	hlfkungfusoftwareesv1alpha1 "github.com/minio/operator/pkg/client/applyconfiguration/hlf.kungfusoftware.es/v1alpha1"
+	scheme "github.com/minio/operator/pkg/client/clientset/versioned/scheme"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	types "k8s.io/apimachinery/pkg/types"
 	watch "k8s.io/apimachinery/pkg/watch"
-	rest "k8s.io/client-go/rest"
+	gentype "k8s.io/client-go/gentype"
 )
 
 // FabricChaincodeTemplatesGetter has a method to return a FabricChaincodeTemplateInterface.
@@ -32,6 +29,7 @@ type FabricChaincodeTemplatesGetter interface {
 type FabricChaincodeTemplateInterface interface {
 	Create(ctx context.Context, fabricChaincodeTemplate *v1alpha1.FabricChaincodeTemplate, opts v1.CreateOptions) (*v1alpha1.FabricChaincodeTemplate, error)
 	Update(ctx context.Context, fabricChaincodeTemplate *v1alpha1.FabricChaincodeTemplate, opts v1.UpdateOptions) (*v1alpha1.FabricChaincodeTemplate, error)
+	// Add a +genclient:noStatus comment above the type to avoid generating UpdateStatus().
 	UpdateStatus(ctx context.Context, fabricChaincodeTemplate *v1alpha1.FabricChaincodeTemplate, opts v1.UpdateOptions) (*v1alpha1.FabricChaincodeTemplate, error)
 	Delete(ctx context.Context, name string, opts v1.DeleteOptions) error
 	DeleteCollection(ctx context.Context, opts v1.DeleteOptions, listOpts v1.ListOptions) error
@@ -40,206 +38,25 @@ type FabricChaincodeTemplateInterface interface {
 	Watch(ctx context.Context, opts v1.ListOptions) (watch.Interface, error)
 	Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *v1alpha1.FabricChaincodeTemplate, err error)
 	Apply(ctx context.Context, fabricChaincodeTemplate *hlfkungfusoftwareesv1alpha1.FabricChaincodeTemplateApplyConfiguration, opts v1.ApplyOptions) (result *v1alpha1.FabricChaincodeTemplate, err error)
+	// Add a +genclient:noStatus comment above the type to avoid generating ApplyStatus().
 	ApplyStatus(ctx context.Context, fabricChaincodeTemplate *hlfkungfusoftwareesv1alpha1.FabricChaincodeTemplateApplyConfiguration, opts v1.ApplyOptions) (result *v1alpha1.FabricChaincodeTemplate, err error)
 	FabricChaincodeTemplateExpansion
 }
 
 // fabricChaincodeTemplates implements FabricChaincodeTemplateInterface
 type fabricChaincodeTemplates struct {
-	client rest.Interface
-	ns     string
+	*gentype.ClientWithListAndApply[*v1alpha1.FabricChaincodeTemplate, *v1alpha1.FabricChaincodeTemplateList, *hlfkungfusoftwareesv1alpha1.FabricChaincodeTemplateApplyConfiguration]
 }
 
 // newFabricChaincodeTemplates returns a FabricChaincodeTemplates
 func newFabricChaincodeTemplates(c *HlfV1alpha1Client, namespace string) *fabricChaincodeTemplates {
 	return &fabricChaincodeTemplates{
-		client: c.RESTClient(),
-		ns:     namespace,
+		gentype.NewClientWithListAndApply[*v1alpha1.FabricChaincodeTemplate, *v1alpha1.FabricChaincodeTemplateList, *hlfkungfusoftwareesv1alpha1.FabricChaincodeTemplateApplyConfiguration](
+			"fabricchaincodetemplates",
+			c.RESTClient(),
+			scheme.ParameterCodec,
+			namespace,
+			func() *v1alpha1.FabricChaincodeTemplate { return &v1alpha1.FabricChaincodeTemplate{} },
+			func() *v1alpha1.FabricChaincodeTemplateList { return &v1alpha1.FabricChaincodeTemplateList{} }),
 	}
-}
-
-// Get takes name of the fabricChaincodeTemplate, and returns the corresponding fabricChaincodeTemplate object, and an error if there is any.
-func (c *fabricChaincodeTemplates) Get(ctx context.Context, name string, options v1.GetOptions) (result *v1alpha1.FabricChaincodeTemplate, err error) {
-	result = &v1alpha1.FabricChaincodeTemplate{}
-	err = c.client.Get().
-		Namespace(c.ns).
-		Resource("fabricchaincodetemplates").
-		Name(name).
-		VersionedParams(&options, scheme.ParameterCodec).
-		Do(ctx).
-		Into(result)
-	return
-}
-
-// List takes label and field selectors, and returns the list of FabricChaincodeTemplates that match those selectors.
-func (c *fabricChaincodeTemplates) List(ctx context.Context, opts v1.ListOptions) (result *v1alpha1.FabricChaincodeTemplateList, err error) {
-	var timeout time.Duration
-	if opts.TimeoutSeconds != nil {
-		timeout = time.Duration(*opts.TimeoutSeconds) * time.Second
-	}
-	result = &v1alpha1.FabricChaincodeTemplateList{}
-	err = c.client.Get().
-		Namespace(c.ns).
-		Resource("fabricchaincodetemplates").
-		VersionedParams(&opts, scheme.ParameterCodec).
-		Timeout(timeout).
-		Do(ctx).
-		Into(result)
-	return
-}
-
-// Watch returns a watch.Interface that watches the requested fabricChaincodeTemplates.
-func (c *fabricChaincodeTemplates) Watch(ctx context.Context, opts v1.ListOptions) (watch.Interface, error) {
-	var timeout time.Duration
-	if opts.TimeoutSeconds != nil {
-		timeout = time.Duration(*opts.TimeoutSeconds) * time.Second
-	}
-	opts.Watch = true
-	return c.client.Get().
-		Namespace(c.ns).
-		Resource("fabricchaincodetemplates").
-		VersionedParams(&opts, scheme.ParameterCodec).
-		Timeout(timeout).
-		Watch(ctx)
-}
-
-// Create takes the representation of a fabricChaincodeTemplate and creates it.  Returns the server's representation of the fabricChaincodeTemplate, and an error, if there is any.
-func (c *fabricChaincodeTemplates) Create(ctx context.Context, fabricChaincodeTemplate *v1alpha1.FabricChaincodeTemplate, opts v1.CreateOptions) (result *v1alpha1.FabricChaincodeTemplate, err error) {
-	result = &v1alpha1.FabricChaincodeTemplate{}
-	err = c.client.Post().
-		Namespace(c.ns).
-		Resource("fabricchaincodetemplates").
-		VersionedParams(&opts, scheme.ParameterCodec).
-		Body(fabricChaincodeTemplate).
-		Do(ctx).
-		Into(result)
-	return
-}
-
-// Update takes the representation of a fabricChaincodeTemplate and updates it. Returns the server's representation of the fabricChaincodeTemplate, and an error, if there is any.
-func (c *fabricChaincodeTemplates) Update(ctx context.Context, fabricChaincodeTemplate *v1alpha1.FabricChaincodeTemplate, opts v1.UpdateOptions) (result *v1alpha1.FabricChaincodeTemplate, err error) {
-	result = &v1alpha1.FabricChaincodeTemplate{}
-	err = c.client.Put().
-		Namespace(c.ns).
-		Resource("fabricchaincodetemplates").
-		Name(fabricChaincodeTemplate.Name).
-		VersionedParams(&opts, scheme.ParameterCodec).
-		Body(fabricChaincodeTemplate).
-		Do(ctx).
-		Into(result)
-	return
-}
-
-// UpdateStatus was generated because the type contains a Status member.
-// Add a +genclient:noStatus comment above the type to avoid generating UpdateStatus().
-func (c *fabricChaincodeTemplates) UpdateStatus(ctx context.Context, fabricChaincodeTemplate *v1alpha1.FabricChaincodeTemplate, opts v1.UpdateOptions) (result *v1alpha1.FabricChaincodeTemplate, err error) {
-	result = &v1alpha1.FabricChaincodeTemplate{}
-	err = c.client.Put().
-		Namespace(c.ns).
-		Resource("fabricchaincodetemplates").
-		Name(fabricChaincodeTemplate.Name).
-		SubResource("status").
-		VersionedParams(&opts, scheme.ParameterCodec).
-		Body(fabricChaincodeTemplate).
-		Do(ctx).
-		Into(result)
-	return
-}
-
-// Delete takes name of the fabricChaincodeTemplate and deletes it. Returns an error if one occurs.
-func (c *fabricChaincodeTemplates) Delete(ctx context.Context, name string, opts v1.DeleteOptions) error {
-	return c.client.Delete().
-		Namespace(c.ns).
-		Resource("fabricchaincodetemplates").
-		Name(name).
-		Body(&opts).
-		Do(ctx).
-		Error()
-}
-
-// DeleteCollection deletes a collection of objects.
-func (c *fabricChaincodeTemplates) DeleteCollection(ctx context.Context, opts v1.DeleteOptions, listOpts v1.ListOptions) error {
-	var timeout time.Duration
-	if listOpts.TimeoutSeconds != nil {
-		timeout = time.Duration(*listOpts.TimeoutSeconds) * time.Second
-	}
-	return c.client.Delete().
-		Namespace(c.ns).
-		Resource("fabricchaincodetemplates").
-		VersionedParams(&listOpts, scheme.ParameterCodec).
-		Timeout(timeout).
-		Body(&opts).
-		Do(ctx).
-		Error()
-}
-
-// Patch applies the patch and returns the patched fabricChaincodeTemplate.
-func (c *fabricChaincodeTemplates) Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *v1alpha1.FabricChaincodeTemplate, err error) {
-	result = &v1alpha1.FabricChaincodeTemplate{}
-	err = c.client.Patch(pt).
-		Namespace(c.ns).
-		Resource("fabricchaincodetemplates").
-		Name(name).
-		SubResource(subresources...).
-		VersionedParams(&opts, scheme.ParameterCodec).
-		Body(data).
-		Do(ctx).
-		Into(result)
-	return
-}
-
-// Apply takes the given apply declarative configuration, applies it and returns the applied fabricChaincodeTemplate.
-func (c *fabricChaincodeTemplates) Apply(ctx context.Context, fabricChaincodeTemplate *hlfkungfusoftwareesv1alpha1.FabricChaincodeTemplateApplyConfiguration, opts v1.ApplyOptions) (result *v1alpha1.FabricChaincodeTemplate, err error) {
-	if fabricChaincodeTemplate == nil {
-		return nil, fmt.Errorf("fabricChaincodeTemplate provided to Apply must not be nil")
-	}
-	patchOpts := opts.ToPatchOptions()
-	data, err := json.Marshal(fabricChaincodeTemplate)
-	if err != nil {
-		return nil, err
-	}
-	name := fabricChaincodeTemplate.Name
-	if name == nil {
-		return nil, fmt.Errorf("fabricChaincodeTemplate.Name must be provided to Apply")
-	}
-	result = &v1alpha1.FabricChaincodeTemplate{}
-	err = c.client.Patch(types.ApplyPatchType).
-		Namespace(c.ns).
-		Resource("fabricchaincodetemplates").
-		Name(*name).
-		VersionedParams(&patchOpts, scheme.ParameterCodec).
-		Body(data).
-		Do(ctx).
-		Into(result)
-	return
-}
-
-// ApplyStatus was generated because the type contains a Status member.
-// Add a +genclient:noStatus comment above the type to avoid generating ApplyStatus().
-func (c *fabricChaincodeTemplates) ApplyStatus(ctx context.Context, fabricChaincodeTemplate *hlfkungfusoftwareesv1alpha1.FabricChaincodeTemplateApplyConfiguration, opts v1.ApplyOptions) (result *v1alpha1.FabricChaincodeTemplate, err error) {
-	if fabricChaincodeTemplate == nil {
-		return nil, fmt.Errorf("fabricChaincodeTemplate provided to Apply must not be nil")
-	}
-	patchOpts := opts.ToPatchOptions()
-	data, err := json.Marshal(fabricChaincodeTemplate)
-	if err != nil {
-		return nil, err
-	}
-
-	name := fabricChaincodeTemplate.Name
-	if name == nil {
-		return nil, fmt.Errorf("fabricChaincodeTemplate.Name must be provided to Apply")
-	}
-
-	result = &v1alpha1.FabricChaincodeTemplate{}
-	err = c.client.Patch(types.ApplyPatchType).
-		Namespace(c.ns).
-		Resource("fabricchaincodetemplates").
-		Name(*name).
-		SubResource("status").
-		VersionedParams(&patchOpts, scheme.ParameterCodec).
-		Body(data).
-		Do(ctx).
-		Into(result)
-	return
 }

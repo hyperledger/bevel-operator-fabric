@@ -7,7 +7,7 @@
 
 package v1alpha1
 
-// FabricPeerExternalCouchDBApplyConfiguration represents an declarative configuration of the FabricPeerExternalCouchDB type for use
+// FabricPeerExternalCouchDBApplyConfiguration represents a declarative configuration of the FabricPeerExternalCouchDB type for use
 // with apply.
 type FabricPeerExternalCouchDBApplyConfiguration struct {
 	Enabled *bool   `json:"enabled,omitempty"`
@@ -15,7 +15,7 @@ type FabricPeerExternalCouchDBApplyConfiguration struct {
 	Port    *int    `json:"port,omitempty"`
 }
 
-// FabricPeerExternalCouchDBApplyConfiguration constructs an declarative configuration of the FabricPeerExternalCouchDB type for use with
+// FabricPeerExternalCouchDBApplyConfiguration constructs a declarative configuration of the FabricPeerExternalCouchDB type for use with
 // apply.
 func FabricPeerExternalCouchDB() *FabricPeerExternalCouchDBApplyConfiguration {
 	return &FabricPeerExternalCouchDBApplyConfiguration{}

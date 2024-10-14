@@ -7,14 +7,14 @@
 
 package v1alpha1
 
-// FabricCASigningSignProfileConstraintApplyConfiguration represents an declarative configuration of the FabricCASigningSignProfileConstraint type for use
+// FabricCASigningSignProfileConstraintApplyConfiguration represents a declarative configuration of the FabricCASigningSignProfileConstraint type for use
 // with apply.
 type FabricCASigningSignProfileConstraintApplyConfiguration struct {
 	IsCA       *bool `json:"isCA,omitempty"`
 	MaxPathLen *int  `json:"maxPathLen,omitempty"`
 }
 
-// FabricCASigningSignProfileConstraintApplyConfiguration constructs an declarative configuration of the FabricCASigningSignProfileConstraint type for use with
+// FabricCASigningSignProfileConstraintApplyConfiguration constructs a declarative configuration of the FabricCASigningSignProfileConstraint type for use with
 // apply.
 func FabricCASigningSignProfileConstraint() *FabricCASigningSignProfileConstraintApplyConfiguration {
 	return &FabricCASigningSignProfileConstraintApplyConfiguration{}

@@ -11,7 +11,7 @@ import (
 	v1 "k8s.io/api/core/v1"
 )
 
-// FabricPeerCouchdbExporterApplyConfiguration represents an declarative configuration of the FabricPeerCouchdbExporter type for use
+// FabricPeerCouchdbExporterApplyConfiguration represents a declarative configuration of the FabricPeerCouchdbExporter type for use
 // with apply.
 type FabricPeerCouchdbExporterApplyConfiguration struct {
 	Enabled         *bool          `json:"enabled,omitempty"`
@@ -20,7 +20,7 @@ type FabricPeerCouchdbExporterApplyConfiguration struct {
 	ImagePullPolicy *v1.PullPolicy `json:"imagePullPolicy,omitempty"`
 }
 
-// FabricPeerCouchdbExporterApplyConfiguration constructs an declarative configuration of the FabricPeerCouchdbExporter type for use with
+// FabricPeerCouchdbExporterApplyConfiguration constructs a declarative configuration of the FabricPeerCouchdbExporter type for use with
 // apply.
 func FabricPeerCouchdbExporter() *FabricPeerCouchdbExporterApplyConfiguration {
 	return &FabricPeerCouchdbExporterApplyConfiguration{}

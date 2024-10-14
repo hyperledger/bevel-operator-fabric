@@ -8,9 +8,9 @@
 package v1alpha1
 
 import (
-	v1alpha1 "github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
-	"k8s.io/apimachinery/pkg/api/errors"
+	v1alpha1 "github.com/kfsoftware/hlf-operator/pkg/apis/hlf.kungfusoftware.es/v1alpha1"
 	"k8s.io/apimachinery/pkg/labels"
+	"k8s.io/client-go/listers"
 	"k8s.io/client-go/tools/cache"
 )
 
@@ -27,25 +27,17 @@ type FabricPeerLister interface {
 
 // fabricPeerLister implements the FabricPeerLister interface.
 type fabricPeerLister struct {
-	indexer cache.Indexer
+	listers.ResourceIndexer[*v1alpha1.FabricPeer]
 }
 
 // NewFabricPeerLister returns a new FabricPeerLister.
 func NewFabricPeerLister(indexer cache.Indexer) FabricPeerLister {
-	return &fabricPeerLister{indexer: indexer}
-}
-
-// List lists all FabricPeers in the indexer.
-func (s *fabricPeerLister) List(selector labels.Selector) (ret []*v1alpha1.FabricPeer, err error) {
-	err = cache.ListAll(s.indexer, selector, func(m interface{}) {
-		ret = append(ret, m.(*v1alpha1.FabricPeer))
-	})
-	return ret, err
+	return &fabricPeerLister{listers.New[*v1alpha1.FabricPeer](indexer, v1alpha1.Resource("fabricpeer"))}
 }
 
 // FabricPeers returns an object that can list and get FabricPeers.
 func (s *fabricPeerLister) FabricPeers(namespace string) FabricPeerNamespaceLister {
-	return fabricPeerNamespaceLister{indexer: s.indexer, namespace: namespace}
+	return fabricPeerNamespaceLister{listers.NewNamespaced[*v1alpha1.FabricPeer](s.ResourceIndexer, namespace)}
 }
 
 // FabricPeerNamespaceLister helps list and get FabricPeers.
@@ -63,26 +55,5 @@ type FabricPeerNamespaceLister interface {
 // fabricPeerNamespaceLister implements the FabricPeerNamespaceLister
 // interface.
 type fabricPeerNamespaceLister struct {
-	indexer   cache.Indexer
-	namespace string
-}
-
-// List lists all FabricPeers in the indexer for a given namespace.
-func (s fabricPeerNamespaceLister) List(selector labels.Selector) (ret []*v1alpha1.FabricPeer, err error) {
-	err = cache.ListAllByNamespace(s.indexer, s.namespace, selector, func(m interface{}) {
-		ret = append(ret, m.(*v1alpha1.FabricPeer))
-	})
-	return ret, err
-}
-
-// Get retrieves the FabricPeer from the indexer for a given namespace and name.
-func (s fabricPeerNamespaceLister) Get(name string) (*v1alpha1.FabricPeer, error) {
-	obj, exists, err := s.indexer.GetByKey(s.namespace + "/" + name)
-	if err != nil {
-		return nil, err
-	}
-	if !exists {
-		return nil, errors.NewNotFound(v1alpha1.Resource("fabricpeer"), name)
-	}
-	return obj.(*v1alpha1.FabricPeer), nil
+	listers.ResourceIndexer[*v1alpha1.FabricPeer]
 }

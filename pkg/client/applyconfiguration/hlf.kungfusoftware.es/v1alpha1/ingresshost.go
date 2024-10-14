@@ -7,14 +7,14 @@
 
 package v1alpha1
 
-// IngressHostApplyConfiguration represents an declarative configuration of the IngressHost type for use
+// IngressHostApplyConfiguration represents a declarative configuration of the IngressHost type for use
 // with apply.
 type IngressHostApplyConfiguration struct {
 	Host  *string                         `json:"host,omitempty"`
 	Paths []IngressPathApplyConfiguration `json:"paths,omitempty"`
 }
 
-// IngressHostApplyConfiguration constructs an declarative configuration of the IngressHost type for use with
+// IngressHostApplyConfiguration constructs a declarative configuration of the IngressHost type for use with
 // apply.
 func IngressHost() *IngressHostApplyConfiguration {
 	return &IngressHostApplyConfiguration{}

@@ -7,13 +7,13 @@
 
 package v1alpha1
 
-// ApplicationCapabilitiesApplyConfiguration represents an declarative configuration of the ApplicationCapabilities type for use
+// ApplicationCapabilitiesApplyConfiguration represents a declarative configuration of the ApplicationCapabilities type for use
 // with apply.
 type ApplicationCapabilitiesApplyConfiguration struct {
 	V2_0 *bool `json:"V2_0,omitempty"`
 }
 
-// ApplicationCapabilitiesApplyConfiguration constructs an declarative configuration of the ApplicationCapabilities type for use with
+// ApplicationCapabilitiesApplyConfiguration constructs a declarative configuration of the ApplicationCapabilities type for use with
 // apply.
 func ApplicationCapabilities() *ApplicationCapabilitiesApplyConfiguration {
 	return &ApplicationCapabilitiesApplyConfiguration{}

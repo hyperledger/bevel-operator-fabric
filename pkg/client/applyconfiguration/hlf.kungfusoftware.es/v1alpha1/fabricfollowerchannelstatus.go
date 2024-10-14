@@ -8,11 +8,11 @@
 package v1alpha1
 
 import (
-	v1alpha1 "github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
+	v1alpha1 "github.com/kfsoftware/hlf-operator/pkg/apis/hlf.kungfusoftware.es/v1alpha1"
 	status "github.com/kfsoftware/hlf-operator/pkg/status"
 )
 
-// FabricFollowerChannelStatusApplyConfiguration represents an declarative configuration of the FabricFollowerChannelStatus type for use
+// FabricFollowerChannelStatusApplyConfiguration represents a declarative configuration of the FabricFollowerChannelStatus type for use
 // with apply.
 type FabricFollowerChannelStatusApplyConfiguration struct {
 	Conditions *status.Conditions         `json:"conditions,omitempty"`
@@ -20,7 +20,7 @@ type FabricFollowerChannelStatusApplyConfiguration struct {
 	Status     *v1alpha1.DeploymentStatus `json:"status,omitempty"`
 }
 
-// FabricFollowerChannelStatusApplyConfiguration constructs an declarative configuration of the FabricFollowerChannelStatus type for use with
+// FabricFollowerChannelStatusApplyConfiguration constructs a declarative configuration of the FabricFollowerChannelStatus type for use with
 // apply.
 func FabricFollowerChannelStatus() *FabricFollowerChannelStatusApplyConfiguration {
 	return &FabricFollowerChannelStatusApplyConfiguration{}

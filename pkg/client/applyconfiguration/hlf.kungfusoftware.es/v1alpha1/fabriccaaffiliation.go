@@ -7,14 +7,14 @@
 
 package v1alpha1
 
-// FabricCAAffiliationApplyConfiguration represents an declarative configuration of the FabricCAAffiliation type for use
+// FabricCAAffiliationApplyConfiguration represents a declarative configuration of the FabricCAAffiliation type for use
 // with apply.
 type FabricCAAffiliationApplyConfiguration struct {
 	Name        *string  `json:"name,omitempty"`
 	Departments []string `json:"departments,omitempty"`
 }
 
-// FabricCAAffiliationApplyConfiguration constructs an declarative configuration of the FabricCAAffiliation type for use with
+// FabricCAAffiliationApplyConfiguration constructs a declarative configuration of the FabricCAAffiliation type for use with
 // apply.
 func FabricCAAffiliation() *FabricCAAffiliationApplyConfiguration {
 	return &FabricCAAffiliationApplyConfiguration{}

@@ -7,7 +7,7 @@
 
 package v1alpha1
 
-// FabricOrderingServiceSpecApplyConfiguration represents an declarative configuration of the FabricOrderingServiceSpec type for use
+// FabricOrderingServiceSpecApplyConfiguration represents a declarative configuration of the FabricOrderingServiceSpec type for use
 // with apply.
 type FabricOrderingServiceSpecApplyConfiguration struct {
 	Image         *string                                 `json:"image,omitempty"`
@@ -20,7 +20,7 @@ type FabricOrderingServiceSpecApplyConfiguration struct {
 	SystemChannel *OrdererSystemChannelApplyConfiguration `json:"systemChannel,omitempty"`
 }
 
-// FabricOrderingServiceSpecApplyConfiguration constructs an declarative configuration of the FabricOrderingServiceSpec type for use with
+// FabricOrderingServiceSpecApplyConfiguration constructs a declarative configuration of the FabricOrderingServiceSpec type for use with
 // apply.
 func FabricOrderingServiceSpec() *FabricOrderingServiceSpecApplyConfiguration {
 	return &FabricOrderingServiceSpecApplyConfiguration{}

@@ -7,14 +7,14 @@
 
 package v1alpha1
 
-// CorsApplyConfiguration represents an declarative configuration of the Cors type for use
+// CorsApplyConfiguration represents a declarative configuration of the Cors type for use
 // with apply.
 type CorsApplyConfiguration struct {
 	Enabled *bool    `json:"enabled,omitempty"`
 	Origins []string `json:"origins,omitempty"`
 }
 
-// CorsApplyConfiguration constructs an declarative configuration of the Cors type for use with
+// CorsApplyConfiguration constructs a declarative configuration of the Cors type for use with
 // apply.
 func Cors() *CorsApplyConfiguration {
 	return &CorsApplyConfiguration{}

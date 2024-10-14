@@ -7,14 +7,14 @@
 
 package v1alpha1
 
-// FabricFollowerChannelExternalPeerApplyConfiguration represents an declarative configuration of the FabricFollowerChannelExternalPeer type for use
+// FabricFollowerChannelExternalPeerApplyConfiguration represents a declarative configuration of the FabricFollowerChannelExternalPeer type for use
 // with apply.
 type FabricFollowerChannelExternalPeerApplyConfiguration struct {
 	URL       *string `json:"url,omitempty"`
 	TLSCACert *string `json:"tlsCACert,omitempty"`
 }
 
-// FabricFollowerChannelExternalPeerApplyConfiguration constructs an declarative configuration of the FabricFollowerChannelExternalPeer type for use with
+// FabricFollowerChannelExternalPeerApplyConfiguration constructs a declarative configuration of the FabricFollowerChannelExternalPeer type for use with
 // apply.
 func FabricFollowerChannelExternalPeer() *FabricFollowerChannelExternalPeerApplyConfiguration {
 	return &FabricFollowerChannelExternalPeerApplyConfiguration{}

@@ -7,7 +7,7 @@
 
 package v1alpha1
 
-// FabricGatewayApiApplyConfiguration represents an declarative configuration of the FabricGatewayApi type for use
+// FabricGatewayApiApplyConfiguration represents a declarative configuration of the FabricGatewayApi type for use
 // with apply.
 type FabricGatewayApiApplyConfiguration struct {
 	Port             *int     `json:"port,omitempty"`
@@ -16,7 +16,7 @@ type FabricGatewayApiApplyConfiguration struct {
 	GatewayNamespace *string  `json:"gatewayNamespace,omitempty"`
 }
 
-// FabricGatewayApiApplyConfiguration constructs an declarative configuration of the FabricGatewayApi type for use with
+// FabricGatewayApiApplyConfiguration constructs a declarative configuration of the FabricGatewayApi type for use with
 // apply.
 func FabricGatewayApi() *FabricGatewayApiApplyConfiguration {
 	return &FabricGatewayApiApplyConfiguration{}

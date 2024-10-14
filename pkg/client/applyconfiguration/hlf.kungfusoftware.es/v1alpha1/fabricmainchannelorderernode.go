@@ -7,14 +7,14 @@
 
 package v1alpha1
 
-// FabricMainChannelOrdererNodeApplyConfiguration represents an declarative configuration of the FabricMainChannelOrdererNode type for use
+// FabricMainChannelOrdererNodeApplyConfiguration represents a declarative configuration of the FabricMainChannelOrdererNode type for use
 // with apply.
 type FabricMainChannelOrdererNodeApplyConfiguration struct {
 	Name      *string `json:"name,omitempty"`
 	Namespace *string `json:"namespace,omitempty"`
 }
 
-// FabricMainChannelOrdererNodeApplyConfiguration constructs an declarative configuration of the FabricMainChannelOrdererNode type for use with
+// FabricMainChannelOrdererNodeApplyConfiguration constructs a declarative configuration of the FabricMainChannelOrdererNode type for use with
 // apply.
 func FabricMainChannelOrdererNode() *FabricMainChannelOrdererNodeApplyConfiguration {
 	return &FabricMainChannelOrdererNodeApplyConfiguration{}

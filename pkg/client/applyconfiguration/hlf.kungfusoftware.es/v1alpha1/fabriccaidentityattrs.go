@@ -7,7 +7,7 @@
 
 package v1alpha1
 
-// FabricCAIdentityAttrsApplyConfiguration represents an declarative configuration of the FabricCAIdentityAttrs type for use
+// FabricCAIdentityAttrsApplyConfiguration represents a declarative configuration of the FabricCAIdentityAttrs type for use
 // with apply.
 type FabricCAIdentityAttrsApplyConfiguration struct {
 	RegistrarRoles *string `json:"hf.Registrar.Roles,omitempty"`
@@ -19,7 +19,7 @@ type FabricCAIdentityAttrsApplyConfiguration struct {
 	AffiliationMgr *bool   `json:"hf.AffiliationMgr,omitempty"`
 }
 
-// FabricCAIdentityAttrsApplyConfiguration constructs an declarative configuration of the FabricCAIdentityAttrs type for use with
+// FabricCAIdentityAttrsApplyConfiguration constructs a declarative configuration of the FabricCAIdentityAttrs type for use with
 // apply.
 func FabricCAIdentityAttrs() *FabricCAIdentityAttrsApplyConfiguration {
 	return &FabricCAIdentityAttrsApplyConfiguration{}

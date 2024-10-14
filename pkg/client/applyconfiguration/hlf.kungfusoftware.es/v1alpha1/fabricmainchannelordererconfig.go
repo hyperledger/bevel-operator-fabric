@@ -8,22 +8,24 @@
 package v1alpha1
 
 import (
-	hlfkungfusoftwareesv1alpha1 "github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
+	v1alpha1 "github.com/kfsoftware/hlf-operator/pkg/apis/hlf.kungfusoftware.es/v1alpha1"
 )
 
-// FabricMainChannelOrdererConfigApplyConfiguration represents an declarative configuration of the FabricMainChannelOrdererConfig type for use
+// FabricMainChannelOrdererConfigApplyConfiguration represents a declarative configuration of the FabricMainChannelOrdererConfig type for use
 // with apply.
 type FabricMainChannelOrdererConfigApplyConfiguration struct {
-	OrdererType  *string                                                       `json:"ordererType,omitempty"`
-	Capabilities []string                                                      `json:"capabilities,omitempty"`
-	Policies     *map[string]FabricMainChannelPoliciesConfigApplyConfiguration `json:"policies,omitempty"`
-	BatchTimeout *string                                                       `json:"batchTimeout,omitempty"`
-	BatchSize    *FabricMainChannelOrdererBatchSizeApplyConfiguration          `json:"batchSize,omitempty"`
-	State        *hlfkungfusoftwareesv1alpha1.FabricMainChannelConsensusState  `json:"state,omitempty"`
-	EtcdRaft     *FabricMainChannelEtcdRaftApplyConfiguration                  `json:"etcdRaft,omitempty"`
+	OrdererType      *v1alpha1.OrdererConsensusType                                `json:"ordererType,omitempty"`
+	Capabilities     []string                                                      `json:"capabilities,omitempty"`
+	Policies         *map[string]FabricMainChannelPoliciesConfigApplyConfiguration `json:"policies,omitempty"`
+	BatchTimeout     *string                                                       `json:"batchTimeout,omitempty"`
+	BatchSize        *FabricMainChannelOrdererBatchSizeApplyConfiguration          `json:"batchSize,omitempty"`
+	State            *v1alpha1.FabricMainChannelConsensusState                     `json:"state,omitempty"`
+	EtcdRaft         *FabricMainChannelEtcdRaftApplyConfiguration                  `json:"etcdRaft,omitempty"`
+	SmartBFT         *FabricMainChannelSmartBFTApplyConfiguration                  `json:"smartBFT,omitempty"`
+	ConsenterMapping []FabricMainChannelConsenterItemApplyConfiguration            `json:"consenterMapping,omitempty"`
 }
 
-// FabricMainChannelOrdererConfigApplyConfiguration constructs an declarative configuration of the FabricMainChannelOrdererConfig type for use with
+// FabricMainChannelOrdererConfigApplyConfiguration constructs a declarative configuration of the FabricMainChannelOrdererConfig type for use with
 // apply.
 func FabricMainChannelOrdererConfig() *FabricMainChannelOrdererConfigApplyConfiguration {
 	return &FabricMainChannelOrdererConfigApplyConfiguration{}
@@ -32,7 +34,7 @@ func FabricMainChannelOrdererConfig() *FabricMainChannelOrdererConfigApplyConfig
 // WithOrdererType sets the OrdererType field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the OrdererType field is set to the value of the last call.
-func (b *FabricMainChannelOrdererConfigApplyConfiguration) WithOrdererType(value string) *FabricMainChannelOrdererConfigApplyConfiguration {
+func (b *FabricMainChannelOrdererConfigApplyConfiguration) WithOrdererType(value v1alpha1.OrdererConsensusType) *FabricMainChannelOrdererConfigApplyConfiguration {
 	b.OrdererType = &value
 	return b
 }
@@ -74,7 +76,7 @@ func (b *FabricMainChannelOrdererConfigApplyConfiguration) WithBatchSize(value *
 // WithState sets the State field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the State field is set to the value of the last call.
-func (b *FabricMainChannelOrdererConfigApplyConfiguration) WithState(value hlfkungfusoftwareesv1alpha1.FabricMainChannelConsensusState) *FabricMainChannelOrdererConfigApplyConfiguration {
+func (b *FabricMainChannelOrdererConfigApplyConfiguration) WithState(value v1alpha1.FabricMainChannelConsensusState) *FabricMainChannelOrdererConfigApplyConfiguration {
 	b.State = &value
 	return b
 }
@@ -84,5 +86,26 @@ func (b *FabricMainChannelOrdererConfigApplyConfiguration) WithState(value hlfku
 // If called multiple times, the EtcdRaft field is set to the value of the last call.
 func (b *FabricMainChannelOrdererConfigApplyConfiguration) WithEtcdRaft(value *FabricMainChannelEtcdRaftApplyConfiguration) *FabricMainChannelOrdererConfigApplyConfiguration {
 	b.EtcdRaft = value
+	return b
+}
+
+// WithSmartBFT sets the SmartBFT field in the declarative configuration to the given value
+// and returns the receiver, so that objects can be built by chaining "With" function invocations.
+// If called multiple times, the SmartBFT field is set to the value of the last call.
+func (b *FabricMainChannelOrdererConfigApplyConfiguration) WithSmartBFT(value *FabricMainChannelSmartBFTApplyConfiguration) *FabricMainChannelOrdererConfigApplyConfiguration {
+	b.SmartBFT = value
+	return b
+}
+
+// WithConsenterMapping adds the given value to the ConsenterMapping field in the declarative configuration
+// and returns the receiver, so that objects can be build by chaining "With" function invocations.
+// If called multiple times, values provided by each call will be appended to the ConsenterMapping field.
+func (b *FabricMainChannelOrdererConfigApplyConfiguration) WithConsenterMapping(values ...*FabricMainChannelConsenterItemApplyConfiguration) *FabricMainChannelOrdererConfigApplyConfiguration {
+	for i := range values {
+		if values[i] == nil {
+			panic("nil value passed to WithConsenterMapping")
+		}
+		b.ConsenterMapping = append(b.ConsenterMapping, *values[i])
+	}
 	return b
 }

@@ -7,7 +7,7 @@
 
 package v1alpha1
 
-// FabricCAMetricsStatsdApplyConfiguration represents an declarative configuration of the FabricCAMetricsStatsd type for use
+// FabricCAMetricsStatsdApplyConfiguration represents a declarative configuration of the FabricCAMetricsStatsd type for use
 // with apply.
 type FabricCAMetricsStatsdApplyConfiguration struct {
 	Network       *string `json:"network,omitempty"`
@@ -16,7 +16,7 @@ type FabricCAMetricsStatsdApplyConfiguration struct {
 	Prefix        *string `json:"prefix,omitempty"`
 }
 
-// FabricCAMetricsStatsdApplyConfiguration constructs an declarative configuration of the FabricCAMetricsStatsd type for use with
+// FabricCAMetricsStatsdApplyConfiguration constructs a declarative configuration of the FabricCAMetricsStatsd type for use with
 // apply.
 func FabricCAMetricsStatsd() *FabricCAMetricsStatsdApplyConfiguration {
 	return &FabricCAMetricsStatsdApplyConfiguration{}

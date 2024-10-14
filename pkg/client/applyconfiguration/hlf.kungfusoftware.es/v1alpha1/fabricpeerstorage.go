@@ -7,7 +7,7 @@
 
 package v1alpha1
 
-// FabricPeerStorageApplyConfiguration represents an declarative configuration of the FabricPeerStorage type for use
+// FabricPeerStorageApplyConfiguration represents a declarative configuration of the FabricPeerStorage type for use
 // with apply.
 type FabricPeerStorageApplyConfiguration struct {
 	CouchDB   *StorageApplyConfiguration `json:"couchdb,omitempty"`
@@ -15,7 +15,7 @@ type FabricPeerStorageApplyConfiguration struct {
 	Chaincode *StorageApplyConfiguration `json:"chaincode,omitempty"`
 }
 
-// FabricPeerStorageApplyConfiguration constructs an declarative configuration of the FabricPeerStorage type for use with
+// FabricPeerStorageApplyConfiguration constructs a declarative configuration of the FabricPeerStorage type for use with
 // apply.
 func FabricPeerStorage() *FabricPeerStorageApplyConfiguration {
 	return &FabricPeerStorageApplyConfiguration{}

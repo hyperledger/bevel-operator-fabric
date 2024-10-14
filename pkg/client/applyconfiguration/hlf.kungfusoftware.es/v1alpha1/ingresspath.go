@@ -7,14 +7,14 @@
 
 package v1alpha1
 
-// IngressPathApplyConfiguration represents an declarative configuration of the IngressPath type for use
+// IngressPathApplyConfiguration represents a declarative configuration of the IngressPath type for use
 // with apply.
 type IngressPathApplyConfiguration struct {
 	Path     *string `json:"path,omitempty"`
 	PathType *string `json:"pathType,omitempty"`
 }
 
-// IngressPathApplyConfiguration constructs an declarative configuration of the IngressPath type for use with
+// IngressPathApplyConfiguration constructs a declarative configuration of the IngressPath type for use with
 // apply.
 func IngressPath() *IngressPathApplyConfiguration {
 	return &IngressPathApplyConfiguration{}

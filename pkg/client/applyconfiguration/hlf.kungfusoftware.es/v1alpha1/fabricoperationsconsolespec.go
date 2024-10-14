@@ -11,7 +11,7 @@ import (
 	v1 "k8s.io/api/core/v1"
 )
 
-// FabricOperationsConsoleSpecApplyConfiguration represents an declarative configuration of the FabricOperationsConsoleSpec type for use
+// FabricOperationsConsoleSpecApplyConfiguration represents a declarative configuration of the FabricOperationsConsoleSpec type for use
 // with apply.
 type FabricOperationsConsoleSpecApplyConfiguration struct {
 	Auth             *FabricOperationsConsoleAuthApplyConfiguration    `json:"auth,omitempty"`
@@ -31,7 +31,7 @@ type FabricOperationsConsoleSpecApplyConfiguration struct {
 	HostURL          *string                                           `json:"hostUrl,omitempty"`
 }
 
-// FabricOperationsConsoleSpecApplyConfiguration constructs an declarative configuration of the FabricOperationsConsoleSpec type for use with
+// FabricOperationsConsoleSpecApplyConfiguration constructs a declarative configuration of the FabricOperationsConsoleSpec type for use with
 // apply.
 func FabricOperationsConsoleSpec() *FabricOperationsConsoleSpecApplyConfiguration {
 	return &FabricOperationsConsoleSpecApplyConfiguration{}

@@ -11,7 +11,7 @@ import (
 	v1 "k8s.io/api/core/v1"
 )
 
-// FabricPeerResourcesApplyConfiguration represents an declarative configuration of the FabricPeerResources type for use
+// FabricPeerResourcesApplyConfiguration represents a declarative configuration of the FabricPeerResources type for use
 // with apply.
 type FabricPeerResourcesApplyConfiguration struct {
 	Peer            *v1.ResourceRequirements `json:"peer,omitempty"`
@@ -21,7 +21,7 @@ type FabricPeerResourcesApplyConfiguration struct {
 	Proxy           *v1.ResourceRequirements `json:"proxy,omitempty"`
 }
 
-// FabricPeerResourcesApplyConfiguration constructs an declarative configuration of the FabricPeerResources type for use with
+// FabricPeerResourcesApplyConfiguration constructs a declarative configuration of the FabricPeerResources type for use with
 // apply.
 func FabricPeerResources() *FabricPeerResourcesApplyConfiguration {
 	return &FabricPeerResourcesApplyConfiguration{}

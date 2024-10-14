@@ -7,7 +7,7 @@
 
 package v1alpha1
 
-// FabricCAItemConfApplyConfiguration represents an declarative configuration of the FabricCAItemConf type for use
+// FabricCAItemConfApplyConfiguration represents a declarative configuration of the FabricCAItemConf type for use
 // with apply.
 type FabricCAItemConfApplyConfiguration struct {
 	Name         *string                                 `json:"name,omitempty"`
@@ -23,7 +23,7 @@ type FabricCAItemConfApplyConfiguration struct {
 	CA           *FabricCACryptoApplyConfiguration       `json:"ca,omitempty"`
 }
 
-// FabricCAItemConfApplyConfiguration constructs an declarative configuration of the FabricCAItemConf type for use with
+// FabricCAItemConfApplyConfiguration constructs a declarative configuration of the FabricCAItemConf type for use with
 // apply.
 func FabricCAItemConf() *FabricCAItemConfApplyConfiguration {
 	return &FabricCAItemConfApplyConfiguration{}

@@ -12,8 +12,8 @@ import (
 	json "encoding/json"
 	"fmt"
 
-	v1alpha1 "github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
-	hlfkungfusoftwareesv1alpha1 "github.com/kfsoftware/hlf-operator/pkg/client/applyconfiguration/hlf.kungfusoftware.es/v1alpha1"
+	v1alpha1 "github.com/kfsoftware/hlf-operator/pkg/apis/hlf.kungfusoftware.es/v1alpha1"
+	hlfkungfusoftwareesv1alpha1 "github.com/minio/operator/pkg/client/applyconfiguration/hlf.kungfusoftware.es/v1alpha1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	labels "k8s.io/apimachinery/pkg/labels"
 	types "k8s.io/apimachinery/pkg/types"
@@ -33,22 +33,24 @@ var fabricoperationsconsolesKind = v1alpha1.SchemeGroupVersion.WithKind("FabricO
 
 // Get takes name of the fabricOperationsConsole, and returns the corresponding fabricOperationsConsole object, and an error if there is any.
 func (c *FakeFabricOperationsConsoles) Get(ctx context.Context, name string, options v1.GetOptions) (result *v1alpha1.FabricOperationsConsole, err error) {
+	emptyResult := &v1alpha1.FabricOperationsConsole{}
 	obj, err := c.Fake.
-		Invokes(testing.NewGetAction(fabricoperationsconsolesResource, c.ns, name), &v1alpha1.FabricOperationsConsole{})
+		Invokes(testing.NewGetActionWithOptions(fabricoperationsconsolesResource, c.ns, name, options), emptyResult)
 
 	if obj == nil {
-		return nil, err
+		return emptyResult, err
 	}
 	return obj.(*v1alpha1.FabricOperationsConsole), err
 }
 
 // List takes label and field selectors, and returns the list of FabricOperationsConsoles that match those selectors.
 func (c *FakeFabricOperationsConsoles) List(ctx context.Context, opts v1.ListOptions) (result *v1alpha1.FabricOperationsConsoleList, err error) {
+	emptyResult := &v1alpha1.FabricOperationsConsoleList{}
 	obj, err := c.Fake.
-		Invokes(testing.NewListAction(fabricoperationsconsolesResource, fabricoperationsconsolesKind, c.ns, opts), &v1alpha1.FabricOperationsConsoleList{})
+		Invokes(testing.NewListActionWithOptions(fabricoperationsconsolesResource, fabricoperationsconsolesKind, c.ns, opts), emptyResult)
 
 	if obj == nil {
-		return nil, err
+		return emptyResult, err
 	}
 
 	label, _, _ := testing.ExtractFromListOptions(opts)
@@ -67,40 +69,43 @@ func (c *FakeFabricOperationsConsoles) List(ctx context.Context, opts v1.ListOpt
 // Watch returns a watch.Interface that watches the requested fabricOperationsConsoles.
 func (c *FakeFabricOperationsConsoles) Watch(ctx context.Context, opts v1.ListOptions) (watch.Interface, error) {
 	return c.Fake.
-		InvokesWatch(testing.NewWatchAction(fabricoperationsconsolesResource, c.ns, opts))
+		InvokesWatch(testing.NewWatchActionWithOptions(fabricoperationsconsolesResource, c.ns, opts))
 
 }
 
 // Create takes the representation of a fabricOperationsConsole and creates it.  Returns the server's representation of the fabricOperationsConsole, and an error, if there is any.
 func (c *FakeFabricOperationsConsoles) Create(ctx context.Context, fabricOperationsConsole *v1alpha1.FabricOperationsConsole, opts v1.CreateOptions) (result *v1alpha1.FabricOperationsConsole, err error) {
+	emptyResult := &v1alpha1.FabricOperationsConsole{}
 	obj, err := c.Fake.
-		Invokes(testing.NewCreateAction(fabricoperationsconsolesResource, c.ns, fabricOperationsConsole), &v1alpha1.FabricOperationsConsole{})
+		Invokes(testing.NewCreateActionWithOptions(fabricoperationsconsolesResource, c.ns, fabricOperationsConsole, opts), emptyResult)
 
 	if obj == nil {
-		return nil, err
+		return emptyResult, err
 	}
 	return obj.(*v1alpha1.FabricOperationsConsole), err
 }
 
 // Update takes the representation of a fabricOperationsConsole and updates it. Returns the server's representation of the fabricOperationsConsole, and an error, if there is any.
 func (c *FakeFabricOperationsConsoles) Update(ctx context.Context, fabricOperationsConsole *v1alpha1.FabricOperationsConsole, opts v1.UpdateOptions) (result *v1alpha1.FabricOperationsConsole, err error) {
+	emptyResult := &v1alpha1.FabricOperationsConsole{}
 	obj, err := c.Fake.
-		Invokes(testing.NewUpdateAction(fabricoperationsconsolesResource, c.ns, fabricOperationsConsole), &v1alpha1.FabricOperationsConsole{})
+		Invokes(testing.NewUpdateActionWithOptions(fabricoperationsconsolesResource, c.ns, fabricOperationsConsole, opts), emptyResult)
 
 	if obj == nil {
-		return nil, err
+		return emptyResult, err
 	}
 	return obj.(*v1alpha1.FabricOperationsConsole), err
 }
 
 // UpdateStatus was generated because the type contains a Status member.
 // Add a +genclient:noStatus comment above the type to avoid generating UpdateStatus().
-func (c *FakeFabricOperationsConsoles) UpdateStatus(ctx context.Context, fabricOperationsConsole *v1alpha1.FabricOperationsConsole, opts v1.UpdateOptions) (*v1alpha1.FabricOperationsConsole, error) {
+func (c *FakeFabricOperationsConsoles) UpdateStatus(ctx context.Context, fabricOperationsConsole *v1alpha1.FabricOperationsConsole, opts v1.UpdateOptions) (result *v1alpha1.FabricOperationsConsole, err error) {
+	emptyResult := &v1alpha1.FabricOperationsConsole{}
 	obj, err := c.Fake.
-		Invokes(testing.NewUpdateSubresourceAction(fabricoperationsconsolesResource, "status", c.ns, fabricOperationsConsole), &v1alpha1.FabricOperationsConsole{})
+		Invokes(testing.NewUpdateSubresourceActionWithOptions(fabricoperationsconsolesResource, "status", c.ns, fabricOperationsConsole, opts), emptyResult)
 
 	if obj == nil {
-		return nil, err
+		return emptyResult, err
 	}
 	return obj.(*v1alpha1.FabricOperationsConsole), err
 }
@@ -115,7 +120,7 @@ func (c *FakeFabricOperationsConsoles) Delete(ctx context.Context, name string, 
 
 // DeleteCollection deletes a collection of objects.
 func (c *FakeFabricOperationsConsoles) DeleteCollection(ctx context.Context, opts v1.DeleteOptions, listOpts v1.ListOptions) error {
-	action := testing.NewDeleteCollectionAction(fabricoperationsconsolesResource, c.ns, listOpts)
+	action := testing.NewDeleteCollectionActionWithOptions(fabricoperationsconsolesResource, c.ns, opts, listOpts)
 
 	_, err := c.Fake.Invokes(action, &v1alpha1.FabricOperationsConsoleList{})
 	return err
@@ -123,11 +128,12 @@ func (c *FakeFabricOperationsConsoles) DeleteCollection(ctx context.Context, opt
 
 // Patch applies the patch and returns the patched fabricOperationsConsole.
 func (c *FakeFabricOperationsConsoles) Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *v1alpha1.FabricOperationsConsole, err error) {
+	emptyResult := &v1alpha1.FabricOperationsConsole{}
 	obj, err := c.Fake.
-		Invokes(testing.NewPatchSubresourceAction(fabricoperationsconsolesResource, c.ns, name, pt, data, subresources...), &v1alpha1.FabricOperationsConsole{})
+		Invokes(testing.NewPatchSubresourceActionWithOptions(fabricoperationsconsolesResource, c.ns, name, pt, data, opts, subresources...), emptyResult)
 
 	if obj == nil {
-		return nil, err
+		return emptyResult, err
 	}
 	return obj.(*v1alpha1.FabricOperationsConsole), err
 }
@@ -145,11 +151,12 @@ func (c *FakeFabricOperationsConsoles) Apply(ctx context.Context, fabricOperatio
 	if name == nil {
 		return nil, fmt.Errorf("fabricOperationsConsole.Name must be provided to Apply")
 	}
+	emptyResult := &v1alpha1.FabricOperationsConsole{}
 	obj, err := c.Fake.
-		Invokes(testing.NewPatchSubresourceAction(fabricoperationsconsolesResource, c.ns, *name, types.ApplyPatchType, data), &v1alpha1.FabricOperationsConsole{})
+		Invokes(testing.NewPatchSubresourceActionWithOptions(fabricoperationsconsolesResource, c.ns, *name, types.ApplyPatchType, data, opts.ToPatchOptions()), emptyResult)
 
 	if obj == nil {
-		return nil, err
+		return emptyResult, err
 	}
 	return obj.(*v1alpha1.FabricOperationsConsole), err
 }
@@ -168,11 +175,12 @@ func (c *FakeFabricOperationsConsoles) ApplyStatus(ctx context.Context, fabricOp
 	if name == nil {
 		return nil, fmt.Errorf("fabricOperationsConsole.Name must be provided to Apply")
 	}
+	emptyResult := &v1alpha1.FabricOperationsConsole{}
 	obj, err := c.Fake.
-		Invokes(testing.NewPatchSubresourceAction(fabricoperationsconsolesResource, c.ns, *name, types.ApplyPatchType, data, "status"), &v1alpha1.FabricOperationsConsole{})
+		Invokes(testing.NewPatchSubresourceActionWithOptions(fabricoperationsconsolesResource, c.ns, *name, types.ApplyPatchType, data, opts.ToPatchOptions(), "status"), emptyResult)
 
 	if obj == nil {
-		return nil, err
+		return emptyResult, err
 	}
 	return obj.(*v1alpha1.FabricOperationsConsole), err
 }

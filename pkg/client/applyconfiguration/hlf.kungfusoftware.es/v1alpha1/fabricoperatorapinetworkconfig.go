@@ -7,14 +7,14 @@
 
 package v1alpha1
 
-// FabricOperatorAPINetworkConfigApplyConfiguration represents an declarative configuration of the FabricOperatorAPINetworkConfig type for use
+// FabricOperatorAPINetworkConfigApplyConfiguration represents a declarative configuration of the FabricOperatorAPINetworkConfig type for use
 // with apply.
 type FabricOperatorAPINetworkConfigApplyConfiguration struct {
 	SecretName *string `json:"secretName,omitempty"`
 	Key        *string `json:"key,omitempty"`
 }
 
-// FabricOperatorAPINetworkConfigApplyConfiguration constructs an declarative configuration of the FabricOperatorAPINetworkConfig type for use with
+// FabricOperatorAPINetworkConfigApplyConfiguration constructs a declarative configuration of the FabricOperatorAPINetworkConfig type for use with
 // apply.
 func FabricOperatorAPINetworkConfig() *FabricOperatorAPINetworkConfigApplyConfiguration {
 	return &FabricOperatorAPINetworkConfigApplyConfiguration{}

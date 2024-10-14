@@ -7,7 +7,7 @@
 
 package v1alpha1
 
-// FabricIstioApplyConfiguration represents an declarative configuration of the FabricIstio type for use
+// FabricIstioApplyConfiguration represents a declarative configuration of the FabricIstio type for use
 // with apply.
 type FabricIstioApplyConfiguration struct {
 	Port           *int     `json:"port,omitempty"`
@@ -15,7 +15,7 @@ type FabricIstioApplyConfiguration struct {
 	IngressGateway *string  `json:"ingressGateway,omitempty"`
 }
 
-// FabricIstioApplyConfiguration constructs an declarative configuration of the FabricIstio type for use with
+// FabricIstioApplyConfiguration constructs a declarative configuration of the FabricIstio type for use with
 // apply.
 func FabricIstio() *FabricIstioApplyConfiguration {
 	return &FabricIstioApplyConfiguration{}

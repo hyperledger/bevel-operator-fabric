@@ -23,6 +23,18 @@ type FabricChaincodeListerExpansion interface{}
 // FabricChaincodeNamespaceLister.
 type FabricChaincodeNamespaceListerExpansion interface{}
 
+// FabricChaincodeApproveListerExpansion allows custom methods to be added to
+// FabricChaincodeApproveLister.
+type FabricChaincodeApproveListerExpansion interface{}
+
+// FabricChaincodeCommitListerExpansion allows custom methods to be added to
+// FabricChaincodeCommitLister.
+type FabricChaincodeCommitListerExpansion interface{}
+
+// FabricChaincodeInstallListerExpansion allows custom methods to be added to
+// FabricChaincodeInstallLister.
+type FabricChaincodeInstallListerExpansion interface{}
+
 // FabricChaincodeTemplateListerExpansion allows custom methods to be added to
 // FabricChaincodeTemplateLister.
 type FabricChaincodeTemplateListerExpansion interface{}

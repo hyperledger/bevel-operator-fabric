@@ -7,14 +7,14 @@
 
 package v1alpha1
 
-// FabricCADatabaseApplyConfiguration represents an declarative configuration of the FabricCADatabase type for use
+// FabricCADatabaseApplyConfiguration represents a declarative configuration of the FabricCADatabase type for use
 // with apply.
 type FabricCADatabaseApplyConfiguration struct {
 	Type       *string `json:"type,omitempty"`
 	Datasource *string `json:"datasource,omitempty"`
 }
 
-// FabricCADatabaseApplyConfiguration constructs an declarative configuration of the FabricCADatabase type for use with
+// FabricCADatabaseApplyConfiguration constructs a declarative configuration of the FabricCADatabase type for use with
 // apply.
 func FabricCADatabase() *FabricCADatabaseApplyConfiguration {
 	return &FabricCADatabaseApplyConfiguration{}

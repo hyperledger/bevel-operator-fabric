@@ -7,7 +7,7 @@
 
 package v1alpha1
 
-// FabricNetworkConfigExternalOrdererApplyConfiguration represents an declarative configuration of the FabricNetworkConfigExternalOrderer type for use
+// FabricNetworkConfigExternalOrdererApplyConfiguration represents a declarative configuration of the FabricNetworkConfigExternalOrderer type for use
 // with apply.
 type FabricNetworkConfigExternalOrdererApplyConfiguration struct {
 	Name      *string `json:"name,omitempty"`
@@ -16,7 +16,7 @@ type FabricNetworkConfigExternalOrdererApplyConfiguration struct {
 	MSPID     *string `json:"mspID,omitempty"`
 }
 
-// FabricNetworkConfigExternalOrdererApplyConfiguration constructs an declarative configuration of the FabricNetworkConfigExternalOrderer type for use with
+// FabricNetworkConfigExternalOrdererApplyConfiguration constructs a declarative configuration of the FabricNetworkConfigExternalOrderer type for use with
 // apply.
 func FabricNetworkConfigExternalOrderer() *FabricNetworkConfigExternalOrdererApplyConfiguration {
 	return &FabricNetworkConfigExternalOrdererApplyConfiguration{}

@@ -7,7 +7,7 @@
 
 package v1alpha1
 
-// FabricCACSRApplyConfiguration represents an declarative configuration of the FabricCACSR type for use
+// FabricCACSRApplyConfiguration represents a declarative configuration of the FabricCACSR type for use
 // with apply.
 type FabricCACSRApplyConfiguration struct {
 	CN    *string                           `json:"cn,omitempty"`
@@ -16,7 +16,7 @@ type FabricCACSRApplyConfiguration struct {
 	CA    *FabricCACSRCAApplyConfiguration  `json:"ca,omitempty"`
 }
 
-// FabricCACSRApplyConfiguration constructs an declarative configuration of the FabricCACSR type for use with
+// FabricCACSRApplyConfiguration constructs a declarative configuration of the FabricCACSR type for use with
 // apply.
 func FabricCACSR() *FabricCACSRApplyConfiguration {
 	return &FabricCACSRApplyConfiguration{}

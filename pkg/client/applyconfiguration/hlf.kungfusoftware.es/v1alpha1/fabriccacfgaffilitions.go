@@ -7,13 +7,13 @@
 
 package v1alpha1
 
-// FabricCACFGAffilitionsApplyConfiguration represents an declarative configuration of the FabricCACFGAffilitions type for use
+// FabricCACFGAffilitionsApplyConfiguration represents a declarative configuration of the FabricCACFGAffilitions type for use
 // with apply.
 type FabricCACFGAffilitionsApplyConfiguration struct {
 	AllowRemove *bool `json:"allowRemove,omitempty"`
 }
 
-// FabricCACFGAffilitionsApplyConfiguration constructs an declarative configuration of the FabricCACFGAffilitions type for use with
+// FabricCACFGAffilitionsApplyConfiguration constructs a declarative configuration of the FabricCACFGAffilitions type for use with
 // apply.
 func FabricCACFGAffilitions() *FabricCACFGAffilitionsApplyConfiguration {
 	return &FabricCACFGAffilitionsApplyConfiguration{}

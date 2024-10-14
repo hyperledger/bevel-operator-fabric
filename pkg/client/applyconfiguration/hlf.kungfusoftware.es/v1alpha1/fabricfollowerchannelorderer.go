@@ -7,14 +7,14 @@
 
 package v1alpha1
 
-// FabricFollowerChannelOrdererApplyConfiguration represents an declarative configuration of the FabricFollowerChannelOrderer type for use
+// FabricFollowerChannelOrdererApplyConfiguration represents a declarative configuration of the FabricFollowerChannelOrderer type for use
 // with apply.
 type FabricFollowerChannelOrdererApplyConfiguration struct {
 	URL         *string `json:"url,omitempty"`
 	Certificate *string `json:"certificate,omitempty"`
 }
 
-// FabricFollowerChannelOrdererApplyConfiguration constructs an declarative configuration of the FabricFollowerChannelOrderer type for use with
+// FabricFollowerChannelOrdererApplyConfiguration constructs a declarative configuration of the FabricFollowerChannelOrderer type for use with
 // apply.
 func FabricFollowerChannelOrderer() *FabricFollowerChannelOrdererApplyConfiguration {
 	return &FabricFollowerChannelOrdererApplyConfiguration{}

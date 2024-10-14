@@ -7,14 +7,14 @@
 
 package v1alpha1
 
-// FabricFollowerChannelPeerApplyConfiguration represents an declarative configuration of the FabricFollowerChannelPeer type for use
+// FabricFollowerChannelPeerApplyConfiguration represents a declarative configuration of the FabricFollowerChannelPeer type for use
 // with apply.
 type FabricFollowerChannelPeerApplyConfiguration struct {
 	Name      *string `json:"name,omitempty"`
 	Namespace *string `json:"namespace,omitempty"`
 }
 
-// FabricFollowerChannelPeerApplyConfiguration constructs an declarative configuration of the FabricFollowerChannelPeer type for use with
+// FabricFollowerChannelPeerApplyConfiguration constructs a declarative configuration of the FabricFollowerChannelPeer type for use with
 // apply.
 func FabricFollowerChannelPeer() *FabricFollowerChannelPeerApplyConfiguration {
 	return &FabricFollowerChannelPeerApplyConfiguration{}

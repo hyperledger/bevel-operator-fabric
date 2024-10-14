@@ -7,14 +7,14 @@
 
 package v1alpha1
 
-// FabricCASigningApplyConfiguration represents an declarative configuration of the FabricCASigning type for use
+// FabricCASigningApplyConfiguration represents a declarative configuration of the FabricCASigning type for use
 // with apply.
 type FabricCASigningApplyConfiguration struct {
 	Default  *FabricCASigningDefaultApplyConfiguration  `json:"default,omitempty"`
 	Profiles *FabricCASigningProfilesApplyConfiguration `json:"profiles,omitempty"`
 }
 
-// FabricCASigningApplyConfiguration constructs an declarative configuration of the FabricCASigning type for use with
+// FabricCASigningApplyConfiguration constructs a declarative configuration of the FabricCASigning type for use with
 // apply.
 func FabricCASigning() *FabricCASigningApplyConfiguration {
 	return &FabricCASigningApplyConfiguration{}

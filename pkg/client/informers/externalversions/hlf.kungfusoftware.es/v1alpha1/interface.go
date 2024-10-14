@@ -8,7 +8,7 @@
 package v1alpha1
 
 import (
-	internalinterfaces "github.com/kfsoftware/hlf-operator/pkg/client/informers/externalversions/internalinterfaces"
+	internalinterfaces "github.com/minio/operator/pkg/client/informers/externalversions/internalinterfaces"
 )
 
 // Interface provides access to all the informers in this group version.
@@ -17,6 +17,12 @@ type Interface interface {
 	FabricCAs() FabricCAInformer
 	// FabricChaincodes returns a FabricChaincodeInformer.
 	FabricChaincodes() FabricChaincodeInformer
+	// FabricChaincodeApproves returns a FabricChaincodeApproveInformer.
+	FabricChaincodeApproves() FabricChaincodeApproveInformer
+	// FabricChaincodeCommits returns a FabricChaincodeCommitInformer.
+	FabricChaincodeCommits() FabricChaincodeCommitInformer
+	// FabricChaincodeInstalls returns a FabricChaincodeInstallInformer.
+	FabricChaincodeInstalls() FabricChaincodeInstallInformer
 	// FabricChaincodeTemplates returns a FabricChaincodeTemplateInformer.
 	FabricChaincodeTemplates() FabricChaincodeTemplateInformer
 	// FabricExplorers returns a FabricExplorerInformer.
@@ -62,6 +68,21 @@ func (v *version) FabricCAs() FabricCAInformer {
 // FabricChaincodes returns a FabricChaincodeInformer.
 func (v *version) FabricChaincodes() FabricChaincodeInformer {
 	return &fabricChaincodeInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
+}
+
+// FabricChaincodeApproves returns a FabricChaincodeApproveInformer.
+func (v *version) FabricChaincodeApproves() FabricChaincodeApproveInformer {
+	return &fabricChaincodeApproveInformer{factory: v.factory, tweakListOptions: v.tweakListOptions}
+}
+
+// FabricChaincodeCommits returns a FabricChaincodeCommitInformer.
+func (v *version) FabricChaincodeCommits() FabricChaincodeCommitInformer {
+	return &fabricChaincodeCommitInformer{factory: v.factory, tweakListOptions: v.tweakListOptions}
+}
+
+// FabricChaincodeInstalls returns a FabricChaincodeInstallInformer.
+func (v *version) FabricChaincodeInstalls() FabricChaincodeInstallInformer {
+	return &fabricChaincodeInstallInformer{factory: v.factory, tweakListOptions: v.tweakListOptions}
 }
 
 // FabricChaincodeTemplates returns a FabricChaincodeTemplateInformer.

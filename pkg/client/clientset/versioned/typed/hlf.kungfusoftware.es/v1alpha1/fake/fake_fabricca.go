@@ -12,8 +12,8 @@ import (
 	json "encoding/json"
 	"fmt"
 
-	v1alpha1 "github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
-	hlfkungfusoftwareesv1alpha1 "github.com/kfsoftware/hlf-operator/pkg/client/applyconfiguration/hlf.kungfusoftware.es/v1alpha1"
+	v1alpha1 "github.com/kfsoftware/hlf-operator/pkg/apis/hlf.kungfusoftware.es/v1alpha1"
+	hlfkungfusoftwareesv1alpha1 "github.com/minio/operator/pkg/client/applyconfiguration/hlf.kungfusoftware.es/v1alpha1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	labels "k8s.io/apimachinery/pkg/labels"
 	types "k8s.io/apimachinery/pkg/types"
@@ -33,22 +33,24 @@ var fabriccasKind = v1alpha1.SchemeGroupVersion.WithKind("FabricCA")
 
 // Get takes name of the fabricCA, and returns the corresponding fabricCA object, and an error if there is any.
 func (c *FakeFabricCAs) Get(ctx context.Context, name string, options v1.GetOptions) (result *v1alpha1.FabricCA, err error) {
+	emptyResult := &v1alpha1.FabricCA{}
 	obj, err := c.Fake.
-		Invokes(testing.NewGetAction(fabriccasResource, c.ns, name), &v1alpha1.FabricCA{})
+		Invokes(testing.NewGetActionWithOptions(fabriccasResource, c.ns, name, options), emptyResult)
 
 	if obj == nil {
-		return nil, err
+		return emptyResult, err
 	}
 	return obj.(*v1alpha1.FabricCA), err
 }
 
 // List takes label and field selectors, and returns the list of FabricCAs that match those selectors.
 func (c *FakeFabricCAs) List(ctx context.Context, opts v1.ListOptions) (result *v1alpha1.FabricCAList, err error) {
+	emptyResult := &v1alpha1.FabricCAList{}
 	obj, err := c.Fake.
-		Invokes(testing.NewListAction(fabriccasResource, fabriccasKind, c.ns, opts), &v1alpha1.FabricCAList{})
+		Invokes(testing.NewListActionWithOptions(fabriccasResource, fabriccasKind, c.ns, opts), emptyResult)
 
 	if obj == nil {
-		return nil, err
+		return emptyResult, err
 	}
 
 	label, _, _ := testing.ExtractFromListOptions(opts)
@@ -67,40 +69,43 @@ func (c *FakeFabricCAs) List(ctx context.Context, opts v1.ListOptions) (result *
 // Watch returns a watch.Interface that watches the requested fabricCAs.
 func (c *FakeFabricCAs) Watch(ctx context.Context, opts v1.ListOptions) (watch.Interface, error) {
 	return c.Fake.
-		InvokesWatch(testing.NewWatchAction(fabriccasResource, c.ns, opts))
+		InvokesWatch(testing.NewWatchActionWithOptions(fabriccasResource, c.ns, opts))
 
 }
 
 // Create takes the representation of a fabricCA and creates it.  Returns the server's representation of the fabricCA, and an error, if there is any.
 func (c *FakeFabricCAs) Create(ctx context.Context, fabricCA *v1alpha1.FabricCA, opts v1.CreateOptions) (result *v1alpha1.FabricCA, err error) {
+	emptyResult := &v1alpha1.FabricCA{}
 	obj, err := c.Fake.
-		Invokes(testing.NewCreateAction(fabriccasResource, c.ns, fabricCA), &v1alpha1.FabricCA{})
+		Invokes(testing.NewCreateActionWithOptions(fabriccasResource, c.ns, fabricCA, opts), emptyResult)
 
 	if obj == nil {
-		return nil, err
+		return emptyResult, err
 	}
 	return obj.(*v1alpha1.FabricCA), err
 }
 
 // Update takes the representation of a fabricCA and updates it. Returns the server's representation of the fabricCA, and an error, if there is any.
 func (c *FakeFabricCAs) Update(ctx context.Context, fabricCA *v1alpha1.FabricCA, opts v1.UpdateOptions) (result *v1alpha1.FabricCA, err error) {
+	emptyResult := &v1alpha1.FabricCA{}
 	obj, err := c.Fake.
-		Invokes(testing.NewUpdateAction(fabriccasResource, c.ns, fabricCA), &v1alpha1.FabricCA{})
+		Invokes(testing.NewUpdateActionWithOptions(fabriccasResource, c.ns, fabricCA, opts), emptyResult)
 
 	if obj == nil {
-		return nil, err
+		return emptyResult, err
 	}
 	return obj.(*v1alpha1.FabricCA), err
 }
 
 // UpdateStatus was generated because the type contains a Status member.
 // Add a +genclient:noStatus comment above the type to avoid generating UpdateStatus().
-func (c *FakeFabricCAs) UpdateStatus(ctx context.Context, fabricCA *v1alpha1.FabricCA, opts v1.UpdateOptions) (*v1alpha1.FabricCA, error) {
+func (c *FakeFabricCAs) UpdateStatus(ctx context.Context, fabricCA *v1alpha1.FabricCA, opts v1.UpdateOptions) (result *v1alpha1.FabricCA, err error) {
+	emptyResult := &v1alpha1.FabricCA{}
 	obj, err := c.Fake.
-		Invokes(testing.NewUpdateSubresourceAction(fabriccasResource, "status", c.ns, fabricCA), &v1alpha1.FabricCA{})
+		Invokes(testing.NewUpdateSubresourceActionWithOptions(fabriccasResource, "status", c.ns, fabricCA, opts), emptyResult)
 
 	if obj == nil {
-		return nil, err
+		return emptyResult, err
 	}
 	return obj.(*v1alpha1.FabricCA), err
 }
@@ -115,7 +120,7 @@ func (c *FakeFabricCAs) Delete(ctx context.Context, name string, opts v1.DeleteO
 
 // DeleteCollection deletes a collection of objects.
 func (c *FakeFabricCAs) DeleteCollection(ctx context.Context, opts v1.DeleteOptions, listOpts v1.ListOptions) error {
-	action := testing.NewDeleteCollectionAction(fabriccasResource, c.ns, listOpts)
+	action := testing.NewDeleteCollectionActionWithOptions(fabriccasResource, c.ns, opts, listOpts)
 
 	_, err := c.Fake.Invokes(action, &v1alpha1.FabricCAList{})
 	return err
@@ -123,11 +128,12 @@ func (c *FakeFabricCAs) DeleteCollection(ctx context.Context, opts v1.DeleteOpti
 
 // Patch applies the patch and returns the patched fabricCA.
 func (c *FakeFabricCAs) Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *v1alpha1.FabricCA, err error) {
+	emptyResult := &v1alpha1.FabricCA{}
 	obj, err := c.Fake.
-		Invokes(testing.NewPatchSubresourceAction(fabriccasResource, c.ns, name, pt, data, subresources...), &v1alpha1.FabricCA{})
+		Invokes(testing.NewPatchSubresourceActionWithOptions(fabriccasResource, c.ns, name, pt, data, opts, subresources...), emptyResult)
 
 	if obj == nil {
-		return nil, err
+		return emptyResult, err
 	}
 	return obj.(*v1alpha1.FabricCA), err
 }
@@ -145,11 +151,12 @@ func (c *FakeFabricCAs) Apply(ctx context.Context, fabricCA *hlfkungfusoftwarees
 	if name == nil {
 		return nil, fmt.Errorf("fabricCA.Name must be provided to Apply")
 	}
+	emptyResult := &v1alpha1.FabricCA{}
 	obj, err := c.Fake.
-		Invokes(testing.NewPatchSubresourceAction(fabriccasResource, c.ns, *name, types.ApplyPatchType, data), &v1alpha1.FabricCA{})
+		Invokes(testing.NewPatchSubresourceActionWithOptions(fabriccasResource, c.ns, *name, types.ApplyPatchType, data, opts.ToPatchOptions()), emptyResult)
 
 	if obj == nil {
-		return nil, err
+		return emptyResult, err
 	}
 	return obj.(*v1alpha1.FabricCA), err
 }
@@ -168,11 +175,12 @@ func (c *FakeFabricCAs) ApplyStatus(ctx context.Context, fabricCA *hlfkungfusoft
 	if name == nil {
 		return nil, fmt.Errorf("fabricCA.Name must be provided to Apply")
 	}
+	emptyResult := &v1alpha1.FabricCA{}
 	obj, err := c.Fake.
-		Invokes(testing.NewPatchSubresourceAction(fabriccasResource, c.ns, *name, types.ApplyPatchType, data, "status"), &v1alpha1.FabricCA{})
+		Invokes(testing.NewPatchSubresourceActionWithOptions(fabriccasResource, c.ns, *name, types.ApplyPatchType, data, opts.ToPatchOptions(), "status"), emptyResult)
 
 	if obj == nil {
-		return nil, err
+		return emptyResult, err
 	}
 	return obj.(*v1alpha1.FabricCA), err
 }

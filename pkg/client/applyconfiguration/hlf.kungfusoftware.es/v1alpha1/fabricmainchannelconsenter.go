@@ -7,7 +7,7 @@
 
 package v1alpha1
 
-// FabricMainChannelConsenterApplyConfiguration represents an declarative configuration of the FabricMainChannelConsenter type for use
+// FabricMainChannelConsenterApplyConfiguration represents a declarative configuration of the FabricMainChannelConsenter type for use
 // with apply.
 type FabricMainChannelConsenterApplyConfiguration struct {
 	Host    *string `json:"host,omitempty"`
@@ -15,7 +15,7 @@ type FabricMainChannelConsenterApplyConfiguration struct {
 	TLSCert *string `json:"tlsCert,omitempty"`
 }
 
-// FabricMainChannelConsenterApplyConfiguration constructs an declarative configuration of the FabricMainChannelConsenter type for use with
+// FabricMainChannelConsenterApplyConfiguration constructs a declarative configuration of the FabricMainChannelConsenter type for use with
 // apply.
 func FabricMainChannelConsenter() *FabricMainChannelConsenterApplyConfiguration {
 	return &FabricMainChannelConsenterApplyConfiguration{}

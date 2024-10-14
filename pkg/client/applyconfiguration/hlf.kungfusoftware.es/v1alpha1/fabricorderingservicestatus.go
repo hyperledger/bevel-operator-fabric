@@ -8,18 +8,18 @@
 package v1alpha1
 
 import (
-	v1alpha1 "github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
+	v1alpha1 "github.com/kfsoftware/hlf-operator/pkg/apis/hlf.kungfusoftware.es/v1alpha1"
 	status "github.com/kfsoftware/hlf-operator/pkg/status"
 )
 
-// FabricOrderingServiceStatusApplyConfiguration represents an declarative configuration of the FabricOrderingServiceStatus type for use
+// FabricOrderingServiceStatusApplyConfiguration represents a declarative configuration of the FabricOrderingServiceStatus type for use
 // with apply.
 type FabricOrderingServiceStatusApplyConfiguration struct {
 	Conditions *status.Conditions         `json:"conditions,omitempty"`
 	Status     *v1alpha1.DeploymentStatus `json:"status,omitempty"`
 }
 
-// FabricOrderingServiceStatusApplyConfiguration constructs an declarative configuration of the FabricOrderingServiceStatus type for use with
+// FabricOrderingServiceStatusApplyConfiguration constructs a declarative configuration of the FabricOrderingServiceStatus type for use with
 // apply.
 func FabricOrderingServiceStatus() *FabricOrderingServiceStatusApplyConfiguration {
 	return &FabricOrderingServiceStatusApplyConfiguration{}

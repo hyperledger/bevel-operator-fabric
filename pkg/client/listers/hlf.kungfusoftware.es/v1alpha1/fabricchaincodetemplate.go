@@ -8,9 +8,9 @@
 package v1alpha1
 
 import (
-	v1alpha1 "github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
-	"k8s.io/apimachinery/pkg/api/errors"
+	v1alpha1 "github.com/kfsoftware/hlf-operator/pkg/apis/hlf.kungfusoftware.es/v1alpha1"
 	"k8s.io/apimachinery/pkg/labels"
+	"k8s.io/client-go/listers"
 	"k8s.io/client-go/tools/cache"
 )
 
@@ -27,25 +27,17 @@ type FabricChaincodeTemplateLister interface {
 
 // fabricChaincodeTemplateLister implements the FabricChaincodeTemplateLister interface.
 type fabricChaincodeTemplateLister struct {
-	indexer cache.Indexer
+	listers.ResourceIndexer[*v1alpha1.FabricChaincodeTemplate]
 }
 
 // NewFabricChaincodeTemplateLister returns a new FabricChaincodeTemplateLister.
 func NewFabricChaincodeTemplateLister(indexer cache.Indexer) FabricChaincodeTemplateLister {
-	return &fabricChaincodeTemplateLister{indexer: indexer}
-}
-
-// List lists all FabricChaincodeTemplates in the indexer.
-func (s *fabricChaincodeTemplateLister) List(selector labels.Selector) (ret []*v1alpha1.FabricChaincodeTemplate, err error) {
-	err = cache.ListAll(s.indexer, selector, func(m interface{}) {
-		ret = append(ret, m.(*v1alpha1.FabricChaincodeTemplate))
-	})
-	return ret, err
+	return &fabricChaincodeTemplateLister{listers.New[*v1alpha1.FabricChaincodeTemplate](indexer, v1alpha1.Resource("fabricchaincodetemplate"))}
 }
 
 // FabricChaincodeTemplates returns an object that can list and get FabricChaincodeTemplates.
 func (s *fabricChaincodeTemplateLister) FabricChaincodeTemplates(namespace string) FabricChaincodeTemplateNamespaceLister {
-	return fabricChaincodeTemplateNamespaceLister{indexer: s.indexer, namespace: namespace}
+	return fabricChaincodeTemplateNamespaceLister{listers.NewNamespaced[*v1alpha1.FabricChaincodeTemplate](s.ResourceIndexer, namespace)}
 }
 
 // FabricChaincodeTemplateNamespaceLister helps list and get FabricChaincodeTemplates.
@@ -63,26 +55,5 @@ type FabricChaincodeTemplateNamespaceLister interface {
 // fabricChaincodeTemplateNamespaceLister implements the FabricChaincodeTemplateNamespaceLister
 // interface.
 type fabricChaincodeTemplateNamespaceLister struct {
-	indexer   cache.Indexer
-	namespace string
-}
-
-// List lists all FabricChaincodeTemplates in the indexer for a given namespace.
-func (s fabricChaincodeTemplateNamespaceLister) List(selector labels.Selector) (ret []*v1alpha1.FabricChaincodeTemplate, err error) {
-	err = cache.ListAllByNamespace(s.indexer, s.namespace, selector, func(m interface{}) {
-		ret = append(ret, m.(*v1alpha1.FabricChaincodeTemplate))
-	})
-	return ret, err
-}
-
-// Get retrieves the FabricChaincodeTemplate from the indexer for a given namespace and name.
-func (s fabricChaincodeTemplateNamespaceLister) Get(name string) (*v1alpha1.FabricChaincodeTemplate, error) {
-	obj, exists, err := s.indexer.GetByKey(s.namespace + "/" + name)
-	if err != nil {
-		return nil, err
-	}
-	if !exists {
-		return nil, errors.NewNotFound(v1alpha1.Resource("fabricchaincodetemplate"), name)
-	}
-	return obj.(*v1alpha1.FabricChaincodeTemplate), nil
+	listers.ResourceIndexer[*v1alpha1.FabricChaincodeTemplate]
 }

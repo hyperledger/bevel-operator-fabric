@@ -11,13 +11,13 @@ import (
 	v1 "k8s.io/api/core/v1"
 )
 
-// FabricCASpecServiceApplyConfiguration represents an declarative configuration of the FabricCASpecService type for use
+// FabricCASpecServiceApplyConfiguration represents a declarative configuration of the FabricCASpecService type for use
 // with apply.
 type FabricCASpecServiceApplyConfiguration struct {
 	ServiceType *v1.ServiceType `json:"type,omitempty"`
 }
 
-// FabricCASpecServiceApplyConfiguration constructs an declarative configuration of the FabricCASpecService type for use with
+// FabricCASpecServiceApplyConfiguration constructs a declarative configuration of the FabricCASpecService type for use with
 // apply.
 func FabricCASpecService() *FabricCASpecServiceApplyConfiguration {
 	return &FabricCASpecServiceApplyConfiguration{}

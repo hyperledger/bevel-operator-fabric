@@ -7,13 +7,13 @@
 
 package v1alpha1
 
-// FabricMainChannelAdminPeerOrganizationSpecApplyConfiguration represents an declarative configuration of the FabricMainChannelAdminPeerOrganizationSpec type for use
+// FabricMainChannelAdminPeerOrganizationSpecApplyConfiguration represents a declarative configuration of the FabricMainChannelAdminPeerOrganizationSpec type for use
 // with apply.
 type FabricMainChannelAdminPeerOrganizationSpecApplyConfiguration struct {
 	MSPID *string `json:"mspID,omitempty"`
 }
 
-// FabricMainChannelAdminPeerOrganizationSpecApplyConfiguration constructs an declarative configuration of the FabricMainChannelAdminPeerOrganizationSpec type for use with
+// FabricMainChannelAdminPeerOrganizationSpecApplyConfiguration constructs a declarative configuration of the FabricMainChannelAdminPeerOrganizationSpec type for use with
 // apply.
 func FabricMainChannelAdminPeerOrganizationSpec() *FabricMainChannelAdminPeerOrganizationSpecApplyConfiguration {
 	return &FabricMainChannelAdminPeerOrganizationSpecApplyConfiguration{}

@@ -7,18 +7,19 @@
 
 package v1alpha1
 
-// FabricIdentityRegisterApplyConfiguration represents an declarative configuration of the FabricIdentityRegister type for use
+// FabricIdentityRegisterApplyConfiguration represents a declarative configuration of the FabricIdentityRegister type for use
 // with apply.
 type FabricIdentityRegisterApplyConfiguration struct {
-	Enrollid       *string  `json:"enrollid,omitempty"`
-	Enrollsecret   *string  `json:"enrollsecret,omitempty"`
-	Type           *string  `json:"type,omitempty"`
-	Affiliation    *string  `json:"affiliation,omitempty"`
-	MaxEnrollments *int     `json:"maxenrollments,omitempty"`
-	Attrs          []string `json:"attrs,omitempty"`
+	Enrollid       *string                                      `json:"enrollid,omitempty"`
+	Enrollsecret   *string                                      `json:"enrollsecret,omitempty"`
+	Type           *string                                      `json:"type,omitempty"`
+	Affiliation    *string                                      `json:"affiliation,omitempty"`
+	MaxEnrollments *int                                         `json:"maxenrollments,omitempty"`
+	Attributes     []FabricIdentityAttributesApplyConfiguration `json:"attributes,omitempty"`
+	Attrs          []string                                     `json:"attrs,omitempty"`
 }
 
-// FabricIdentityRegisterApplyConfiguration constructs an declarative configuration of the FabricIdentityRegister type for use with
+// FabricIdentityRegisterApplyConfiguration constructs a declarative configuration of the FabricIdentityRegister type for use with
 // apply.
 func FabricIdentityRegister() *FabricIdentityRegisterApplyConfiguration {
 	return &FabricIdentityRegisterApplyConfiguration{}
@@ -61,6 +62,19 @@ func (b *FabricIdentityRegisterApplyConfiguration) WithAffiliation(value string)
 // If called multiple times, the MaxEnrollments field is set to the value of the last call.
 func (b *FabricIdentityRegisterApplyConfiguration) WithMaxEnrollments(value int) *FabricIdentityRegisterApplyConfiguration {
 	b.MaxEnrollments = &value
+	return b
+}
+
+// WithAttributes adds the given value to the Attributes field in the declarative configuration
+// and returns the receiver, so that objects can be build by chaining "With" function invocations.
+// If called multiple times, values provided by each call will be appended to the Attributes field.
+func (b *FabricIdentityRegisterApplyConfiguration) WithAttributes(values ...*FabricIdentityAttributesApplyConfiguration) *FabricIdentityRegisterApplyConfiguration {
+	for i := range values {
+		if values[i] == nil {
+			panic("nil value passed to WithAttributes")
+		}
+		b.Attributes = append(b.Attributes, *values[i])
+	}
 	return b
 }
 

@@ -8,9 +8,9 @@
 package v1alpha1
 
 import (
-	v1alpha1 "github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
-	"k8s.io/apimachinery/pkg/api/errors"
+	v1alpha1 "github.com/kfsoftware/hlf-operator/pkg/apis/hlf.kungfusoftware.es/v1alpha1"
 	"k8s.io/apimachinery/pkg/labels"
+	"k8s.io/client-go/listers"
 	"k8s.io/client-go/tools/cache"
 )
 
@@ -27,25 +27,17 @@ type FabricIdentityLister interface {
 
 // fabricIdentityLister implements the FabricIdentityLister interface.
 type fabricIdentityLister struct {
-	indexer cache.Indexer
+	listers.ResourceIndexer[*v1alpha1.FabricIdentity]
 }
 
 // NewFabricIdentityLister returns a new FabricIdentityLister.
 func NewFabricIdentityLister(indexer cache.Indexer) FabricIdentityLister {
-	return &fabricIdentityLister{indexer: indexer}
-}
-
-// List lists all FabricIdentities in the indexer.
-func (s *fabricIdentityLister) List(selector labels.Selector) (ret []*v1alpha1.FabricIdentity, err error) {
-	err = cache.ListAll(s.indexer, selector, func(m interface{}) {
-		ret = append(ret, m.(*v1alpha1.FabricIdentity))
-	})
-	return ret, err
+	return &fabricIdentityLister{listers.New[*v1alpha1.FabricIdentity](indexer, v1alpha1.Resource("fabricidentity"))}
 }
 
 // FabricIdentities returns an object that can list and get FabricIdentities.
 func (s *fabricIdentityLister) FabricIdentities(namespace string) FabricIdentityNamespaceLister {
-	return fabricIdentityNamespaceLister{indexer: s.indexer, namespace: namespace}
+	return fabricIdentityNamespaceLister{listers.NewNamespaced[*v1alpha1.FabricIdentity](s.ResourceIndexer, namespace)}
 }
 
 // FabricIdentityNamespaceLister helps list and get FabricIdentities.
@@ -63,26 +55,5 @@ type FabricIdentityNamespaceLister interface {
 // fabricIdentityNamespaceLister implements the FabricIdentityNamespaceLister
 // interface.
 type fabricIdentityNamespaceLister struct {
-	indexer   cache.Indexer
-	namespace string
-}
-
-// List lists all FabricIdentities in the indexer for a given namespace.
-func (s fabricIdentityNamespaceLister) List(selector labels.Selector) (ret []*v1alpha1.FabricIdentity, err error) {
-	err = cache.ListAllByNamespace(s.indexer, s.namespace, selector, func(m interface{}) {
-		ret = append(ret, m.(*v1alpha1.FabricIdentity))
-	})
-	return ret, err
-}
-
-// Get retrieves the FabricIdentity from the indexer for a given namespace and name.
-func (s fabricIdentityNamespaceLister) Get(name string) (*v1alpha1.FabricIdentity, error) {
-	obj, exists, err := s.indexer.GetByKey(s.namespace + "/" + name)
-	if err != nil {
-		return nil, err
-	}
-	if !exists {
-		return nil, errors.NewNotFound(v1alpha1.Resource("fabricidentity"), name)
-	}
-	return obj.(*v1alpha1.FabricIdentity), nil
+	listers.ResourceIndexer[*v1alpha1.FabricIdentity]
 }

@@ -11,7 +11,7 @@ import (
 	v1 "k8s.io/api/core/v1"
 )
 
-// OrdererNodeServiceApplyConfiguration represents an declarative configuration of the OrdererNodeService type for use
+// OrdererNodeServiceApplyConfiguration represents a declarative configuration of the OrdererNodeService type for use
 // with apply.
 type OrdererNodeServiceApplyConfiguration struct {
 	Type               *v1.ServiceType `json:"type,omitempty"`
@@ -19,7 +19,7 @@ type OrdererNodeServiceApplyConfiguration struct {
 	NodePortRequest    *int            `json:"nodePortRequest,omitempty"`
 }
 
-// OrdererNodeServiceApplyConfiguration constructs an declarative configuration of the OrdererNodeService type for use with
+// OrdererNodeServiceApplyConfiguration constructs a declarative configuration of the OrdererNodeService type for use with
 // apply.
 func OrdererNodeService() *OrdererNodeServiceApplyConfiguration {
 	return &OrdererNodeServiceApplyConfiguration{}

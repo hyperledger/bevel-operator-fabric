@@ -11,7 +11,7 @@ import (
 	v1 "k8s.io/api/core/v1"
 )
 
-// FabricPeerCouchDBApplyConfiguration represents an declarative configuration of the FabricPeerCouchDB type for use
+// FabricPeerCouchDBApplyConfiguration represents a declarative configuration of the FabricPeerCouchDB type for use
 // with apply.
 type FabricPeerCouchDBApplyConfiguration struct {
 	User            *string                                      `json:"user,omitempty"`
@@ -22,7 +22,7 @@ type FabricPeerCouchDBApplyConfiguration struct {
 	ExternalCouchDB *FabricPeerExternalCouchDBApplyConfiguration `json:"externalCouchDB,omitempty"`
 }
 
-// FabricPeerCouchDBApplyConfiguration constructs an declarative configuration of the FabricPeerCouchDB type for use with
+// FabricPeerCouchDBApplyConfiguration constructs a declarative configuration of the FabricPeerCouchDB type for use with
 // apply.
 func FabricPeerCouchDB() *FabricPeerCouchDBApplyConfiguration {
 	return &FabricPeerCouchDBApplyConfiguration{}

@@ -7,14 +7,14 @@
 
 package v1alpha1
 
-// CatlsApplyConfiguration represents an declarative configuration of the Catls type for use
+// CatlsApplyConfiguration represents a declarative configuration of the Catls type for use
 // with apply.
 type CatlsApplyConfiguration struct {
 	Cacert    *string                           `json:"cacert,omitempty"`
 	SecretRef *SecretRefNSKeyApplyConfiguration `json:"secretRef,omitempty"`
 }
 
-// CatlsApplyConfiguration constructs an declarative configuration of the Catls type for use with
+// CatlsApplyConfiguration constructs a declarative configuration of the Catls type for use with
 // apply.
 func Catls() *CatlsApplyConfiguration {
 	return &CatlsApplyConfiguration{}

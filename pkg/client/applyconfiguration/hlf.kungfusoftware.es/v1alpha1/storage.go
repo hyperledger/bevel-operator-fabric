@@ -11,7 +11,7 @@ import (
 	v1 "k8s.io/api/core/v1"
 )
 
-// StorageApplyConfiguration represents an declarative configuration of the Storage type for use
+// StorageApplyConfiguration represents a declarative configuration of the Storage type for use
 // with apply.
 type StorageApplyConfiguration struct {
 	Size         *string                        `json:"size,omitempty"`
@@ -19,7 +19,7 @@ type StorageApplyConfiguration struct {
 	AccessMode   *v1.PersistentVolumeAccessMode `json:"accessMode,omitempty"`
 }
 
-// StorageApplyConfiguration constructs an declarative configuration of the Storage type for use with
+// StorageApplyConfiguration constructs a declarative configuration of the Storage type for use with
 // apply.
 func Storage() *StorageApplyConfiguration {
 	return &StorageApplyConfiguration{}

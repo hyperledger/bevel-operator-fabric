@@ -7,14 +7,14 @@
 
 package v1alpha1
 
-// FabricCASigningDefaultApplyConfiguration represents an declarative configuration of the FabricCASigningDefault type for use
+// FabricCASigningDefaultApplyConfiguration represents a declarative configuration of the FabricCASigningDefault type for use
 // with apply.
 type FabricCASigningDefaultApplyConfiguration struct {
 	Expiry *string  `json:"expiry,omitempty"`
 	Usage  []string `json:"usage,omitempty"`
 }
 
-// FabricCASigningDefaultApplyConfiguration constructs an declarative configuration of the FabricCASigningDefault type for use with
+// FabricCASigningDefaultApplyConfiguration constructs a declarative configuration of the FabricCASigningDefault type for use with
 // apply.
 func FabricCASigningDefault() *FabricCASigningDefaultApplyConfiguration {
 	return &FabricCASigningDefaultApplyConfiguration{}

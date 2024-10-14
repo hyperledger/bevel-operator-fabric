@@ -7,14 +7,14 @@
 
 package v1alpha1
 
-// FabricNetworkConfigIdentityApplyConfiguration represents an declarative configuration of the FabricNetworkConfigIdentity type for use
+// FabricNetworkConfigIdentityApplyConfiguration represents a declarative configuration of the FabricNetworkConfigIdentity type for use
 // with apply.
 type FabricNetworkConfigIdentityApplyConfiguration struct {
 	Name      *string `json:"name,omitempty"`
 	Namespace *string `json:"namespace,omitempty"`
 }
 
-// FabricNetworkConfigIdentityApplyConfiguration constructs an declarative configuration of the FabricNetworkConfigIdentity type for use with
+// FabricNetworkConfigIdentityApplyConfiguration constructs a declarative configuration of the FabricNetworkConfigIdentity type for use with
 // apply.
 func FabricNetworkConfigIdentity() *FabricNetworkConfigIdentityApplyConfiguration {
 	return &FabricNetworkConfigIdentityApplyConfiguration{}

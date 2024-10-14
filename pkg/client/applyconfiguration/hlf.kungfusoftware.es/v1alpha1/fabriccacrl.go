@@ -7,13 +7,13 @@
 
 package v1alpha1
 
-// FabricCACRLApplyConfiguration represents an declarative configuration of the FabricCACRL type for use
+// FabricCACRLApplyConfiguration represents a declarative configuration of the FabricCACRL type for use
 // with apply.
 type FabricCACRLApplyConfiguration struct {
 	Expiry *string `json:"expiry,omitempty"`
 }
 
-// FabricCACRLApplyConfiguration constructs an declarative configuration of the FabricCACRL type for use with
+// FabricCACRLApplyConfiguration constructs a declarative configuration of the FabricCACRL type for use with
 // apply.
 func FabricCACRL() *FabricCACRLApplyConfiguration {
 	return &FabricCACRLApplyConfiguration{}

@@ -8,12 +8,12 @@
 package v1alpha1
 
 import (
-	v1alpha1 "github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
+	v1alpha1 "github.com/kfsoftware/hlf-operator/pkg/apis/hlf.kungfusoftware.es/v1alpha1"
 	status "github.com/kfsoftware/hlf-operator/pkg/status"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// FabricOrdererNodeStatusApplyConfiguration represents an declarative configuration of the FabricOrdererNodeStatus type for use
+// FabricOrdererNodeStatusApplyConfiguration represents a declarative configuration of the FabricOrdererNodeStatus type for use
 // with apply.
 type FabricOrdererNodeStatusApplyConfiguration struct {
 	Conditions            *status.Conditions         `json:"conditions,omitempty"`
@@ -30,7 +30,7 @@ type FabricOrdererNodeStatusApplyConfiguration struct {
 	Message               *string                    `json:"message,omitempty"`
 }
 
-// FabricOrdererNodeStatusApplyConfiguration constructs an declarative configuration of the FabricOrdererNodeStatus type for use with
+// FabricOrdererNodeStatusApplyConfiguration constructs a declarative configuration of the FabricOrdererNodeStatus type for use with
 // apply.
 func FabricOrdererNodeStatus() *FabricOrdererNodeStatusApplyConfiguration {
 	return &FabricOrdererNodeStatusApplyConfiguration{}

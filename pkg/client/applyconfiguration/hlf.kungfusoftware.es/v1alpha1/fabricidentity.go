@@ -13,7 +13,7 @@ import (
 	v1 "k8s.io/client-go/applyconfigurations/meta/v1"
 )
 
-// FabricIdentityApplyConfiguration represents an declarative configuration of the FabricIdentity type for use
+// FabricIdentityApplyConfiguration represents a declarative configuration of the FabricIdentity type for use
 // with apply.
 type FabricIdentityApplyConfiguration struct {
 	v1.TypeMetaApplyConfiguration    `json:",inline"`
@@ -22,7 +22,7 @@ type FabricIdentityApplyConfiguration struct {
 	Status                           *FabricIdentityStatusApplyConfiguration `json:"status,omitempty"`
 }
 
-// FabricIdentity constructs an declarative configuration of the FabricIdentity type for use with
+// FabricIdentity constructs a declarative configuration of the FabricIdentity type for use with
 // apply.
 func FabricIdentity(name, namespace string) *FabricIdentityApplyConfiguration {
 	b := &FabricIdentityApplyConfiguration{}
@@ -205,4 +205,10 @@ func (b *FabricIdentityApplyConfiguration) WithSpec(value *FabricIdentitySpecApp
 func (b *FabricIdentityApplyConfiguration) WithStatus(value *FabricIdentityStatusApplyConfiguration) *FabricIdentityApplyConfiguration {
 	b.Status = value
 	return b
+}
+
+// GetName retrieves the value of the Name field in the declarative configuration.
+func (b *FabricIdentityApplyConfiguration) GetName() *string {
+	b.ensureObjectMetaApplyConfigurationExists()
+	return b.Name
 }

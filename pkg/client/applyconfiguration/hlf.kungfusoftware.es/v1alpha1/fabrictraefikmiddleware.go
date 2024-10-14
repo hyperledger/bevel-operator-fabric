@@ -7,14 +7,14 @@
 
 package v1alpha1
 
-// FabricTraefikMiddlewareApplyConfiguration represents an declarative configuration of the FabricTraefikMiddleware type for use
+// FabricTraefikMiddlewareApplyConfiguration represents a declarative configuration of the FabricTraefikMiddleware type for use
 // with apply.
 type FabricTraefikMiddlewareApplyConfiguration struct {
 	Name      *string `json:"name,omitempty"`
 	Namespace *string `json:"namespace,omitempty"`
 }
 
-// FabricTraefikMiddlewareApplyConfiguration constructs an declarative configuration of the FabricTraefikMiddleware type for use with
+// FabricTraefikMiddlewareApplyConfiguration constructs a declarative configuration of the FabricTraefikMiddleware type for use with
 // apply.
 func FabricTraefikMiddleware() *FabricTraefikMiddlewareApplyConfiguration {
 	return &FabricTraefikMiddlewareApplyConfiguration{}

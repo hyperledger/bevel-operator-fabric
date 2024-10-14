@@ -12,8 +12,8 @@ import (
 	json "encoding/json"
 	"fmt"
 
-	v1alpha1 "github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
-	hlfkungfusoftwareesv1alpha1 "github.com/kfsoftware/hlf-operator/pkg/client/applyconfiguration/hlf.kungfusoftware.es/v1alpha1"
+	v1alpha1 "github.com/kfsoftware/hlf-operator/pkg/apis/hlf.kungfusoftware.es/v1alpha1"
+	hlfkungfusoftwareesv1alpha1 "github.com/minio/operator/pkg/client/applyconfiguration/hlf.kungfusoftware.es/v1alpha1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	labels "k8s.io/apimachinery/pkg/labels"
 	types "k8s.io/apimachinery/pkg/types"
@@ -33,22 +33,24 @@ var fabricchaincodesKind = v1alpha1.SchemeGroupVersion.WithKind("FabricChaincode
 
 // Get takes name of the fabricChaincode, and returns the corresponding fabricChaincode object, and an error if there is any.
 func (c *FakeFabricChaincodes) Get(ctx context.Context, name string, options v1.GetOptions) (result *v1alpha1.FabricChaincode, err error) {
+	emptyResult := &v1alpha1.FabricChaincode{}
 	obj, err := c.Fake.
-		Invokes(testing.NewGetAction(fabricchaincodesResource, c.ns, name), &v1alpha1.FabricChaincode{})
+		Invokes(testing.NewGetActionWithOptions(fabricchaincodesResource, c.ns, name, options), emptyResult)
 
 	if obj == nil {
-		return nil, err
+		return emptyResult, err
 	}
 	return obj.(*v1alpha1.FabricChaincode), err
 }
 
 // List takes label and field selectors, and returns the list of FabricChaincodes that match those selectors.
 func (c *FakeFabricChaincodes) List(ctx context.Context, opts v1.ListOptions) (result *v1alpha1.FabricChaincodeList, err error) {
+	emptyResult := &v1alpha1.FabricChaincodeList{}
 	obj, err := c.Fake.
-		Invokes(testing.NewListAction(fabricchaincodesResource, fabricchaincodesKind, c.ns, opts), &v1alpha1.FabricChaincodeList{})
+		Invokes(testing.NewListActionWithOptions(fabricchaincodesResource, fabricchaincodesKind, c.ns, opts), emptyResult)
 
 	if obj == nil {
-		return nil, err
+		return emptyResult, err
 	}
 
 	label, _, _ := testing.ExtractFromListOptions(opts)
@@ -67,40 +69,43 @@ func (c *FakeFabricChaincodes) List(ctx context.Context, opts v1.ListOptions) (r
 // Watch returns a watch.Interface that watches the requested fabricChaincodes.
 func (c *FakeFabricChaincodes) Watch(ctx context.Context, opts v1.ListOptions) (watch.Interface, error) {
 	return c.Fake.
-		InvokesWatch(testing.NewWatchAction(fabricchaincodesResource, c.ns, opts))
+		InvokesWatch(testing.NewWatchActionWithOptions(fabricchaincodesResource, c.ns, opts))
 
 }
 
 // Create takes the representation of a fabricChaincode and creates it.  Returns the server's representation of the fabricChaincode, and an error, if there is any.
 func (c *FakeFabricChaincodes) Create(ctx context.Context, fabricChaincode *v1alpha1.FabricChaincode, opts v1.CreateOptions) (result *v1alpha1.FabricChaincode, err error) {
+	emptyResult := &v1alpha1.FabricChaincode{}
 	obj, err := c.Fake.
-		Invokes(testing.NewCreateAction(fabricchaincodesResource, c.ns, fabricChaincode), &v1alpha1.FabricChaincode{})
+		Invokes(testing.NewCreateActionWithOptions(fabricchaincodesResource, c.ns, fabricChaincode, opts), emptyResult)
 
 	if obj == nil {
-		return nil, err
+		return emptyResult, err
 	}
 	return obj.(*v1alpha1.FabricChaincode), err
 }
 
 // Update takes the representation of a fabricChaincode and updates it. Returns the server's representation of the fabricChaincode, and an error, if there is any.
 func (c *FakeFabricChaincodes) Update(ctx context.Context, fabricChaincode *v1alpha1.FabricChaincode, opts v1.UpdateOptions) (result *v1alpha1.FabricChaincode, err error) {
+	emptyResult := &v1alpha1.FabricChaincode{}
 	obj, err := c.Fake.
-		Invokes(testing.NewUpdateAction(fabricchaincodesResource, c.ns, fabricChaincode), &v1alpha1.FabricChaincode{})
+		Invokes(testing.NewUpdateActionWithOptions(fabricchaincodesResource, c.ns, fabricChaincode, opts), emptyResult)
 
 	if obj == nil {
-		return nil, err
+		return emptyResult, err
 	}
 	return obj.(*v1alpha1.FabricChaincode), err
 }
 
 // UpdateStatus was generated because the type contains a Status member.
 // Add a +genclient:noStatus comment above the type to avoid generating UpdateStatus().
-func (c *FakeFabricChaincodes) UpdateStatus(ctx context.Context, fabricChaincode *v1alpha1.FabricChaincode, opts v1.UpdateOptions) (*v1alpha1.FabricChaincode, error) {
+func (c *FakeFabricChaincodes) UpdateStatus(ctx context.Context, fabricChaincode *v1alpha1.FabricChaincode, opts v1.UpdateOptions) (result *v1alpha1.FabricChaincode, err error) {
+	emptyResult := &v1alpha1.FabricChaincode{}
 	obj, err := c.Fake.
-		Invokes(testing.NewUpdateSubresourceAction(fabricchaincodesResource, "status", c.ns, fabricChaincode), &v1alpha1.FabricChaincode{})
+		Invokes(testing.NewUpdateSubresourceActionWithOptions(fabricchaincodesResource, "status", c.ns, fabricChaincode, opts), emptyResult)
 
 	if obj == nil {
-		return nil, err
+		return emptyResult, err
 	}
 	return obj.(*v1alpha1.FabricChaincode), err
 }
@@ -115,7 +120,7 @@ func (c *FakeFabricChaincodes) Delete(ctx context.Context, name string, opts v1.
 
 // DeleteCollection deletes a collection of objects.
 func (c *FakeFabricChaincodes) DeleteCollection(ctx context.Context, opts v1.DeleteOptions, listOpts v1.ListOptions) error {
-	action := testing.NewDeleteCollectionAction(fabricchaincodesResource, c.ns, listOpts)
+	action := testing.NewDeleteCollectionActionWithOptions(fabricchaincodesResource, c.ns, opts, listOpts)
 
 	_, err := c.Fake.Invokes(action, &v1alpha1.FabricChaincodeList{})
 	return err
@@ -123,11 +128,12 @@ func (c *FakeFabricChaincodes) DeleteCollection(ctx context.Context, opts v1.Del
 
 // Patch applies the patch and returns the patched fabricChaincode.
 func (c *FakeFabricChaincodes) Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *v1alpha1.FabricChaincode, err error) {
+	emptyResult := &v1alpha1.FabricChaincode{}
 	obj, err := c.Fake.
-		Invokes(testing.NewPatchSubresourceAction(fabricchaincodesResource, c.ns, name, pt, data, subresources...), &v1alpha1.FabricChaincode{})
+		Invokes(testing.NewPatchSubresourceActionWithOptions(fabricchaincodesResource, c.ns, name, pt, data, opts, subresources...), emptyResult)
 
 	if obj == nil {
-		return nil, err
+		return emptyResult, err
 	}
 	return obj.(*v1alpha1.FabricChaincode), err
 }
@@ -145,11 +151,12 @@ func (c *FakeFabricChaincodes) Apply(ctx context.Context, fabricChaincode *hlfku
 	if name == nil {
 		return nil, fmt.Errorf("fabricChaincode.Name must be provided to Apply")
 	}
+	emptyResult := &v1alpha1.FabricChaincode{}
 	obj, err := c.Fake.
-		Invokes(testing.NewPatchSubresourceAction(fabricchaincodesResource, c.ns, *name, types.ApplyPatchType, data), &v1alpha1.FabricChaincode{})
+		Invokes(testing.NewPatchSubresourceActionWithOptions(fabricchaincodesResource, c.ns, *name, types.ApplyPatchType, data, opts.ToPatchOptions()), emptyResult)
 
 	if obj == nil {
-		return nil, err
+		return emptyResult, err
 	}
 	return obj.(*v1alpha1.FabricChaincode), err
 }
@@ -168,11 +175,12 @@ func (c *FakeFabricChaincodes) ApplyStatus(ctx context.Context, fabricChaincode 
 	if name == nil {
 		return nil, fmt.Errorf("fabricChaincode.Name must be provided to Apply")
 	}
+	emptyResult := &v1alpha1.FabricChaincode{}
 	obj, err := c.Fake.
-		Invokes(testing.NewPatchSubresourceAction(fabricchaincodesResource, c.ns, *name, types.ApplyPatchType, data, "status"), &v1alpha1.FabricChaincode{})
+		Invokes(testing.NewPatchSubresourceActionWithOptions(fabricchaincodesResource, c.ns, *name, types.ApplyPatchType, data, opts.ToPatchOptions(), "status"), emptyResult)
 
 	if obj == nil {
-		return nil, err
+		return emptyResult, err
 	}
 	return obj.(*v1alpha1.FabricChaincode), err
 }

@@ -8,16 +8,16 @@
 package v1alpha1
 
 import (
-	v1alpha1 "github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
+	v1alpha1 "github.com/kfsoftware/hlf-operator/pkg/apis/hlf.kungfusoftware.es/v1alpha1"
 )
 
-// OrdererServiceApplyConfiguration represents an declarative configuration of the OrdererService type for use
+// OrdererServiceApplyConfiguration represents a declarative configuration of the OrdererService type for use
 // with apply.
 type OrdererServiceApplyConfiguration struct {
 	Type *v1alpha1.ServiceType `json:"type,omitempty"`
 }
 
-// OrdererServiceApplyConfiguration constructs an declarative configuration of the OrdererService type for use with
+// OrdererServiceApplyConfiguration constructs a declarative configuration of the OrdererService type for use with
 // apply.
 func OrdererService() *OrdererServiceApplyConfiguration {
 	return &OrdererServiceApplyConfiguration{}

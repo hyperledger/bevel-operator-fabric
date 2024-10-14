@@ -13,7 +13,7 @@ import (
 	v1 "k8s.io/client-go/applyconfigurations/meta/v1"
 )
 
-// FabricChaincodeTemplateApplyConfiguration represents an declarative configuration of the FabricChaincodeTemplate type for use
+// FabricChaincodeTemplateApplyConfiguration represents a declarative configuration of the FabricChaincodeTemplate type for use
 // with apply.
 type FabricChaincodeTemplateApplyConfiguration struct {
 	v1.TypeMetaApplyConfiguration    `json:",inline"`
@@ -22,7 +22,7 @@ type FabricChaincodeTemplateApplyConfiguration struct {
 	Status                           *FabricChaincodeTemplateStatusApplyConfiguration `json:"status,omitempty"`
 }
 
-// FabricChaincodeTemplate constructs an declarative configuration of the FabricChaincodeTemplate type for use with
+// FabricChaincodeTemplate constructs a declarative configuration of the FabricChaincodeTemplate type for use with
 // apply.
 func FabricChaincodeTemplate(name, namespace string) *FabricChaincodeTemplateApplyConfiguration {
 	b := &FabricChaincodeTemplateApplyConfiguration{}
@@ -205,4 +205,10 @@ func (b *FabricChaincodeTemplateApplyConfiguration) WithSpec(value *FabricChainc
 func (b *FabricChaincodeTemplateApplyConfiguration) WithStatus(value *FabricChaincodeTemplateStatusApplyConfiguration) *FabricChaincodeTemplateApplyConfiguration {
 	b.Status = value
 	return b
+}
+
+// GetName retrieves the value of the Name field in the declarative configuration.
+func (b *FabricChaincodeTemplateApplyConfiguration) GetName() *string {
+	b.ensureObjectMetaApplyConfigurationExists()
+	return b.Name
 }

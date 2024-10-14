@@ -7,14 +7,14 @@
 
 package v1alpha1
 
-// FabricCACFGApplyConfiguration represents an declarative configuration of the FabricCACFG type for use
+// FabricCACFGApplyConfiguration represents a declarative configuration of the FabricCACFG type for use
 // with apply.
 type FabricCACFGApplyConfiguration struct {
 	Identities   *FabricCACFGIdentitiesApplyConfiguration  `json:"identities,omitempty"`
 	Affiliations *FabricCACFGAffilitionsApplyConfiguration `json:"affiliations,omitempty"`
 }
 
-// FabricCACFGApplyConfiguration constructs an declarative configuration of the FabricCACFG type for use with
+// FabricCACFGApplyConfiguration constructs a declarative configuration of the FabricCACFG type for use with
 // apply.
 func FabricCACFG() *FabricCACFGApplyConfiguration {
 	return &FabricCACFGApplyConfiguration{}

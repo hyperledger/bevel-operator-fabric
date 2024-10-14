@@ -7,13 +7,13 @@
 
 package v1alpha1
 
-// OrdererNodeEnrollmentApplyConfiguration represents an declarative configuration of the OrdererNodeEnrollment type for use
+// OrdererNodeEnrollmentApplyConfiguration represents a declarative configuration of the OrdererNodeEnrollment type for use
 // with apply.
 type OrdererNodeEnrollmentApplyConfiguration struct {
 	TLS *OrdererNodeEnrollmentTLSApplyConfiguration `json:"tls,omitempty"`
 }
 
-// OrdererNodeEnrollmentApplyConfiguration constructs an declarative configuration of the OrdererNodeEnrollment type for use with
+// OrdererNodeEnrollmentApplyConfiguration constructs a declarative configuration of the OrdererNodeEnrollment type for use with
 // apply.
 func OrdererNodeEnrollment() *OrdererNodeEnrollmentApplyConfiguration {
 	return &OrdererNodeEnrollmentApplyConfiguration{}

@@ -7,7 +7,7 @@
 
 package v1alpha1
 
-// ChannelConfigApplyConfiguration represents an declarative configuration of the ChannelConfig type for use
+// ChannelConfigApplyConfiguration represents a declarative configuration of the ChannelConfig type for use
 // with apply.
 type ChannelConfigApplyConfiguration struct {
 	BatchTimeout            *string                                    `json:"batchTimeout,omitempty"`
@@ -24,7 +24,7 @@ type ChannelConfigApplyConfiguration struct {
 	MaxInflightBlocks       *int                                       `json:"maxInflightBlocks,omitempty"`
 }
 
-// ChannelConfigApplyConfiguration constructs an declarative configuration of the ChannelConfig type for use with
+// ChannelConfigApplyConfiguration constructs a declarative configuration of the ChannelConfig type for use with
 // apply.
 func ChannelConfig() *ChannelConfigApplyConfiguration {
 	return &ChannelConfigApplyConfiguration{}

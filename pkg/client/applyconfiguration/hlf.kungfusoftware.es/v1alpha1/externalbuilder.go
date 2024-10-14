@@ -7,7 +7,7 @@
 
 package v1alpha1
 
-// ExternalBuilderApplyConfiguration represents an declarative configuration of the ExternalBuilder type for use
+// ExternalBuilderApplyConfiguration represents a declarative configuration of the ExternalBuilder type for use
 // with apply.
 type ExternalBuilderApplyConfiguration struct {
 	Name                 *string  `json:"name,omitempty"`
@@ -15,7 +15,7 @@ type ExternalBuilderApplyConfiguration struct {
 	PropagateEnvironment []string `json:"propagateEnvironment,omitempty"`
 }
 
-// ExternalBuilderApplyConfiguration constructs an declarative configuration of the ExternalBuilder type for use with
+// ExternalBuilderApplyConfiguration constructs a declarative configuration of the ExternalBuilder type for use with
 // apply.
 func ExternalBuilder() *ExternalBuilderApplyConfiguration {
 	return &ExternalBuilderApplyConfiguration{}

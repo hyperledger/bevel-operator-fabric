@@ -7,14 +7,14 @@
 
 package v1alpha1
 
-// FabricCAMetricsApplyConfiguration represents an declarative configuration of the FabricCAMetrics type for use
+// FabricCAMetricsApplyConfiguration represents a declarative configuration of the FabricCAMetrics type for use
 // with apply.
 type FabricCAMetricsApplyConfiguration struct {
 	Provider *string                                  `json:"provider,omitempty"`
 	Statsd   *FabricCAMetricsStatsdApplyConfiguration `json:"statsd,omitempty"`
 }
 
-// FabricCAMetricsApplyConfiguration constructs an declarative configuration of the FabricCAMetrics type for use with
+// FabricCAMetricsApplyConfiguration constructs a declarative configuration of the FabricCAMetrics type for use with
 // apply.
 func FabricCAMetrics() *FabricCAMetricsApplyConfiguration {
 	return &FabricCAMetricsApplyConfiguration{}

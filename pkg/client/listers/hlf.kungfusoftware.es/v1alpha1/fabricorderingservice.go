@@ -8,9 +8,9 @@
 package v1alpha1
 
 import (
-	v1alpha1 "github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
-	"k8s.io/apimachinery/pkg/api/errors"
+	v1alpha1 "github.com/kfsoftware/hlf-operator/pkg/apis/hlf.kungfusoftware.es/v1alpha1"
 	"k8s.io/apimachinery/pkg/labels"
+	"k8s.io/client-go/listers"
 	"k8s.io/client-go/tools/cache"
 )
 
@@ -27,25 +27,17 @@ type FabricOrderingServiceLister interface {
 
 // fabricOrderingServiceLister implements the FabricOrderingServiceLister interface.
 type fabricOrderingServiceLister struct {
-	indexer cache.Indexer
+	listers.ResourceIndexer[*v1alpha1.FabricOrderingService]
 }
 
 // NewFabricOrderingServiceLister returns a new FabricOrderingServiceLister.
 func NewFabricOrderingServiceLister(indexer cache.Indexer) FabricOrderingServiceLister {
-	return &fabricOrderingServiceLister{indexer: indexer}
-}
-
-// List lists all FabricOrderingServices in the indexer.
-func (s *fabricOrderingServiceLister) List(selector labels.Selector) (ret []*v1alpha1.FabricOrderingService, err error) {
-	err = cache.ListAll(s.indexer, selector, func(m interface{}) {
-		ret = append(ret, m.(*v1alpha1.FabricOrderingService))
-	})
-	return ret, err
+	return &fabricOrderingServiceLister{listers.New[*v1alpha1.FabricOrderingService](indexer, v1alpha1.Resource("fabricorderingservice"))}
 }
 
 // FabricOrderingServices returns an object that can list and get FabricOrderingServices.
 func (s *fabricOrderingServiceLister) FabricOrderingServices(namespace string) FabricOrderingServiceNamespaceLister {
-	return fabricOrderingServiceNamespaceLister{indexer: s.indexer, namespace: namespace}
+	return fabricOrderingServiceNamespaceLister{listers.NewNamespaced[*v1alpha1.FabricOrderingService](s.ResourceIndexer, namespace)}
 }
 
 // FabricOrderingServiceNamespaceLister helps list and get FabricOrderingServices.
@@ -63,26 +55,5 @@ type FabricOrderingServiceNamespaceLister interface {
 // fabricOrderingServiceNamespaceLister implements the FabricOrderingServiceNamespaceLister
 // interface.
 type fabricOrderingServiceNamespaceLister struct {
-	indexer   cache.Indexer
-	namespace string
-}
-
-// List lists all FabricOrderingServices in the indexer for a given namespace.
-func (s fabricOrderingServiceNamespaceLister) List(selector labels.Selector) (ret []*v1alpha1.FabricOrderingService, err error) {
-	err = cache.ListAllByNamespace(s.indexer, s.namespace, selector, func(m interface{}) {
-		ret = append(ret, m.(*v1alpha1.FabricOrderingService))
-	})
-	return ret, err
-}
-
-// Get retrieves the FabricOrderingService from the indexer for a given namespace and name.
-func (s fabricOrderingServiceNamespaceLister) Get(name string) (*v1alpha1.FabricOrderingService, error) {
-	obj, exists, err := s.indexer.GetByKey(s.namespace + "/" + name)
-	if err != nil {
-		return nil, err
-	}
-	if !exists {
-		return nil, errors.NewNotFound(v1alpha1.Resource("fabricorderingservice"), name)
-	}
-	return obj.(*v1alpha1.FabricOrderingService), nil
+	listers.ResourceIndexer[*v1alpha1.FabricOrderingService]
 }

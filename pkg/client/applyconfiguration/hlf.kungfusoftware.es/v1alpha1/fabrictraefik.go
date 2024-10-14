@@ -7,7 +7,7 @@
 
 package v1alpha1
 
-// FabricTraefikApplyConfiguration represents an declarative configuration of the FabricTraefik type for use
+// FabricTraefikApplyConfiguration represents a declarative configuration of the FabricTraefik type for use
 // with apply.
 type FabricTraefikApplyConfiguration struct {
 	Entrypoints []string                                    `json:"entryPoints,omitempty"`
@@ -15,7 +15,7 @@ type FabricTraefikApplyConfiguration struct {
 	Hosts       []string                                    `json:"hosts,omitempty"`
 }
 
-// FabricTraefikApplyConfiguration constructs an declarative configuration of the FabricTraefik type for use with
+// FabricTraefikApplyConfiguration constructs a declarative configuration of the FabricTraefik type for use with
 // apply.
 func FabricTraefik() *FabricTraefikApplyConfiguration {
 	return &FabricTraefikApplyConfiguration{}

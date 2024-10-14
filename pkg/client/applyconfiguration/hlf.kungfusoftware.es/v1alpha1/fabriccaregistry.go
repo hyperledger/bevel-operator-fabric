@@ -7,14 +7,14 @@
 
 package v1alpha1
 
-// FabricCARegistryApplyConfiguration represents an declarative configuration of the FabricCARegistry type for use
+// FabricCARegistryApplyConfiguration represents a declarative configuration of the FabricCARegistry type for use
 // with apply.
 type FabricCARegistryApplyConfiguration struct {
 	MaxEnrollments *int                                 `json:"max_enrollments,omitempty"`
 	Identities     []FabricCAIdentityApplyConfiguration `json:"identities,omitempty"`
 }
 
-// FabricCARegistryApplyConfiguration constructs an declarative configuration of the FabricCARegistry type for use with
+// FabricCARegistryApplyConfiguration constructs a declarative configuration of the FabricCARegistry type for use with
 // apply.
 func FabricCARegistry() *FabricCARegistryApplyConfiguration {
 	return &FabricCARegistryApplyConfiguration{}

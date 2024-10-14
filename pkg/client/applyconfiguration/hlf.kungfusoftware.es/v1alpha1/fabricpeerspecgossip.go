@@ -7,17 +7,21 @@
 
 package v1alpha1
 
-// FabricPeerSpecGossipApplyConfiguration represents an declarative configuration of the FabricPeerSpecGossip type for use
+// FabricPeerSpecGossipApplyConfiguration represents a declarative configuration of the FabricPeerSpecGossip type for use
 // with apply.
 type FabricPeerSpecGossipApplyConfiguration struct {
-	ExternalEndpoint  *string `json:"externalEndpoint,omitempty"`
-	Bootstrap         *string `json:"bootstrap,omitempty"`
-	Endpoint          *string `json:"endpoint,omitempty"`
-	UseLeaderElection *bool   `json:"useLeaderElection,omitempty"`
-	OrgLeader         *bool   `json:"orgLeader,omitempty"`
+	ExternalEndpoint       *string `json:"externalEndpoint,omitempty"`
+	Bootstrap              *string `json:"bootstrap,omitempty"`
+	Endpoint               *string `json:"endpoint,omitempty"`
+	UseLeaderElection      *bool   `json:"useLeaderElection,omitempty"`
+	OrgLeader              *bool   `json:"orgLeader,omitempty"`
+	ReconnectInterval      *string `json:"reconnectInterval,omitempty"`
+	AliveExpirationTimeout *string `json:"aliveExpirationTimeout,omitempty"`
+	AliveTimeInterval      *string `json:"aliveTimeInterval,omitempty"`
+	ResponseWaitTime       *string `json:"responseWaitTime,omitempty"`
 }
 
-// FabricPeerSpecGossipApplyConfiguration constructs an declarative configuration of the FabricPeerSpecGossip type for use with
+// FabricPeerSpecGossipApplyConfiguration constructs a declarative configuration of the FabricPeerSpecGossip type for use with
 // apply.
 func FabricPeerSpecGossip() *FabricPeerSpecGossipApplyConfiguration {
 	return &FabricPeerSpecGossipApplyConfiguration{}
@@ -60,5 +64,37 @@ func (b *FabricPeerSpecGossipApplyConfiguration) WithUseLeaderElection(value boo
 // If called multiple times, the OrgLeader field is set to the value of the last call.
 func (b *FabricPeerSpecGossipApplyConfiguration) WithOrgLeader(value bool) *FabricPeerSpecGossipApplyConfiguration {
 	b.OrgLeader = &value
+	return b
+}
+
+// WithReconnectInterval sets the ReconnectInterval field in the declarative configuration to the given value
+// and returns the receiver, so that objects can be built by chaining "With" function invocations.
+// If called multiple times, the ReconnectInterval field is set to the value of the last call.
+func (b *FabricPeerSpecGossipApplyConfiguration) WithReconnectInterval(value string) *FabricPeerSpecGossipApplyConfiguration {
+	b.ReconnectInterval = &value
+	return b
+}
+
+// WithAliveExpirationTimeout sets the AliveExpirationTimeout field in the declarative configuration to the given value
+// and returns the receiver, so that objects can be built by chaining "With" function invocations.
+// If called multiple times, the AliveExpirationTimeout field is set to the value of the last call.
+func (b *FabricPeerSpecGossipApplyConfiguration) WithAliveExpirationTimeout(value string) *FabricPeerSpecGossipApplyConfiguration {
+	b.AliveExpirationTimeout = &value
+	return b
+}
+
+// WithAliveTimeInterval sets the AliveTimeInterval field in the declarative configuration to the given value
+// and returns the receiver, so that objects can be built by chaining "With" function invocations.
+// If called multiple times, the AliveTimeInterval field is set to the value of the last call.
+func (b *FabricPeerSpecGossipApplyConfiguration) WithAliveTimeInterval(value string) *FabricPeerSpecGossipApplyConfiguration {
+	b.AliveTimeInterval = &value
+	return b
+}
+
+// WithResponseWaitTime sets the ResponseWaitTime field in the declarative configuration to the given value
+// and returns the receiver, so that objects can be built by chaining "With" function invocations.
+// If called multiple times, the ResponseWaitTime field is set to the value of the last call.
+func (b *FabricPeerSpecGossipApplyConfiguration) WithResponseWaitTime(value string) *FabricPeerSpecGossipApplyConfiguration {
+	b.ResponseWaitTime = &value
 	return b
 }

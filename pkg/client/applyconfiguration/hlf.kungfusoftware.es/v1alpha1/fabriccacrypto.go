@@ -7,7 +7,7 @@
 
 package v1alpha1
 
-// FabricCACryptoApplyConfiguration represents an declarative configuration of the FabricCACrypto type for use
+// FabricCACryptoApplyConfiguration represents a declarative configuration of the FabricCACrypto type for use
 // with apply.
 type FabricCACryptoApplyConfiguration struct {
 	Key       *string                      `json:"key,omitempty"`
@@ -16,7 +16,7 @@ type FabricCACryptoApplyConfiguration struct {
 	Chain     *string                      `json:"chain,omitempty"`
 }
 
-// FabricCACryptoApplyConfiguration constructs an declarative configuration of the FabricCACrypto type for use with
+// FabricCACryptoApplyConfiguration constructs a declarative configuration of the FabricCACrypto type for use with
 // apply.
 func FabricCACrypto() *FabricCACryptoApplyConfiguration {
 	return &FabricCACryptoApplyConfiguration{}

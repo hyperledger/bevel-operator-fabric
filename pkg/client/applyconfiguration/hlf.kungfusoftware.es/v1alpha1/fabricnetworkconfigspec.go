@@ -7,7 +7,7 @@
 
 package v1alpha1
 
-// FabricNetworkConfigSpecApplyConfiguration represents an declarative configuration of the FabricNetworkConfigSpec type for use
+// FabricNetworkConfigSpecApplyConfiguration represents a declarative configuration of the FabricNetworkConfigSpec type for use
 // with apply.
 type FabricNetworkConfigSpecApplyConfiguration struct {
 	Organization           *string                                                      `json:"organization,omitempty"`
@@ -23,7 +23,7 @@ type FabricNetworkConfigSpecApplyConfiguration struct {
 	SecretName             *string                                                      `json:"secretName,omitempty"`
 }
 
-// FabricNetworkConfigSpecApplyConfiguration constructs an declarative configuration of the FabricNetworkConfigSpec type for use with
+// FabricNetworkConfigSpecApplyConfiguration constructs a declarative configuration of the FabricNetworkConfigSpec type for use with
 // apply.
 func FabricNetworkConfigSpec() *FabricNetworkConfigSpecApplyConfiguration {
 	return &FabricNetworkConfigSpecApplyConfiguration{}

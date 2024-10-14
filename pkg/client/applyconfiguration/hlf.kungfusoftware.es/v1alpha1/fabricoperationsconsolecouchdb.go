@@ -11,7 +11,7 @@ import (
 	v1 "k8s.io/api/core/v1"
 )
 
-// FabricOperationsConsoleCouchDBApplyConfiguration represents an declarative configuration of the FabricOperationsConsoleCouchDB type for use
+// FabricOperationsConsoleCouchDBApplyConfiguration represents a declarative configuration of the FabricOperationsConsoleCouchDB type for use
 // with apply.
 type FabricOperationsConsoleCouchDBApplyConfiguration struct {
 	Image            *string                    `json:"image,omitempty"`
@@ -26,7 +26,7 @@ type FabricOperationsConsoleCouchDBApplyConfiguration struct {
 	ImagePullPolicy  *v1.PullPolicy             `json:"imagePullPolicy,omitempty"`
 }
 
-// FabricOperationsConsoleCouchDBApplyConfiguration constructs an declarative configuration of the FabricOperationsConsoleCouchDB type for use with
+// FabricOperationsConsoleCouchDBApplyConfiguration constructs a declarative configuration of the FabricOperationsConsoleCouchDB type for use with
 // apply.
 func FabricOperationsConsoleCouchDB() *FabricOperationsConsoleCouchDBApplyConfiguration {
 	return &FabricOperationsConsoleCouchDBApplyConfiguration{}

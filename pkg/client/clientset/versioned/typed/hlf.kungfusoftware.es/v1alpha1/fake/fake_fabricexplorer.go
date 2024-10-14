@@ -12,8 +12,8 @@ import (
 	json "encoding/json"
 	"fmt"
 
-	v1alpha1 "github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
-	hlfkungfusoftwareesv1alpha1 "github.com/kfsoftware/hlf-operator/pkg/client/applyconfiguration/hlf.kungfusoftware.es/v1alpha1"
+	v1alpha1 "github.com/kfsoftware/hlf-operator/pkg/apis/hlf.kungfusoftware.es/v1alpha1"
+	hlfkungfusoftwareesv1alpha1 "github.com/minio/operator/pkg/client/applyconfiguration/hlf.kungfusoftware.es/v1alpha1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	labels "k8s.io/apimachinery/pkg/labels"
 	types "k8s.io/apimachinery/pkg/types"
@@ -33,22 +33,24 @@ var fabricexplorersKind = v1alpha1.SchemeGroupVersion.WithKind("FabricExplorer")
 
 // Get takes name of the fabricExplorer, and returns the corresponding fabricExplorer object, and an error if there is any.
 func (c *FakeFabricExplorers) Get(ctx context.Context, name string, options v1.GetOptions) (result *v1alpha1.FabricExplorer, err error) {
+	emptyResult := &v1alpha1.FabricExplorer{}
 	obj, err := c.Fake.
-		Invokes(testing.NewGetAction(fabricexplorersResource, c.ns, name), &v1alpha1.FabricExplorer{})
+		Invokes(testing.NewGetActionWithOptions(fabricexplorersResource, c.ns, name, options), emptyResult)
 
 	if obj == nil {
-		return nil, err
+		return emptyResult, err
 	}
 	return obj.(*v1alpha1.FabricExplorer), err
 }
 
 // List takes label and field selectors, and returns the list of FabricExplorers that match those selectors.
 func (c *FakeFabricExplorers) List(ctx context.Context, opts v1.ListOptions) (result *v1alpha1.FabricExplorerList, err error) {
+	emptyResult := &v1alpha1.FabricExplorerList{}
 	obj, err := c.Fake.
-		Invokes(testing.NewListAction(fabricexplorersResource, fabricexplorersKind, c.ns, opts), &v1alpha1.FabricExplorerList{})
+		Invokes(testing.NewListActionWithOptions(fabricexplorersResource, fabricexplorersKind, c.ns, opts), emptyResult)
 
 	if obj == nil {
-		return nil, err
+		return emptyResult, err
 	}
 
 	label, _, _ := testing.ExtractFromListOptions(opts)
@@ -67,40 +69,43 @@ func (c *FakeFabricExplorers) List(ctx context.Context, opts v1.ListOptions) (re
 // Watch returns a watch.Interface that watches the requested fabricExplorers.
 func (c *FakeFabricExplorers) Watch(ctx context.Context, opts v1.ListOptions) (watch.Interface, error) {
 	return c.Fake.
-		InvokesWatch(testing.NewWatchAction(fabricexplorersResource, c.ns, opts))
+		InvokesWatch(testing.NewWatchActionWithOptions(fabricexplorersResource, c.ns, opts))
 
 }
 
 // Create takes the representation of a fabricExplorer and creates it.  Returns the server's representation of the fabricExplorer, and an error, if there is any.
 func (c *FakeFabricExplorers) Create(ctx context.Context, fabricExplorer *v1alpha1.FabricExplorer, opts v1.CreateOptions) (result *v1alpha1.FabricExplorer, err error) {
+	emptyResult := &v1alpha1.FabricExplorer{}
 	obj, err := c.Fake.
-		Invokes(testing.NewCreateAction(fabricexplorersResource, c.ns, fabricExplorer), &v1alpha1.FabricExplorer{})
+		Invokes(testing.NewCreateActionWithOptions(fabricexplorersResource, c.ns, fabricExplorer, opts), emptyResult)
 
 	if obj == nil {
-		return nil, err
+		return emptyResult, err
 	}
 	return obj.(*v1alpha1.FabricExplorer), err
 }
 
 // Update takes the representation of a fabricExplorer and updates it. Returns the server's representation of the fabricExplorer, and an error, if there is any.
 func (c *FakeFabricExplorers) Update(ctx context.Context, fabricExplorer *v1alpha1.FabricExplorer, opts v1.UpdateOptions) (result *v1alpha1.FabricExplorer, err error) {
+	emptyResult := &v1alpha1.FabricExplorer{}
 	obj, err := c.Fake.
-		Invokes(testing.NewUpdateAction(fabricexplorersResource, c.ns, fabricExplorer), &v1alpha1.FabricExplorer{})
+		Invokes(testing.NewUpdateActionWithOptions(fabricexplorersResource, c.ns, fabricExplorer, opts), emptyResult)
 
 	if obj == nil {
-		return nil, err
+		return emptyResult, err
 	}
 	return obj.(*v1alpha1.FabricExplorer), err
 }
 
 // UpdateStatus was generated because the type contains a Status member.
 // Add a +genclient:noStatus comment above the type to avoid generating UpdateStatus().
-func (c *FakeFabricExplorers) UpdateStatus(ctx context.Context, fabricExplorer *v1alpha1.FabricExplorer, opts v1.UpdateOptions) (*v1alpha1.FabricExplorer, error) {
+func (c *FakeFabricExplorers) UpdateStatus(ctx context.Context, fabricExplorer *v1alpha1.FabricExplorer, opts v1.UpdateOptions) (result *v1alpha1.FabricExplorer, err error) {
+	emptyResult := &v1alpha1.FabricExplorer{}
 	obj, err := c.Fake.
-		Invokes(testing.NewUpdateSubresourceAction(fabricexplorersResource, "status", c.ns, fabricExplorer), &v1alpha1.FabricExplorer{})
+		Invokes(testing.NewUpdateSubresourceActionWithOptions(fabricexplorersResource, "status", c.ns, fabricExplorer, opts), emptyResult)
 
 	if obj == nil {
-		return nil, err
+		return emptyResult, err
 	}
 	return obj.(*v1alpha1.FabricExplorer), err
 }
@@ -115,7 +120,7 @@ func (c *FakeFabricExplorers) Delete(ctx context.Context, name string, opts v1.D
 
 // DeleteCollection deletes a collection of objects.
 func (c *FakeFabricExplorers) DeleteCollection(ctx context.Context, opts v1.DeleteOptions, listOpts v1.ListOptions) error {
-	action := testing.NewDeleteCollectionAction(fabricexplorersResource, c.ns, listOpts)
+	action := testing.NewDeleteCollectionActionWithOptions(fabricexplorersResource, c.ns, opts, listOpts)
 
 	_, err := c.Fake.Invokes(action, &v1alpha1.FabricExplorerList{})
 	return err
@@ -123,11 +128,12 @@ func (c *FakeFabricExplorers) DeleteCollection(ctx context.Context, opts v1.Dele
 
 // Patch applies the patch and returns the patched fabricExplorer.
 func (c *FakeFabricExplorers) Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *v1alpha1.FabricExplorer, err error) {
+	emptyResult := &v1alpha1.FabricExplorer{}
 	obj, err := c.Fake.
-		Invokes(testing.NewPatchSubresourceAction(fabricexplorersResource, c.ns, name, pt, data, subresources...), &v1alpha1.FabricExplorer{})
+		Invokes(testing.NewPatchSubresourceActionWithOptions(fabricexplorersResource, c.ns, name, pt, data, opts, subresources...), emptyResult)
 
 	if obj == nil {
-		return nil, err
+		return emptyResult, err
 	}
 	return obj.(*v1alpha1.FabricExplorer), err
 }
@@ -145,11 +151,12 @@ func (c *FakeFabricExplorers) Apply(ctx context.Context, fabricExplorer *hlfkung
 	if name == nil {
 		return nil, fmt.Errorf("fabricExplorer.Name must be provided to Apply")
 	}
+	emptyResult := &v1alpha1.FabricExplorer{}
 	obj, err := c.Fake.
-		Invokes(testing.NewPatchSubresourceAction(fabricexplorersResource, c.ns, *name, types.ApplyPatchType, data), &v1alpha1.FabricExplorer{})
+		Invokes(testing.NewPatchSubresourceActionWithOptions(fabricexplorersResource, c.ns, *name, types.ApplyPatchType, data, opts.ToPatchOptions()), emptyResult)
 
 	if obj == nil {
-		return nil, err
+		return emptyResult, err
 	}
 	return obj.(*v1alpha1.FabricExplorer), err
 }
@@ -168,11 +175,12 @@ func (c *FakeFabricExplorers) ApplyStatus(ctx context.Context, fabricExplorer *h
 	if name == nil {
 		return nil, fmt.Errorf("fabricExplorer.Name must be provided to Apply")
 	}
+	emptyResult := &v1alpha1.FabricExplorer{}
 	obj, err := c.Fake.
-		Invokes(testing.NewPatchSubresourceAction(fabricexplorersResource, c.ns, *name, types.ApplyPatchType, data, "status"), &v1alpha1.FabricExplorer{})
+		Invokes(testing.NewPatchSubresourceActionWithOptions(fabricexplorersResource, c.ns, *name, types.ApplyPatchType, data, opts.ToPatchOptions(), "status"), emptyResult)
 
 	if obj == nil {
-		return nil, err
+		return emptyResult, err
 	}
 	return obj.(*v1alpha1.FabricExplorer), err
 }

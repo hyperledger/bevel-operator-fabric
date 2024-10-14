@@ -13,7 +13,7 @@ import (
 	v1 "k8s.io/client-go/applyconfigurations/meta/v1"
 )
 
-// FabricOrdererNodeApplyConfiguration represents an declarative configuration of the FabricOrdererNode type for use
+// FabricOrdererNodeApplyConfiguration represents a declarative configuration of the FabricOrdererNode type for use
 // with apply.
 type FabricOrdererNodeApplyConfiguration struct {
 	v1.TypeMetaApplyConfiguration    `json:",inline"`
@@ -22,7 +22,7 @@ type FabricOrdererNodeApplyConfiguration struct {
 	Status                           *FabricOrdererNodeStatusApplyConfiguration `json:"status,omitempty"`
 }
 
-// FabricOrdererNode constructs an declarative configuration of the FabricOrdererNode type for use with
+// FabricOrdererNode constructs a declarative configuration of the FabricOrdererNode type for use with
 // apply.
 func FabricOrdererNode(name, namespace string) *FabricOrdererNodeApplyConfiguration {
 	b := &FabricOrdererNodeApplyConfiguration{}
@@ -205,4 +205,10 @@ func (b *FabricOrdererNodeApplyConfiguration) WithSpec(value *FabricOrdererNodeS
 func (b *FabricOrdererNodeApplyConfiguration) WithStatus(value *FabricOrdererNodeStatusApplyConfiguration) *FabricOrdererNodeApplyConfiguration {
 	b.Status = value
 	return b
+}
+
+// GetName retrieves the value of the Name field in the declarative configuration.
+func (b *FabricOrdererNodeApplyConfiguration) GetName() *string {
+	b.ensureObjectMetaApplyConfigurationExists()
+	return b.Name
 }

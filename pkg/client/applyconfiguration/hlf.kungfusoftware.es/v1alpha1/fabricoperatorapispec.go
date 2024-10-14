@@ -11,7 +11,7 @@ import (
 	v1 "k8s.io/api/core/v1"
 )
 
-// FabricOperatorAPISpecApplyConfiguration represents an declarative configuration of the FabricOperatorAPISpec type for use
+// FabricOperatorAPISpecApplyConfiguration represents a declarative configuration of the FabricOperatorAPISpec type for use
 // with apply.
 type FabricOperatorAPISpecApplyConfiguration struct {
 	Image            *string                                       `json:"image,omitempty"`
@@ -31,7 +31,7 @@ type FabricOperatorAPISpecApplyConfiguration struct {
 	Resources        *v1.ResourceRequirements                      `json:"resources,omitempty"`
 }
 
-// FabricOperatorAPISpecApplyConfiguration constructs an declarative configuration of the FabricOperatorAPISpec type for use with
+// FabricOperatorAPISpecApplyConfiguration constructs a declarative configuration of the FabricOperatorAPISpec type for use with
 // apply.
 func FabricOperatorAPISpec() *FabricOperatorAPISpecApplyConfiguration {
 	return &FabricOperatorAPISpecApplyConfiguration{}

@@ -7,13 +7,13 @@
 
 package v1alpha1
 
-// FabricCATLSConfApplyConfiguration represents an declarative configuration of the FabricCATLSConf type for use
+// FabricCATLSConfApplyConfiguration represents a declarative configuration of the FabricCATLSConf type for use
 // with apply.
 type FabricCATLSConfApplyConfiguration struct {
 	Subject *FabricCASubjectApplyConfiguration `json:"subject,omitempty"`
 }
 
-// FabricCATLSConfApplyConfiguration constructs an declarative configuration of the FabricCATLSConf type for use with
+// FabricCATLSConfApplyConfiguration constructs a declarative configuration of the FabricCATLSConf type for use with
 // apply.
 func FabricCATLSConf() *FabricCATLSConfApplyConfiguration {
 	return &FabricCATLSConfApplyConfiguration{}

@@ -7,7 +7,7 @@
 
 package v1alpha1
 
-// FabricOperatorAPIHLFConfigApplyConfiguration represents an declarative configuration of the FabricOperatorAPIHLFConfig type for use
+// FabricOperatorAPIHLFConfigApplyConfiguration represents a declarative configuration of the FabricOperatorAPIHLFConfig type for use
 // with apply.
 type FabricOperatorAPIHLFConfigApplyConfiguration struct {
 	MSPID         *string                                           `json:"mspID,omitempty"`
@@ -15,7 +15,7 @@ type FabricOperatorAPIHLFConfigApplyConfiguration struct {
 	NetworkConfig *FabricOperatorAPINetworkConfigApplyConfiguration `json:"networkConfig,omitempty"`
 }
 
-// FabricOperatorAPIHLFConfigApplyConfiguration constructs an declarative configuration of the FabricOperatorAPIHLFConfig type for use with
+// FabricOperatorAPIHLFConfigApplyConfiguration constructs a declarative configuration of the FabricOperatorAPIHLFConfig type for use with
 // apply.
 func FabricOperatorAPIHLFConfig() *FabricOperatorAPIHLFConfigApplyConfiguration {
 	return &FabricOperatorAPIHLFConfigApplyConfiguration{}

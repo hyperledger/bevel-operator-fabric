@@ -7,7 +7,7 @@
 
 package v1alpha1
 
-// HLFIdentityApplyConfiguration represents an declarative configuration of the HLFIdentity type for use
+// HLFIdentityApplyConfiguration represents a declarative configuration of the HLFIdentity type for use
 // with apply.
 type HLFIdentityApplyConfiguration struct {
 	SecretName      *string `json:"secretName,omitempty"`
@@ -15,7 +15,7 @@ type HLFIdentityApplyConfiguration struct {
 	SecretKey       *string `json:"secretKey,omitempty"`
 }
 
-// HLFIdentityApplyConfiguration constructs an declarative configuration of the HLFIdentity type for use with
+// HLFIdentityApplyConfiguration constructs a declarative configuration of the HLFIdentity type for use with
 // apply.
 func HLFIdentity() *HLFIdentityApplyConfiguration {
 	return &HLFIdentityApplyConfiguration{}

@@ -2906,24 +2906,3 @@ type FabricChaincodeTemplateSpec struct {
 	// +kubebuilder:validation:Optional
 	MspID string `json:"mspID"`
 }
-
-func init() {
-	SchemeBuilder.Register(&FabricPeer{}, &FabricPeerList{})
-	SchemeBuilder.Register(&FabricChaincodeTemplate{}, &FabricChaincodeTemplateList{})
-	SchemeBuilder.Register(&FabricOrderingService{}, &FabricOrderingServiceList{})
-	SchemeBuilder.Register(&FabricCA{}, &FabricCAList{})
-	SchemeBuilder.Register(&FabricOrdererNode{}, &FabricOrdererNodeList{})
-	SchemeBuilder.Register(&FabricExplorer{}, &FabricExplorerList{})
-	SchemeBuilder.Register(&FabricNetworkConfig{}, &FabricNetworkConfigList{})
-	SchemeBuilder.Register(&FabricChaincode{}, &FabricChaincodeList{})
-	SchemeBuilder.Register(&FabricOperationsConsole{}, &FabricOperationsConsoleList{})
-	SchemeBuilder.Register(&FabricOperatorUI{}, &FabricOperatorUIList{})
-	SchemeBuilder.Register(&FabricOperatorAPI{}, &FabricOperatorAPIList{})
-	SchemeBuilder.Register(&FabricMainChannel{}, &FabricMainChannelList{})
-	SchemeBuilder.Register(&FabricIdentity{}, &FabricIdentityList{})
-	SchemeBuilder.Register(&FabricChaincodeInstall{}, &FabricChaincodeInstallList{})
-	SchemeBuilder.Register(&FabricChaincodeApprove{}, &FabricChaincodeApproveList{})
-	SchemeBuilder.Register(&FabricChaincodeCommit{}, &FabricChaincodeCommitList{})
-
-	SchemeBuilder.Register(&FabricFollowerChannel{}, &FabricFollowerChannelList{})
-}

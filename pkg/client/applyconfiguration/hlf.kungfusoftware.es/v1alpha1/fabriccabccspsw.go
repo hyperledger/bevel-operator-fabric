@@ -7,14 +7,14 @@
 
 package v1alpha1
 
-// FabricCABCCSPSWApplyConfiguration represents an declarative configuration of the FabricCABCCSPSW type for use
+// FabricCABCCSPSWApplyConfiguration represents a declarative configuration of the FabricCABCCSPSW type for use
 // with apply.
 type FabricCABCCSPSWApplyConfiguration struct {
 	Hash     *string `json:"hash,omitempty"`
 	Security *string `json:"security,omitempty"`
 }
 
-// FabricCABCCSPSWApplyConfiguration constructs an declarative configuration of the FabricCABCCSPSW type for use with
+// FabricCABCCSPSWApplyConfiguration constructs a declarative configuration of the FabricCABCCSPSW type for use with
 // apply.
 func FabricCABCCSPSW() *FabricCABCCSPSWApplyConfiguration {
 	return &FabricCABCCSPSWApplyConfiguration{}

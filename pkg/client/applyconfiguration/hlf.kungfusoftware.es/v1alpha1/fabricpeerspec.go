@@ -8,12 +8,12 @@
 package v1alpha1
 
 import (
-	hlfkungfusoftwareesv1alpha1 "github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
+	hlfkungfusoftwareesv1alpha1 "github.com/kfsoftware/hlf-operator/pkg/apis/hlf.kungfusoftware.es/v1alpha1"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// FabricPeerSpecApplyConfiguration represents an declarative configuration of the FabricPeerSpec type for use
+// FabricPeerSpecApplyConfiguration represents a declarative configuration of the FabricPeerSpec type for use
 // with apply.
 type FabricPeerSpecApplyConfiguration struct {
 	PodAnnotations                 map[string]string                            `json:"podAnnotations,omitempty"`
@@ -56,7 +56,7 @@ type FabricPeerSpecApplyConfiguration struct {
 	Env                            []v1.EnvVar                                  `json:"env,omitempty"`
 }
 
-// FabricPeerSpecApplyConfiguration constructs an declarative configuration of the FabricPeerSpec type for use with
+// FabricPeerSpecApplyConfiguration constructs a declarative configuration of the FabricPeerSpec type for use with
 // apply.
 func FabricPeerSpec() *FabricPeerSpecApplyConfiguration {
 	return &FabricPeerSpecApplyConfiguration{}

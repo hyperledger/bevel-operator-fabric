@@ -7,7 +7,7 @@
 
 package v1alpha1
 
-// ExternalCertificateApplyConfiguration represents an declarative configuration of the ExternalCertificate type for use
+// ExternalCertificateApplyConfiguration represents a declarative configuration of the ExternalCertificate type for use
 // with apply.
 type ExternalCertificateApplyConfiguration struct {
 	SecretName         *string `json:"secretName,omitempty"`
@@ -17,7 +17,7 @@ type ExternalCertificateApplyConfiguration struct {
 	PrivateKeyKey      *string `json:"privateKeyKey,omitempty"`
 }
 
-// ExternalCertificateApplyConfiguration constructs an declarative configuration of the ExternalCertificate type for use with
+// ExternalCertificateApplyConfiguration constructs a declarative configuration of the ExternalCertificate type for use with
 // apply.
 func ExternalCertificate() *ExternalCertificateApplyConfiguration {
 	return &ExternalCertificateApplyConfiguration{}

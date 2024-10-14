@@ -7,13 +7,13 @@
 
 package v1alpha1
 
-// FabricMainChannelEtcdRaftApplyConfiguration represents an declarative configuration of the FabricMainChannelEtcdRaft type for use
+// FabricMainChannelEtcdRaftApplyConfiguration represents a declarative configuration of the FabricMainChannelEtcdRaft type for use
 // with apply.
 type FabricMainChannelEtcdRaftApplyConfiguration struct {
 	Options *FabricMainChannelEtcdRaftOptionsApplyConfiguration `json:"options,omitempty"`
 }
 
-// FabricMainChannelEtcdRaftApplyConfiguration constructs an declarative configuration of the FabricMainChannelEtcdRaft type for use with
+// FabricMainChannelEtcdRaftApplyConfiguration constructs a declarative configuration of the FabricMainChannelEtcdRaft type for use with
 // apply.
 func FabricMainChannelEtcdRaft() *FabricMainChannelEtcdRaftApplyConfiguration {
 	return &FabricMainChannelEtcdRaftApplyConfiguration{}

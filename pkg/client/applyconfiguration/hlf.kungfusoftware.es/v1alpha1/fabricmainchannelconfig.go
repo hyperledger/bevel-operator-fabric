@@ -7,7 +7,7 @@
 
 package v1alpha1
 
-// FabricMainChannelConfigApplyConfiguration represents an declarative configuration of the FabricMainChannelConfig type for use
+// FabricMainChannelConfigApplyConfiguration represents a declarative configuration of the FabricMainChannelConfig type for use
 // with apply.
 type FabricMainChannelConfigApplyConfiguration struct {
 	Application  *FabricMainChannelApplicationConfigApplyConfiguration         `json:"application,omitempty"`
@@ -16,7 +16,7 @@ type FabricMainChannelConfigApplyConfiguration struct {
 	Policies     *map[string]FabricMainChannelPoliciesConfigApplyConfiguration `json:"policies,omitempty"`
 }
 
-// FabricMainChannelConfigApplyConfiguration constructs an declarative configuration of the FabricMainChannelConfig type for use with
+// FabricMainChannelConfigApplyConfiguration constructs a declarative configuration of the FabricMainChannelConfig type for use with
 // apply.
 func FabricMainChannelConfig() *FabricMainChannelConfigApplyConfiguration {
 	return &FabricMainChannelConfigApplyConfiguration{}

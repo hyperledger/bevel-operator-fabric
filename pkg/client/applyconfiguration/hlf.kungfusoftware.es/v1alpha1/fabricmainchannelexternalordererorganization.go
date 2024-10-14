@@ -7,7 +7,7 @@
 
 package v1alpha1
 
-// FabricMainChannelExternalOrdererOrganizationApplyConfiguration represents an declarative configuration of the FabricMainChannelExternalOrdererOrganization type for use
+// FabricMainChannelExternalOrdererOrganizationApplyConfiguration represents a declarative configuration of the FabricMainChannelExternalOrdererOrganization type for use
 // with apply.
 type FabricMainChannelExternalOrdererOrganizationApplyConfiguration struct {
 	MSPID            *string  `json:"mspID,omitempty"`
@@ -16,7 +16,7 @@ type FabricMainChannelExternalOrdererOrganizationApplyConfiguration struct {
 	OrdererEndpoints []string `json:"ordererEndpoints,omitempty"`
 }
 
-// FabricMainChannelExternalOrdererOrganizationApplyConfiguration constructs an declarative configuration of the FabricMainChannelExternalOrdererOrganization type for use with
+// FabricMainChannelExternalOrdererOrganizationApplyConfiguration constructs a declarative configuration of the FabricMainChannelExternalOrdererOrganization type for use with
 // apply.
 func FabricMainChannelExternalOrdererOrganization() *FabricMainChannelExternalOrdererOrganizationApplyConfiguration {
 	return &FabricMainChannelExternalOrdererOrganizationApplyConfiguration{}

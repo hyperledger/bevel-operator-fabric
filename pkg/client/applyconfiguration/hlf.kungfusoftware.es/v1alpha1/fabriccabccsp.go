@@ -7,14 +7,14 @@
 
 package v1alpha1
 
-// FabricCABCCSPApplyConfiguration represents an declarative configuration of the FabricCABCCSP type for use
+// FabricCABCCSPApplyConfiguration represents a declarative configuration of the FabricCABCCSP type for use
 // with apply.
 type FabricCABCCSPApplyConfiguration struct {
 	Default *string                            `json:"default,omitempty"`
 	SW      *FabricCABCCSPSWApplyConfiguration `json:"sw,omitempty"`
 }
 
-// FabricCABCCSPApplyConfiguration constructs an declarative configuration of the FabricCABCCSP type for use with
+// FabricCABCCSPApplyConfiguration constructs a declarative configuration of the FabricCABCCSP type for use with
 // apply.
 func FabricCABCCSP() *FabricCABCCSPApplyConfiguration {
 	return &FabricCABCCSPApplyConfiguration{}

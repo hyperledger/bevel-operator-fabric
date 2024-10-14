@@ -11,7 +11,7 @@ import (
 	v1 "k8s.io/api/core/v1"
 )
 
-// FabricFSServerApplyConfiguration represents an declarative configuration of the FabricFSServer type for use
+// FabricFSServerApplyConfiguration represents a declarative configuration of the FabricFSServer type for use
 // with apply.
 type FabricFSServerApplyConfiguration struct {
 	Image      *string        `json:"image,omitempty"`
@@ -19,7 +19,7 @@ type FabricFSServerApplyConfiguration struct {
 	PullPolicy *v1.PullPolicy `json:"pullPolicy,omitempty"`
 }
 
-// FabricFSServerApplyConfiguration constructs an declarative configuration of the FabricFSServer type for use with
+// FabricFSServerApplyConfiguration constructs a declarative configuration of the FabricFSServer type for use with
 // apply.
 func FabricFSServer() *FabricFSServerApplyConfiguration {
 	return &FabricFSServerApplyConfiguration{}

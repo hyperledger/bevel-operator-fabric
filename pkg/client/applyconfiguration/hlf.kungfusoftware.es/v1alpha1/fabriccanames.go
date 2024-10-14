@@ -7,7 +7,7 @@
 
 package v1alpha1
 
-// FabricCANamesApplyConfiguration represents an declarative configuration of the FabricCANames type for use
+// FabricCANamesApplyConfiguration represents a declarative configuration of the FabricCANames type for use
 // with apply.
 type FabricCANamesApplyConfiguration struct {
 	C  *string `json:"C,omitempty"`
@@ -17,7 +17,7 @@ type FabricCANamesApplyConfiguration struct {
 	OU *string `json:"OU,omitempty"`
 }
 
-// FabricCANamesApplyConfiguration constructs an declarative configuration of the FabricCANames type for use with
+// FabricCANamesApplyConfiguration constructs a declarative configuration of the FabricCANames type for use with
 // apply.
 func FabricCANames() *FabricCANamesApplyConfiguration {
 	return &FabricCANamesApplyConfiguration{}

@@ -7,13 +7,13 @@
 
 package v1alpha1
 
-// SecretApplyConfiguration represents an declarative configuration of the Secret type for use
+// SecretApplyConfiguration represents a declarative configuration of the Secret type for use
 // with apply.
 type SecretApplyConfiguration struct {
 	Enrollment *EnrollmentApplyConfiguration `json:"enrollment,omitempty"`
 }
 
-// SecretApplyConfiguration constructs an declarative configuration of the Secret type for use with
+// SecretApplyConfiguration constructs a declarative configuration of the Secret type for use with
 // apply.
 func Secret() *SecretApplyConfiguration {
 	return &SecretApplyConfiguration{}

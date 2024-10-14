@@ -7,7 +7,7 @@
 
 package v1alpha1
 
-// FabricCASubjectApplyConfiguration represents an declarative configuration of the FabricCASubject type for use
+// FabricCASubjectApplyConfiguration represents a declarative configuration of the FabricCASubject type for use
 // with apply.
 type FabricCASubjectApplyConfiguration struct {
 	CN *string `json:"cn,omitempty"`
@@ -18,7 +18,7 @@ type FabricCASubjectApplyConfiguration struct {
 	OU *string `json:"OU,omitempty"`
 }
 
-// FabricCASubjectApplyConfiguration constructs an declarative configuration of the FabricCASubject type for use with
+// FabricCASubjectApplyConfiguration constructs a declarative configuration of the FabricCASubject type for use with
 // apply.
 func FabricCASubject() *FabricCASubjectApplyConfiguration {
 	return &FabricCASubjectApplyConfiguration{}

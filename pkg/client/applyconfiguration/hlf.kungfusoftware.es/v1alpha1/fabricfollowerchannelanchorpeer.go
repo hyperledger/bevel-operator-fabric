@@ -7,14 +7,14 @@
 
 package v1alpha1
 
-// FabricFollowerChannelAnchorPeerApplyConfiguration represents an declarative configuration of the FabricFollowerChannelAnchorPeer type for use
+// FabricFollowerChannelAnchorPeerApplyConfiguration represents a declarative configuration of the FabricFollowerChannelAnchorPeer type for use
 // with apply.
 type FabricFollowerChannelAnchorPeerApplyConfiguration struct {
 	Host *string `json:"host,omitempty"`
 	Port *int    `json:"port,omitempty"`
 }
 
-// FabricFollowerChannelAnchorPeerApplyConfiguration constructs an declarative configuration of the FabricFollowerChannelAnchorPeer type for use with
+// FabricFollowerChannelAnchorPeerApplyConfiguration constructs a declarative configuration of the FabricFollowerChannelAnchorPeer type for use with
 // apply.
 func FabricFollowerChannelAnchorPeer() *FabricFollowerChannelAnchorPeerApplyConfiguration {
 	return &FabricFollowerChannelAnchorPeerApplyConfiguration{}

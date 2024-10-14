@@ -11,7 +11,7 @@ import (
 	v1beta1 "k8s.io/api/networking/v1beta1"
 )
 
-// IngressApplyConfiguration represents an declarative configuration of the Ingress type for use
+// IngressApplyConfiguration represents a declarative configuration of the Ingress type for use
 // with apply.
 type IngressApplyConfiguration struct {
 	Enabled     *bool                           `json:"enabled,omitempty"`
@@ -21,7 +21,7 @@ type IngressApplyConfiguration struct {
 	Hosts       []IngressHostApplyConfiguration `json:"hosts,omitempty"`
 }
 
-// IngressApplyConfiguration constructs an declarative configuration of the Ingress type for use with
+// IngressApplyConfiguration constructs a declarative configuration of the Ingress type for use with
 // apply.
 func Ingress() *IngressApplyConfiguration {
 	return &IngressApplyConfiguration{}

@@ -7,14 +7,14 @@
 
 package v1alpha1
 
-// FabricCACSRCAApplyConfiguration represents an declarative configuration of the FabricCACSRCA type for use
+// FabricCACSRCAApplyConfiguration represents a declarative configuration of the FabricCACSRCA type for use
 // with apply.
 type FabricCACSRCAApplyConfiguration struct {
 	Expiry     *string `json:"expiry,omitempty"`
 	PathLength *int    `json:"pathLength,omitempty"`
 }
 
-// FabricCACSRCAApplyConfiguration constructs an declarative configuration of the FabricCACSRCA type for use with
+// FabricCACSRCAApplyConfiguration constructs a declarative configuration of the FabricCACSRCA type for use with
 // apply.
 func FabricCACSRCA() *FabricCACSRCAApplyConfiguration {
 	return &FabricCACSRCAApplyConfiguration{}

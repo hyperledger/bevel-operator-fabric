@@ -7,7 +7,7 @@
 
 package v1alpha1
 
-// FabricMainChannelEtcdRaftOptionsApplyConfiguration represents an declarative configuration of the FabricMainChannelEtcdRaftOptions type for use
+// FabricMainChannelEtcdRaftOptionsApplyConfiguration represents a declarative configuration of the FabricMainChannelEtcdRaftOptions type for use
 // with apply.
 type FabricMainChannelEtcdRaftOptionsApplyConfiguration struct {
 	TickInterval         *string `json:"tickInterval,omitempty"`
@@ -17,7 +17,7 @@ type FabricMainChannelEtcdRaftOptionsApplyConfiguration struct {
 	SnapshotIntervalSize *uint32 `json:"snapshotIntervalSize,omitempty"`
 }
 
-// FabricMainChannelEtcdRaftOptionsApplyConfiguration constructs an declarative configuration of the FabricMainChannelEtcdRaftOptions type for use with
+// FabricMainChannelEtcdRaftOptionsApplyConfiguration constructs a declarative configuration of the FabricMainChannelEtcdRaftOptions type for use with
 // apply.
 func FabricMainChannelEtcdRaftOptions() *FabricMainChannelEtcdRaftOptionsApplyConfiguration {
 	return &FabricMainChannelEtcdRaftOptionsApplyConfiguration{}

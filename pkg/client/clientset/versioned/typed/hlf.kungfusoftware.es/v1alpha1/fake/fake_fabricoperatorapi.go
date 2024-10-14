@@ -12,8 +12,8 @@ import (
 	json "encoding/json"
 	"fmt"
 
-	v1alpha1 "github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
-	hlfkungfusoftwareesv1alpha1 "github.com/kfsoftware/hlf-operator/pkg/client/applyconfiguration/hlf.kungfusoftware.es/v1alpha1"
+	v1alpha1 "github.com/kfsoftware/hlf-operator/pkg/apis/hlf.kungfusoftware.es/v1alpha1"
+	hlfkungfusoftwareesv1alpha1 "github.com/minio/operator/pkg/client/applyconfiguration/hlf.kungfusoftware.es/v1alpha1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	labels "k8s.io/apimachinery/pkg/labels"
 	types "k8s.io/apimachinery/pkg/types"
@@ -33,22 +33,24 @@ var fabricoperatorapisKind = v1alpha1.SchemeGroupVersion.WithKind("FabricOperato
 
 // Get takes name of the fabricOperatorAPI, and returns the corresponding fabricOperatorAPI object, and an error if there is any.
 func (c *FakeFabricOperatorAPIs) Get(ctx context.Context, name string, options v1.GetOptions) (result *v1alpha1.FabricOperatorAPI, err error) {
+	emptyResult := &v1alpha1.FabricOperatorAPI{}
 	obj, err := c.Fake.
-		Invokes(testing.NewGetAction(fabricoperatorapisResource, c.ns, name), &v1alpha1.FabricOperatorAPI{})
+		Invokes(testing.NewGetActionWithOptions(fabricoperatorapisResource, c.ns, name, options), emptyResult)
 
 	if obj == nil {
-		return nil, err
+		return emptyResult, err
 	}
 	return obj.(*v1alpha1.FabricOperatorAPI), err
 }
 
 // List takes label and field selectors, and returns the list of FabricOperatorAPIs that match those selectors.
 func (c *FakeFabricOperatorAPIs) List(ctx context.Context, opts v1.ListOptions) (result *v1alpha1.FabricOperatorAPIList, err error) {
+	emptyResult := &v1alpha1.FabricOperatorAPIList{}
 	obj, err := c.Fake.
-		Invokes(testing.NewListAction(fabricoperatorapisResource, fabricoperatorapisKind, c.ns, opts), &v1alpha1.FabricOperatorAPIList{})
+		Invokes(testing.NewListActionWithOptions(fabricoperatorapisResource, fabricoperatorapisKind, c.ns, opts), emptyResult)
 
 	if obj == nil {
-		return nil, err
+		return emptyResult, err
 	}
 
 	label, _, _ := testing.ExtractFromListOptions(opts)
@@ -67,40 +69,43 @@ func (c *FakeFabricOperatorAPIs) List(ctx context.Context, opts v1.ListOptions) 
 // Watch returns a watch.Interface that watches the requested fabricOperatorAPIs.
 func (c *FakeFabricOperatorAPIs) Watch(ctx context.Context, opts v1.ListOptions) (watch.Interface, error) {
 	return c.Fake.
-		InvokesWatch(testing.NewWatchAction(fabricoperatorapisResource, c.ns, opts))
+		InvokesWatch(testing.NewWatchActionWithOptions(fabricoperatorapisResource, c.ns, opts))
 
 }
 
 // Create takes the representation of a fabricOperatorAPI and creates it.  Returns the server's representation of the fabricOperatorAPI, and an error, if there is any.
 func (c *FakeFabricOperatorAPIs) Create(ctx context.Context, fabricOperatorAPI *v1alpha1.FabricOperatorAPI, opts v1.CreateOptions) (result *v1alpha1.FabricOperatorAPI, err error) {
+	emptyResult := &v1alpha1.FabricOperatorAPI{}
 	obj, err := c.Fake.
-		Invokes(testing.NewCreateAction(fabricoperatorapisResource, c.ns, fabricOperatorAPI), &v1alpha1.FabricOperatorAPI{})
+		Invokes(testing.NewCreateActionWithOptions(fabricoperatorapisResource, c.ns, fabricOperatorAPI, opts), emptyResult)
 
 	if obj == nil {
-		return nil, err
+		return emptyResult, err
 	}
 	return obj.(*v1alpha1.FabricOperatorAPI), err
 }
 
 // Update takes the representation of a fabricOperatorAPI and updates it. Returns the server's representation of the fabricOperatorAPI, and an error, if there is any.
 func (c *FakeFabricOperatorAPIs) Update(ctx context.Context, fabricOperatorAPI *v1alpha1.FabricOperatorAPI, opts v1.UpdateOptions) (result *v1alpha1.FabricOperatorAPI, err error) {
+	emptyResult := &v1alpha1.FabricOperatorAPI{}
 	obj, err := c.Fake.
-		Invokes(testing.NewUpdateAction(fabricoperatorapisResource, c.ns, fabricOperatorAPI), &v1alpha1.FabricOperatorAPI{})
+		Invokes(testing.NewUpdateActionWithOptions(fabricoperatorapisResource, c.ns, fabricOperatorAPI, opts), emptyResult)
 
 	if obj == nil {
-		return nil, err
+		return emptyResult, err
 	}
 	return obj.(*v1alpha1.FabricOperatorAPI), err
 }
 
 // UpdateStatus was generated because the type contains a Status member.
 // Add a +genclient:noStatus comment above the type to avoid generating UpdateStatus().
-func (c *FakeFabricOperatorAPIs) UpdateStatus(ctx context.Context, fabricOperatorAPI *v1alpha1.FabricOperatorAPI, opts v1.UpdateOptions) (*v1alpha1.FabricOperatorAPI, error) {
+func (c *FakeFabricOperatorAPIs) UpdateStatus(ctx context.Context, fabricOperatorAPI *v1alpha1.FabricOperatorAPI, opts v1.UpdateOptions) (result *v1alpha1.FabricOperatorAPI, err error) {
+	emptyResult := &v1alpha1.FabricOperatorAPI{}
 	obj, err := c.Fake.
-		Invokes(testing.NewUpdateSubresourceAction(fabricoperatorapisResource, "status", c.ns, fabricOperatorAPI), &v1alpha1.FabricOperatorAPI{})
+		Invokes(testing.NewUpdateSubresourceActionWithOptions(fabricoperatorapisResource, "status", c.ns, fabricOperatorAPI, opts), emptyResult)
 
 	if obj == nil {
-		return nil, err
+		return emptyResult, err
 	}
 	return obj.(*v1alpha1.FabricOperatorAPI), err
 }
@@ -115,7 +120,7 @@ func (c *FakeFabricOperatorAPIs) Delete(ctx context.Context, name string, opts v
 
 // DeleteCollection deletes a collection of objects.
 func (c *FakeFabricOperatorAPIs) DeleteCollection(ctx context.Context, opts v1.DeleteOptions, listOpts v1.ListOptions) error {
-	action := testing.NewDeleteCollectionAction(fabricoperatorapisResource, c.ns, listOpts)
+	action := testing.NewDeleteCollectionActionWithOptions(fabricoperatorapisResource, c.ns, opts, listOpts)
 
 	_, err := c.Fake.Invokes(action, &v1alpha1.FabricOperatorAPIList{})
 	return err
@@ -123,11 +128,12 @@ func (c *FakeFabricOperatorAPIs) DeleteCollection(ctx context.Context, opts v1.D
 
 // Patch applies the patch and returns the patched fabricOperatorAPI.
 func (c *FakeFabricOperatorAPIs) Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *v1alpha1.FabricOperatorAPI, err error) {
+	emptyResult := &v1alpha1.FabricOperatorAPI{}
 	obj, err := c.Fake.
-		Invokes(testing.NewPatchSubresourceAction(fabricoperatorapisResource, c.ns, name, pt, data, subresources...), &v1alpha1.FabricOperatorAPI{})
+		Invokes(testing.NewPatchSubresourceActionWithOptions(fabricoperatorapisResource, c.ns, name, pt, data, opts, subresources...), emptyResult)
 
 	if obj == nil {
-		return nil, err
+		return emptyResult, err
 	}
 	return obj.(*v1alpha1.FabricOperatorAPI), err
 }
@@ -145,11 +151,12 @@ func (c *FakeFabricOperatorAPIs) Apply(ctx context.Context, fabricOperatorAPI *h
 	if name == nil {
 		return nil, fmt.Errorf("fabricOperatorAPI.Name must be provided to Apply")
 	}
+	emptyResult := &v1alpha1.FabricOperatorAPI{}
 	obj, err := c.Fake.
-		Invokes(testing.NewPatchSubresourceAction(fabricoperatorapisResource, c.ns, *name, types.ApplyPatchType, data), &v1alpha1.FabricOperatorAPI{})
+		Invokes(testing.NewPatchSubresourceActionWithOptions(fabricoperatorapisResource, c.ns, *name, types.ApplyPatchType, data, opts.ToPatchOptions()), emptyResult)
 
 	if obj == nil {
-		return nil, err
+		return emptyResult, err
 	}
 	return obj.(*v1alpha1.FabricOperatorAPI), err
 }
@@ -168,11 +175,12 @@ func (c *FakeFabricOperatorAPIs) ApplyStatus(ctx context.Context, fabricOperator
 	if name == nil {
 		return nil, fmt.Errorf("fabricOperatorAPI.Name must be provided to Apply")
 	}
+	emptyResult := &v1alpha1.FabricOperatorAPI{}
 	obj, err := c.Fake.
-		Invokes(testing.NewPatchSubresourceAction(fabricoperatorapisResource, c.ns, *name, types.ApplyPatchType, data, "status"), &v1alpha1.FabricOperatorAPI{})
+		Invokes(testing.NewPatchSubresourceActionWithOptions(fabricoperatorapisResource, c.ns, *name, types.ApplyPatchType, data, opts.ToPatchOptions(), "status"), emptyResult)
 
 	if obj == nil {
-		return nil, err
+		return emptyResult, err
 	}
 	return obj.(*v1alpha1.FabricOperatorAPI), err
 }

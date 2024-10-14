@@ -11,13 +11,13 @@ import (
 	v1 "k8s.io/api/core/v1"
 )
 
-// PeerServiceApplyConfiguration represents an declarative configuration of the PeerService type for use
+// PeerServiceApplyConfiguration represents a declarative configuration of the PeerService type for use
 // with apply.
 type PeerServiceApplyConfiguration struct {
 	Type *v1.ServiceType `json:"type,omitempty"`
 }
 
-// PeerServiceApplyConfiguration constructs an declarative configuration of the PeerService type for use with
+// PeerServiceApplyConfiguration constructs a declarative configuration of the PeerService type for use with
 // apply.
 func PeerService() *PeerServiceApplyConfiguration {
 	return &PeerServiceApplyConfiguration{}

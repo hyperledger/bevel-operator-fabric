@@ -7,7 +7,7 @@
 
 package v1alpha1
 
-// FabricPeerLoggingApplyConfiguration represents an declarative configuration of the FabricPeerLogging type for use
+// FabricPeerLoggingApplyConfiguration represents a declarative configuration of the FabricPeerLogging type for use
 // with apply.
 type FabricPeerLoggingApplyConfiguration struct {
 	Level    *string `json:"level,omitempty"`
@@ -20,7 +20,7 @@ type FabricPeerLoggingApplyConfiguration struct {
 	Policies *string `json:"policies,omitempty"`
 }
 
-// FabricPeerLoggingApplyConfiguration constructs an declarative configuration of the FabricPeerLogging type for use with
+// FabricPeerLoggingApplyConfiguration constructs a declarative configuration of the FabricPeerLogging type for use with
 // apply.
 func FabricPeerLogging() *FabricPeerLoggingApplyConfiguration {
 	return &FabricPeerLoggingApplyConfiguration{}

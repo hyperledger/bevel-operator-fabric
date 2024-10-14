@@ -7,14 +7,14 @@
 
 package v1alpha1
 
-// FabricPeerDiscoveryApplyConfiguration represents an declarative configuration of the FabricPeerDiscovery type for use
+// FabricPeerDiscoveryApplyConfiguration represents a declarative configuration of the FabricPeerDiscovery type for use
 // with apply.
 type FabricPeerDiscoveryApplyConfiguration struct {
 	Period      *string `json:"period,omitempty"`
 	TouchPeriod *string `json:"touchPeriod,omitempty"`
 }
 
-// FabricPeerDiscoveryApplyConfiguration constructs an declarative configuration of the FabricPeerDiscovery type for use with
+// FabricPeerDiscoveryApplyConfiguration constructs a declarative configuration of the FabricPeerDiscovery type for use with
 // apply.
 func FabricPeerDiscovery() *FabricPeerDiscoveryApplyConfiguration {
 	return &FabricPeerDiscoveryApplyConfiguration{}

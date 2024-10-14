@@ -11,13 +11,13 @@ import (
 	v1 "k8s.io/api/core/v1"
 )
 
-// FabricExplorerSpecApplyConfiguration represents an declarative configuration of the FabricExplorerSpec type for use
+// FabricExplorerSpecApplyConfiguration represents a declarative configuration of the FabricExplorerSpec type for use
 // with apply.
 type FabricExplorerSpecApplyConfiguration struct {
 	Resources *v1.ResourceRequirements `json:"resources,omitempty"`
 }
 
-// FabricExplorerSpecApplyConfiguration constructs an declarative configuration of the FabricExplorerSpec type for use with
+// FabricExplorerSpecApplyConfiguration constructs a declarative configuration of the FabricExplorerSpec type for use with
 // apply.
 func FabricExplorerSpec() *FabricExplorerSpecApplyConfiguration {
 	return &FabricExplorerSpecApplyConfiguration{}

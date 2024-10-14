@@ -7,7 +7,7 @@
 
 package v1alpha1
 
-// SecretRefNSKeyApplyConfiguration represents an declarative configuration of the SecretRefNSKey type for use
+// SecretRefNSKeyApplyConfiguration represents a declarative configuration of the SecretRefNSKey type for use
 // with apply.
 type SecretRefNSKeyApplyConfiguration struct {
 	Name      *string `json:"name,omitempty"`
@@ -15,7 +15,7 @@ type SecretRefNSKeyApplyConfiguration struct {
 	Key       *string `json:"key,omitempty"`
 }
 
-// SecretRefNSKeyApplyConfiguration constructs an declarative configuration of the SecretRefNSKey type for use with
+// SecretRefNSKeyApplyConfiguration constructs a declarative configuration of the SecretRefNSKey type for use with
 // apply.
 func SecretRefNSKey() *SecretRefNSKeyApplyConfiguration {
 	return &SecretRefNSKeyApplyConfiguration{}

@@ -7,7 +7,7 @@
 
 package v1alpha1
 
-// AddressOverrideApplyConfiguration represents an declarative configuration of the AddressOverride type for use
+// AddressOverrideApplyConfiguration represents a declarative configuration of the AddressOverride type for use
 // with apply.
 type AddressOverrideApplyConfiguration struct {
 	From        *string `json:"from,omitempty"`
@@ -15,7 +15,7 @@ type AddressOverrideApplyConfiguration struct {
 	CACertsFile *string `json:"caCertsFile,omitempty"`
 }
 
-// AddressOverrideApplyConfiguration constructs an declarative configuration of the AddressOverride type for use with
+// AddressOverrideApplyConfiguration constructs a declarative configuration of the AddressOverride type for use with
 // apply.
 func AddressOverride() *AddressOverrideApplyConfiguration {
 	return &AddressOverrideApplyConfiguration{}

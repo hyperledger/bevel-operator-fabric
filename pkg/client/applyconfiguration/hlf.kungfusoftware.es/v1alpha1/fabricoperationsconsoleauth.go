@@ -7,7 +7,7 @@
 
 package v1alpha1
 
-// FabricOperationsConsoleAuthApplyConfiguration represents an declarative configuration of the FabricOperationsConsoleAuth type for use
+// FabricOperationsConsoleAuthApplyConfiguration represents a declarative configuration of the FabricOperationsConsoleAuth type for use
 // with apply.
 type FabricOperationsConsoleAuthApplyConfiguration struct {
 	Scheme   *string `json:"scheme,omitempty"`
@@ -15,7 +15,7 @@ type FabricOperationsConsoleAuthApplyConfiguration struct {
 	Password *string `json:"password,omitempty"`
 }
 
-// FabricOperationsConsoleAuthApplyConfiguration constructs an declarative configuration of the FabricOperationsConsoleAuth type for use with
+// FabricOperationsConsoleAuthApplyConfiguration constructs a declarative configuration of the FabricOperationsConsoleAuth type for use with
 // apply.
 func FabricOperationsConsoleAuth() *FabricOperationsConsoleAuthApplyConfiguration {
 	return &FabricOperationsConsoleAuthApplyConfiguration{}

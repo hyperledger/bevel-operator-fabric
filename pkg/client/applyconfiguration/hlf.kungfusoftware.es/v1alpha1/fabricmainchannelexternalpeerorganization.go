@@ -7,7 +7,7 @@
 
 package v1alpha1
 
-// FabricMainChannelExternalPeerOrganizationApplyConfiguration represents an declarative configuration of the FabricMainChannelExternalPeerOrganization type for use
+// FabricMainChannelExternalPeerOrganizationApplyConfiguration represents a declarative configuration of the FabricMainChannelExternalPeerOrganization type for use
 // with apply.
 type FabricMainChannelExternalPeerOrganizationApplyConfiguration struct {
 	MSPID        *string `json:"mspID,omitempty"`
@@ -15,7 +15,7 @@ type FabricMainChannelExternalPeerOrganizationApplyConfiguration struct {
 	SignRootCert *string `json:"signRootCert,omitempty"`
 }
 
-// FabricMainChannelExternalPeerOrganizationApplyConfiguration constructs an declarative configuration of the FabricMainChannelExternalPeerOrganization type for use with
+// FabricMainChannelExternalPeerOrganizationApplyConfiguration constructs a declarative configuration of the FabricMainChannelExternalPeerOrganization type for use with
 // apply.
 func FabricMainChannelExternalPeerOrganization() *FabricMainChannelExternalPeerOrganizationApplyConfiguration {
 	return &FabricMainChannelExternalPeerOrganizationApplyConfiguration{}

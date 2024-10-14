@@ -8,11 +8,11 @@
 package v1alpha1
 
 import (
-	v1alpha1 "github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
+	v1alpha1 "github.com/kfsoftware/hlf-operator/pkg/apis/hlf.kungfusoftware.es/v1alpha1"
 	status "github.com/kfsoftware/hlf-operator/pkg/status"
 )
 
-// FabricNetworkConfigStatusApplyConfiguration represents an declarative configuration of the FabricNetworkConfigStatus type for use
+// FabricNetworkConfigStatusApplyConfiguration represents a declarative configuration of the FabricNetworkConfigStatus type for use
 // with apply.
 type FabricNetworkConfigStatusApplyConfiguration struct {
 	Conditions *status.Conditions         `json:"conditions,omitempty"`
@@ -20,7 +20,7 @@ type FabricNetworkConfigStatusApplyConfiguration struct {
 	Status     *v1alpha1.DeploymentStatus `json:"status,omitempty"`
 }
 
-// FabricNetworkConfigStatusApplyConfiguration constructs an declarative configuration of the FabricNetworkConfigStatus type for use with
+// FabricNetworkConfigStatusApplyConfiguration constructs a declarative configuration of the FabricNetworkConfigStatus type for use with
 // apply.
 func FabricNetworkConfigStatus() *FabricNetworkConfigStatusApplyConfiguration {
 	return &FabricNetworkConfigStatusApplyConfiguration{}

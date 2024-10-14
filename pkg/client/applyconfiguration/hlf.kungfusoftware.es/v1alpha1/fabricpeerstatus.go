@@ -8,12 +8,12 @@
 package v1alpha1
 
 import (
-	v1alpha1 "github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
+	v1alpha1 "github.com/kfsoftware/hlf-operator/pkg/apis/hlf.kungfusoftware.es/v1alpha1"
 	status "github.com/kfsoftware/hlf-operator/pkg/status"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// FabricPeerStatusApplyConfiguration represents an declarative configuration of the FabricPeerStatus type for use
+// FabricPeerStatusApplyConfiguration represents a declarative configuration of the FabricPeerStatus type for use
 // with apply.
 type FabricPeerStatusApplyConfiguration struct {
 	Conditions            *status.Conditions         `json:"conditions,omitempty"`
@@ -27,7 +27,7 @@ type FabricPeerStatusApplyConfiguration struct {
 	NodePort              *int                       `json:"port,omitempty"`
 }
 
-// FabricPeerStatusApplyConfiguration constructs an declarative configuration of the FabricPeerStatus type for use with
+// FabricPeerStatusApplyConfiguration constructs a declarative configuration of the FabricPeerStatus type for use with
 // apply.
 func FabricPeerStatus() *FabricPeerStatusApplyConfiguration {
 	return &FabricPeerStatusApplyConfiguration{}

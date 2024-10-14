@@ -7,14 +7,14 @@
 
 package v1alpha1
 
-// FabricCASigningTLSProfileApplyConfiguration represents an declarative configuration of the FabricCASigningTLSProfile type for use
+// FabricCASigningTLSProfileApplyConfiguration represents a declarative configuration of the FabricCASigningTLSProfile type for use
 // with apply.
 type FabricCASigningTLSProfileApplyConfiguration struct {
 	Usage  []string `json:"usage,omitempty"`
 	Expiry *string  `json:"expiry,omitempty"`
 }
 
-// FabricCASigningTLSProfileApplyConfiguration constructs an declarative configuration of the FabricCASigningTLSProfile type for use with
+// FabricCASigningTLSProfileApplyConfiguration constructs a declarative configuration of the FabricCASigningTLSProfile type for use with
 // apply.
 func FabricCASigningTLSProfile() *FabricCASigningTLSProfileApplyConfiguration {
 	return &FabricCASigningTLSProfileApplyConfiguration{}

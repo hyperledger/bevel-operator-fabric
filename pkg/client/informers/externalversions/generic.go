@@ -10,7 +10,7 @@ package externalversions
 import (
 	"fmt"
 
-	v1alpha1 "github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
+	v1alpha1 "github.com/kfsoftware/hlf-operator/pkg/apis/hlf.kungfusoftware.es/v1alpha1"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"
 	cache "k8s.io/client-go/tools/cache"
 )
@@ -46,6 +46,12 @@ func (f *sharedInformerFactory) ForResource(resource schema.GroupVersionResource
 		return &genericInformer{resource: resource.GroupResource(), informer: f.Hlf().V1alpha1().FabricCAs().Informer()}, nil
 	case v1alpha1.SchemeGroupVersion.WithResource("fabricchaincodes"):
 		return &genericInformer{resource: resource.GroupResource(), informer: f.Hlf().V1alpha1().FabricChaincodes().Informer()}, nil
+	case v1alpha1.SchemeGroupVersion.WithResource("fabricchaincodeapproves"):
+		return &genericInformer{resource: resource.GroupResource(), informer: f.Hlf().V1alpha1().FabricChaincodeApproves().Informer()}, nil
+	case v1alpha1.SchemeGroupVersion.WithResource("fabricchaincodecommits"):
+		return &genericInformer{resource: resource.GroupResource(), informer: f.Hlf().V1alpha1().FabricChaincodeCommits().Informer()}, nil
+	case v1alpha1.SchemeGroupVersion.WithResource("fabricchaincodeinstalls"):
+		return &genericInformer{resource: resource.GroupResource(), informer: f.Hlf().V1alpha1().FabricChaincodeInstalls().Informer()}, nil
 	case v1alpha1.SchemeGroupVersion.WithResource("fabricchaincodetemplates"):
 		return &genericInformer{resource: resource.GroupResource(), informer: f.Hlf().V1alpha1().FabricChaincodeTemplates().Informer()}, nil
 	case v1alpha1.SchemeGroupVersion.WithResource("fabricexplorers"):

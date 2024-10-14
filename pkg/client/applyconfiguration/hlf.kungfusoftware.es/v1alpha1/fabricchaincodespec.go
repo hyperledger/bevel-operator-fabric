@@ -11,33 +11,47 @@ import (
 	v1 "k8s.io/api/core/v1"
 )
 
-// FabricChaincodeSpecApplyConfiguration represents an declarative configuration of the FabricChaincodeSpec type for use
+// FabricChaincodeSpecApplyConfiguration represents a declarative configuration of the FabricChaincodeSpec type for use
 // with apply.
 type FabricChaincodeSpecApplyConfiguration struct {
-	Annotations         map[string]string         `json:"annotations,omitempty"`
-	Labels              map[string]string         `json:"labels,omitempty"`
-	PodAnnotations      map[string]string         `json:"podAnnotations,omitempty"`
-	PodLabels           map[string]string         `json:"podLabels,omitempty"`
-	Image               *string                   `json:"image,omitempty"`
-	ImagePullPolicy     *v1.PullPolicy            `json:"imagePullPolicy,omitempty"`
-	PackageID           *string                   `json:"packageId,omitempty"`
-	ImagePullSecrets    []v1.LocalObjectReference `json:"imagePullSecrets,omitempty"`
-	Command             []string                  `json:"command,omitempty"`
-	Args                []string                  `json:"args,omitempty"`
-	Affinity            *v1.Affinity              `json:"affinity,omitempty"`
-	Tolerations         []v1.Toleration           `json:"tolerations,omitempty"`
-	Resources           *v1.ResourceRequirements  `json:"resources,omitempty"`
-	Credentials         *TLSApplyConfiguration    `json:"credentials,omitempty"`
-	Replicas            *int                      `json:"replicas,omitempty"`
-	Env                 []v1.EnvVar               `json:"env,omitempty"`
-	ChaincodeServerPort *int                      `json:"chaincodeServerPort,omitempty"`
-	MspID               *string                   `json:"mspID,omitempty"`
+	Template            *FabricChaincodeTemplateRefApplyConfiguration `json:"template,omitempty"`
+	Annotations         map[string]string                             `json:"annotations,omitempty"`
+	Labels              map[string]string                             `json:"labels,omitempty"`
+	PodAnnotations      map[string]string                             `json:"podAnnotations,omitempty"`
+	PodLabels           map[string]string                             `json:"podLabels,omitempty"`
+	Image               *string                                       `json:"image,omitempty"`
+	ImagePullPolicy     *v1.PullPolicy                                `json:"imagePullPolicy,omitempty"`
+	PackageID           *string                                       `json:"packageId,omitempty"`
+	ImagePullSecrets    []v1.LocalObjectReference                     `json:"imagePullSecrets,omitempty"`
+	Command             []string                                      `json:"command,omitempty"`
+	Args                []string                                      `json:"args,omitempty"`
+	Affinity            *v1.Affinity                                  `json:"affinity,omitempty"`
+	Tolerations         []v1.Toleration                               `json:"tolerations,omitempty"`
+	Resources           *v1.ResourceRequirements                      `json:"resources,omitempty"`
+	PodSecurityContext  *v1.PodSecurityContext                        `json:"podSecurityContext,omitempty"`
+	SecurityContext     *v1.SecurityContext                           `json:"securityContext,omitempty"`
+	ServiceAccountName  *string                                       `json:"serviceAccountName,omitempty"`
+	EnableServiceLinks  *bool                                         `json:"enableServiceLinks,omitempty"`
+	NodeSelector        map[string]string                             `json:"nodeSelector,omitempty"`
+	Credentials         *TLSApplyConfiguration                        `json:"credentials,omitempty"`
+	Replicas            *int                                          `json:"replicas,omitempty"`
+	Env                 []v1.EnvVar                                   `json:"env,omitempty"`
+	ChaincodeServerPort *int                                          `json:"chaincodeServerPort,omitempty"`
+	MspID               *string                                       `json:"mspID,omitempty"`
 }
 
-// FabricChaincodeSpecApplyConfiguration constructs an declarative configuration of the FabricChaincodeSpec type for use with
+// FabricChaincodeSpecApplyConfiguration constructs a declarative configuration of the FabricChaincodeSpec type for use with
 // apply.
 func FabricChaincodeSpec() *FabricChaincodeSpecApplyConfiguration {
 	return &FabricChaincodeSpecApplyConfiguration{}
+}
+
+// WithTemplate sets the Template field in the declarative configuration to the given value
+// and returns the receiver, so that objects can be built by chaining "With" function invocations.
+// If called multiple times, the Template field is set to the value of the last call.
+func (b *FabricChaincodeSpecApplyConfiguration) WithTemplate(value *FabricChaincodeTemplateRefApplyConfiguration) *FabricChaincodeSpecApplyConfiguration {
+	b.Template = value
+	return b
 }
 
 // WithAnnotations puts the entries into the Annotations field in the declarative configuration
@@ -173,6 +187,52 @@ func (b *FabricChaincodeSpecApplyConfiguration) WithTolerations(values ...v1.Tol
 // If called multiple times, the Resources field is set to the value of the last call.
 func (b *FabricChaincodeSpecApplyConfiguration) WithResources(value v1.ResourceRequirements) *FabricChaincodeSpecApplyConfiguration {
 	b.Resources = &value
+	return b
+}
+
+// WithPodSecurityContext sets the PodSecurityContext field in the declarative configuration to the given value
+// and returns the receiver, so that objects can be built by chaining "With" function invocations.
+// If called multiple times, the PodSecurityContext field is set to the value of the last call.
+func (b *FabricChaincodeSpecApplyConfiguration) WithPodSecurityContext(value v1.PodSecurityContext) *FabricChaincodeSpecApplyConfiguration {
+	b.PodSecurityContext = &value
+	return b
+}
+
+// WithSecurityContext sets the SecurityContext field in the declarative configuration to the given value
+// and returns the receiver, so that objects can be built by chaining "With" function invocations.
+// If called multiple times, the SecurityContext field is set to the value of the last call.
+func (b *FabricChaincodeSpecApplyConfiguration) WithSecurityContext(value v1.SecurityContext) *FabricChaincodeSpecApplyConfiguration {
+	b.SecurityContext = &value
+	return b
+}
+
+// WithServiceAccountName sets the ServiceAccountName field in the declarative configuration to the given value
+// and returns the receiver, so that objects can be built by chaining "With" function invocations.
+// If called multiple times, the ServiceAccountName field is set to the value of the last call.
+func (b *FabricChaincodeSpecApplyConfiguration) WithServiceAccountName(value string) *FabricChaincodeSpecApplyConfiguration {
+	b.ServiceAccountName = &value
+	return b
+}
+
+// WithEnableServiceLinks sets the EnableServiceLinks field in the declarative configuration to the given value
+// and returns the receiver, so that objects can be built by chaining "With" function invocations.
+// If called multiple times, the EnableServiceLinks field is set to the value of the last call.
+func (b *FabricChaincodeSpecApplyConfiguration) WithEnableServiceLinks(value bool) *FabricChaincodeSpecApplyConfiguration {
+	b.EnableServiceLinks = &value
+	return b
+}
+
+// WithNodeSelector puts the entries into the NodeSelector field in the declarative configuration
+// and returns the receiver, so that objects can be build by chaining "With" function invocations.
+// If called multiple times, the entries provided by each call will be put on the NodeSelector field,
+// overwriting an existing map entries in NodeSelector field with the same key.
+func (b *FabricChaincodeSpecApplyConfiguration) WithNodeSelector(entries map[string]string) *FabricChaincodeSpecApplyConfiguration {
+	if b.NodeSelector == nil && len(entries) > 0 {
+		b.NodeSelector = make(map[string]string, len(entries))
+	}
+	for k, v := range entries {
+		b.NodeSelector[k] = v
+	}
 	return b
 }
 

@@ -7,7 +7,7 @@
 
 package v1alpha1
 
-// TLSApplyConfiguration represents an declarative configuration of the TLS type for use
+// TLSApplyConfiguration represents a declarative configuration of the TLS type for use
 // with apply.
 type TLSApplyConfiguration struct {
 	Cahost       *string                                `json:"cahost,omitempty"`
@@ -20,7 +20,7 @@ type TLSApplyConfiguration struct {
 	External     *ExternalCertificateApplyConfiguration `json:"external,omitempty"`
 }
 
-// TLSApplyConfiguration constructs an declarative configuration of the TLS type for use with
+// TLSApplyConfiguration constructs a declarative configuration of the TLS type for use with
 // apply.
 func TLS() *TLSApplyConfiguration {
 	return &TLSApplyConfiguration{}

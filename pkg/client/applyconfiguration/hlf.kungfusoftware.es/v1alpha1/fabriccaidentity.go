@@ -7,7 +7,7 @@
 
 package v1alpha1
 
-// FabricCAIdentityApplyConfiguration represents an declarative configuration of the FabricCAIdentity type for use
+// FabricCAIdentityApplyConfiguration represents a declarative configuration of the FabricCAIdentity type for use
 // with apply.
 type FabricCAIdentityApplyConfiguration struct {
 	Name        *string                                  `json:"name,omitempty"`
@@ -17,7 +17,7 @@ type FabricCAIdentityApplyConfiguration struct {
 	Attrs       *FabricCAIdentityAttrsApplyConfiguration `json:"attrs,omitempty"`
 }
 
-// FabricCAIdentityApplyConfiguration constructs an declarative configuration of the FabricCAIdentity type for use with
+// FabricCAIdentityApplyConfiguration constructs a declarative configuration of the FabricCAIdentity type for use with
 // apply.
 func FabricCAIdentity() *FabricCAIdentityApplyConfiguration {
 	return &FabricCAIdentityApplyConfiguration{}

@@ -11,7 +11,7 @@ import (
 	v1 "k8s.io/api/core/v1"
 )
 
-// FabricChaincodeTemplateSpecApplyConfiguration represents an declarative configuration of the FabricChaincodeTemplateSpec type for use
+// FabricChaincodeTemplateSpecApplyConfiguration represents a declarative configuration of the FabricChaincodeTemplateSpec type for use
 // with apply.
 type FabricChaincodeTemplateSpecApplyConfiguration struct {
 	Annotations         map[string]string         `json:"annotations,omitempty"`
@@ -25,14 +25,13 @@ type FabricChaincodeTemplateSpecApplyConfiguration struct {
 	Affinity            *v1.Affinity              `json:"affinity,omitempty"`
 	Tolerations         []v1.Toleration           `json:"tolerations,omitempty"`
 	Resources           *v1.ResourceRequirements  `json:"resources,omitempty"`
-	Credentials         *TLSApplyConfiguration    `json:"credentials,omitempty"`
 	Replicas            *int                      `json:"replicas,omitempty"`
 	Env                 []v1.EnvVar               `json:"env,omitempty"`
 	ChaincodeServerPort *int                      `json:"chaincodeServerPort,omitempty"`
 	MspID               *string                   `json:"mspID,omitempty"`
 }
 
-// FabricChaincodeTemplateSpecApplyConfiguration constructs an declarative configuration of the FabricChaincodeTemplateSpec type for use with
+// FabricChaincodeTemplateSpecApplyConfiguration constructs a declarative configuration of the FabricChaincodeTemplateSpec type for use with
 // apply.
 func FabricChaincodeTemplateSpec() *FabricChaincodeTemplateSpecApplyConfiguration {
 	return &FabricChaincodeTemplateSpecApplyConfiguration{}
@@ -155,14 +154,6 @@ func (b *FabricChaincodeTemplateSpecApplyConfiguration) WithTolerations(values .
 // If called multiple times, the Resources field is set to the value of the last call.
 func (b *FabricChaincodeTemplateSpecApplyConfiguration) WithResources(value v1.ResourceRequirements) *FabricChaincodeTemplateSpecApplyConfiguration {
 	b.Resources = &value
-	return b
-}
-
-// WithCredentials sets the Credentials field in the declarative configuration to the given value
-// and returns the receiver, so that objects can be built by chaining "With" function invocations.
-// If called multiple times, the Credentials field is set to the value of the last call.
-func (b *FabricChaincodeTemplateSpecApplyConfiguration) WithCredentials(value *TLSApplyConfiguration) *FabricChaincodeTemplateSpecApplyConfiguration {
-	b.Credentials = value
 	return b
 }
 

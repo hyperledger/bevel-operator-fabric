@@ -8,11 +8,11 @@
 package v1alpha1
 
 import (
-	v1alpha1 "github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
+	v1alpha1 "github.com/kfsoftware/hlf-operator/pkg/apis/hlf.kungfusoftware.es/v1alpha1"
 	status "github.com/kfsoftware/hlf-operator/pkg/status"
 )
 
-// FabricCAStatusApplyConfiguration represents an declarative configuration of the FabricCAStatus type for use
+// FabricCAStatusApplyConfiguration represents a declarative configuration of the FabricCAStatus type for use
 // with apply.
 type FabricCAStatusApplyConfiguration struct {
 	Conditions *status.Conditions         `json:"conditions,omitempty"`
@@ -24,7 +24,7 @@ type FabricCAStatusApplyConfiguration struct {
 	TLSCACert  *string                    `json:"tlsca_cert,omitempty"`
 }
 
-// FabricCAStatusApplyConfiguration constructs an declarative configuration of the FabricCAStatus type for use with
+// FabricCAStatusApplyConfiguration constructs a declarative configuration of the FabricCAStatus type for use with
 // apply.
 func FabricCAStatus() *FabricCAStatusApplyConfiguration {
 	return &FabricCAStatusApplyConfiguration{}

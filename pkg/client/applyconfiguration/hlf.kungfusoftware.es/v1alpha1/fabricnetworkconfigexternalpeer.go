@@ -7,7 +7,7 @@
 
 package v1alpha1
 
-// FabricNetworkConfigExternalPeerApplyConfiguration represents an declarative configuration of the FabricNetworkConfigExternalPeer type for use
+// FabricNetworkConfigExternalPeerApplyConfiguration represents a declarative configuration of the FabricNetworkConfigExternalPeer type for use
 // with apply.
 type FabricNetworkConfigExternalPeerApplyConfiguration struct {
 	Name      *string `json:"name,omitempty"`
@@ -16,7 +16,7 @@ type FabricNetworkConfigExternalPeerApplyConfiguration struct {
 	MSPID     *string `json:"mspID,omitempty"`
 }
 
-// FabricNetworkConfigExternalPeerApplyConfiguration constructs an declarative configuration of the FabricNetworkConfigExternalPeer type for use with
+// FabricNetworkConfigExternalPeerApplyConfiguration constructs a declarative configuration of the FabricNetworkConfigExternalPeer type for use with
 // apply.
 func FabricNetworkConfigExternalPeer() *FabricNetworkConfigExternalPeerApplyConfiguration {
 	return &FabricNetworkConfigExternalPeerApplyConfiguration{}

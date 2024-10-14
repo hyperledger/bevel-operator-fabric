@@ -13,7 +13,7 @@ import (
 	v1 "k8s.io/client-go/applyconfigurations/meta/v1"
 )
 
-// FabricPeerApplyConfiguration represents an declarative configuration of the FabricPeer type for use
+// FabricPeerApplyConfiguration represents a declarative configuration of the FabricPeer type for use
 // with apply.
 type FabricPeerApplyConfiguration struct {
 	v1.TypeMetaApplyConfiguration    `json:",inline"`
@@ -22,7 +22,7 @@ type FabricPeerApplyConfiguration struct {
 	Status                           *FabricPeerStatusApplyConfiguration `json:"status,omitempty"`
 }
 
-// FabricPeer constructs an declarative configuration of the FabricPeer type for use with
+// FabricPeer constructs a declarative configuration of the FabricPeer type for use with
 // apply.
 func FabricPeer(name, namespace string) *FabricPeerApplyConfiguration {
 	b := &FabricPeerApplyConfiguration{}
@@ -205,4 +205,10 @@ func (b *FabricPeerApplyConfiguration) WithSpec(value *FabricPeerSpecApplyConfig
 func (b *FabricPeerApplyConfiguration) WithStatus(value *FabricPeerStatusApplyConfiguration) *FabricPeerApplyConfiguration {
 	b.Status = value
 	return b
+}
+
+// GetName retrieves the value of the Name field in the declarative configuration.
+func (b *FabricPeerApplyConfiguration) GetName() *string {
+	b.ensureObjectMetaApplyConfigurationExists()
+	return b.Name
 }

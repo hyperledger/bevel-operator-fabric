@@ -7,13 +7,13 @@
 
 package v1alpha1
 
-// FabricNetworkConfigOrganizationApplyConfiguration represents an declarative configuration of the FabricNetworkConfigOrganization type for use
+// FabricNetworkConfigOrganizationApplyConfiguration represents a declarative configuration of the FabricNetworkConfigOrganization type for use
 // with apply.
 type FabricNetworkConfigOrganizationApplyConfiguration struct {
 	Peers []FabricNetworkConfigOrgPeerApplyConfiguration `json:"peers,omitempty"`
 }
 
-// FabricNetworkConfigOrganizationApplyConfiguration constructs an declarative configuration of the FabricNetworkConfigOrganization type for use with
+// FabricNetworkConfigOrganizationApplyConfiguration constructs a declarative configuration of the FabricNetworkConfigOrganization type for use with
 // apply.
 func FabricNetworkConfigOrganization() *FabricNetworkConfigOrganizationApplyConfiguration {
 	return &FabricNetworkConfigOrganizationApplyConfiguration{}

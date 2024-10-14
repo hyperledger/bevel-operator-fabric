@@ -7,13 +7,13 @@
 
 package v1alpha1
 
-// FabricCAIntermediateApplyConfiguration represents an declarative configuration of the FabricCAIntermediate type for use
+// FabricCAIntermediateApplyConfiguration represents a declarative configuration of the FabricCAIntermediate type for use
 // with apply.
 type FabricCAIntermediateApplyConfiguration struct {
 	ParentServer *FabricCAIntermediateParentServerApplyConfiguration `json:"parentServer,omitempty"`
 }
 
-// FabricCAIntermediateApplyConfiguration constructs an declarative configuration of the FabricCAIntermediate type for use with
+// FabricCAIntermediateApplyConfiguration constructs a declarative configuration of the FabricCAIntermediate type for use with
 // apply.
 func FabricCAIntermediate() *FabricCAIntermediateApplyConfiguration {
 	return &FabricCAIntermediateApplyConfiguration{}

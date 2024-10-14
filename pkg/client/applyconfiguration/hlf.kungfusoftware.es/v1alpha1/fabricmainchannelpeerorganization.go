@@ -7,7 +7,7 @@
 
 package v1alpha1
 
-// FabricMainChannelPeerOrganizationApplyConfiguration represents an declarative configuration of the FabricMainChannelPeerOrganization type for use
+// FabricMainChannelPeerOrganizationApplyConfiguration represents a declarative configuration of the FabricMainChannelPeerOrganization type for use
 // with apply.
 type FabricMainChannelPeerOrganizationApplyConfiguration struct {
 	MSPID       *string `json:"mspID,omitempty"`
@@ -15,7 +15,7 @@ type FabricMainChannelPeerOrganizationApplyConfiguration struct {
 	CANamespace *string `json:"caNamespace,omitempty"`
 }
 
-// FabricMainChannelPeerOrganizationApplyConfiguration constructs an declarative configuration of the FabricMainChannelPeerOrganization type for use with
+// FabricMainChannelPeerOrganizationApplyConfiguration constructs a declarative configuration of the FabricMainChannelPeerOrganization type for use with
 // apply.
 func FabricMainChannelPeerOrganization() *FabricMainChannelPeerOrganizationApplyConfiguration {
 	return &FabricMainChannelPeerOrganizationApplyConfiguration{}

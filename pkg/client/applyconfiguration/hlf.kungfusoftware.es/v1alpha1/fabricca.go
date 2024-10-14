@@ -13,7 +13,7 @@ import (
 	v1 "k8s.io/client-go/applyconfigurations/meta/v1"
 )
 
-// FabricCAApplyConfiguration represents an declarative configuration of the FabricCA type for use
+// FabricCAApplyConfiguration represents a declarative configuration of the FabricCA type for use
 // with apply.
 type FabricCAApplyConfiguration struct {
 	v1.TypeMetaApplyConfiguration    `json:",inline"`
@@ -22,7 +22,7 @@ type FabricCAApplyConfiguration struct {
 	Status                           *FabricCAStatusApplyConfiguration `json:"status,omitempty"`
 }
 
-// FabricCA constructs an declarative configuration of the FabricCA type for use with
+// FabricCA constructs a declarative configuration of the FabricCA type for use with
 // apply.
 func FabricCA(name, namespace string) *FabricCAApplyConfiguration {
 	b := &FabricCAApplyConfiguration{}
@@ -205,4 +205,10 @@ func (b *FabricCAApplyConfiguration) WithSpec(value *FabricCASpecApplyConfigurat
 func (b *FabricCAApplyConfiguration) WithStatus(value *FabricCAStatusApplyConfiguration) *FabricCAApplyConfiguration {
 	b.Status = value
 	return b
+}
+
+// GetName retrieves the value of the Name field in the declarative configuration.
+func (b *FabricCAApplyConfiguration) GetName() *string {
+	b.ensureObjectMetaApplyConfigurationExists()
+	return b.Name
 }

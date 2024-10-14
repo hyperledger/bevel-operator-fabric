@@ -7,7 +7,7 @@
 
 package v1alpha1
 
-// FabricFollowerChannelSpecApplyConfiguration represents an declarative configuration of the FabricFollowerChannelSpec type for use
+// FabricFollowerChannelSpecApplyConfiguration represents a declarative configuration of the FabricFollowerChannelSpec type for use
 // with apply.
 type FabricFollowerChannelSpecApplyConfiguration struct {
 	Name                *string                                               `json:"name,omitempty"`
@@ -19,7 +19,7 @@ type FabricFollowerChannelSpecApplyConfiguration struct {
 	HLFIdentity         *HLFIdentityApplyConfiguration                        `json:"hlfIdentity,omitempty"`
 }
 
-// FabricFollowerChannelSpecApplyConfiguration constructs an declarative configuration of the FabricFollowerChannelSpec type for use with
+// FabricFollowerChannelSpecApplyConfiguration constructs a declarative configuration of the FabricFollowerChannelSpec type for use with
 // apply.
 func FabricFollowerChannelSpec() *FabricFollowerChannelSpecApplyConfiguration {
 	return &FabricFollowerChannelSpecApplyConfiguration{}

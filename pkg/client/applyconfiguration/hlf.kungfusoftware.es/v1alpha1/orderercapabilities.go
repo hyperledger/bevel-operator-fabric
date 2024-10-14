@@ -7,13 +7,13 @@
 
 package v1alpha1
 
-// OrdererCapabilitiesApplyConfiguration represents an declarative configuration of the OrdererCapabilities type for use
+// OrdererCapabilitiesApplyConfiguration represents a declarative configuration of the OrdererCapabilities type for use
 // with apply.
 type OrdererCapabilitiesApplyConfiguration struct {
 	V2_0 *bool `json:"V2_0,omitempty"`
 }
 
-// OrdererCapabilitiesApplyConfiguration constructs an declarative configuration of the OrdererCapabilities type for use with
+// OrdererCapabilitiesApplyConfiguration constructs a declarative configuration of the OrdererCapabilities type for use with
 // apply.
 func OrdererCapabilities() *OrdererCapabilitiesApplyConfiguration {
 	return &OrdererCapabilitiesApplyConfiguration{}

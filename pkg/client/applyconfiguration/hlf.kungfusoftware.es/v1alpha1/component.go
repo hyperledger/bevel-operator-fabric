@@ -7,7 +7,7 @@
 
 package v1alpha1
 
-// ComponentApplyConfiguration represents an declarative configuration of the Component type for use
+// ComponentApplyConfiguration represents a declarative configuration of the Component type for use
 // with apply.
 type ComponentApplyConfiguration struct {
 	Cahost       *string                                `json:"cahost,omitempty"`
@@ -19,7 +19,7 @@ type ComponentApplyConfiguration struct {
 	External     *ExternalCertificateApplyConfiguration `json:"external,omitempty"`
 }
 
-// ComponentApplyConfiguration constructs an declarative configuration of the Component type for use with
+// ComponentApplyConfiguration constructs a declarative configuration of the Component type for use with
 // apply.
 func Component() *ComponentApplyConfiguration {
 	return &ComponentApplyConfiguration{}

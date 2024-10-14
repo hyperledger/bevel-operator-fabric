@@ -7,13 +7,13 @@
 
 package v1alpha1
 
-// SecretRefApplyConfiguration represents an declarative configuration of the SecretRef type for use
+// SecretRefApplyConfiguration represents a declarative configuration of the SecretRef type for use
 // with apply.
 type SecretRefApplyConfiguration struct {
 	Name *string `json:"name,omitempty"`
 }
 
-// SecretRefApplyConfiguration constructs an declarative configuration of the SecretRef type for use with
+// SecretRefApplyConfiguration constructs a declarative configuration of the SecretRef type for use with
 // apply.
 func SecretRef() *SecretRefApplyConfiguration {
 	return &SecretRefApplyConfiguration{}

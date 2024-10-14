@@ -10,8 +10,8 @@ package v1alpha1
 import (
 	"net/http"
 
-	v1alpha1 "github.com/kfsoftware/hlf-operator/api/hlf.kungfusoftware.es/v1alpha1"
-	"github.com/kfsoftware/hlf-operator/pkg/client/clientset/versioned/scheme"
+	v1alpha1 "github.com/kfsoftware/hlf-operator/pkg/apis/hlf.kungfusoftware.es/v1alpha1"
+	"github.com/minio/operator/pkg/client/clientset/versioned/scheme"
 	rest "k8s.io/client-go/rest"
 )
 
@@ -19,6 +19,9 @@ type HlfV1alpha1Interface interface {
 	RESTClient() rest.Interface
 	FabricCAsGetter
 	FabricChaincodesGetter
+	FabricChaincodeApprovesGetter
+	FabricChaincodeCommitsGetter
+	FabricChaincodeInstallsGetter
 	FabricChaincodeTemplatesGetter
 	FabricExplorersGetter
 	FabricFollowerChannelsGetter
@@ -44,6 +47,18 @@ func (c *HlfV1alpha1Client) FabricCAs(namespace string) FabricCAInterface {
 
 func (c *HlfV1alpha1Client) FabricChaincodes(namespace string) FabricChaincodeInterface {
 	return newFabricChaincodes(c, namespace)
+}
+
+func (c *HlfV1alpha1Client) FabricChaincodeApproves() FabricChaincodeApproveInterface {
+	return newFabricChaincodeApproves(c)
+}
+
+func (c *HlfV1alpha1Client) FabricChaincodeCommits() FabricChaincodeCommitInterface {
+	return newFabricChaincodeCommits(c)
+}
+
+func (c *HlfV1alpha1Client) FabricChaincodeInstalls() FabricChaincodeInstallInterface {
+	return newFabricChaincodeInstalls(c)
 }
 
 func (c *HlfV1alpha1Client) FabricChaincodeTemplates(namespace string) FabricChaincodeTemplateInterface {
