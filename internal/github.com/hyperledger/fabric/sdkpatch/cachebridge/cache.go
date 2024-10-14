@@ -37,7 +37,7 @@ type KeyPairCacheKey struct {
 	KeyType bool
 }
 
-//String return string value for keyPairCacheKey
+// String return string value for keyPairCacheKey
 func (keyPairCacheKey *KeyPairCacheKey) String() string {
 	return fmt.Sprintf("%x_%t", keyPairCacheKey.SKI, keyPairCacheKey.KeyType)
 }
@@ -47,7 +47,7 @@ type SessionCacheKey struct {
 	SessionID string
 }
 
-//String return string value for SessionCacheKey
+// String return string value for SessionCacheKey
 func (SessionCacheKey *SessionCacheKey) String() string {
 	return SessionCacheKey.SessionID
 }
