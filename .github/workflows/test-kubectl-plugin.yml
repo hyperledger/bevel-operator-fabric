@@ -41,15 +41,19 @@ jobs:
           go build -o hlf-operator ./main.go
           docker build -t "${IMAGE}:${TAG}" .
           kind load docker-image "${IMAGE}:${TAG}"
-      - name: Deploy operator
-        run: |
-          helm repo add kfs https://kfsoftware.github.io/hlf-helm-charts --force-update
-          helm install hlf-operator --version=1.10.0-beta2 kfs/hlf-operator --set image.repository="${IMAGE}" --set image.tag="${TAG}" --set image.pullPolicy="IfNotPresent"
 
-      - name: Install operator CRDs
+      - name: Install operator CRDs deploy
         run: |
           go install sigs.k8s.io/controller-tools/cmd/controller-gen@v0.16.4
           make generate manifests install
+
+      - name: Install the operator
+        run: |
+          export IMAGE=kfsoftware/hlf-operator:dev-$(date +%s) 
+          make docker-build IMG=$IMAGE 
+          kind load docker-image $IMAGE 
+          make deploy IMG=$IMAGE
+
       - name: Install Istio
         run: |
           curl -L https://istio.io/downloadIstio | ISTIO_VERSION=1.23.2 TARGET_ARCH=x86_64 sh -

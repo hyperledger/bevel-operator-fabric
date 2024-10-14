@@ -210,6 +210,7 @@ func (r *FabricChaincodeInstallReconciler) addFinalizer(reqLogger logr.Logger, m
 // +kubebuilder:rbac:groups=hlf.kungfusoftware.es,resources=fabricchaincodeinstalls,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=hlf.kungfusoftware.es,resources=fabricchaincodeinstalls/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=hlf.kungfusoftware.es,resources=fabricchaincodeinstalls/finalizers,verbs=get;update;patch
+
 func (r *FabricChaincodeInstallReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	reqLogger := r.Log.WithValues("hlf", req.NamespacedName)
 	fabricChaincodeInstall := &hlfv1alpha1.FabricChaincodeInstall{}
