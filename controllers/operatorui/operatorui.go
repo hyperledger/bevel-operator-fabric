@@ -13,7 +13,6 @@ import (
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"helm.sh/helm/v3/pkg/cli"
-	"k8s.io/kubernetes/pkg/api/v1/pod"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
@@ -98,7 +97,7 @@ func GetOperatorUIState(conf *action.Configuration, config *rest.Config, release
 			}
 			if len(pods.Items) > 0 {
 				for _, item := range pods.Items {
-					if pod.IsPodReadyConditionTrue(item.Status) {
+					if utils.IsPodReadyConditionTrue(item.Status) {
 						r.Status = hlfv1alpha1.RunningStatus
 					} else {
 						switch item.Status.Phase {

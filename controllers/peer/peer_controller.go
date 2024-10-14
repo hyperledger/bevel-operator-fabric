@@ -29,7 +29,6 @@ import (
 	"helm.sh/helm/v3/pkg/cli"
 	apiv1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
-	"k8s.io/kubernetes/pkg/api/v1/pod"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
@@ -180,7 +179,7 @@ func GetPeerState(conf *action.Configuration, config *rest.Config, releaseName s
 			}
 			if len(pods.Items) > 0 {
 				for _, item := range pods.Items {
-					if pod.IsPodReadyConditionTrue(item.Status) {
+					if utils.IsPodReadyConditionTrue(item.Status) {
 						r.Status = hlfv1alpha1.RunningStatus
 					} else {
 						switch item.Status.Phase {

@@ -18,7 +18,6 @@ import (
 	"github.com/kfsoftware/hlf-operator/pkg/status"
 	"helm.sh/helm/v3/pkg/cli"
 	"helm.sh/helm/v3/pkg/release"
-	"k8s.io/kubernetes/pkg/api/v1/pod"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sort"
 
@@ -746,7 +745,7 @@ func GetCAState(clientSet *kubernetes.Clientset, ca *hlfv1alpha1.FabricCA, relea
 	}
 	if len(pods.Items) > 0 {
 		for _, item := range pods.Items {
-			if pod.IsPodReadyConditionTrue(item.Status) {
+			if utils.IsPodReadyConditionTrue(item.Status) {
 				r.Status = hlfv1alpha1.RunningStatus
 			} else {
 				switch item.Status.Phase {

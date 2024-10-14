@@ -52,8 +52,8 @@ jobs:
           make generate manifests install
       - name: Install Istio
         run: |
-          curl -L https://istio.io/downloadIstio | ISTIO_VERSION=1.20.0 TARGET_ARCH=x86_64 sh -
-          export PATH="$PATH:$PWD/istio-1.20.0/bin"
+          curl -L https://istio.io/downloadIstio | ISTIO_VERSION=1.23.2 TARGET_ARCH=x86_64 sh -
+          export PATH="$PATH:$PWD/istio-1.23.2/bin"
           kubectl create namespace istio-system
 
           istioctl operator init
@@ -123,7 +123,7 @@ jobs:
 
           sleep 2
 
-          kubectl wait --timeout=180s --for=jsonpath='{.status.status}'=HEALTHY istiooperator istio-gateway --namespace=istio-system
+          kubectl wait --timeout=240s --for=jsonpath='{.status.status}'=HEALTHY istiooperator istio-gateway --namespace=istio-system
 
       - name: Configure DNS in Kubernetes
         run: |
@@ -169,14 +169,14 @@ jobs:
       - name: Create Peer org
         run: |
           export PEER_IMAGE=hyperledger/fabric-peer
-          export PEER_VERSION=2.5.5
+          export PEER_VERSION=2.5.10
 
           export CA_IMAGE=hyperledger/fabric-ca
-          export CA_VERSION=1.5.7
+          export CA_VERSION=1.5.13
 
           kubectl hlf ca create --image=$CA_IMAGE --version=$CA_VERSION --storage-class=standard --capacity=2Gi --name=org1-ca \
               --enroll-id=enroll --hosts=org1-ca.localho.st --enroll-pw=enrollpw
-          kubectl wait --timeout=180s --for=condition=Running fabriccas.hlf.kungfusoftware.es --all    
+          kubectl wait --timeout=240s --for=condition=Running fabriccas.hlf.kungfusoftware.es --all    
 
           # register user for the peers
           kubectl hlf ca register --name=org1-ca --user=peer --secret=peerpw --type=peer \
@@ -186,26 +186,26 @@ jobs:
           kubectl hlf peer create --statedb=couchdb --image=$PEER_IMAGE --version=$PEER_VERSION \
                   --storage-class=standard --enroll-id=peer --mspid=Org1MSP \
                   --enroll-pw=peerpw --hosts=peer0-org1.localho.st --capacity=5Gi --name=org1-peer0 --ca-name=org1-ca.default
-          kubectl wait --timeout=180s --for=condition=Running fabricpeers.hlf.kungfusoftware.es --all
+          kubectl wait --timeout=240s --for=condition=Running fabricpeers.hlf.kungfusoftware.es --all
       - name: Create Orderer Org
         run: |
           export ORDERER_IMAGE=hyperledger/fabric-orderer
-          export ORDERER_VERSION=2.5.5
+          export ORDERER_VERSION=2.5.10
 
           export CA_IMAGE=hyperledger/fabric-ca
-          export CA_VERSION=1.5.7
+          export CA_VERSION=1.5.13
 
           kubectl hlf ca create --image=$CA_IMAGE --version=$CA_VERSION --storage-class=standard --capacity=2Gi --name=ord-ca \
               --enroll-id=enroll --enroll-pw=enrollpw --hosts=ord-ca.localho.st
 
-          kubectl wait --timeout=180s --for=condition=Running fabriccas.hlf.kungfusoftware.es --all
+          kubectl wait --timeout=240s --for=condition=Running fabriccas.hlf.kungfusoftware.es --all
           kubectl hlf ca register --name=ord-ca --user=orderer --secret=ordererpw \
               --type=orderer --enroll-id enroll --enroll-secret=enrollpw --mspid=OrdererMSP
 
           kubectl hlf ordnode create --image=$ORDERER_IMAGE --version=$ORDERER_VERSION \
               --storage-class=standard --enroll-id=orderer --mspid=OrdererMSP --hosts=orderer0-ord.localho.st --admin-hosts=admin-orderer0-ord.localho.st \
               --enroll-pw=ordererpw --capacity=2Gi --name=ord-node1 --ca-name=ord-ca.default
-          kubectl wait --timeout=180s --for=condition=Running fabricorderernodes.hlf.kungfusoftware.es --all
+          kubectl wait --timeout=240s --for=condition=Running fabricorderernodes.hlf.kungfusoftware.es --all
       - name: Prepare Connection string for Orderer Node
         run: |
           kubectl hlf inspect --output ordservice.yaml -o OrdererMSP
@@ -258,7 +258,7 @@ jobs:
               --identities="OrdererMSP;admin-tls-ordservice.yaml" \
               --identities="Org1MSP;peer-org1.yaml"
 
-          kubectl wait --timeout=180s --for=condition=RUNNING fabricmainchannels.hlf.kungfusoftware.es --all 
+          kubectl wait --timeout=240s --for=condition=RUNNING fabricmainchannels.hlf.kungfusoftware.es --all 
 
 
       - name: Join peers to channel
@@ -276,7 +276,7 @@ jobs:
               --secret-ns=default \
               --secret-key="peer-org1.yaml"
 
-          kubectl wait --timeout=180s --for=condition=RUNNING fabricfollowerchannels.hlf.kungfusoftware.es --all
+          kubectl wait --timeout=240s --for=condition=RUNNING fabricfollowerchannels.hlf.kungfusoftware.es --all
       - name: Get channel
         run: |
           sleep 3
@@ -334,7 +334,7 @@ jobs:
         run: |
           sleep 10
           echo "waiting for deployment to be ready"
-          kubectl wait --timeout=180s --for=condition=Available deployment asset --namespace=default    
+          kubectl wait --timeout=240s --for=condition=Available deployment asset --namespace=default    
           kubectl hlf chaincode invoke --config=org1.yaml \
               --user=admin --peer=org1-peer0.default \
               --chaincode=asset --channel=demo \

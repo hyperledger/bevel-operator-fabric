@@ -37,7 +37,6 @@ import (
 	"k8s.io/cli-runtime/pkg/genericclioptions"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
-	"k8s.io/kubernetes/pkg/api/v1/pod"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
@@ -1398,7 +1397,7 @@ func GetOrdererState(conf *action.Configuration, config *rest.Config, releaseNam
 			}
 			if len(pods.Items) > 0 {
 				for _, item := range pods.Items {
-					if pod.IsPodReadyConditionTrue(item.Status) {
+					if utils.IsPodReadyConditionTrue(item.Status) {
 						r.Status = hlfv1alpha1.RunningStatus
 					} else {
 						switch item.Status.Phase {
