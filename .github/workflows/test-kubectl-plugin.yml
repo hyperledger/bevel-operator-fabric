@@ -33,7 +33,12 @@ jobs:
           cd kubectl-hlf
           go build -o kubectl-hlf ./main.go
           sudo mv kubectl-hlf /usr/local/bin/kubectl-hlf
-      - name: Build Docker Image
+
+      - name: Install operator CRDs deploy
+        run: |
+          go install sigs.k8s.io/controller-tools/cmd/controller-gen@v0.16.4
+          make generate manifests install
+      - name: Deploy the operator
         run: |
           export GOOS=linux
           export GOARCH=amd64
@@ -41,17 +46,6 @@ jobs:
           go build -o hlf-operator ./main.go
           docker build -t "${IMAGE}:${TAG}" .
           kind load docker-image "${IMAGE}:${TAG}"
-
-      - name: Install operator CRDs deploy
-        run: |
-          go install sigs.k8s.io/controller-tools/cmd/controller-gen@v0.16.4
-          make generate manifests install
-
-      - name: Install the operator
-        run: |
-          export IMAGE=kfsoftware/hlf-operator:dev-$(date +%s) 
-          make docker-build IMG=$IMAGE 
-          kind load docker-image $IMAGE 
           make deploy IMG=$IMAGE
 
       - name: Install Istio

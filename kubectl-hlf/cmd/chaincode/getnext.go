@@ -39,6 +39,15 @@ type mspFilter struct {
 func (f *mspFilter) Accept(peer fab.Peer) bool {
 	return peer.MSPID() == f.mspID
 }
+
+type mspFilterExclude struct {
+	mspID string
+}
+
+// Accept returns true if this peer is to be included in the target list
+func (f *mspFilterExclude) Accept(peer fab.Peer) bool {
+	return peer.MSPID() != f.mspID
+}
 func (c *getNextCmd) validate() error {
 	if c.property != "version" && c.property != "sequence" {
 		return errors.New("property must be either version or sequence")
@@ -48,6 +57,22 @@ func (c *getNextCmd) validate() error {
 	}
 	return nil
 }
+
+type mspFilterArray struct {
+	mspIDs []string
+}
+
+// Accept returns true if this peer's MSPID is in the array of MSPIDs
+func (f *mspFilterArray) Accept(peer fab.Peer) bool {
+	for _, mspID := range f.mspIDs {
+		if peer.MSPID() == mspID {
+			return true
+		}
+	}
+	return false
+}
+
+
 func (c *getNextCmd) run(out io.Writer, stdErr io.Writer) error {
 	mspID := c.mspID
 	configBackend := config.FromFile(c.configPath)
