@@ -251,9 +251,9 @@ jobs:
           apiVersion: hlf.kungfusoftware.es/v1alpha1
           kind: FabricMainChannel
           metadata:
-            name: demo2
+            name: demo
           spec:
-            name: demo2
+            name: demo
             adminOrdererOrganizations:
               - mspID: OrdererMSP
             adminPeerOrganizations:
