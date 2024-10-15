@@ -64,6 +64,9 @@ type mspFilterArray struct {
 
 // Accept returns true if this peer's MSPID is in the array of MSPIDs
 func (f *mspFilterArray) Accept(peer fab.Peer) bool {
+	if len(f.mspIDs) == 0 {
+		return true
+	}
 	for _, mspID := range f.mspIDs {
 		if peer.MSPID() == mspID {
 			return true
@@ -71,7 +74,6 @@ func (f *mspFilterArray) Accept(peer fab.Peer) bool {
 	}
 	return false
 }
-
 
 func (c *getNextCmd) run(out io.Writer, stdErr io.Writer) error {
 	mspID := c.mspID
