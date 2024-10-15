@@ -245,7 +245,8 @@ jobs:
                   --from-file=admin-sign-ordservice.yaml=$PWD/admin-sign-ordservice.yaml \
                   --from-file=admin-tls-ordservice.yaml=$PWD/admin-tls-ordservice.yaml
           kubectl get fabricorderernodes ord-node1 -o jsonpath='{.status.tlsCert}' > ./orderer-cert.pem
-
+          export IDENT_8=$(printf "%8s" "")
+          export ORDERER0_TLS_CERT=$(kubectl get fabricorderernodes ord-node1 -o=jsonpath='{.status.tlsCert}' | sed -e "s/^/${IDENT_8}/" )
           kubectl apply -f - <<EOF
           apiVersion: hlf.kungfusoftware.es/v1alpha1
           kind: FabricMainChannel
